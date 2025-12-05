@@ -8,6 +8,7 @@ interface SavedNiche {
   niche_id: string;
   niche_name: string;
   alert_enabled: boolean;
+  notes: string | null;
   created_at: string;
 }
 
@@ -121,6 +122,25 @@ export function useSavedNiches() {
     return true;
   };
 
+  const updateNote = async (nicheId: string, notes: string) => {
+    if (!user) return false;
+
+    const { error } = await supabase
+      .from("saved_niches")
+      .update({ notes })
+      .eq("user_id", user.id)
+      .eq("niche_id", nicheId);
+
+    if (error) {
+      toast.error("Failed to update note");
+      console.error(error);
+      return false;
+    }
+
+    await fetchSavedNiches();
+    return true;
+  };
+
   return {
     savedNiches,
     loading,
@@ -128,6 +148,7 @@ export function useSavedNiches() {
     saveNiche,
     unsaveNiche,
     toggleAlert,
+    updateNote,
     maxSaves,
     canSaveMore: role === "pro" || savedNiches.length < maxSaves,
   };
