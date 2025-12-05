@@ -1,8 +1,21 @@
 import { motion } from "framer-motion";
-import { Zap } from "lucide-react";
+import { Zap, Star, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Navbar = () => {
+  const { user, signOut, role } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
+
+  const isActive = (path: string) => location.pathname === path;
+
   return (
     <motion.nav
       initial={{ opacity: 0, y: -20 }}
@@ -12,32 +25,62 @@ const Navbar = () => {
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between px-6 py-3 rounded-2xl glass-card">
           {/* Logo */}
-          <div className="flex items-center gap-2">
+          <button onClick={() => navigate("/")} className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30">
               <Zap className="w-5 h-5 text-primary-foreground" />
             </div>
             <span className="text-xl font-bold">
               Digi<span className="gradient-text">Stream</span>
             </span>
-          </div>
+          </button>
           
-          {/* Nav links - hidden on mobile */}
+          {/* Nav links */}
           <div className="hidden md:flex items-center gap-6">
-            <a href="#trending" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-              Trends
-            </a>
-            <a href="#plr" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-              PLR Sources
-            </a>
-            <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-              How It Works
-            </a>
+            <button
+              onClick={() => navigate("/discover")}
+              className={`text-sm transition-colors ${
+                isActive("/discover") ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Discover
+            </button>
+            {user && (
+              <button
+                onClick={() => navigate("/saved")}
+                className={`text-sm transition-colors flex items-center gap-1 ${
+                  isActive("/saved") ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Star className="w-4 h-4" />
+                Saved
+              </button>
+            )}
           </div>
           
-          {/* CTA */}
-          <Button variant="glow" size="sm">
-            Get Started
-          </Button>
+          {/* Auth Section */}
+          <div className="flex items-center gap-3">
+            {user ? (
+              <>
+                {role === "pro" && (
+                  <span className="hidden md:inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full">
+                    ✨ Pro
+                  </span>
+                )}
+                <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
+                  <User className="w-4 h-4" />
+                  <span className="max-w-[100px] truncate">{user.email}</span>
+                </div>
+                <Button variant="outline" size="sm" onClick={handleSignOut}>
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden md:inline">Sign Out</span>
+                </Button>
+              </>
+            ) : (
+              <Button variant="glow" size="sm" onClick={() => navigate("/auth")}>
+                Get Started
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </motion.nav>
