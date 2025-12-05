@@ -19,9 +19,9 @@ interface TrendingCardProps {
 
 const TrendingCard = ({ product, index }: TrendingCardProps) => {
   const competitionColors = {
-    Low: "text-green-400 bg-green-400/10",
-    Medium: "text-yellow-400 bg-yellow-400/10",
-    High: "text-red-400 bg-red-400/10",
+    Low: "text-ocean-300 bg-ocean-400/10",
+    Medium: "text-accent bg-accent/10",
+    High: "text-magenta-300 bg-magenta-400/10",
   };
 
   return (
@@ -36,7 +36,7 @@ const TrendingCard = ({ product, index }: TrendingCardProps) => {
       <div className="relative bg-card rounded-lg p-6 h-full">
         {/* Hot badge for top items */}
         {index < 3 && (
-          <div className="absolute -top-2 -right-2 flex items-center gap-1 px-2 py-1 bg-primary text-primary-foreground text-xs font-semibold rounded-full">
+          <div className="absolute -top-2 -right-2 flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-primary to-accent text-primary-foreground text-xs font-semibold rounded-full shadow-lg shadow-primary/30">
             <Flame className="w-3 h-3" />
             HOT
           </div>
@@ -69,14 +69,14 @@ const TrendingCard = ({ product, index }: TrendingCardProps) => {
               <Zap className="w-3 h-3" />
               Trend Score
             </div>
-            <div className="text-xl font-bold text-primary">{product.trendScore}</div>
+            <div className="text-xl font-bold gradient-text">{product.trendScore}</div>
           </div>
           <div>
             <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
               <TrendingUp className="w-3 h-3" />
               Growth
             </div>
-            <div className="text-xl font-bold text-green-400">{product.growth}</div>
+            <div className="text-xl font-bold text-ocean-300">{product.growth}</div>
           </div>
         </div>
         
@@ -86,7 +86,7 @@ const TrendingCard = ({ product, index }: TrendingCardProps) => {
         </div>
         
         {/* Action */}
-        <Button variant="outline" size="sm" className="w-full group-hover:border-primary/50">
+        <Button variant="outline" size="sm" className="w-full group-hover:border-primary/50 group-hover:shadow-lg group-hover:shadow-primary/10">
           View Details
           <ExternalLink className="w-3 h-3" />
         </Button>

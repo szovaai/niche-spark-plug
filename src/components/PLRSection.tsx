@@ -53,7 +53,7 @@ const PLRSection = ({ isVisible }: PLRSectionProps) => {
   if (!isVisible) return null;
 
   return (
-    <section className="py-16 px-4 bg-secondary/20">
+    <section className="py-16 px-4 bg-secondary/30">
       <div className="max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -61,9 +61,9 @@ const PLRSection = ({ isVisible }: PLRSectionProps) => {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-4">
             <Package className="w-4 h-4 text-primary" />
-            <span className="text-sm text-primary font-medium">Recommended Sources</span>
+            <span className="text-sm gradient-text font-medium">Recommended Sources</span>
           </div>
           <h2 className="text-2xl md:text-3xl font-bold mb-3">
             Get Started with Quality PLR Content
@@ -83,12 +83,12 @@ const PLRSection = ({ isVisible }: PLRSectionProps) => {
               transition={{ delay: index * 0.1 }}
               className={`relative rounded-xl p-6 transition-all duration-300 hover:shadow-lg ${
                 source.highlight 
-                  ? 'bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/30' 
-                  : 'bg-card border border-border'
+                  ? 'gradient-ocean border border-primary/30 hover:border-primary/50 hover:shadow-primary/20' 
+                  : 'bg-card border border-border hover:border-border/80'
               }`}
             >
               {source.highlight && (
-                <div className="absolute -top-3 left-6 px-3 py-1 bg-primary text-primary-foreground text-xs font-semibold rounded-full">
+                <div className="absolute -top-3 left-6 px-3 py-1 bg-gradient-to-r from-primary to-accent text-primary-foreground text-xs font-semibold rounded-full shadow-lg shadow-primary/30">
                   RECOMMENDED
                 </div>
               )}
@@ -100,7 +100,7 @@ const PLRSection = ({ isVisible }: PLRSectionProps) => {
                     {source.category}
                   </span>
                 </div>
-                <div className="flex items-center gap-1 text-yellow-400">
+                <div className="flex items-center gap-1 text-accent">
                   <Star className="w-4 h-4 fill-current" />
                   <span className="text-sm font-medium">{source.rating}</span>
                 </div>
