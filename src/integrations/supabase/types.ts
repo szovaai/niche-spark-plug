@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      daily_inspiration: {
+        Row: {
+          category: string | null
+          content: string
+          created_at: string
+          id: string
+          is_active: boolean | null
+          niche_link: string | null
+          title: string
+        }
+        Insert: {
+          category?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          niche_link?: string | null
+          title: string
+        }
+        Update: {
+          category?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          niche_link?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       launch_packs: {
         Row: {
           category: string
@@ -68,9 +98,13 @@ export type Database = {
           display_name: string | null
           email: string | null
           id: string
+          onboarding_completed: boolean | null
           pack_uses_reset_at: string | null
           pack_uses_today: number | null
+          preferred_platform: string | null
+          product_interests: string[] | null
           searches_today: number | null
+          tooltips_seen: string[] | null
           updated_at: string | null
           usage_reset_at: string | null
           views_today: number | null
@@ -80,9 +114,13 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id: string
+          onboarding_completed?: boolean | null
           pack_uses_reset_at?: string | null
           pack_uses_today?: number | null
+          preferred_platform?: string | null
+          product_interests?: string[] | null
           searches_today?: number | null
+          tooltips_seen?: string[] | null
           updated_at?: string | null
           usage_reset_at?: string | null
           views_today?: number | null
@@ -92,9 +130,13 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id?: string
+          onboarding_completed?: boolean | null
           pack_uses_reset_at?: string | null
           pack_uses_today?: number | null
+          preferred_platform?: string | null
+          product_interests?: string[] | null
           searches_today?: number | null
+          tooltips_seen?: string[] | null
           updated_at?: string | null
           usage_reset_at?: string | null
           views_today?: number | null
