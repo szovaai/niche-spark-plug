@@ -97,13 +97,21 @@ const LaunchPacks = () => {
                     <span className="text-sm">Quick promo/marketing idea</span>
                   </div>
                 </div>
+                <div className="mb-4">
+                  <span className="inline-flex items-center gap-2 px-3 py-1 bg-destructive/20 border border-destructive/30 rounded-full text-sm font-medium text-destructive">
+                    ⏰ Only 147 Founder spots left
+                  </span>
+                </div>
                 <button
                   onClick={() => setShowUpgradeModal(true)}
                   className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold rounded-xl hover:opacity-90 transition-opacity"
                 >
                   <Crown className="w-5 h-5" />
-                  Unlock All Packs – $17
+                  🔒 Lock In $17/mo Forever
                 </button>
+                <p className="text-xs text-muted-foreground mt-3">
+                  Regular price $27/mo • Cancel anytime
+                </p>
               </div>
             </motion.div>
           )}

@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Check, Crown, Zap, Star, Sparkles } from "lucide-react";
+import { X, Check, Crown, Zap, Star, Sparkles, Clock, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface UpgradeModalProps {
@@ -9,6 +9,8 @@ interface UpgradeModalProps {
 }
 
 const UpgradeModal = ({ isOpen, onClose, trigger }: UpgradeModalProps) => {
+  const founderSpotsLeft = 147; // Can be made dynamic later
+  
   const proFeatures = [
     { icon: Zap, text: "Unlimited searches & niche views" },
     { icon: Star, text: "Full snapshot with all metrics" },
@@ -64,6 +66,23 @@ const UpgradeModal = ({ isOpen, onClose, trigger }: UpgradeModalProps) => {
                 </div>
               </div>
 
+              {/* Founder Plan Badge */}
+              <div className="flex items-center gap-2 mb-3">
+                <motion.div
+                  initial={{ scale: 0.9 }}
+                  animate={{ scale: [0.9, 1.05, 1] }}
+                  transition={{ duration: 0.5 }}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-accent/30 border border-accent/50 rounded-full"
+                >
+                  <Clock className="w-4 h-4 text-accent" />
+                  <span className="text-sm font-semibold text-accent">FOUNDER PLAN</span>
+                </motion.div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-destructive/20 border border-destructive/30 rounded-full">
+                  <Users className="w-4 h-4 text-destructive" />
+                  <span className="text-sm font-medium text-destructive">{founderSpotsLeft} spots left</span>
+                </div>
+              </div>
+
               {trigger && (
                 <p className="text-sm text-muted-foreground bg-background/20 rounded-lg px-3 py-2">
                   {trigger}
@@ -76,15 +95,20 @@ const UpgradeModal = ({ isOpen, onClose, trigger }: UpgradeModalProps) => {
               {/* Price */}
               <div className="text-center mb-6">
                 <div className="flex items-center justify-center gap-2 mb-1">
-                  <span className="text-muted-foreground line-through">$27/mo</span>
-                  <span className="text-xs bg-accent/20 text-accent px-2 py-1 rounded-full font-medium">
-                    LAUNCH DEAL
-                  </span>
+                  <span className="text-muted-foreground line-through text-lg">$27/mo</span>
                 </div>
                 <div className="text-4xl font-bold">
-                  $17 <span className="text-lg font-normal text-muted-foreground">one-time</span>
+                  $17<span className="text-lg font-normal text-muted-foreground">/mo</span>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">Lifetime access. No subscription.</p>
+                <motion.p 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-sm font-semibold text-primary mt-2"
+                >
+                  🔒 Lock in this price FOR LIFE
+                </motion.p>
+                <p className="text-xs text-muted-foreground mt-1">Cancel anytime. No risk.</p>
               </div>
 
               {/* Features */}
@@ -101,7 +125,7 @@ const UpgradeModal = ({ isOpen, onClose, trigger }: UpgradeModalProps) => {
 
               {/* CTA */}
               <Button variant="hero" size="xl" className="w-full dual-glow">
-                Upgrade to Pro – $17
+                🔒 Lock In $17/mo Forever
               </Button>
 
               <p className="text-xs text-center text-muted-foreground mt-4">
