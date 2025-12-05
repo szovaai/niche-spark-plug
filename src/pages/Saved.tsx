@@ -1,17 +1,21 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Star, Bell, BellOff, Trash2, ChevronRight, Lock } from "lucide-react";
+import { Star, Bell, BellOff, Trash2, ChevronRight, Lock, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import Navbar from "@/components/Navbar";
 import { useAuth } from "@/hooks/useAuth";
 import { useSavedNiches } from "@/hooks/useSavedNiches";
 import { nicheSnapshots } from "@/data/mockNiches";
+import { getXLSRating, getXLSColor } from "@/lib/launchabilityScore";
 
 const Saved = () => {
   const navigate = useNavigate();
   const { user, loading, role } = useAuth();
-  const { savedNiches, unsaveNiche, toggleAlert, maxSaves, canSaveMore } = useSavedNiches();
+  const { savedNiches, unsaveNiche, toggleAlert, updateNote, maxSaves, canSaveMore } = useSavedNiches();
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [noteValue, setNoteValue] = useState("");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -31,6 +35,18 @@ const Saved = () => {
 
   const getNicheData = (nicheId: string) => {
     return nicheSnapshots.find((n) => n.id === nicheId);
+  };
+
+  const handleNoteBlur = async (nicheId: string) => {
+    if (editingNoteId === nicheId) {
+      await updateNote(nicheId, noteValue);
+      setEditingNoteId(null);
+    }
+  };
+
+  const startEditingNote = (nicheId: string, currentNote: string | null) => {
+    setEditingNoteId(nicheId);
+    setNoteValue(currentNote || "");
   };
 
   return (
@@ -71,6 +87,9 @@ const Saved = () => {
             <div className="space-y-4">
               {savedNiches.map((saved, index) => {
                 const nicheData = getNicheData(saved.niche_id);
+                const score = nicheData?.launchabilityScore || 0;
+                const rating = getXLSRating(score);
+                const colorClass = getXLSColor(score);
                 
                 return (
                   <motion.div
@@ -80,12 +99,21 @@ const Saved = () => {
                     transition={{ delay: index * 0.05 }}
                     className="p-4 bg-card border border-border rounded-xl hover:border-primary/30 transition-all"
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-4">
+                      {/* XLS Score Badge */}
+                      {nicheData && (
+                        <div className="flex-shrink-0 flex flex-col items-center justify-center w-14 h-14 rounded-lg bg-background/50 border border-border">
+                          <Zap className={`w-3 h-3 ${colorClass}`} />
+                          <span className={`text-lg font-bold ${colorClass}`}>{score}</span>
+                          <span className="text-[10px] text-muted-foreground">{rating}</span>
+                        </div>
+                      )}
+
                       <div 
-                        className="flex-1 cursor-pointer"
+                        className="flex-1 cursor-pointer min-w-0"
                         onClick={() => navigate(`/niche/${saved.niche_id}`)}
                       >
-                        <h3 className="font-semibold hover:text-primary transition-colors">
+                        <h3 className="font-semibold hover:text-primary transition-colors truncate">
                           {saved.niche_name}
                         </h3>
                         {nicheData && (
@@ -106,7 +134,7 @@ const Saved = () => {
                         )}
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-shrink-0">
                         {/* Alert Toggle */}
                         <button
                           onClick={() => toggleAlert(saved.niche_id, !saved.alert_enabled)}
@@ -141,6 +169,28 @@ const Saved = () => {
                           <ChevronRight className="w-4 h-4" />
                         </button>
                       </div>
+                    </div>
+
+                    {/* Notes Field */}
+                    <div className="mt-3 pt-3 border-t border-border/50">
+                      {editingNoteId === saved.niche_id ? (
+                        <Input
+                          value={noteValue}
+                          onChange={(e) => setNoteValue(e.target.value)}
+                          onBlur={() => handleNoteBlur(saved.niche_id)}
+                          onKeyDown={(e) => e.key === "Enter" && handleNoteBlur(saved.niche_id)}
+                          placeholder="Add a note (e.g., 'Holiday bundle idea')"
+                          className="text-sm bg-background/50"
+                          autoFocus
+                        />
+                      ) : (
+                        <button
+                          onClick={() => startEditingNote(saved.niche_id, saved.notes)}
+                          className="w-full text-left text-sm text-muted-foreground hover:text-foreground transition-colors p-2 rounded-lg hover:bg-background/50"
+                        >
+                          {saved.notes || "Add a note..."}
+                        </button>
+                      )}
                     </div>
                   </motion.div>
                 );

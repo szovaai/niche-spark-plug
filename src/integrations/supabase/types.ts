@@ -150,6 +150,7 @@ export type Database = {
           id: string
           niche_id: string
           niche_name: string
+          notes: string | null
           user_id: string
         }
         Insert: {
@@ -158,6 +159,7 @@ export type Database = {
           id?: string
           niche_id: string
           niche_name: string
+          notes?: string | null
           user_id: string
         }
         Update: {
@@ -166,6 +168,7 @@ export type Database = {
           id?: string
           niche_id?: string
           niche_name?: string
+          notes?: string | null
           user_id?: string
         }
         Relationships: []
