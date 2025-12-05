@@ -57,6 +57,36 @@ export default {
         surface: {
           elevated: "hsl(var(--surface-elevated))",
         },
+        // Solana Ocean Glass extended palette
+        ocean: {
+          50: "hsl(210 100% 95%)",
+          100: "hsl(210 100% 85%)",
+          200: "hsl(210 100% 75%)",
+          300: "hsl(210 100% 65%)",
+          400: "hsl(210 100% 55%)",
+          500: "hsl(210 100% 50%)",
+          600: "hsl(210 100% 45%)",
+          700: "hsl(210 100% 35%)",
+          800: "hsl(210 100% 25%)",
+          900: "hsl(210 100% 15%)",
+        },
+        magenta: {
+          50: "hsl(320 85% 95%)",
+          100: "hsl(320 85% 85%)",
+          200: "hsl(320 85% 75%)",
+          300: "hsl(320 85% 65%)",
+          400: "hsl(320 85% 60%)",
+          500: "hsl(320 85% 50%)",
+          600: "hsl(320 85% 40%)",
+          700: "hsl(320 85% 30%)",
+          800: "hsl(320 85% 20%)",
+          900: "hsl(320 85% 10%)",
+        },
+        glass: {
+          light: "hsl(220 50% 20% / 0.3)",
+          medium: "hsl(220 50% 15% / 0.5)",
+          dark: "hsl(220 50% 10% / 0.7)",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -98,6 +128,24 @@ export default {
           "0%": { backgroundPosition: "-200% 0" },
           "100%": { backgroundPosition: "200% 0" },
         },
+        aurora: {
+          "0%, 100%": { opacity: "1", transform: "scale(1) rotate(0deg)" },
+          "50%": { opacity: "0.8", transform: "scale(1.1) rotate(5deg)" },
+        },
+        float: {
+          "0%, 100%": { transform: "translateY(0) translateX(0)" },
+          "25%": { transform: "translateY(-20px) translateX(10px)" },
+          "50%": { transform: "translateY(-10px) translateX(-10px)" },
+          "75%": { transform: "translateY(-30px) translateX(5px)" },
+        },
+        "glow-pulse": {
+          "0%, 100%": { 
+            boxShadow: "0 0 20px hsl(210 100% 55% / 0.3), 0 0 40px hsl(320 85% 60% / 0.1)" 
+          },
+          "50%": { 
+            boxShadow: "0 0 40px hsl(210 100% 55% / 0.5), 0 0 80px hsl(320 85% 60% / 0.3)" 
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -106,6 +154,10 @@ export default {
         "scale-in": "scale-in 0.3s ease-out forwards",
         "slide-in-right": "slide-in-right 0.4s ease-out forwards",
         shimmer: "shimmer 2s infinite linear",
+        aurora: "aurora 15s ease-in-out infinite",
+        float: "float 8s ease-in-out infinite",
+        "float-delayed": "float 8s ease-in-out infinite 2s",
+        "glow-pulse": "glow-pulse 2s ease-in-out infinite",
       },
     },
   },
