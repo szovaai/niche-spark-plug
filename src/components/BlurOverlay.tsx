@@ -8,10 +8,27 @@ interface BlurOverlayProps {
   isBlurred: boolean;
   message?: string;
   showCTA?: boolean;
+  onAction?: () => void;
+  actionLabel?: string;
 }
 
-const BlurOverlay = ({ children, isBlurred, message = "Sign up to unlock", showCTA = true }: BlurOverlayProps) => {
+const BlurOverlay = ({ 
+  children, 
+  isBlurred, 
+  message = "Sign up to unlock", 
+  showCTA = true,
+  onAction,
+  actionLabel = "Create Free Account"
+}: BlurOverlayProps) => {
   const navigate = useNavigate();
+
+  const handleAction = () => {
+    if (onAction) {
+      onAction();
+    } else {
+      navigate("/auth");
+    }
+  };
 
   if (!isBlurred) {
     return <>{children}</>;
@@ -30,8 +47,8 @@ const BlurOverlay = ({ children, isBlurred, message = "Sign up to unlock", showC
         <Lock className="w-8 h-8 text-primary mb-3" />
         <p className="text-foreground font-medium mb-3">{message}</p>
         {showCTA && (
-          <Button variant="hero" size="sm" onClick={() => navigate("/auth")}>
-            Create Free Account
+          <Button variant="hero" size="sm" onClick={handleAction}>
+            {actionLabel}
           </Button>
         )}
       </motion.div>
