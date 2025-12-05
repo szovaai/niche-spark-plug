@@ -1,6 +1,7 @@
 export type DemandTier = "Spark" | "Hot" | "On Fire";
 export type CompetitionTier = "Easy" | "Moderate" | "Saturated";
 export type MomentumDirection = "rising" | "steady" | "declining";
+export type LaunchSpeed = "Instant" | "1 Hour" | "1 Day";
 
 export interface NicheSnapshot {
   id: string;
@@ -15,6 +16,8 @@ export interface NicheSnapshot {
   };
   salesTier: DemandTier;
   platform: "Etsy" | "Shopify" | "Gumroad" | "Multiple";
+  launchSpeed: LaunchSpeed;
+  launchabilityScore: number;
 }
 
 export interface ProductPattern {

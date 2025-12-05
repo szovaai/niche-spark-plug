@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
-import { TrendingUp, TrendingDown, Minus, Star, Flame, Zap, BarChart3, Lock, Crown } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, Star, Flame, Zap, BarChart3, Lock, Crown, Clock } from "lucide-react";
 import { NicheSnapshot } from "@/types/niche";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSavedNiches } from "@/hooks/useSavedNiches";
+import LaunchabilityScoreBadge from "@/components/LaunchabilityScoreBadge";
 
 interface NicheSnapshotCardProps {
   niche: NicheSnapshot;
@@ -68,11 +69,16 @@ const NicheSnapshotCard = ({ niche, index, showBlur = false, onUpgradeClick }: N
       className="gradient-border group cursor-pointer"
     >
       <div className="relative bg-card rounded-lg p-5 h-full">
-        {/* Save Button */}
+        {/* XLS Score Badge - Top Right */}
+        <div className="absolute top-3 right-3">
+          <LaunchabilityScoreBadge score={niche.launchabilityScore} size="sm" />
+        </div>
+
+        {/* Save Button - Below XLS */}
         {user && (
           <button
             onClick={handleSaveToggle}
-            className={`absolute top-3 right-3 p-2 rounded-full transition-all ${
+            className={`absolute top-16 right-3 p-2 rounded-full transition-all ${
               isNicheSaved(niche.id)
                 ? "bg-primary/20 text-primary"
                 : "bg-secondary/50 text-muted-foreground hover:text-primary"
@@ -88,15 +94,19 @@ const NicheSnapshotCard = ({ niche, index, showBlur = false, onUpgradeClick }: N
         </span>
 
         {/* Niche Name - Always visible */}
-        <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors">
+        <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors pr-14">
           {niche.name}
         </h3>
         
-        {/* Demand Tier - Always visible */}
-        <div className="flex items-center gap-2 mb-3">
+        {/* Demand + Launch Speed */}
+        <div className="flex items-center gap-2 mb-3 flex-wrap">
           <span className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${demandColors[niche.demandTier]}`}>
             <DemandIcon className="w-3 h-3" />
             {niche.demandTier}
+          </span>
+          <span className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-400/10 text-green-400">
+            {niche.launchSpeed === "Instant" ? <Zap className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+            {niche.launchSpeed}
           </span>
         </div>
 

@@ -22,6 +22,8 @@ export const nicheSnapshots: NicheSnapshot[] = [
     priceRange: { min: 7, max: 18 },
     salesTier: "Hot",
     platform: "Etsy",
+    launchSpeed: "1 Hour",
+    launchabilityScore: 82,
   },
   {
     id: "holiday-coupon-books",
@@ -33,6 +35,8 @@ export const nicheSnapshots: NicheSnapshot[] = [
     priceRange: { min: 4, max: 12 },
     salesTier: "Hot",
     platform: "Etsy",
+    launchSpeed: "Instant",
+    launchabilityScore: 90,
   },
   {
     id: "kids-activity-packs",
@@ -44,6 +48,8 @@ export const nicheSnapshots: NicheSnapshot[] = [
     priceRange: { min: 5, max: 15 },
     salesTier: "On Fire",
     platform: "Multiple",
+    launchSpeed: "1 Hour",
+    launchabilityScore: 82,
   },
   {
     id: "ai-coloring-pages",
@@ -55,6 +61,8 @@ export const nicheSnapshots: NicheSnapshot[] = [
     priceRange: { min: 3, max: 10 },
     salesTier: "Spark",
     platform: "Etsy",
+    launchSpeed: "Instant",
+    launchabilityScore: 90,
   },
   {
     id: "budget-trackers",
@@ -66,6 +74,8 @@ export const nicheSnapshots: NicheSnapshot[] = [
     priceRange: { min: 5, max: 20 },
     salesTier: "Hot",
     platform: "Multiple",
+    launchSpeed: "1 Hour",
+    launchabilityScore: 52,
   },
   {
     id: "digital-recipe-cards",
@@ -77,6 +87,8 @@ export const nicheSnapshots: NicheSnapshot[] = [
     priceRange: { min: 4, max: 12 },
     salesTier: "Spark",
     platform: "Etsy",
+    launchSpeed: "Instant",
+    launchabilityScore: 70,
   },
   {
     id: "wedding-planning",
@@ -88,6 +100,8 @@ export const nicheSnapshots: NicheSnapshot[] = [
     priceRange: { min: 15, max: 45 },
     salesTier: "On Fire",
     platform: "Etsy",
+    launchSpeed: "1 Day",
+    launchabilityScore: 55,
   },
   {
     id: "social-media-templates",
@@ -99,15 +113,14 @@ export const nicheSnapshots: NicheSnapshot[] = [
     priceRange: { min: 8, max: 25 },
     salesTier: "Hot",
     platform: "Multiple",
+    launchSpeed: "1 Hour",
+    launchabilityScore: 72,
   },
 ];
 
-// Helper to check if a niche qualifies for "Fast Cash" filter
+// Helper to check if a niche qualifies for "Fast Cash" filter (XLS >= 70)
 export const isFastCashNiche = (niche: NicheSnapshot): boolean => {
-  const isHighDemand = niche.demandTier === "Hot" || niche.demandTier === "On Fire";
-  const isLowCompetition = niche.competitionTier === "Easy" || niche.competitionTier === "Moderate";
-  const isGoodPrice = niche.priceRange.min >= 4 && niche.priceRange.max <= 27;
-  return isHighDemand && isLowCompetition && isGoodPrice;
+  return niche.launchabilityScore >= 70;
 };
 
 export const getProductPatterns = (nicheId: string): ProductPattern[] => {

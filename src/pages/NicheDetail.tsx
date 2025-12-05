@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { 
-  ArrowLeft, Star, TrendingUp, TrendingDown, Minus, Flame, Zap, 
-  ShoppingBag, ExternalLink, Sparkles, Lock, Crown, Store
+  ArrowLeft, Star, ShoppingBag, ExternalLink, Lock, Crown, Store, Zap, Flame, Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
@@ -13,9 +12,12 @@ import UpgradeModal from "@/components/UpgradeModal";
 import LaunchRecipeSection from "@/components/LaunchRecipeSection";
 import StoreBlueprintModal from "@/components/StoreBlueprintModal";
 import UsageLimitBadge from "@/components/UsageLimitBadge";
+import LaunchabilityScoreBadge from "@/components/LaunchabilityScoreBadge";
+import MicroSignalsBadges from "@/components/MicroSignalsBadges";
 import { nicheSnapshots, getProductPatterns, getKeywordIdeas, getPLRSources, getLaunchRecipe, getStoreBlueprint } from "@/data/mockNiches";
 import { useAuth } from "@/hooks/useAuth";
 import { useSavedNiches } from "@/hooks/useSavedNiches";
+import { getXLSRating, getXLSTagline } from "@/lib/launchabilityScore";
 
 const NicheDetail = () => {
   const { nicheId } = useParams<{ nicheId: string }>();
@@ -62,24 +64,16 @@ const NicheDetail = () => {
   const storeBlueprint = getStoreBlueprint(nicheId || "");
 
   const demandColors = {
-    Spark: "text-ocean-300 bg-ocean-400/20 border-ocean-400/30",
-    Hot: "text-accent bg-accent/20 border-accent/30",
-    "On Fire": "text-magenta-300 bg-magenta-400/20 border-magenta-400/30",
+    Spark: "bg-ocean-400/10 text-ocean-300",
+    Hot: "bg-accent/10 text-accent",
+    "On Fire": "bg-magenta-400/10 text-magenta-300",
   };
 
   const competitionColors = {
-    Easy: "text-ocean-300 bg-ocean-400/20 border-ocean-400/30",
-    Moderate: "text-accent bg-accent/20 border-accent/30",
-    Saturated: "text-magenta-300 bg-magenta-400/20 border-magenta-400/30",
+    Easy: "bg-ocean-400/10 text-ocean-300",
+    Moderate: "bg-accent/10 text-accent",
+    Saturated: "bg-magenta-400/10 text-magenta-300",
   };
-
-  const momentumLabel = {
-    rising: "🔺 Rising",
-    steady: "➖ Steady",
-    declining: "🔻 Declining",
-  }[niche.momentum];
-
-  const DemandIcon = niche.demandTier === "Spark" ? Zap : Flame;
 
   const handleSaveToggle = async () => {
     if (isNicheSaved(niche.id)) {
@@ -176,90 +170,58 @@ const NicheDetail = () => {
             className="gradient-border mb-8"
           >
             <div className="bg-card rounded-lg p-6 md:p-8">
-              <div className="flex items-start justify-between mb-6">
-                <div>
+              {/* Header with XLS Score */}
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+                <div className="flex-1">
                   <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded">
                     {niche.category}
                   </span>
                   <h1 className="text-3xl md:text-4xl font-bold mt-3 gradient-text">
                     {niche.name}
                   </h1>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    <Zap className="w-4 h-4 inline text-primary mr-1" />
+                    {getXLSRating(niche.launchabilityScore)} — {getXLSTagline(niche.launchabilityScore)}
+                  </p>
                 </div>
-                {user && (
-                  <button
-                    onClick={handleSaveToggle}
-                    className={`p-3 rounded-xl transition-all ${
-                      isNicheSaved(niche.id)
-                        ? "bg-primary/20 text-primary"
-                        : "bg-secondary text-muted-foreground hover:text-primary"
-                    }`}
-                  >
-                    <Star className={`w-5 h-5 ${isNicheSaved(niche.id) ? "fill-current" : ""}`} />
-                  </button>
-                )}
+                
+                <div className="flex items-center gap-3">
+                  {/* XLS Score Badge */}
+                  <LaunchabilityScoreBadge score={niche.launchabilityScore} size="lg" showTagline />
+                  
+                  {user && (
+                    <button
+                      onClick={handleSaveToggle}
+                      className={`p-3 rounded-xl transition-all ${
+                        isNicheSaved(niche.id)
+                          ? "bg-primary/20 text-primary"
+                          : "bg-secondary text-muted-foreground hover:text-primary"
+                      }`}
+                    >
+                      <Star className={`w-5 h-5 ${isNicheSaved(niche.id) ? "fill-current" : ""}`} />
+                    </button>
+                  )}
+                </div>
               </div>
 
-              {/* Snapshot Badges */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                {/* Demand - Always visible */}
-                <div className={`p-4 rounded-xl border ${demandColors[niche.demandTier]}`}>
-                  <div className="flex items-center gap-2 mb-1">
-                    <DemandIcon className="w-4 h-4" />
-                    <span className="text-xs font-medium">Demand</span>
-                  </div>
-                  <span className="text-lg font-bold">{niche.demandTier}</span>
-                </div>
-
-                {/* Competition - Blurred for Free */}
-                <div className={`relative p-4 rounded-xl border ${isPro ? competitionColors[niche.competitionTier] : "border-border bg-secondary/30"}`}>
-                  {!isPro && !user && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-secondary/80 rounded-xl">
-                      <Lock className="w-4 h-4 text-muted-foreground" />
-                    </div>
-                  )}
-                  {!isPro && user && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-secondary/80 rounded-xl">
-                      <Crown className="w-4 h-4 text-accent" />
-                    </div>
-                  )}
-                  <div className={`text-xs font-medium mb-1 ${!isPro && "blur-sm"}`}>Competition</div>
-                  <span className={`text-lg font-bold ${!isPro && "blur-sm"}`}>{niche.competitionTier}</span>
-                </div>
-
-                {/* Momentum - Blurred for Free */}
-                <div className={`relative p-4 rounded-xl border ${isPro ? "border-border bg-secondary/30" : "border-border bg-secondary/30"}`}>
-                  {!isPro && !user && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-secondary/80 rounded-xl">
-                      <Lock className="w-4 h-4 text-muted-foreground" />
-                    </div>
-                  )}
-                  {!isPro && user && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-secondary/80 rounded-xl">
-                      <Crown className="w-4 h-4 text-accent" />
-                    </div>
-                  )}
-                  <div className={`text-xs font-medium text-muted-foreground mb-1 ${!isPro && "blur-sm"}`}>Momentum</div>
-                  <span className={`text-lg font-bold ${!isPro && "blur-sm"}`}>{momentumLabel}</span>
-                </div>
-
-                {/* Price Band - Blurred for non-users, visible for Free */}
-                <div className="relative p-4 rounded-xl border border-border bg-secondary/30">
-                  {!user && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-secondary/80 rounded-xl">
-                      <Lock className="w-4 h-4 text-muted-foreground" />
-                    </div>
-                  )}
-                  <div className={`text-xs font-medium text-muted-foreground mb-1 ${!user && "blur-sm"}`}>Price Band</div>
-                  <span className={`text-lg font-bold ${!user && "blur-sm"}`}>${niche.priceRange.min}–${niche.priceRange.max}</span>
-                </div>
+              {/* Micro-Signals Badges */}
+              <div className="mb-6">
+                <MicroSignalsBadges
+                  demandTier={niche.demandTier}
+                  competitionTier={niche.competitionTier}
+                  momentum={niche.momentum}
+                  launchSpeed={niche.launchSpeed}
+                />
               </div>
 
               {/* AI Summary */}
               <div className="p-4 rounded-xl gradient-ocean border border-primary/20">
                 <p className="text-sm leading-relaxed">
-                  <strong>Quick Take:</strong> Great for quick-launch digital products. 
-                  {niche.competitionTier === "Easy" && " Low competition means easier entry."}
-                  {niche.momentum === "rising" && " Rising demand suggests good timing to enter."}
+                  <strong>Quick Take:</strong> XLS {niche.launchabilityScore}/100 — 
+                  {niche.launchabilityScore >= 85 && " Excellent opportunity! Launch this today."}
+                  {niche.launchabilityScore >= 70 && niche.launchabilityScore < 85 && " Strong opportunity worth pursuing."}
+                  {niche.launchabilityScore >= 50 && niche.launchabilityScore < 70 && " Good potential with some competition."}
+                  {niche.launchabilityScore < 50 && " Research more before committing."}
                   {" "}Best suited for {niche.platform === "Multiple" ? "Etsy and Gumroad" : niche.platform}.
                 </p>
               </div>
