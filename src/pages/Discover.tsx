@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Sparkles, Clock } from "lucide-react";
+import { Search, Sparkles, Clock, Play } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
@@ -9,9 +9,14 @@ import NicheSnapshotCard from "@/components/NicheSnapshotCard";
 import FastCashFilterToggle from "@/components/FastCashFilterToggle";
 import UsageLimitBadge from "@/components/UsageLimitBadge";
 import UpgradeModal from "@/components/UpgradeModal";
+import InspirationOfTheDay from "@/components/InspirationOfTheDay";
+import DemoModeModal from "@/components/DemoModeModal";
+import OnboardingWizard from "@/components/OnboardingWizard";
+import FirstTimeTooltip, { TOOLTIP_CONTENT } from "@/components/FirstTimeTooltip";
 import { trendingTopics, nicheSnapshots, isFastCashNiche } from "@/data/mockNiches";
 import { useAuth } from "@/hooks/useAuth";
 import { useSavedNiches } from "@/hooks/useSavedNiches";
+import { useOnboarding } from "@/hooks/useOnboarding";
 import { toast } from "sonner";
 
 const categories = [
@@ -28,10 +33,12 @@ const categories = [
 const Discover = () => {
   const { user, role, canSearch, incrementSearch } = useAuth();
   const { savedNiches } = useSavedNiches();
+  const { showOnboarding, completeOnboarding, skipOnboarding } = useOnboarding();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [fastCashOnly, setFastCashOnly] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showDemoModal, setShowDemoModal] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState("");
 
   const handleSearch = async (query: string) => {
@@ -77,6 +84,14 @@ const Discover = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
+      {/* Onboarding Wizard */}
+      {showOnboarding && (
+        <OnboardingWizard
+          onComplete={completeOnboarding}
+          onSkip={skipOnboarding}
+        />
+      )}
+      
       <main className="pt-24 pb-16 px-4">
         <div className="max-w-6xl mx-auto">
           {/* Hero Search Section */}
@@ -92,6 +107,19 @@ const Discover = () => {
             <p className="text-muted-foreground max-w-xl mx-auto mb-8">
               Search trending digital products and find your next winning niche
             </p>
+
+            {/* Demo Mode Button */}
+            {!user && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowDemoModal(true)}
+                className="mb-4 gap-2"
+              >
+                <Play className="w-4 h-4" />
+                See How It Works
+              </Button>
+            )}
 
             {/* Usage Badge for Free users */}
             {user && role === "free" && (
@@ -129,12 +157,18 @@ const Discover = () => {
                 ))}
               </div>
 
-              {/* Fast Cash Filter */}
-              <FastCashFilterToggle
-                enabled={fastCashOnly}
-                onToggle={handleFastCashToggle}
-                onUpgradeClick={() => handleUpgradeClick("Fast-Launch Filter is a Pro feature. Instantly find niches ready to launch!")}
-              />
+              {/* Fast Cash Filter with Tooltip */}
+              <FirstTimeTooltip
+                tooltipId="fast_cash_filter"
+                content={TOOLTIP_CONTENT.fast_cash_filter}
+                side="bottom"
+              >
+                <FastCashFilterToggle
+                  enabled={fastCashOnly}
+                  onToggle={handleFastCashToggle}
+                  onUpgradeClick={() => handleUpgradeClick("Fast-Launch Filter is a Pro feature. Instantly find niches ready to launch!")}
+                />
+              </FirstTimeTooltip>
             </div>
           </motion.div>
 
@@ -172,7 +206,10 @@ const Discover = () => {
             </div>
 
             {/* Sidebar */}
-            <div className="space-y-8">
+            <div className="space-y-6">
+              {/* Inspiration of the Day */}
+              <InspirationOfTheDay />
+
               {/* Trending Feed */}
               <TrendingFeed topics={trendingTopics} />
 
@@ -204,6 +241,11 @@ const Discover = () => {
         isOpen={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
         trigger={upgradeReason}
+      />
+
+      <DemoModeModal
+        open={showDemoModal}
+        onOpenChange={setShowDemoModal}
       />
     </div>
   );

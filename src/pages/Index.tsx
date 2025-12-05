@@ -1,19 +1,34 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import HeroSection from "@/components/HeroSection";
 import Navbar from "@/components/Navbar";
 import TrendingFeed from "@/components/TrendingFeed";
 import NicheSnapshotCard from "@/components/NicheSnapshotCard";
+import InspirationOfTheDay from "@/components/InspirationOfTheDay";
+import DemoModeModal from "@/components/DemoModeModal";
+import OnboardingWizard from "@/components/OnboardingWizard";
 import { trendingTopics, nicheSnapshots } from "@/data/mockNiches";
 import { motion } from "framer-motion";
-import { Sparkles, ArrowRight, Shield, Zap, BarChart3 } from "lucide-react";
+import { Sparkles, ArrowRight, Shield, Zap, BarChart3, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useOnboarding } from "@/hooks/useOnboarding";
 
 const Index = () => {
   const navigate = useNavigate();
+  const [showDemoModal, setShowDemoModal] = useState(false);
+  const { showOnboarding, completeOnboarding, skipOnboarding } = useOnboarding();
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
+      
+      {/* Onboarding Wizard */}
+      {showOnboarding && (
+        <OnboardingWizard
+          onComplete={completeOnboarding}
+          onSkip={skipOnboarding}
+        />
+      )}
       
       <HeroSection onGetStarted={() => navigate("/discover")} />
       
@@ -31,11 +46,28 @@ const Index = () => {
               <span className="text-sm gradient-text font-medium">Live Trends</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Today's Digital Winners</h2>
+            
+            {/* Demo Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowDemoModal(true)}
+              className="mt-2 gap-2"
+            >
+              <Play className="w-4 h-4" />
+              See How It Works
+            </Button>
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <TrendingFeed topics={trendingTopics.slice(0, 5)} />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left column: Trending + Inspiration */}
+            <div className="space-y-6">
+              <TrendingFeed topics={trendingTopics.slice(0, 5)} />
+              <InspirationOfTheDay />
+            </div>
+            
+            {/* Right columns: Niche cards */}
+            <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
               {nicheSnapshots.slice(0, 4).map((niche, index) => (
                 <NicheSnapshotCard key={niche.id} niche={niche} index={index} showBlur={true} />
               ))}
@@ -54,9 +86,9 @@ const Index = () => {
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { icon: BarChart3, title: "Digital Profit Snapshots", description: "Instant clarity on demand, competition, and momentum." },
-            { icon: Zap, title: "Build My Product Pack", description: "AI-powered product ideas and launch strategies." },
-            { icon: Shield, title: "PLR Shortcuts", description: "Curated PLR sources filtered by niche." },
+            { icon: BarChart3, title: "Launchability Score™", description: "Our proprietary 0-100 score tells you exactly how easy and profitable each niche is." },
+            { icon: Zap, title: "60-Minute Launch", description: "AI-powered product packs and launch strategies get you selling fast." },
+            { icon: Shield, title: "PLR Shortcuts", description: "Curated PLR sources filtered by niche save you hours of work." },
           ].map((f, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="p-6 bg-card border border-border rounded-xl">
               <f.icon className="w-8 h-8 text-primary mb-4" />
@@ -73,6 +105,11 @@ const Index = () => {
           <p className="text-sm text-muted-foreground">© 2024 DigiStream</p>
         </div>
       </footer>
+
+      <DemoModeModal
+        open={showDemoModal}
+        onOpenChange={setShowDemoModal}
+      />
     </div>
   );
 };

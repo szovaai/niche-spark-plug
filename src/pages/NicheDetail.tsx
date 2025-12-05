@@ -14,6 +14,8 @@ import StoreBlueprintModal from "@/components/StoreBlueprintModal";
 import UsageLimitBadge from "@/components/UsageLimitBadge";
 import LaunchabilityScoreBadge from "@/components/LaunchabilityScoreBadge";
 import MicroSignalsBadges from "@/components/MicroSignalsBadges";
+import LaunchTimelineBar from "@/components/LaunchTimelineBar";
+import FirstTimeTooltip, { TOOLTIP_CONTENT } from "@/components/FirstTimeTooltip";
 import { nicheSnapshots, getProductPatterns, getKeywordIdeas, getPLRSources, getLaunchRecipe, getStoreBlueprint } from "@/data/mockNiches";
 import { useAuth } from "@/hooks/useAuth";
 import { useSavedNiches } from "@/hooks/useSavedNiches";
@@ -163,6 +165,15 @@ const NicheDetail = () => {
             {user && role === "free" && <UsageLimitBadge type="views" />}
           </div>
 
+          {/* Launch Timeline Bar */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            <LaunchTimelineBar currentStep={1} />
+          </motion.div>
+
           {/* Hero Section - Snapshot */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -186,8 +197,14 @@ const NicheDetail = () => {
                 </div>
                 
                 <div className="flex items-center gap-3">
-                  {/* XLS Score Badge */}
-                  <LaunchabilityScoreBadge score={niche.launchabilityScore} size="lg" showTagline />
+                  {/* XLS Score Badge with Tooltip */}
+                  <FirstTimeTooltip
+                    tooltipId="launchability_score"
+                    content={TOOLTIP_CONTENT.launchability_score}
+                    side="left"
+                  >
+                    <LaunchabilityScoreBadge score={niche.launchabilityScore} size="lg" showTagline />
+                  </FirstTimeTooltip>
                   
                   {user && (
                     <button
