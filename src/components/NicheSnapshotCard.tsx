@@ -1,21 +1,22 @@
 import { motion } from "framer-motion";
-import { TrendingUp, TrendingDown, Minus, Star, Flame, Zap, BarChart3 } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, Star, Flame, Zap, BarChart3, Lock, Crown } from "lucide-react";
 import { NicheSnapshot } from "@/types/niche";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSavedNiches } from "@/hooks/useSavedNiches";
-import BlurOverlay from "./BlurOverlay";
 
 interface NicheSnapshotCardProps {
   niche: NicheSnapshot;
   index: number;
   showBlur?: boolean;
+  onUpgradeClick?: () => void;
 }
 
-const NicheSnapshotCard = ({ niche, index, showBlur = false }: NicheSnapshotCardProps) => {
+const NicheSnapshotCard = ({ niche, index, showBlur = false, onUpgradeClick }: NicheSnapshotCardProps) => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const { isNicheSaved, saveNiche, unsaveNiche } = useSavedNiches();
+  const isPro = role === "pro";
 
   const demandColors = {
     Spark: "text-ocean-300 bg-ocean-400/10",
@@ -56,58 +57,6 @@ const NicheSnapshotCard = ({ niche, index, showBlur = false }: NicheSnapshotCard
     }
   };
 
-  const publicContent = (
-    <>
-      {/* Niche Name - Always visible */}
-      <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors">
-        {niche.name}
-      </h3>
-      
-      {/* Demand Tier - Always visible */}
-      <div className="flex items-center gap-2 mb-3">
-        <span className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${demandColors[niche.demandTier]}`}>
-          <DemandIcon className="w-3 h-3" />
-          {niche.demandTier}
-        </span>
-      </div>
-    </>
-  );
-
-  const lockedContent = (
-    <div className="space-y-3">
-      {/* Competition */}
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">Competition</span>
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${competitionColors[niche.competitionTier]}`}>
-          {niche.competitionTier}
-        </span>
-      </div>
-
-      {/* Momentum */}
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">Momentum</span>
-        <span className={`flex items-center gap-1 ${momentumColor}`}>
-          <MomentumIcon className="w-4 h-4" />
-          {niche.momentum}
-        </span>
-      </div>
-
-      {/* Price Range */}
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">Price Range</span>
-        <span className="text-sm font-medium text-foreground">
-          ${niche.priceRange.min}–${niche.priceRange.max}
-        </span>
-      </div>
-
-      {/* Platform */}
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">Platform</span>
-        <span className="text-xs px-2 py-1 bg-secondary rounded">{niche.platform}</span>
-      </div>
-    </div>
-  );
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -138,16 +87,88 @@ const NicheSnapshotCard = ({ niche, index, showBlur = false }: NicheSnapshotCard
           {niche.category}
         </span>
 
-        {publicContent}
+        {/* Niche Name - Always visible */}
+        <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors">
+          {niche.name}
+        </h3>
+        
+        {/* Demand Tier - Always visible */}
+        <div className="flex items-center gap-2 mb-3">
+          <span className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${demandColors[niche.demandTier]}`}>
+            <DemandIcon className="w-3 h-3" />
+            {niche.demandTier}
+          </span>
+        </div>
 
-        <BlurOverlay isBlurred={showBlur && !user} message="Sign up to see full insights">
-          {lockedContent}
-        </BlurOverlay>
+        {/* Locked Content */}
+        <div className="space-y-3">
+          {/* Competition - Blurred for non-Pro */}
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">Competition</span>
+            {isPro ? (
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${competitionColors[niche.competitionTier]}`}>
+                {niche.competitionTier}
+              </span>
+            ) : showBlur || !user ? (
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Lock className="w-3 h-3" />
+                {user ? <Crown className="w-3 h-3 text-accent" /> : "Sign up"}
+              </span>
+            ) : (
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Crown className="w-3 h-3 text-accent" />
+                Pro
+              </span>
+            )}
+          </div>
+
+          {/* Momentum - Blurred for non-Pro */}
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">Momentum</span>
+            {isPro ? (
+              <span className={`flex items-center gap-1 ${momentumColor}`}>
+                <MomentumIcon className="w-4 h-4" />
+                {niche.momentum}
+              </span>
+            ) : showBlur || !user ? (
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Lock className="w-3 h-3" />
+                {user ? <Crown className="w-3 h-3 text-accent" /> : "Sign up"}
+              </span>
+            ) : (
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Crown className="w-3 h-3 text-accent" />
+                Pro
+              </span>
+            )}
+          </div>
+
+          {/* Price Range - Visible for Free, blurred for non-users */}
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">Price Range</span>
+            {user ? (
+              <span className="text-sm font-medium text-foreground">
+                ${niche.priceRange.min}–${niche.priceRange.max}
+              </span>
+            ) : (
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Lock className="w-3 h-3" />
+                Sign up
+              </span>
+            )}
+          </div>
+
+          {/* Platform */}
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">Platform</span>
+            <span className="text-xs px-2 py-1 bg-secondary rounded">{niche.platform}</span>
+          </div>
+        </div>
 
         {/* View Button */}
         <button className="w-full mt-4 py-2 text-sm text-primary border border-primary/30 rounded-lg hover:bg-primary/10 transition-colors flex items-center justify-center gap-2">
           <BarChart3 className="w-4 h-4" />
-          View Niches
+          View Details
         </button>
       </div>
     </motion.div>

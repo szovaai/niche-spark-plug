@@ -1,14 +1,18 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Sparkles, TrendingUp, Clock, Filter } from "lucide-react";
+import { Search, Sparkles, Clock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import TrendingFeed from "@/components/TrendingFeed";
 import NicheSnapshotCard from "@/components/NicheSnapshotCard";
-import { trendingTopics, nicheSnapshots } from "@/data/mockNiches";
+import FastCashFilterToggle from "@/components/FastCashFilterToggle";
+import UsageLimitBadge from "@/components/UsageLimitBadge";
+import UpgradeModal from "@/components/UpgradeModal";
+import { trendingTopics, nicheSnapshots, isFastCashNiche } from "@/data/mockNiches";
 import { useAuth } from "@/hooks/useAuth";
 import { useSavedNiches } from "@/hooks/useSavedNiches";
+import { toast } from "sonner";
 
 const categories = [
   "All",
@@ -22,18 +26,50 @@ const categories = [
 ];
 
 const Discover = () => {
-  const { user } = useAuth();
+  const { user, role, canSearch, incrementSearch } = useAuth();
   const { savedNiches } = useSavedNiches();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [fastCashOnly, setFastCashOnly] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradeReason, setUpgradeReason] = useState("");
 
-  const filteredNiches = nicheSnapshots.filter((niche) => {
+  const handleSearch = async (query: string) => {
+    if (query && user && role === "free") {
+      const canProceed = await incrementSearch();
+      if (!canProceed) {
+        setUpgradeReason("You've used all 3 daily searches. Upgrade to Pro for unlimited searches!");
+        setShowUpgradeModal(true);
+        return;
+      }
+    }
+    setSearchQuery(query);
+  };
+
+  const handleFastCashToggle = (enabled: boolean) => {
+    setFastCashOnly(enabled);
+    if (enabled) {
+      toast.success("Showing fast-launch niches only");
+    }
+  };
+
+  const handleUpgradeClick = (reason: string) => {
+    setUpgradeReason(reason);
+    setShowUpgradeModal(true);
+  };
+
+  let filteredNiches = nicheSnapshots.filter((niche) => {
     const matchesSearch = niche.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       niche.category.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === "All" || 
       niche.category.toLowerCase().includes(selectedCategory.toLowerCase());
     return matchesSearch && matchesCategory;
   });
+
+  // Apply Fast Cash filter (Pro only)
+  if (fastCashOnly && role === "pro") {
+    filteredNiches = filteredNiches.filter(isFastCashNiche);
+  }
 
   const recentlyViewed = savedNiches.slice(0, 3);
 
@@ -57,6 +93,13 @@ const Discover = () => {
               Search trending digital products and find your next winning niche
             </p>
 
+            {/* Usage Badge for Free users */}
+            {user && role === "free" && (
+              <div className="flex justify-center mb-4">
+                <UsageLimitBadge type="searches" />
+              </div>
+            )}
+
             {/* Search Bar */}
             <div className="max-w-2xl mx-auto relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -64,24 +107,34 @@ const Discover = () => {
                 type="text"
                 placeholder="Search niches, keywords, or product types..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => handleSearch(e.target.value)}
                 className="pl-12 pr-4 h-14 text-lg bg-card border-border/50 focus:border-primary/50"
               />
             </div>
 
-            {/* Category Filters */}
-            <div className="flex flex-wrap justify-center gap-2 mt-6">
-              {categories.map((cat) => (
-                <Button
-                  key={cat}
-                  variant="category"
-                  size="sm"
-                  data-active={selectedCategory === cat}
-                  onClick={() => setSelectedCategory(cat)}
-                >
-                  {cat}
-                </Button>
-              ))}
+            {/* Filters Row */}
+            <div className="flex flex-wrap items-center justify-center gap-4 mt-6">
+              {/* Category Filters */}
+              <div className="flex flex-wrap justify-center gap-2">
+                {categories.map((cat) => (
+                  <Button
+                    key={cat}
+                    variant="category"
+                    size="sm"
+                    data-active={selectedCategory === cat}
+                    onClick={() => setSelectedCategory(cat)}
+                  >
+                    {cat}
+                  </Button>
+                ))}
+              </div>
+
+              {/* Fast Cash Filter */}
+              <FastCashFilterToggle
+                enabled={fastCashOnly}
+                onToggle={handleFastCashToggle}
+                onUpgradeClick={() => handleUpgradeClick("Fast-Launch Filter is a Pro feature. Instantly find niches ready to launch!")}
+              />
             </div>
           </motion.div>
 
@@ -92,7 +145,7 @@ const Discover = () => {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-primary" />
-                  {searchQuery ? "Search Results" : "Top Niches"}
+                  {searchQuery ? "Search Results" : fastCashOnly ? "Fast-Launch Niches" : "Top Niches"}
                 </h2>
                 <span className="text-sm text-muted-foreground">
                   {filteredNiches.length} niches found
@@ -106,13 +159,14 @@ const Discover = () => {
                     niche={niche}
                     index={index}
                     showBlur={!user}
+                    onUpgradeClick={() => handleUpgradeClick("Sign up to see full niche insights")}
                   />
                 ))}
               </div>
 
               {filteredNiches.length === 0 && (
                 <div className="text-center py-12">
-                  <p className="text-muted-foreground">No niches found matching your search.</p>
+                  <p className="text-muted-foreground">No niches found matching your criteria.</p>
                 </div>
               )}
             </div>
@@ -122,7 +176,7 @@ const Discover = () => {
               {/* Trending Feed */}
               <TrendingFeed topics={trendingTopics} />
 
-              {/* Recently Viewed (if logged in) */}
+              {/* Recently Saved (if logged in) */}
               {user && recentlyViewed.length > 0 && (
                 <div>
                   <h3 className="text-lg font-bold flex items-center gap-2 mb-4">
@@ -145,6 +199,12 @@ const Discover = () => {
           </div>
         </div>
       </main>
+
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        trigger={upgradeReason}
+      />
     </div>
   );
 };

@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import Discover from "./pages/Discover";
 import NicheDetail from "./pages/NicheDetail";
 import Saved from "./pages/Saved";
+import LaunchPacks from "./pages/LaunchPacks";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/discover" element={<Discover />} />
             <Route path="/niche/:nicheId" element={<NicheDetail />} />
             <Route path="/saved" element={<Saved />} />
+            <Route path="/launch-packs" element={<LaunchPacks />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

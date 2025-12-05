@@ -1,4 +1,4 @@
-import { NicheSnapshot, ProductPattern, KeywordIdea, TrendingTopic, PLRSource } from "@/types/niche";
+import { NicheSnapshot, ProductPattern, KeywordIdea, TrendingTopic, PLRSource, LaunchPack, LaunchRecipe, StoreBlueprint } from "@/types/niche";
 
 export const trendingTopics: TrendingTopic[] = [
   { id: "1", name: "Minimalist 2026 Planners", platform: "Etsy", momentum: "rising", category: "Planners" },
@@ -102,6 +102,14 @@ export const nicheSnapshots: NicheSnapshot[] = [
   },
 ];
 
+// Helper to check if a niche qualifies for "Fast Cash" filter
+export const isFastCashNiche = (niche: NicheSnapshot): boolean => {
+  const isHighDemand = niche.demandTier === "Hot" || niche.demandTier === "On Fire";
+  const isLowCompetition = niche.competitionTier === "Easy" || niche.competitionTier === "Moderate";
+  const isGoodPrice = niche.priceRange.min >= 4 && niche.priceRange.max <= 27;
+  return isHighDemand && isLowCompetition && isGoodPrice;
+};
+
 export const getProductPatterns = (nicheId: string): ProductPattern[] => {
   const patterns: Record<string, ProductPattern[]> = {
     "minimalist-planners": [
@@ -183,4 +191,215 @@ export const getPLRSources = (nicheId: string): PLRSource[] => {
       nicheRelevance: "Perfect for educational content bundles",
     },
   ];
+};
+
+// Launch Packs - Pre-curated Done-For-You packs
+export const launchPacks: LaunchPack[] = [
+  {
+    id: "holiday-planner-pack",
+    title: "Holiday Planner Quick-Start",
+    slug: "holiday-planner",
+    nicheName: "Holiday Planning",
+    category: "Seasonal",
+    whyHot: "Holiday planning searches spike 300% in Nov-Dec. Low competition for undated/reusable formats. Perfect impulse buy at $7-15.",
+    plrSuggestion: {
+      id: "plr-holiday",
+      name: "PLR.me Holiday Bundle",
+      description: "Complete holiday planning templates",
+      features: ["50+ pages", "Editable Canva", "Commercial license"],
+      category: "Planners",
+      link: "#",
+    },
+    listingTitle: "2025 Holiday Planner Bundle | Printable Christmas Organizer | Gift List Budget Tracker",
+    listingBullets: [
+      "✨ Complete 30+ page holiday planning bundle",
+      "🎁 Gift tracker, budget planner, menu planning",
+      "📱 Works on iPad, tablet, or print at home",
+      "⚡ Instant download - start planning today",
+    ],
+    imageRecommendations: [
+      "Mockup on iPad with festive background",
+      "Flat lay with Christmas decorations",
+      "Page spread showing gift tracker",
+    ],
+    promoIdea: "Pin 'Holiday Planning Checklist' graphic to Pinterest with link. Best timing: early November.",
+  },
+  {
+    id: "new-year-goals-pack",
+    title: "New Year Goals Pack",
+    slug: "new-year-goals",
+    nicheName: "Goal Setting",
+    category: "New Year",
+    whyHot: "Goal-setting products see 5x demand in December-January. Evergreen appeal with seasonal spikes. Works as standalone or bundle upsell.",
+    plrSuggestion: {
+      id: "plr-goals",
+      name: "IDPLR Goal Setting Kit",
+      description: "Vision board and goal planning templates",
+      features: ["Workbooks", "Trackers", "Vision board templates"],
+      category: "Self-Improvement",
+      link: "#",
+    },
+    listingTitle: "2026 Goal Setting Planner | Vision Board Kit | Habit Tracker Bundle | New Year Resolution",
+    listingBullets: [
+      "🎯 Set and achieve your 2026 goals",
+      "📊 Monthly, weekly, and daily tracking pages",
+      "✨ Includes vision board templates",
+      "🖨️ Printable + digital iPad version included",
+    ],
+    imageRecommendations: [
+      "Clean desk setup with planner open",
+      "Vision board page spread",
+      "Before/after goal tracking example",
+    ],
+    promoIdea: "Create Instagram Reel: '5 Goals That Will Change Your 2026' with planner in background.",
+  },
+  {
+    id: "kids-learning-pack",
+    title: "Kids Learning Activity Pack",
+    slug: "kids-learning",
+    nicheName: "Educational Printables",
+    category: "Kids & Education",
+    whyHot: "Parents constantly search for educational activities. Evergreen demand, especially homeschool market. Easy to create bundles.",
+    plrSuggestion: {
+      id: "plr-kids",
+      name: "Content Sparks Kids Bundle",
+      description: "Educational worksheets and activities",
+      features: ["100+ worksheets", "Multiple age ranges", "Answer keys"],
+      category: "Education",
+      link: "#",
+    },
+    listingTitle: "Printable Learning Bundle for Kids | Preschool Worksheets | Educational Activities | Homeschool",
+    listingBullets: [
+      "📚 100+ pages of learning activities",
+      "🎨 Coloring, tracing, counting, and more",
+      "👶 Perfect for ages 3-7",
+      "🏠 Great for homeschool or quiet time",
+    ],
+    imageRecommendations: [
+      "Child's hand coloring a worksheet",
+      "Spread of colorful activity pages",
+      "Before/after completed worksheet",
+    ],
+    promoIdea: "Join Facebook homeschool groups and share free sample page with link to full bundle.",
+  },
+  {
+    id: "social-media-canva-pack",
+    title: "Social Media Canva Templates",
+    slug: "social-media-templates",
+    nicheName: "Social Media Marketing",
+    category: "Business",
+    whyHot: "Every small business owner needs social content. Recurring buyers as they need fresh templates. Higher price point ($15-30).",
+    plrSuggestion: {
+      id: "plr-social",
+      name: "PLR.me Social Media Kit",
+      description: "Canva templates for Instagram and Facebook",
+      features: ["200+ templates", "Stories + Posts", "Engagement graphics"],
+      category: "Marketing",
+      link: "#",
+    },
+    listingTitle: "Canva Social Media Templates | Instagram Post Bundle | Small Business Marketing Kit",
+    listingBullets: [
+      "📱 200+ fully editable Canva templates",
+      "✨ Instagram posts, stories, and reels covers",
+      "💼 Perfect for coaches, shops, and creators",
+      "🎨 Easily customize colors and fonts",
+    ],
+    imageRecommendations: [
+      "Phone mockup showing Instagram grid",
+      "Laptop with Canva editor open",
+      "Before/after customization example",
+    ],
+    promoIdea: "Share a free 'Content Calendar' PDF on your email list, upsell the full template pack.",
+  },
+  {
+    id: "self-care-journal-pack",
+    title: "Self-Care Journal Bundle",
+    slug: "self-care-journal",
+    nicheName: "Wellness & Self-Care",
+    category: "Health & Wellness",
+    whyHot: "Mental wellness is a growing market. Appeals to broad audience. Great for bundles and subscriptions.",
+    plrSuggestion: {
+      id: "plr-selfcare",
+      name: "IDPLR Wellness Journal",
+      description: "Self-care and mindfulness journal templates",
+      features: ["Gratitude pages", "Mood trackers", "Affirmations"],
+      category: "Wellness",
+      link: "#",
+    },
+    listingTitle: "Self-Care Journal Bundle | Mental Health Planner | Gratitude Diary | Mindfulness Tracker",
+    listingBullets: [
+      "💜 Complete self-care planning system",
+      "🧘 Gratitude, mood tracking, and affirmations",
+      "📖 Perfect for daily mindfulness practice",
+      "✨ Beautiful minimal aesthetic design",
+    ],
+    imageRecommendations: [
+      "Cozy setup with candle and journal",
+      "Gratitude page with handwritten example",
+      "Full spread showing different sections",
+    ],
+    promoIdea: "Create Pinterest board 'Self-Care Ideas' and pin journal pages as examples.",
+  },
+];
+
+// 60-Minute Launch Recipes
+export const getLaunchRecipe = (nicheId: string): LaunchRecipe[] => {
+  return [
+    {
+      step: 1,
+      title: "Grab Your PLR Base",
+      description: "Choose a PLR product from our recommended sources. Look for one with editable files (Canva or Word format preferred).",
+      timeEstimate: "5 min",
+    },
+    {
+      step: 2,
+      title: "Customize 3 Key Elements",
+      description: "Change the cover design, update fonts/colors to match your brand, and add your logo or watermark.",
+      timeEstimate: "15 min",
+    },
+    {
+      step: 3,
+      title: "Create Listing Images",
+      description: "Make 5 mockup images: cover shot, page spread, device mockup, feature callout, and lifestyle shot.",
+      timeEstimate: "15 min",
+    },
+    {
+      step: 4,
+      title: "Write Your Listing",
+      description: "Use our title template and bullet points. Focus on benefits (save time, get organized) not features.",
+      timeEstimate: "10 min",
+    },
+    {
+      step: 5,
+      title: "Set Price & Publish",
+      description: "Price between the suggested range. Start slightly lower for first sales/reviews, then increase.",
+      timeEstimate: "5 min",
+    },
+    {
+      step: 6,
+      title: "Quick Promo Boost",
+      description: "Pin one image to Pinterest, share in one relevant Facebook group, or post to your Instagram.",
+      timeEstimate: "10 min",
+    },
+  ];
+};
+
+// 1-Product Store Blueprint
+export const getStoreBlueprint = (nicheId: string): StoreBlueprint => {
+  const niche = nicheSnapshots.find(n => n.id === nicheId);
+  const nicheName = niche?.name || "Digital Product";
+  
+  return {
+    heroHeadline: `Get Your ${nicheName} Instantly – Download & Start Today`,
+    sections: [
+      { name: "Hero", description: "Bold headline + product mockup + 'Get Instant Access' CTA button" },
+      { name: "Benefits", description: "3-4 benefit cards with icons: Save Time, Easy to Use, Instant Download, etc." },
+      { name: "What's Inside", description: "Preview of pages/content with feature callouts" },
+      { name: "Testimonials", description: "3 customer quotes with star ratings (placeholder ready)" },
+      { name: "FAQ", description: "5 common questions: file format, how to download, refund policy, etc." },
+      { name: "Final CTA", description: "Urgency message + price + download button" },
+    ],
+    recommendedPlatform: niche?.platform === "Etsy" ? "Shopify or Gumroad for higher margins" : "Shopify for brand building, Gumroad for simplicity",
+    ctaSuggestion: "Get Instant Access – Only $X",
+  };
 };

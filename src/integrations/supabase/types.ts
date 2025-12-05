@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      launch_packs: {
+        Row: {
+          category: string
+          created_at: string | null
+          id: string
+          image_recommendations: string[]
+          is_active: boolean | null
+          listing_bullets: string[]
+          listing_title: string
+          niche_name: string
+          plr_suggestion: Json
+          promo_idea: string
+          slug: string
+          title: string
+          why_hot: string
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          id?: string
+          image_recommendations: string[]
+          is_active?: boolean | null
+          listing_bullets: string[]
+          listing_title: string
+          niche_name: string
+          plr_suggestion: Json
+          promo_idea: string
+          slug: string
+          title: string
+          why_hot: string
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          id?: string
+          image_recommendations?: string[]
+          is_active?: boolean | null
+          listing_bullets?: string[]
+          listing_title?: string
+          niche_name?: string
+          plr_suggestion?: Json
+          promo_idea?: string
+          slug?: string
+          title?: string
+          why_hot?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -22,7 +70,10 @@ export type Database = {
           id: string
           pack_uses_reset_at: string | null
           pack_uses_today: number | null
+          searches_today: number | null
           updated_at: string | null
+          usage_reset_at: string | null
+          views_today: number | null
         }
         Insert: {
           created_at?: string | null
@@ -31,7 +82,10 @@ export type Database = {
           id: string
           pack_uses_reset_at?: string | null
           pack_uses_today?: number | null
+          searches_today?: number | null
           updated_at?: string | null
+          usage_reset_at?: string | null
+          views_today?: number | null
         }
         Update: {
           created_at?: string | null
@@ -40,7 +94,10 @@ export type Database = {
           id?: string
           pack_uses_reset_at?: string | null
           pack_uses_today?: number | null
+          searches_today?: number | null
           updated_at?: string | null
+          usage_reset_at?: string | null
+          views_today?: number | null
         }
         Relationships: []
       }
@@ -94,6 +151,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_and_reset_daily_limits: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
       get_saved_niche_count: { Args: { _user_id: string }; Returns: number }
       has_role: {
         Args: {
@@ -102,6 +163,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_search_count: { Args: { p_user_id: string }; Returns: Json }
+      increment_view_count: { Args: { p_user_id: string }; Returns: Json }
     }
     Enums: {
       app_role: "free" | "pro"

@@ -60,3 +60,32 @@ export interface TrendingTopic {
   momentum: MomentumDirection;
   category: string;
 }
+
+// New types for Free vs Pro features
+export interface LaunchPack {
+  id: string;
+  title: string;
+  slug: string;
+  nicheName: string;
+  category: string;
+  whyHot: string;
+  plrSuggestion: PLRSource;
+  listingTitle: string;
+  listingBullets: string[];
+  imageRecommendations: string[];
+  promoIdea: string;
+}
+
+export interface LaunchRecipe {
+  step: number;
+  title: string;
+  description: string;
+  timeEstimate: string;
+}
+
+export interface StoreBlueprint {
+  heroHeadline: string;
+  sections: Array<{ name: string; description: string }>;
+  recommendedPlatform: string;
+  ctaSuggestion: string;
+}
