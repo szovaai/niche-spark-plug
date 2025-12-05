@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Zap, Star, LogOut, User } from "lucide-react";
+import { Zap, Star, LogOut, User, Package, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -8,6 +8,7 @@ const Navbar = () => {
   const { user, signOut, role } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const isPro = role === "pro";
 
   const handleSignOut = async () => {
     await signOut();
@@ -44,6 +45,16 @@ const Navbar = () => {
             >
               Discover
             </button>
+            <button
+              onClick={() => navigate("/launch-packs")}
+              className={`text-sm transition-colors flex items-center gap-1 ${
+                isActive("/launch-packs") ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Package className="w-4 h-4" />
+              Launch Packs
+              {!isPro && <Crown className="w-3 h-3 text-accent" />}
+            </button>
             {user && (
               <button
                 onClick={() => navigate("/saved")}
@@ -61,9 +72,10 @@ const Navbar = () => {
           <div className="flex items-center gap-3">
             {user ? (
               <>
-                {role === "pro" && (
-                  <span className="hidden md:inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full">
-                    ✨ Pro
+                {isPro && (
+                  <span className="hidden md:inline-flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-primary/20 to-accent/20 text-accent text-xs font-medium rounded-full">
+                    <Crown className="w-3 h-3" />
+                    Pro
                   </span>
                 )}
                 <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
