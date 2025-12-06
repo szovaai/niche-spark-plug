@@ -1,8 +1,15 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Sparkles, Clock, Play } from "lucide-react";
+import { Search, Sparkles, Clock, Play, ArrowUpDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import Navbar from "@/components/Navbar";
 import TrendingFeed from "@/components/TrendingFeed";
 import NicheSnapshotCard from "@/components/NicheSnapshotCard";
@@ -37,6 +44,7 @@ const Discover = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [fastCashOnly, setFastCashOnly] = useState(false);
+  const [sortBy, setSortBy] = useState<"relevance" | "xls-high" | "xls-low">("relevance");
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showDemoModal, setShowDemoModal] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState("");
@@ -76,6 +84,13 @@ const Discover = () => {
   // Apply Fast Cash filter (Pro only)
   if (fastCashOnly && role === "pro") {
     filteredNiches = filteredNiches.filter(isFastCashNiche);
+  }
+
+  // Apply sorting
+  if (sortBy === "xls-high") {
+    filteredNiches = [...filteredNiches].sort((a, b) => b.launchabilityScore - a.launchabilityScore);
+  } else if (sortBy === "xls-low") {
+    filteredNiches = [...filteredNiches].sort((a, b) => a.launchabilityScore - b.launchabilityScore);
   }
 
   const recentlyViewed = savedNiches.slice(0, 3);
@@ -176,14 +191,27 @@ const Discover = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content - Niches */}
             <div className="lg:col-span-2">
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
                 <h2 className="text-xl font-bold flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-primary" />
                   {searchQuery ? "Search Results" : fastCashOnly ? "Fast-Launch Niches" : "Top Niches"}
                 </h2>
-                <span className="text-sm text-muted-foreground">
-                  {filteredNiches.length} niches found
-                </span>
+                <div className="flex items-center gap-3">
+                  <Select value={sortBy} onValueChange={(value: "relevance" | "xls-high" | "xls-low") => setSortBy(value)}>
+                    <SelectTrigger className="w-[180px] bg-card border-border/50">
+                      <ArrowUpDown className="w-4 h-4 mr-2 text-muted-foreground" />
+                      <SelectValue placeholder="Sort by..." />
+                    </SelectTrigger>
+                    <SelectContent className="bg-card border-border">
+                      <SelectItem value="relevance">Relevance</SelectItem>
+                      <SelectItem value="xls-high">XLS: High → Low</SelectItem>
+                      <SelectItem value="xls-low">XLS: Low → High</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">
+                    {filteredNiches.length} niches
+                  </span>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
