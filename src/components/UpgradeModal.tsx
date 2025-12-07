@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Check, Crown, Zap, Star, Sparkles, Clock, Users } from "lucide-react";
+import { X, Check, Crown, Zap, Star, Sparkles, Clock, Users, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface UpgradeModalProps {
@@ -128,7 +128,23 @@ const UpgradeModal = ({ isOpen, onClose, trigger }: UpgradeModalProps) => {
                 🔒 Lock In $17/mo Forever
               </Button>
 
-              <p className="text-xs text-center text-muted-foreground mt-4">
+              {/* Trust Badges */}
+              <div className="flex items-center justify-center gap-4 mt-4 text-xs">
+                <div className="flex items-center gap-1">
+                  <Check className="w-3.5 h-3.5 text-green-500" />
+                  <span className="text-muted-foreground">Cancel anytime</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Check className="w-3.5 h-3.5 text-green-500" />
+                  <span className="text-muted-foreground">Unlimited exports</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Lock className="w-3.5 h-3.5 text-green-500" />
+                  <span className="text-muted-foreground">Secure checkout</span>
+                </div>
+              </div>
+
+              <p className="text-xs text-center text-muted-foreground mt-3">
                 30-day "First Launch" guarantee. Get a refund if you can't launch.
               </p>
             </div>

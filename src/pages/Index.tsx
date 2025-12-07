@@ -9,7 +9,7 @@ import DemoModeModal from "@/components/DemoModeModal";
 import OnboardingWizard from "@/components/OnboardingWizard";
 import { trendingTopics, nicheSnapshots } from "@/data/mockNiches";
 import { motion } from "framer-motion";
-import { Sparkles, ArrowRight, Shield, Zap, BarChart3, Play } from "lucide-react";
+import { Sparkles, ArrowRight, Shield, Zap, BarChart3, Play, Check, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useOnboarding } from "@/hooks/useOnboarding";
 
@@ -78,6 +78,22 @@ const Index = () => {
             <Button variant="hero" size="lg" onClick={() => navigate("/discover")}>
               Explore All Niches <ArrowRight className="w-5 h-5" />
             </Button>
+            
+            {/* Trust Badges */}
+            <div className="flex items-center justify-center gap-6 mt-6 text-sm">
+              <div className="flex items-center gap-1.5">
+                <Check className="w-4 h-4 text-green-500" />
+                <span className="text-muted-foreground">Cancel anytime</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Check className="w-4 h-4 text-green-500" />
+                <span className="text-muted-foreground">Unlimited exports</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Lock className="w-4 h-4 text-green-500" />
+                <span className="text-muted-foreground">Secure checkout</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
