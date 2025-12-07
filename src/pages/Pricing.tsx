@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Crown, Shield, Zap, Sparkles, Users, ArrowRight } from "lucide-react";
+import { Crown, Shield, Zap, Sparkles, Users, ArrowRight, Check, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Navbar from "@/components/Navbar";
@@ -197,10 +197,26 @@ const Pricing = () => {
                   {isPro ? "You're on Pro!" : "Lock In $17/mo Forever"}
                   {!isPro && <ArrowRight className="w-4 h-4 ml-2" />}
                 </Button>
+
+                {/* Trust Badges - Green Checkmarks */}
+                <div className="flex items-center justify-center gap-4 mt-4 text-sm">
+                  <div className="flex items-center gap-1.5">
+                    <Check className="w-4 h-4 text-green-500" />
+                    <span className="text-muted-foreground">Cancel anytime</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Check className="w-4 h-4 text-green-500" />
+                    <span className="text-muted-foreground">Unlimited exports</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Lock className="w-4 h-4 text-green-500" />
+                    <span className="text-muted-foreground">Secure checkout</span>
+                  </div>
+                </div>
               </motion.div>
             </div>
 
-            {/* Trust Badges */}
+            {/* Secondary Trust Badges */}
             <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground mb-16">
               <div className="flex items-center gap-2">
                 <Shield className="w-4 h-4 text-green-400" />
@@ -209,10 +225,6 @@ const Pricing = () => {
               <div className="flex items-center gap-2">
                 <Users className="w-4 h-4 text-primary" />
                 147/200 founder spots claimed
-              </div>
-              <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-accent" />
-                Cancel anytime
               </div>
             </div>
           </motion.div>
