@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Zap, Star, LogOut, User, Package, Crown } from "lucide-react";
+import { Zap, Star, LogOut, User, Package, Crown, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -54,6 +54,15 @@ const Navbar = () => {
               <Package className="w-4 h-4" />
               Launch Packs
               {!isPro && <Crown className="w-3 h-3 text-accent" />}
+            </button>
+            <button
+              onClick={() => navigate("/pricing")}
+              className={`text-sm transition-colors flex items-center gap-1 ${
+                isActive("/pricing") ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <DollarSign className="w-4 h-4" />
+              Pricing
             </button>
             {user && (
               <button
