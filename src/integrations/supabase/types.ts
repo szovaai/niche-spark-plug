@@ -92,6 +92,51 @@ export type Database = {
         }
         Relationships: []
       }
+      niche_blueprint_usage: {
+        Row: {
+          blueprint_hash: string
+          created_at: string
+          id: string
+          niche_id: string
+          niche_name: string
+          price_tier: string
+          product_name: string | null
+          product_type: string
+          style_vibe: string
+          target_audience: string
+          transformation_focus: string
+          user_id: string
+        }
+        Insert: {
+          blueprint_hash: string
+          created_at?: string
+          id?: string
+          niche_id: string
+          niche_name: string
+          price_tier: string
+          product_name?: string | null
+          product_type: string
+          style_vibe: string
+          target_audience: string
+          transformation_focus: string
+          user_id: string
+        }
+        Update: {
+          blueprint_hash?: string
+          created_at?: string
+          id?: string
+          niche_id?: string
+          niche_name?: string
+          price_tier?: string
+          product_name?: string | null
+          product_type?: string
+          style_vibe?: string
+          target_audience?: string
+          transformation_focus?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -199,6 +244,19 @@ export type Database = {
       check_and_reset_daily_limits: {
         Args: { p_user_id: string }
         Returns: Json
+      }
+      check_blueprint_uniqueness: {
+        Args: {
+          p_niche_id: string
+          p_style_vibe: string
+          p_target_audience: string
+          p_transformation_focus: string
+        }
+        Returns: number
+      }
+      get_niche_blueprint_count: {
+        Args: { p_niche_id: string }
+        Returns: number
       }
       get_saved_niche_count: { Args: { _user_id: string }; Returns: number }
       has_role: {

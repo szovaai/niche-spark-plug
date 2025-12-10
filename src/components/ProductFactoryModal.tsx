@@ -3,11 +3,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Sparkles, Loader2, ArrowLeft, Image, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductBlueprint, ProductType, NicheSnapshot, PRODUCT_TYPES } from "@/types/niche";
+import { PersonalizationData } from "@/types/personalization";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ProductTypeCard from "./ProductTypeCard";
 import BlueprintDisplay from "./BlueprintDisplay";
 import EcoverFactory from "./EcoverFactory";
+import PersonalizationStep from "./PersonalizationStep";
 
 interface ProductFactoryModalProps {
   isOpen: boolean;
@@ -15,23 +17,29 @@ interface ProductFactoryModalProps {
   niche: NicheSnapshot;
 }
 
-type Step = "select" | "generating" | "result";
+type Step = "select" | "personalize" | "generating" | "result";
 type ResultTab = "blueprint" | "ecovers";
 
 const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProps) => {
   const [step, setStep] = useState<Step>("select");
   const [resultTab, setResultTab] = useState<ResultTab>("blueprint");
   const [selectedType, setSelectedType] = useState<ProductType | null>(null);
+  const [personalization, setPersonalization] = useState<PersonalizationData | null>(null);
   const [loading, setLoading] = useState(false);
   const [blueprint, setBlueprint] = useState<ProductBlueprint | null>(null);
 
-  const handleTypeSelect = async (type: ProductType) => {
+  const handleTypeSelect = (type: ProductType) => {
     setSelectedType(type);
-    setStep("generating");
-    await generateBlueprint(type);
+    setStep("personalize");
   };
 
-  const generateBlueprint = async (type: ProductType) => {
+  const handlePersonalizationComplete = async (data: PersonalizationData) => {
+    setPersonalization(data);
+    setStep("generating");
+    await generateBlueprint(selectedType!, data);
+  };
+
+  const generateBlueprint = async (type: ProductType, personalizationData: PersonalizationData) => {
     setLoading(true);
     setBlueprint(null);
 
@@ -43,6 +51,7 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
           demandTier: niche.demandTier,
           competitionTier: niche.competitionTier,
           productType: type,
+          personalization: personalizationData,
         },
       });
 
@@ -58,7 +67,7 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
         } else {
           toast.error(data.error);
         }
-        setStep("select");
+        setStep("personalize");
         return;
       }
 
@@ -67,35 +76,65 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
     } catch (error) {
       console.error("Error generating blueprint:", error);
       toast.error("Failed to generate product blueprint. Please try again.");
-      setStep("select");
+      setStep("personalize");
     } finally {
       setLoading(false);
     }
   };
 
   const handleRegenerate = () => {
-    if (selectedType) {
+    if (selectedType && personalization) {
       setStep("generating");
-      generateBlueprint(selectedType);
+      generateBlueprint(selectedType, personalization);
     }
   };
 
   const handleBack = () => {
-    setStep("select");
-    setResultTab("blueprint");
-    setBlueprint(null);
-    setSelectedType(null);
+    if (step === "personalize") {
+      setStep("select");
+      setSelectedType(null);
+    } else if (step === "result") {
+      setStep("personalize");
+      setResultTab("blueprint");
+      setBlueprint(null);
+    }
   };
 
   const handleClose = () => {
     onClose();
-    // Reset state after animation
     setTimeout(() => {
       setStep("select");
       setResultTab("blueprint");
       setBlueprint(null);
       setSelectedType(null);
+      setPersonalization(null);
     }, 300);
+  };
+
+  const getStepTitle = () => {
+    switch (step) {
+      case "select":
+        return "Turn Into Product";
+      case "personalize":
+        return "Personalize Your Product";
+      case "generating":
+        return "AI Product Factory";
+      case "result":
+        return "AI Product Factory";
+    }
+  };
+
+  const getStepSubtitle = () => {
+    switch (step) {
+      case "select":
+        return `Choose a product type for "${niche.name}"`;
+      case "personalize":
+        return `Customize your ${selectedType} to stand out`;
+      case "generating":
+        return `Creating your personalized ${selectedType}...`;
+      case "result":
+        return `${selectedType} for "${niche.name}"`;
+    }
   };
 
   return (
@@ -122,7 +161,7 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
               {/* Header */}
               <div className="sticky top-0 bg-card border-b border-border px-6 py-4 flex items-center justify-between z-10">
                 <div className="flex items-center gap-3">
-                  {step === "result" && (
+                  {(step === "personalize" || step === "result") && (
                     <button onClick={handleBack} className="p-2 hover:bg-secondary rounded-lg transition-colors">
                       <ArrowLeft className="w-4 h-4" />
                     </button>
@@ -130,13 +169,9 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
                   <div>
                     <h2 className="text-xl font-bold gradient-text flex items-center gap-2">
                       <Sparkles className="w-5 h-5 text-primary" />
-                      {step === "select" ? "Turn Into Product" : "AI Product Factory"}
+                      {getStepTitle()}
                     </h2>
-                    <p className="text-sm text-muted-foreground mt-0.5">
-                      {step === "select" && `Choose a product type for "${niche.name}"`}
-                      {step === "generating" && `Creating your ${selectedType} blueprint...`}
-                      {step === "result" && `${selectedType} for "${niche.name}"`}
-                    </p>
+                    <p className="text-sm text-muted-foreground mt-0.5">{getStepSubtitle()}</p>
                   </div>
                 </div>
                 <button onClick={handleClose} className="p-2 hover:bg-secondary rounded-lg transition-colors">
@@ -167,25 +202,33 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
                     <div className="p-4 rounded-xl bg-secondary/50 border border-border">
                       <p className="text-sm text-muted-foreground text-center">
                         <Sparkles className="w-4 h-4 inline mr-1 text-primary" />
-                        AI generates page-by-page content with Human Tone Engine™ for natural, conversational copy.
+                        Next: Personalize your product to make it unique and stand out from competitors.
                       </p>
                     </div>
                   </div>
+                )}
+
+                {/* Step: Personalization */}
+                {step === "personalize" && selectedType && (
+                  <PersonalizationStep
+                    onComplete={handlePersonalizationComplete}
+                    onBack={handleBack}
+                  />
                 )}
 
                 {/* Step: Generating */}
                 {step === "generating" && (
                   <div className="text-center py-16">
                     <Loader2 className="w-12 h-12 mx-auto mb-4 text-primary animate-spin" />
-                    <h3 className="text-lg font-semibold mb-2">Creating Your {selectedType}</h3>
+                    <h3 className="text-lg font-semibold mb-2">Creating Your Unique {selectedType}</h3>
                     <p className="text-muted-foreground max-w-md mx-auto">
-                      AI is generating page-by-page content, style guide, and marketing copy with the Human Tone Engine™...
+                      AI is generating personalized content for {personalization?.targetAudience} focused on {personalization?.transformationFocus}...
                     </p>
                     <div className="mt-6 space-y-2 text-sm text-muted-foreground">
-                      <p className="animate-pulse">✓ Analyzing niche trends</p>
-                      <p className="animate-pulse" style={{ animationDelay: "0.5s" }}>✓ Generating content pages</p>
-                      <p className="animate-pulse" style={{ animationDelay: "1s" }}>✓ Creating style guide</p>
-                      <p className="animate-pulse" style={{ animationDelay: "1.5s" }}>✓ Writing marketing copy</p>
+                      <p className="animate-pulse">✓ Analyzing your personalization choices</p>
+                      <p className="animate-pulse" style={{ animationDelay: "0.5s" }}>✓ Crafting unique content for {personalization?.targetAudience}</p>
+                      <p className="animate-pulse" style={{ animationDelay: "1s" }}>✓ Applying {personalization?.styleVibe} aesthetic</p>
+                      <p className="animate-pulse" style={{ animationDelay: "1.5s" }}>✓ Writing marketing copy with Human Tone™</p>
                     </div>
                   </div>
                 )}
@@ -193,6 +236,27 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
                 {/* Step: Result */}
                 {step === "result" && blueprint && (
                   <div className="space-y-6">
+                    {/* Personalization Summary */}
+                    {personalization && (
+                      <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+                        <p className="text-xs text-muted-foreground mb-1">Product DNA:</p>
+                        <div className="flex flex-wrap gap-2">
+                          <span className="text-xs px-2 py-1 rounded-full bg-primary/20 text-primary">
+                            👤 {personalization.targetAudience}
+                          </span>
+                          <span className="text-xs px-2 py-1 rounded-full bg-accent/20 text-accent">
+                            ✨ {personalization.transformationFocus}
+                          </span>
+                          <span className="text-xs px-2 py-1 rounded-full bg-secondary text-foreground">
+                            🎨 {personalization.styleVibe}
+                          </span>
+                          <span className="text-xs px-2 py-1 rounded-full bg-secondary text-foreground">
+                            💰 {personalization.priceTier}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Tab Switcher */}
                     <div className="flex gap-2 p-1 bg-secondary/50 rounded-lg">
                       <button
