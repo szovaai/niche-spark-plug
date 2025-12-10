@@ -1,1 +1,10 @@
 project_id = "kzrnodhfrryimxnbesov"
+
+[functions.build-pack]
+verify_jwt = true
+
+[functions.generate-store-blueprint]
+verify_jwt = true
+
+[functions.generate-product-blueprint]
+verify_jwt = true

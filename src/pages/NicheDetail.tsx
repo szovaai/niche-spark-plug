@@ -2,12 +2,11 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { 
-  ArrowLeft, Star, ShoppingBag, ExternalLink, Lock, Crown, Store, Zap, Flame, Sparkles
+  ArrowLeft, Star, ShoppingBag, ExternalLink, Lock, Crown, Store, Zap, Flame, Sparkles, Rocket
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import BlurOverlay from "@/components/BlurOverlay";
-import BuildPackModal from "@/components/BuildPackModal";
 import UpgradeModal from "@/components/UpgradeModal";
 import LaunchRecipeSection from "@/components/LaunchRecipeSection";
 import StoreBlueprintModal from "@/components/StoreBlueprintModal";
@@ -16,6 +15,7 @@ import LaunchabilityScoreBadge from "@/components/LaunchabilityScoreBadge";
 import MicroSignalsBadges from "@/components/MicroSignalsBadges";
 import LaunchTimelineBar from "@/components/LaunchTimelineBar";
 import FirstTimeTooltip, { TOOLTIP_CONTENT } from "@/components/FirstTimeTooltip";
+import ProductFactoryModal from "@/components/ProductFactoryModal";
 import { nicheSnapshots, getProductPatterns, getKeywordIdeas, getPLRSources, getLaunchRecipe, getStoreBlueprint } from "@/data/mockNiches";
 import { useAuth } from "@/hooks/useAuth";
 import { useSavedNiches } from "@/hooks/useSavedNiches";
@@ -26,7 +26,7 @@ const NicheDetail = () => {
   const navigate = useNavigate();
   const { user, role, canViewNiche, incrementView } = useAuth();
   const { isNicheSaved, saveNiche, unsaveNiche } = useSavedNiches();
-  const [showPackModal, setShowPackModal] = useState(false);
+  const [showProductFactoryModal, setShowProductFactoryModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showBlueprintModal, setShowBlueprintModal] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState("");
@@ -90,16 +90,16 @@ const NicheDetail = () => {
     setShowUpgradeModal(true);
   };
 
-  const handleBuildPackClick = () => {
+  const handleProductFactoryClick = () => {
     if (!user) {
       navigate("/auth");
       return;
     }
     if (!isPro) {
-      handleUpgradeClick("Build My Product Pack is a Pro feature. Get AI-powered product recommendations!");
+      handleUpgradeClick("AI Product Factory is a Pro feature. Turn any niche into a complete product blueprint!");
       return;
     }
-    setShowPackModal(true);
+    setShowProductFactoryModal(true);
   };
 
   const handleStoreBlueprintClick = () => {
@@ -429,16 +429,16 @@ const NicheDetail = () => {
             transition={{ delay: 0.4 }}
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
-            {/* Build My Product Pack */}
+            {/* Turn Into Product - Primary CTA */}
             <Button
               variant="hero"
               size="xl"
-              onClick={handleBuildPackClick}
+              onClick={handleProductFactoryClick}
               className="dual-glow"
             >
               {!isPro && <Crown className="w-5 h-5" />}
-              <Sparkles className="w-5 h-5" />
-              Build My Product Pack
+              <Rocket className="w-5 h-5" />
+              ✨ Turn Into Product
             </Button>
 
             {/* 1-Product Store Blueprint */}
@@ -457,9 +457,9 @@ const NicheDetail = () => {
       </main>
 
       {/* Modals */}
-      <BuildPackModal
-        isOpen={showPackModal}
-        onClose={() => setShowPackModal(false)}
+      <ProductFactoryModal
+        isOpen={showProductFactoryModal}
+        onClose={() => setShowProductFactoryModal(false)}
         niche={niche}
       />
 
