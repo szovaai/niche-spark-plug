@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sparkles, Loader2, ArrowLeft } from "lucide-react";
+import { X, Sparkles, Loader2, ArrowLeft, Image, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductBlueprint, ProductType, NicheSnapshot, PRODUCT_TYPES } from "@/types/niche";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ProductTypeCard from "./ProductTypeCard";
 import BlueprintDisplay from "./BlueprintDisplay";
+import EcoverFactory from "./EcoverFactory";
 
 interface ProductFactoryModalProps {
   isOpen: boolean;
@@ -15,9 +16,11 @@ interface ProductFactoryModalProps {
 }
 
 type Step = "select" | "generating" | "result";
+type ResultTab = "blueprint" | "ecovers";
 
 const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProps) => {
   const [step, setStep] = useState<Step>("select");
+  const [resultTab, setResultTab] = useState<ResultTab>("blueprint");
   const [selectedType, setSelectedType] = useState<ProductType | null>(null);
   const [loading, setLoading] = useState(false);
   const [blueprint, setBlueprint] = useState<ProductBlueprint | null>(null);
@@ -79,6 +82,7 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
 
   const handleBack = () => {
     setStep("select");
+    setResultTab("blueprint");
     setBlueprint(null);
     setSelectedType(null);
   };
@@ -88,6 +92,7 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
     // Reset state after animation
     setTimeout(() => {
       setStep("select");
+      setResultTab("blueprint");
       setBlueprint(null);
       setSelectedType(null);
     }, 300);
@@ -187,11 +192,46 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
 
                 {/* Step: Result */}
                 {step === "result" && blueprint && (
-                  <BlueprintDisplay 
-                    blueprint={blueprint} 
-                    onRegenerate={handleRegenerate}
-                    loading={loading}
-                  />
+                  <div className="space-y-6">
+                    {/* Tab Switcher */}
+                    <div className="flex gap-2 p-1 bg-secondary/50 rounded-lg">
+                      <button
+                        onClick={() => setResultTab("blueprint")}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+                          resultTab === "blueprint"
+                            ? "bg-card text-foreground shadow-sm"
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        <FileText className="w-4 h-4" />
+                        Blueprint
+                      </button>
+                      <button
+                        onClick={() => setResultTab("ecovers")}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+                          resultTab === "ecovers"
+                            ? "bg-card text-foreground shadow-sm"
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        <Image className="w-4 h-4" />
+                        Ecovers & Promos
+                      </button>
+                    </div>
+
+                    {/* Tab Content */}
+                    {resultTab === "blueprint" && (
+                      <BlueprintDisplay 
+                        blueprint={blueprint} 
+                        onRegenerate={handleRegenerate}
+                        loading={loading}
+                      />
+                    )}
+
+                    {resultTab === "ecovers" && (
+                      <EcoverFactory blueprint={blueprint} />
+                    )}
+                  </div>
                 )}
               </div>
             </div>
