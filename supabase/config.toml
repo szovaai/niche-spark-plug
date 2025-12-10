@@ -8,3 +8,6 @@ verify_jwt = true
 
 [functions.generate-product-blueprint]
 verify_jwt = true
+
+[functions.generate-ecover]
+verify_jwt = true
