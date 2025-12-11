@@ -12,6 +12,7 @@ import Saved from "./pages/Saved";
 import LaunchPacks from "./pages/LaunchPacks";
 import Pricing from "./pages/Pricing";
 import MyProducts from "./pages/MyProducts";
+import MoneyMap from "./pages/MoneyMap";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/launch-packs" element={<LaunchPacks />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/my-products" element={<MyProducts />} />
+            <Route path="/money-map" element={<MoneyMap />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
