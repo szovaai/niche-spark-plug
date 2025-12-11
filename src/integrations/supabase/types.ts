@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      community_wins: {
+        Row: {
+          created_at: string
+          display_name: string
+          id: string
+          is_public: boolean
+          niche_name: string | null
+          platform: string | null
+          product_name: string
+          user_id: string
+          win_type: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          id?: string
+          is_public?: boolean
+          niche_name?: string | null
+          platform?: string | null
+          product_name: string
+          user_id: string
+          win_type?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          id?: string
+          is_public?: boolean
+          niche_name?: string | null
+          platform?: string | null
+          product_name?: string
+          user_id?: string
+          win_type?: string
+        }
+        Relationships: []
+      }
       daily_inspiration: {
         Row: {
           category: string | null
@@ -233,12 +269,15 @@ export type Database = {
           display_name: string | null
           email: string | null
           id: string
+          last_activity_date: string | null
           onboarding_completed: boolean | null
           pack_uses_reset_at: string | null
           pack_uses_today: number | null
           preferred_platform: string | null
           product_interests: string[] | null
+          products_launched: number | null
           searches_today: number | null
+          streak_days: number | null
           tooltips_seen: string[] | null
           updated_at: string | null
           usage_reset_at: string | null
@@ -249,12 +288,15 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id: string
+          last_activity_date?: string | null
           onboarding_completed?: boolean | null
           pack_uses_reset_at?: string | null
           pack_uses_today?: number | null
           preferred_platform?: string | null
           product_interests?: string[] | null
+          products_launched?: number | null
           searches_today?: number | null
+          streak_days?: number | null
           tooltips_seen?: string[] | null
           updated_at?: string | null
           usage_reset_at?: string | null
@@ -265,16 +307,52 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id?: string
+          last_activity_date?: string | null
           onboarding_completed?: boolean | null
           pack_uses_reset_at?: string | null
           pack_uses_today?: number | null
           preferred_platform?: string | null
           product_interests?: string[] | null
+          products_launched?: number | null
           searches_today?: number | null
+          streak_days?: number | null
           tooltips_seen?: string[] | null
           updated_at?: string | null
           usage_reset_at?: string | null
           views_today?: number | null
+        }
+        Relationships: []
+      }
+      revenue_goals: {
+        Row: {
+          created_at: string
+          current_amount: number
+          deadline: string | null
+          goal_amount: number
+          id: string
+          is_active: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_amount?: number
+          deadline?: string | null
+          goal_amount?: number
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_amount?: number
+          deadline?: string | null
+          goal_amount?: number
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -304,6 +382,36 @@ export type Database = {
           niche_id?: string
           niche_name?: string
           notes?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_description: string | null
+          achievement_id: string
+          achievement_name: string
+          earned_at: string
+          icon: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          achievement_description?: string | null
+          achievement_id: string
+          achievement_name: string
+          earned_at?: string
+          icon?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          achievement_description?: string | null
+          achievement_id?: string
+          achievement_name?: string
+          earned_at?: string
+          icon?: string | null
+          id?: string
           user_id?: string
         }
         Relationships: []
