@@ -4,12 +4,11 @@ import { motion } from "framer-motion";
 import { Star, Bell, BellOff, Trash2, ChevronRight, Lock, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import Navbar from "@/components/Navbar";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { useSavedNiches } from "@/hooks/useSavedNiches";
 import { nicheSnapshots } from "@/data/mockNiches";
 import { getXLSRating, getXLSColor } from "@/lib/launchabilityScore";
-
 const Saved = () => {
   const navigate = useNavigate();
   const { user, loading, role } = useAuth();
@@ -50,11 +49,9 @@ const Saved = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      
-      <main className="pt-24 pb-16 px-4">
-        <div className="max-w-4xl mx-auto">
+    <DashboardLayout>
+      <div className="pb-16 px-4">
+        <div className="max-w-4xl mx-auto pt-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -228,8 +225,8 @@ const Saved = () => {
             </motion.div>
           )}
         </div>
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

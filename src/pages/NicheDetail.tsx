@@ -5,7 +5,7 @@ import {
   ArrowLeft, Star, ShoppingBag, ExternalLink, Lock, Crown, Store, Zap, Flame, Sparkles, Rocket, Search, Calculator
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Navbar from "@/components/Navbar";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import BlurOverlay from "@/components/BlurOverlay";
 import UpgradeModal from "@/components/UpgradeModal";
 import LaunchRecipeSection from "@/components/LaunchRecipeSection";
@@ -115,10 +115,9 @@ const NicheDetail = () => {
   // Show limit reached state
   if (viewLimitHit) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <main className="pt-24 pb-16 px-4">
-          <div className="max-w-4xl mx-auto">
+      <DashboardLayout>
+        <div className="pb-16 px-4">
+          <div className="max-w-4xl mx-auto pt-6">
             <button
               onClick={() => navigate(-1)}
               className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
@@ -139,22 +138,20 @@ const NicheDetail = () => {
               </Button>
             </div>
           </div>
-        </main>
+        </div>
         <UpgradeModal
           isOpen={showUpgradeModal}
           onClose={() => setShowUpgradeModal(false)}
           trigger={upgradeReason}
         />
-      </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      
-      <main className="pt-24 pb-16 px-4">
-        <div className="max-w-4xl mx-auto">
+    <DashboardLayout>
+      <div className="pb-16 px-4">
+        <div className="max-w-4xl mx-auto pt-6">
           {/* Back Button + Usage Badge */}
           <div className="flex items-center justify-between mb-6">
             <button
@@ -528,7 +525,7 @@ const NicheDetail = () => {
             </Button>
           </motion.div>
         </div>
-      </main>
+      </div>
 
       {/* Modals */}
       <ProductFactoryModal
@@ -549,7 +546,7 @@ const NicheDetail = () => {
         blueprint={storeBlueprint}
         nicheName={niche.name}
       />
-    </div>
+    </DashboardLayout>
   );
 };
 

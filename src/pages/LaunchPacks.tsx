@@ -1,24 +1,21 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Package, Crown, Sparkles } from "lucide-react";
-import Navbar from "@/components/Navbar";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import LaunchPackCard from "@/components/LaunchPackCard";
 import UpgradeModal from "@/components/UpgradeModal";
 import BlurOverlay from "@/components/BlurOverlay";
 import { launchPacks } from "@/data/mockNiches";
 import { useAuth } from "@/hooks/useAuth";
-
 const LaunchPacks = () => {
   const { user, role } = useAuth();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const isPro = role === "pro";
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      
-      <main className="pt-24 pb-16 px-4">
-        <div className="max-w-6xl mx-auto">
+    <DashboardLayout>
+      <div className="pb-16 px-4">
+        <div className="max-w-6xl mx-auto pt-6">
           {/* Hero Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -116,14 +113,14 @@ const LaunchPacks = () => {
             </motion.div>
           )}
         </div>
-      </main>
+      </div>
 
       <UpgradeModal
         isOpen={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
         trigger="Done-For-You Launch Packs are a Pro feature!"
       />
-    </div>
+    </DashboardLayout>
   );
 };
 

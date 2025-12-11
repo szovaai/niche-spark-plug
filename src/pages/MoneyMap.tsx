@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Navbar from "@/components/Navbar";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import RevenueGoalWidget from "@/components/RevenueGoalWidget";
 import SuccessWall from "@/components/SuccessWall";
 import { useAuth } from "@/hooks/useAuth";
@@ -41,11 +41,9 @@ const MoneyMap = () => {
   const currentProduct = STARTER_PRODUCTS[selectedProduct];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-
-      <main className="pt-24 pb-16 px-4">
-        <div className="max-w-4xl mx-auto">
+    <DashboardLayout>
+      <div className="pb-16 px-4">
+        <div className="max-w-4xl mx-auto pt-6">
           {/* Hero */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -388,8 +386,8 @@ const MoneyMap = () => {
             <SuccessWall />
           </motion.div>
         </div>
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 
