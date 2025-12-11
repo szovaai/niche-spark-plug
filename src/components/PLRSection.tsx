@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Package, ExternalLink, Star, Check } from "lucide-react";
+import { Package, ExternalLink, Star, Check, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import PLRUpgrader from "@/components/PLRUpgrader";
 
 const plrSources = [
   {
@@ -50,6 +52,8 @@ interface PLRSectionProps {
 }
 
 const PLRSection = ({ isVisible }: PLRSectionProps) => {
+  const [showUpgrader, setShowUpgrader] = useState(false);
+
   if (!isVisible) return null;
 
   return (
@@ -68,9 +72,19 @@ const PLRSection = ({ isVisible }: PLRSectionProps) => {
           <h2 className="text-2xl md:text-3xl font-bold mb-3">
             Get Started with Quality PLR Content
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
             These trusted platforms offer ready-to-sell digital products that match your trending niches
           </p>
+          
+          {/* PLR Upgrader Button */}
+          <Button 
+            variant="hero" 
+            onClick={() => setShowUpgrader(true)}
+            className="mb-8"
+          >
+            <Wand2 className="w-5 h-5" />
+            Upgrade Your PLR
+          </Button>
         </motion.div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -142,6 +156,12 @@ const PLRSection = ({ isVisible }: PLRSectionProps) => {
           * Some links may be affiliate links. We only recommend products we trust.
         </motion.p>
       </div>
+
+      {/* PLR Upgrader Modal */}
+      <PLRUpgrader 
+        isOpen={showUpgrader} 
+        onClose={() => setShowUpgrader(false)} 
+      />
     </section>
   );
 };
