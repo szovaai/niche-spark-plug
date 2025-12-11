@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { 
   Package, Plus, Search, Filter, Loader2, 
   Calendar, Eye, MoreVertical, Trash2, Copy,
-  CheckCircle2, Circle, Clock, AlertCircle
+  CheckCircle2, Circle, Clock, AlertCircle, Target
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductBuild } from "@/types/productBuild";
+import { PlaybookProgress } from "@/types/playbook";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -62,6 +63,7 @@ const MyProducts = () => {
         ecovers: item.ecovers,
         status: item.status,
         completion_steps: item.completion_steps,
+        playbook_progress: item.playbook_progress as PlaybookProgress | undefined,
         created_at: item.created_at,
         updated_at: item.updated_at,
       }));
@@ -276,26 +278,41 @@ const MyProducts = () => {
                           ) : (
                             <Circle className="w-3 h-3" />
                           )}
-                          {key}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+                                  {key}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
 
-                  {/* Footer */}
-                  <div className="flex items-center justify-between pt-3 border-t border-border">
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Calendar className="w-3 h-3" />
-                      {new Date(product.created_at).toLocaleDateString()}
-                    </div>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      product.status === 'complete'
-                        ? 'bg-green-500/20 text-green-400'
-                        : 'bg-yellow-500/20 text-yellow-400'
-                    }`}>
-                      {product.status === 'complete' ? '✓ Complete' : '⏳ In Progress'}
-                    </span>
-                  </div>
+                          {/* Playbook Progress */}
+                          {product.playbook_progress && (
+                            <div className="flex items-center gap-2 mb-3 p-2 rounded-lg bg-primary/5 border border-primary/20">
+                              <Target className="w-4 h-4 text-primary flex-shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-medium">
+                                  First Sale: {product.playbook_progress.completedSteps?.length || 0}/12
+                                </p>
+                              </div>
+                              {product.playbook_progress.completedAt && (
+                                <span className="text-xs text-green-400">🎉 Done</span>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Footer */}
+                          <div className="flex items-center justify-between pt-3 border-t border-border">
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Calendar className="w-3 h-3" />
+                              {new Date(product.created_at).toLocaleDateString()}
+                            </div>
+                            <span className={`text-xs px-2 py-1 rounded-full ${
+                              product.status === 'complete'
+                                ? 'bg-green-500/20 text-green-400'
+                                : 'bg-yellow-500/20 text-yellow-400'
+                            }`}>
+                              {product.status === 'complete' ? '✓ Complete' : '⏳ In Progress'}
+                            </span>
+                          </div>
                 </motion.div>
               ))}
             </div>

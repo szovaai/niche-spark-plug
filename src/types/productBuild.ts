@@ -2,6 +2,7 @@ import { ProductBlueprint } from "./niche";
 import { PersonalizationData } from "./personalization";
 import { BundleVariants } from "./bundle";
 import { LaunchKit } from "./launchKit";
+import { PlaybookProgress } from "./playbook";
 
 export interface ProductBuild {
   id: string;
@@ -36,6 +37,7 @@ export interface ProductBuild {
     bundles: boolean;
     launchKit: boolean;
   };
+  playbook_progress?: PlaybookProgress;
   
   created_at: string;
   updated_at: string;

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sparkles, Loader2, ArrowLeft, Image, FileText, Package, Rocket, Zap } from "lucide-react";
+import { X, Sparkles, Loader2, ArrowLeft, Image, FileText, Package, Rocket, Zap, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductBlueprint, ProductType, NicheSnapshot, PRODUCT_TYPES } from "@/types/niche";
 import { PersonalizationData } from "@/types/personalization";
@@ -15,6 +15,7 @@ import PersonalizationStep from "./PersonalizationStep";
 import BundleDisplay from "./BundleDisplay";
 import LaunchKitDisplay from "./LaunchKitDisplay";
 import CompleteProductWizard from "./CompleteProductWizard";
+import FirstSalePlaybook from "./FirstSalePlaybook";
 
 interface ProductFactoryModalProps {
   isOpen: boolean;
@@ -23,7 +24,7 @@ interface ProductFactoryModalProps {
 }
 
 type Step = "select" | "personalize" | "generating" | "result" | "complete-wizard";
-type ResultTab = "blueprint" | "ecovers" | "bundles" | "launchKit";
+type ResultTab = "blueprint" | "ecovers" | "bundles" | "launchKit" | "firstSale";
 
 const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProps) => {
   const [step, setStep] = useState<Step>("select");
@@ -442,6 +443,17 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
                         <Rocket className="w-4 h-4" />
                         Launch Kit
                       </button>
+                      <button
+                        onClick={() => setResultTab("firstSale")}
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-sm font-medium transition-all whitespace-nowrap ${
+                          resultTab === "firstSale"
+                            ? "bg-card text-foreground shadow-sm"
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        <Target className="w-4 h-4" />
+                        First Sale
+                      </button>
                     </div>
 
                     {/* Tab Content */}
@@ -526,6 +538,14 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
                           <LaunchKitDisplay launchKit={launchKit} />
                         )}
                       </div>
+                    )}
+
+                    {resultTab === "firstSale" && personalization && (
+                      <FirstSalePlaybook
+                        blueprint={blueprint}
+                        personalization={personalization}
+                        nicheName={niche.name}
+                      />
                     )}
                   </div>
                 )}
