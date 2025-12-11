@@ -144,17 +144,22 @@ const Discover = () => {
                   See How It Works
                 </Button>
               )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowCompetitorClone(true)}
-                className="gap-2"
+              <FirstTimeTooltip
+                tooltipId="competitor_clone"
+                content={TOOLTIP_CONTENT.competitor_clone}
+                side="bottom"
               >
-                <Copy className="w-4 h-4" />
-                Clone Competitor
-              </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowCompetitorClone(true)}
+                  className="gap-2"
+                >
+                  <Copy className="w-4 h-4" />
+                  Clone Competitor
+                </Button>
+              </FirstTimeTooltip>
             </div>
-
             {/* Usage Badge for Free users */}
             {user && role === "free" && (
               <div className="flex justify-center mb-4">

@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Package, ExternalLink, Star, Check, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PLRUpgrader from "@/components/PLRUpgrader";
+import FirstTimeTooltip, { TOOLTIP_CONTENT } from "@/components/FirstTimeTooltip";
 
 const plrSources = [
   {
@@ -77,14 +78,20 @@ const PLRSection = ({ isVisible }: PLRSectionProps) => {
           </p>
           
           {/* PLR Upgrader Button */}
-          <Button 
-            variant="hero" 
-            onClick={() => setShowUpgrader(true)}
-            className="mb-8"
+          <FirstTimeTooltip
+            tooltipId="plr_upgrader"
+            content={TOOLTIP_CONTENT.plr_upgrader}
+            side="bottom"
           >
-            <Wand2 className="w-5 h-5" />
-            Upgrade Your PLR
-          </Button>
+            <Button 
+              variant="hero" 
+              onClick={() => setShowUpgrader(true)}
+              className="mb-8"
+            >
+              <Wand2 className="w-5 h-5" />
+              Upgrade Your PLR
+            </Button>
+          </FirstTimeTooltip>
         </motion.div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
