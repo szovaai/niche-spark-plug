@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { 
-  ArrowLeft, Star, ShoppingBag, ExternalLink, Lock, Crown, Store, Zap, Flame, Sparkles, Rocket
+  ArrowLeft, Star, ShoppingBag, ExternalLink, Lock, Crown, Store, Zap, Flame, Sparkles, Rocket, Search, Calculator
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
@@ -16,6 +16,8 @@ import MicroSignalsBadges from "@/components/MicroSignalsBadges";
 import LaunchTimelineBar from "@/components/LaunchTimelineBar";
 import FirstTimeTooltip, { TOOLTIP_CONTENT } from "@/components/FirstTimeTooltip";
 import ProductFactoryModal from "@/components/ProductFactoryModal";
+import GapFinder from "@/components/GapFinder";
+import ProfitCalculator from "@/components/ProfitCalculator";
 import { nicheSnapshots, getProductPatterns, getKeywordIdeas, getPLRSources, getLaunchRecipe, getStoreBlueprint } from "@/data/mockNiches";
 import { useAuth } from "@/hooks/useAuth";
 import { useSavedNiches } from "@/hooks/useSavedNiches";
@@ -422,11 +424,71 @@ const NicheDetail = () => {
             </BlurOverlay>
           </motion.section>
 
+          {/* Profit Calculator Section */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="mb-8"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <Calculator className="w-5 h-5 text-primary" />
+                Profit Calculator
+              </h2>
+              {!isPro && (
+                <span className="flex items-center gap-1 text-xs bg-gradient-to-r from-primary/20 to-accent/20 text-accent px-2 py-1 rounded-full">
+                  <Crown className="w-3 h-3" />
+                  Pro
+                </span>
+              )}
+            </div>
+            
+            <BlurOverlay 
+              isBlurred={!isPro} 
+              message={!user ? "Sign up to calculate profits" : "Upgrade to Pro for profit insights"}
+              onAction={() => !user ? navigate("/auth") : handleUpgradeClick("Profit Calculator is a Pro feature!")}
+              actionLabel={!user ? "Sign Up" : "Upgrade"}
+            >
+              <ProfitCalculator compact />
+            </BlurOverlay>
+          </motion.section>
+
+          {/* Gap Finder Section */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mb-8"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <Search className="w-5 h-5 text-primary" />
+                Gap Finder
+              </h2>
+              {!isPro && (
+                <span className="flex items-center gap-1 text-xs bg-gradient-to-r from-primary/20 to-accent/20 text-accent px-2 py-1 rounded-full">
+                  <Crown className="w-3 h-3" />
+                  Pro
+                </span>
+              )}
+            </div>
+            
+            <BlurOverlay 
+              isBlurred={!isPro} 
+              message={!user ? "Sign up to find market gaps" : "Upgrade to Pro for gap analysis"}
+              onAction={() => !user ? navigate("/auth") : handleUpgradeClick("Gap Finder is a Pro feature!")}
+              actionLabel={!user ? "Sign Up" : "Upgrade"}
+            >
+              <GapFinder initialNiche={niche.name} />
+            </BlurOverlay>
+          </motion.section>
+
           {/* Action Buttons */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.45 }}
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
             {/* Turn Into Product - Primary CTA */}

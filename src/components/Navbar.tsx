@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Zap, Star, LogOut, User, Package, Crown, DollarSign, Boxes } from "lucide-react";
+import { Zap, Star, LogOut, User, Package, Crown, DollarSign, Boxes, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -46,15 +46,26 @@ const Navbar = () => {
               Discover
             </button>
             {user && (
-              <button
-                onClick={() => navigate("/my-products")}
-                className={`text-sm transition-colors flex items-center gap-1 ${
-                  isActive("/my-products") ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Boxes className="w-4 h-4" />
-                My Products
-              </button>
+              <>
+                <button
+                  onClick={() => navigate("/my-products")}
+                  className={`text-sm transition-colors flex items-center gap-1 ${
+                    isActive("/my-products") ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Boxes className="w-4 h-4" />
+                  My Products
+                </button>
+                <button
+                  onClick={() => navigate("/money-map")}
+                  className={`text-sm transition-colors flex items-center gap-1 ${
+                    isActive("/money-map") ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Map className="w-4 h-4" />
+                  Money Map
+                </button>
+              </>
             )}
             <button
               onClick={() => navigate("/launch-packs")}
