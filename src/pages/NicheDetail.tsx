@@ -431,18 +431,24 @@ const NicheDetail = () => {
             transition={{ delay: 0.35 }}
             className="mb-8"
           >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold flex items-center gap-2">
-                <Calculator className="w-5 h-5 text-primary" />
-                Profit Calculator
-              </h2>
-              {!isPro && (
-                <span className="flex items-center gap-1 text-xs bg-gradient-to-r from-primary/20 to-accent/20 text-accent px-2 py-1 rounded-full">
-                  <Crown className="w-3 h-3" />
-                  Pro
-                </span>
-              )}
-            </div>
+            <FirstTimeTooltip
+              tooltipId="profit_calculator"
+              content={TOOLTIP_CONTENT.profit_calculator}
+              side="right"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <Calculator className="w-5 h-5 text-primary" />
+                  Profit Calculator
+                </h2>
+                {!isPro && (
+                  <span className="flex items-center gap-1 text-xs bg-gradient-to-r from-primary/20 to-accent/20 text-accent px-2 py-1 rounded-full">
+                    <Crown className="w-3 h-3" />
+                    Pro
+                  </span>
+                )}
+              </div>
+            </FirstTimeTooltip>
             
             <BlurOverlay 
               isBlurred={!isPro} 
@@ -461,18 +467,24 @@ const NicheDetail = () => {
             transition={{ delay: 0.4 }}
             className="mb-8"
           >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold flex items-center gap-2">
-                <Search className="w-5 h-5 text-primary" />
-                Gap Finder
-              </h2>
-              {!isPro && (
-                <span className="flex items-center gap-1 text-xs bg-gradient-to-r from-primary/20 to-accent/20 text-accent px-2 py-1 rounded-full">
-                  <Crown className="w-3 h-3" />
-                  Pro
-                </span>
-              )}
-            </div>
+            <FirstTimeTooltip
+              tooltipId="gap_finder"
+              content={TOOLTIP_CONTENT.gap_finder}
+              side="right"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <Search className="w-5 h-5 text-primary" />
+                  Gap Finder
+                </h2>
+                {!isPro && (
+                  <span className="flex items-center gap-1 text-xs bg-gradient-to-r from-primary/20 to-accent/20 text-accent px-2 py-1 rounded-full">
+                    <Crown className="w-3 h-3" />
+                    Pro
+                  </span>
+                )}
+              </div>
+            </FirstTimeTooltip>
             
             <BlurOverlay 
               isBlurred={!isPro} 

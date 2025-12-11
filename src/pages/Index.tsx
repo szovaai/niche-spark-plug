@@ -8,6 +8,7 @@ import InspirationOfTheDay from "@/components/InspirationOfTheDay";
 import DemoModeModal from "@/components/DemoModeModal";
 import OnboardingWizard from "@/components/OnboardingWizard";
 import NicheWizard from "@/components/NicheWizard";
+import FirstTimeTooltip, { TOOLTIP_CONTENT } from "@/components/FirstTimeTooltip";
 import { trendingTopics, nicheSnapshots } from "@/data/mockNiches";
 import { motion } from "framer-motion";
 import { Sparkles, ArrowRight, Shield, Zap, BarChart3, Play, Check, Lock, Wand2, Map } from "lucide-react";
@@ -39,24 +40,36 @@ const Index = () => {
       <section className="py-8 px-4 border-b border-border">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => setShowNicheWizard(true)}
-              className="gap-2"
+            <FirstTimeTooltip
+              tooltipId="niche_wizard"
+              content={TOOLTIP_CONTENT.niche_wizard}
+              side="bottom"
             >
-              <Wand2 className="w-5 h-5 text-primary" />
-              Find My Perfect Niche
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => navigate("/money-map")}
-              className="gap-2"
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => setShowNicheWizard(true)}
+                className="gap-2"
+              >
+                <Wand2 className="w-5 h-5 text-primary" />
+                Find My Perfect Niche
+              </Button>
+            </FirstTimeTooltip>
+            <FirstTimeTooltip
+              tooltipId="money_map"
+              content={TOOLTIP_CONTENT.money_map}
+              side="bottom"
             >
-              <Map className="w-5 h-5 text-accent" />
-              7-Day Money Map
-            </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => navigate("/money-map")}
+                className="gap-2"
+              >
+                <Map className="w-5 h-5 text-accent" />
+                7-Day Money Map
+              </Button>
+            </FirstTimeTooltip>
           </div>
         </div>
       </section>
