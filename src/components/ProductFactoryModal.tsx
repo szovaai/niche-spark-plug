@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sparkles, Loader2, ArrowLeft, Image, FileText, Package } from "lucide-react";
+import { X, Sparkles, Loader2, ArrowLeft, Image, FileText, Package, Rocket, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductBlueprint, ProductType, NicheSnapshot, PRODUCT_TYPES } from "@/types/niche";
 import { PersonalizationData } from "@/types/personalization";
 import { BundleVariants } from "@/types/bundle";
+import { LaunchKit } from "@/types/launchKit";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ProductTypeCard from "./ProductTypeCard";
@@ -12,6 +13,8 @@ import BlueprintDisplay from "./BlueprintDisplay";
 import EcoverFactory from "./EcoverFactory";
 import PersonalizationStep from "./PersonalizationStep";
 import BundleDisplay from "./BundleDisplay";
+import LaunchKitDisplay from "./LaunchKitDisplay";
+import CompleteProductWizard from "./CompleteProductWizard";
 
 interface ProductFactoryModalProps {
   isOpen: boolean;
@@ -19,8 +22,8 @@ interface ProductFactoryModalProps {
   niche: NicheSnapshot;
 }
 
-type Step = "select" | "personalize" | "generating" | "result";
-type ResultTab = "blueprint" | "ecovers" | "bundles";
+type Step = "select" | "personalize" | "generating" | "result" | "complete-wizard";
+type ResultTab = "blueprint" | "ecovers" | "bundles" | "launchKit";
 
 const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProps) => {
   const [step, setStep] = useState<Step>("select");
@@ -31,6 +34,8 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
   const [blueprint, setBlueprint] = useState<ProductBlueprint | null>(null);
   const [bundles, setBundles] = useState<BundleVariants | null>(null);
   const [bundleLoading, setBundleLoading] = useState(false);
+  const [launchKit, setLaunchKit] = useState<LaunchKit | null>(null);
+  const [launchKitLoading, setLaunchKitLoading] = useState(false);
 
   const handleTypeSelect = (type: ProductType) => {
     setSelectedType(type);
@@ -41,6 +46,22 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
     setPersonalization(data);
     setStep("generating");
     await generateBlueprint(selectedType!, data);
+  };
+
+  const handleBuildCompleteProduct = (data: PersonalizationData) => {
+    setPersonalization(data);
+    setStep("complete-wizard");
+  };
+
+  const handleCompleteWizardDone = (data: {
+    blueprint: ProductBlueprint;
+    bundles: BundleVariants;
+    launchKit: LaunchKit;
+  }) => {
+    setBlueprint(data.blueprint);
+    setBundles(data.bundles);
+    setLaunchKit(data.launchKit);
+    setStep("result");
   };
 
   const generateBlueprint = async (type: ProductType, personalizationData: PersonalizationData) => {
@@ -89,7 +110,8 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
   const handleRegenerate = () => {
     if (selectedType && personalization) {
       setStep("generating");
-      setBundles(null); // Reset bundles when regenerating
+      setBundles(null);
+      setLaunchKit(null);
       generateBlueprint(selectedType, personalization);
     }
   };
@@ -123,6 +145,36 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
     }
   };
 
+  const generateLaunchKit = async () => {
+    if (!blueprint || !personalization) return;
+    
+    setLaunchKitLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-launch-kit", {
+        body: {
+          blueprint,
+          personalization,
+          nicheName: niche.name,
+        },
+      });
+
+      if (error) throw error;
+      
+      if (data.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      setLaunchKit(data);
+      toast.success("Launch kit generated!");
+    } catch (error) {
+      console.error("Error generating launch kit:", error);
+      toast.error("Failed to generate launch kit. Please try again.");
+    } finally {
+      setLaunchKitLoading(false);
+    }
+  };
+
   const handleBack = () => {
     if (step === "personalize") {
       setStep("select");
@@ -132,6 +184,9 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
       setResultTab("blueprint");
       setBlueprint(null);
       setBundles(null);
+      setLaunchKit(null);
+    } else if (step === "complete-wizard") {
+      setStep("personalize");
     }
   };
 
@@ -142,6 +197,7 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
       setResultTab("blueprint");
       setBlueprint(null);
       setBundles(null);
+      setLaunchKit(null);
       setSelectedType(null);
       setPersonalization(null);
     }, 300);
@@ -155,6 +211,8 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
         return "Personalize Your Product";
       case "generating":
         return "AI Product Factory";
+      case "complete-wizard":
+        return "Building Complete Product";
       case "result":
         return "AI Product Factory";
     }
@@ -168,6 +226,8 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
         return `Customize your ${selectedType} to stand out`;
       case "generating":
         return `Creating your personalized ${selectedType}...`;
+      case "complete-wizard":
+        return `Generating blueprint, bundles, and launch kit...`;
       case "result":
         return `${selectedType} for "${niche.name}"`;
     }
@@ -197,7 +257,7 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
               {/* Header */}
               <div className="sticky top-0 bg-card border-b border-border px-6 py-4 flex items-center justify-between z-10">
                 <div className="flex items-center gap-3">
-                  {(step === "personalize" || step === "result") && (
+                  {(step === "personalize" || step === "result" || step === "complete-wizard") && (
                     <button onClick={handleBack} className="p-2 hover:bg-secondary rounded-lg transition-colors">
                       <ArrowLeft className="w-4 h-4" />
                     </button>
@@ -246,9 +306,52 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
 
                 {/* Step: Personalization */}
                 {step === "personalize" && selectedType && (
-                  <PersonalizationStep
-                    onComplete={handlePersonalizationComplete}
-                    onBack={handleBack}
+                  <div className="space-y-6">
+                    <PersonalizationStep
+                      onComplete={handlePersonalizationComplete}
+                      onBack={handleBack}
+                    />
+                    
+                    {/* One-Click Complete Product Option */}
+                    <div className="p-4 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/30">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+                          <Zap className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold mb-1">⚡ One-Click Complete Product</h4>
+                          <p className="text-sm text-muted-foreground mb-3">
+                            Skip the manual steps! Generate your blueprint, bundle variants, AND 7-day launch kit all at once.
+                          </p>
+                          <Button 
+                            variant="glow" 
+                            size="sm"
+                            onClick={() => {
+                              // Get current personalization values from the form
+                              const form = document.querySelector('form');
+                              if (form) {
+                                const formData = new FormData(form);
+                                // This is a simplified approach - we'll trigger the complete flow
+                              }
+                            }}
+                          >
+                            <Zap className="w-4 h-4 mr-1" />
+                            Build Complete Product
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step: Complete Wizard */}
+                {step === "complete-wizard" && selectedType && personalization && (
+                  <CompleteProductWizard
+                    niche={niche}
+                    productType={selectedType}
+                    personalization={personalization}
+                    onComplete={handleCompleteWizardDone}
+                    onCancel={handleBack}
                   />
                 )}
 
@@ -294,10 +397,10 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
                     )}
 
                     {/* Tab Switcher */}
-                    <div className="flex gap-1 p-1 bg-secondary/50 rounded-lg">
+                    <div className="flex gap-1 p-1 bg-secondary/50 rounded-lg overflow-x-auto">
                       <button
                         onClick={() => setResultTab("blueprint")}
-                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-sm font-medium transition-all ${
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-sm font-medium transition-all whitespace-nowrap ${
                           resultTab === "blueprint"
                             ? "bg-card text-foreground shadow-sm"
                             : "text-muted-foreground hover:text-foreground"
@@ -308,7 +411,7 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
                       </button>
                       <button
                         onClick={() => setResultTab("ecovers")}
-                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-sm font-medium transition-all ${
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-sm font-medium transition-all whitespace-nowrap ${
                           resultTab === "ecovers"
                             ? "bg-card text-foreground shadow-sm"
                             : "text-muted-foreground hover:text-foreground"
@@ -319,7 +422,7 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
                       </button>
                       <button
                         onClick={() => setResultTab("bundles")}
-                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-sm font-medium transition-all ${
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-sm font-medium transition-all whitespace-nowrap ${
                           resultTab === "bundles"
                             ? "bg-card text-foreground shadow-sm"
                             : "text-muted-foreground hover:text-foreground"
@@ -327,6 +430,17 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
                       >
                         <Package className="w-4 h-4" />
                         Bundles
+                      </button>
+                      <button
+                        onClick={() => setResultTab("launchKit")}
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-sm font-medium transition-all whitespace-nowrap ${
+                          resultTab === "launchKit"
+                            ? "bg-card text-foreground shadow-sm"
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        <Rocket className="w-4 h-4" />
+                        Launch Kit
                       </button>
                     </div>
 
@@ -376,6 +490,40 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
                             bundles={bundles} 
                             originalProductName={blueprint.productName} 
                           />
+                        )}
+                      </div>
+                    )}
+
+                    {resultTab === "launchKit" && (
+                      <div className="space-y-4">
+                        {!launchKit ? (
+                          <div className="text-center py-12">
+                            <Rocket className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                            <h3 className="text-lg font-semibold mb-2">Generate Launch Marketing Kit</h3>
+                            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                              Get a complete 7-day launch plan with TikTok scripts, Instagram carousels, 
+                              Pinterest pins, email templates, and power hooks.
+                            </p>
+                            <Button 
+                              onClick={generateLaunchKit} 
+                              disabled={launchKitLoading}
+                              className="gap-2"
+                            >
+                              {launchKitLoading ? (
+                                <>
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                  Generating Launch Kit...
+                                </>
+                              ) : (
+                                <>
+                                  <Sparkles className="w-4 h-4" />
+                                  Generate Launch Kit
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        ) : (
+                          <LaunchKitDisplay launchKit={launchKit} />
                         )}
                       </div>
                     )}

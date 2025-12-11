@@ -218,6 +218,69 @@ export type Database = {
         }
         Relationships: []
       }
+      user_product_builds: {
+        Row: {
+          blueprint: Json
+          bundles: Json | null
+          completion_steps: Json | null
+          created_at: string
+          ecovers: Json | null
+          id: string
+          launch_kit: Json | null
+          niche_id: string
+          niche_name: string
+          price_tier: string
+          product_name: string
+          product_type: string
+          status: string
+          style_vibe: string
+          target_audience: string
+          transformation_focus: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          blueprint: Json
+          bundles?: Json | null
+          completion_steps?: Json | null
+          created_at?: string
+          ecovers?: Json | null
+          id?: string
+          launch_kit?: Json | null
+          niche_id: string
+          niche_name: string
+          price_tier: string
+          product_name: string
+          product_type: string
+          status?: string
+          style_vibe: string
+          target_audience: string
+          transformation_focus: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          blueprint?: Json
+          bundles?: Json | null
+          completion_steps?: Json | null
+          created_at?: string
+          ecovers?: Json | null
+          id?: string
+          launch_kit?: Json | null
+          niche_id?: string
+          niche_name?: string
+          price_tier?: string
+          product_name?: string
+          product_type?: string
+          status?: string
+          style_vibe?: string
+          target_audience?: string
+          transformation_focus?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
