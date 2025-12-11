@@ -9,7 +9,8 @@ import {
   CreditCard,
   Crown,
   LogOut,
-  ChevronLeft
+  ChevronLeft,
+  LayoutDashboard
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
@@ -32,6 +33,7 @@ import {
 } from "@/components/ui/sidebar";
 
 const mainNavItems = [
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Discover", url: "/discover", icon: Search },
   { title: "My Products", url: "/my-products", icon: Package },
   { title: "Money Map", url: "/money-map", icon: Map },

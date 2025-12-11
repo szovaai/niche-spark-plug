@@ -10,6 +10,7 @@ interface DashboardLayoutProps {
 }
 
 const pageTitles: Record<string, string> = {
+  "/dashboard": "Dashboard",
   "/discover": "Discover",
   "/my-products": "My Products",
   "/money-map": "Money Map",

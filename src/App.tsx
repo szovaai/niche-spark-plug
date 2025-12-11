@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import Dashboard from "./pages/Dashboard";
 import Discover from "./pages/Discover";
 import NicheDetail from "./pages/NicheDetail";
 import Saved from "./pages/Saved";
@@ -28,6 +29,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/discover" element={<Discover />} />
             <Route path="/niche/:nicheId" element={<NicheDetail />} />
             <Route path="/saved" element={<Saved />} />
