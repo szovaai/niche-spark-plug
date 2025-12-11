@@ -10,6 +10,8 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navbar from "@/components/Navbar";
+import RevenueGoalWidget from "@/components/RevenueGoalWidget";
+import SuccessWall from "@/components/SuccessWall";
 import { useAuth } from "@/hooks/useAuth";
 import { STARTER_PRODUCTS, DAILY_CHALLENGES, type DailyChallenge } from "@/types/moneyMap";
 
@@ -62,17 +64,29 @@ const MoneyMap = () => {
             </p>
           </motion.div>
 
+          {/* Revenue Goal Widget */}
+          {user && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="mb-8"
+            >
+              <RevenueGoalWidget />
+            </motion.div>
+          )}
+
           {/* Overall Progress */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
+            transition={{ delay: 0.15 }}
             className="p-6 rounded-xl gradient-ocean border border-primary/20 mb-8"
           >
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Trophy className="w-5 h-5 text-accent" />
-                <span className="font-semibold">Your Progress</span>
+                <span className="font-semibold">7-Day Challenge Progress</span>
               </div>
               <Badge variant="secondary">{completedDays.length}/7 Days Complete</Badge>
             </div>
@@ -362,6 +376,16 @@ const MoneyMap = () => {
                 Good listing images = more clicks
               </li>
             </ul>
+          </motion.div>
+
+          {/* Success Wall */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mt-8"
+          >
+            <SuccessWall />
           </motion.div>
         </div>
       </main>

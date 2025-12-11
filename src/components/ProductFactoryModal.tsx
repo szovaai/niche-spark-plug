@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sparkles, Loader2, ArrowLeft, Image, FileText, Package, Rocket, Zap, Target, LayoutGrid } from "lucide-react";
+import { X, Sparkles, Loader2, ArrowLeft, Image, FileText, Package, Rocket, Zap, Target, LayoutGrid, Tag, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductBlueprint, ProductType, NicheSnapshot, PRODUCT_TYPES } from "@/types/niche";
 import { PersonalizationData } from "@/types/personalization";
 import { BundleVariants } from "@/types/bundle";
 import { LaunchKit } from "@/types/launchKit";
+import { ListingKit } from "@/types/listingKit";
 import { PLRPrefill } from "@/types/plrVault";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -15,9 +16,12 @@ import EcoverFactory from "./EcoverFactory";
 import PersonalizationStep from "./PersonalizationStep";
 import BundleDisplay from "./BundleDisplay";
 import LaunchKitDisplay from "./LaunchKitDisplay";
+import ListingKitDisplay from "./ListingKitDisplay";
 import CompleteProductWizard from "./CompleteProductWizard";
 import FirstSalePlaybook from "./FirstSalePlaybook";
 import ContentMultiplierDisplay from "./ContentMultiplierDisplay";
+import ExportModal from "./ExportModal";
+import TemplateLibrary from "./TemplateLibrary";
 
 interface ProductFactoryModalProps {
   isOpen: boolean;
@@ -27,7 +31,7 @@ interface ProductFactoryModalProps {
 }
 
 type Step = "select" | "personalize" | "generating" | "result" | "complete-wizard";
-type ResultTab = "blueprint" | "ecovers" | "bundles" | "launchKit" | "firstSale" | "content";
+type ResultTab = "blueprint" | "ecovers" | "bundles" | "launchKit" | "listingKit" | "firstSale" | "content" | "templates";
 
 const ProductFactoryModal = ({ isOpen, onClose, niche, plrPrefill }: ProductFactoryModalProps) => {
   const [step, setStep] = useState<Step>("select");
@@ -40,6 +44,9 @@ const ProductFactoryModal = ({ isOpen, onClose, niche, plrPrefill }: ProductFact
   const [bundleLoading, setBundleLoading] = useState(false);
   const [launchKit, setLaunchKit] = useState<LaunchKit | null>(null);
   const [launchKitLoading, setLaunchKitLoading] = useState(false);
+  const [listingKit, setListingKit] = useState<ListingKit | null>(null);
+  const [listingKitLoading, setListingKitLoading] = useState(false);
+  const [showExport, setShowExport] = useState(false);
 
   const handleTypeSelect = (type: ProductType) => {
     setSelectedType(type);
@@ -186,6 +193,37 @@ const ProductFactoryModal = ({ isOpen, onClose, niche, plrPrefill }: ProductFact
     }
   };
 
+  const generateListingKit = async () => {
+    if (!blueprint || !personalization) return;
+    
+    setListingKitLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-listing-kit", {
+        body: {
+          blueprint,
+          personalization,
+          platform: "all",
+          nicheName: niche.name,
+        },
+      });
+
+      if (error) throw error;
+      
+      if (data.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      setListingKit(data);
+      toast.success("Listing kit generated!");
+    } catch (error) {
+      console.error("Error generating listing kit:", error);
+      toast.error("Failed to generate listing kit. Please try again.");
+    } finally {
+      setListingKitLoading(false);
+    }
+  };
+
   const handleBack = () => {
     if (step === "personalize") {
       setStep("select");
@@ -196,6 +234,7 @@ const ProductFactoryModal = ({ isOpen, onClose, niche, plrPrefill }: ProductFact
       setBlueprint(null);
       setBundles(null);
       setLaunchKit(null);
+      setListingKit(null);
     } else if (step === "complete-wizard") {
       setStep("personalize");
     }
@@ -209,6 +248,7 @@ const ProductFactoryModal = ({ isOpen, onClose, niche, plrPrefill }: ProductFact
       setBlueprint(null);
       setBundles(null);
       setLaunchKit(null);
+      setListingKit(null);
       setSelectedType(null);
       setPersonalization(null);
     }, 300);
@@ -464,7 +504,18 @@ const ProductFactoryModal = ({ isOpen, onClose, niche, plrPrefill }: ProductFact
                         }`}
                       >
                         <Rocket className="w-4 h-4" />
-                        Launch Kit
+                        Launch
+                      </button>
+                      <button
+                        onClick={() => setResultTab("listingKit")}
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-sm font-medium transition-all whitespace-nowrap ${
+                          resultTab === "listingKit"
+                            ? "bg-card text-foreground shadow-sm"
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        <Tag className="w-4 h-4" />
+                        Listing
                       </button>
                       <button
                         onClick={() => setResultTab("firstSale")}
@@ -574,6 +625,14 @@ const ProductFactoryModal = ({ isOpen, onClose, niche, plrPrefill }: ProductFact
                       </div>
                     )}
 
+                    {resultTab === "listingKit" && (
+                      <ListingKitDisplay
+                        listingKit={listingKit}
+                        loading={listingKitLoading}
+                        onGenerate={generateListingKit}
+                      />
+                    )}
+
                     {resultTab === "firstSale" && personalization && (
                       <FirstSalePlaybook
                         blueprint={blueprint}
@@ -589,11 +648,43 @@ const ProductFactoryModal = ({ isOpen, onClose, niche, plrPrefill }: ProductFact
                         nicheName={niche.name}
                       />
                     )}
+
+                    {resultTab === "templates" && personalization && (
+                      <TemplateLibrary
+                        productType={selectedType || undefined}
+                        styleVibe={personalization.styleVibe}
+                      />
+                    )}
+
+                    {/* Export Button */}
+                    <div className="pt-4 border-t border-border">
+                      <Button
+                        variant="outline"
+                        className="w-full gap-2"
+                        onClick={() => setShowExport(true)}
+                      >
+                        <Download className="w-4 h-4" />
+                        Export All
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>
             </div>
           </motion.div>
+
+          {/* Export Modal */}
+          <ExportModal
+            isOpen={showExport}
+            onClose={() => setShowExport(false)}
+            data={{
+              blueprint,
+              bundles,
+              launchKit,
+              listingKit,
+              productName: blueprint?.productName || "Product",
+            }}
+          />
         </>
       )}
     </AnimatePresence>
