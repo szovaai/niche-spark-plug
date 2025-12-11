@@ -229,6 +229,7 @@ export type Database = {
           launch_kit: Json | null
           niche_id: string
           niche_name: string
+          playbook_progress: Json | null
           price_tier: string
           product_name: string
           product_type: string
@@ -249,6 +250,7 @@ export type Database = {
           launch_kit?: Json | null
           niche_id: string
           niche_name: string
+          playbook_progress?: Json | null
           price_tier: string
           product_name: string
           product_type: string
@@ -269,6 +271,7 @@ export type Database = {
           launch_kit?: Json | null
           niche_id?: string
           niche_name?: string
+          playbook_progress?: Json | null
           price_tier?: string
           product_name?: string
           product_type?: string
