@@ -49,6 +49,7 @@ export const TOOLTIP_CONTENT = {
   competitor_clone: "Analyze any Etsy listing to find weaknesses and generate a better, differentiated version.",
   store_blueprint: "Preview how your 1-product store would look with branding, homepage layout, and product positioning.",
   saved_niches: "Your bookmarked opportunities. Enable alerts to get notified when momentum changes.",
+  uniqueness_checker: "AI analyzes your content for uniqueness patterns. Get a score and actionable tips to stand out from competitors.",
 };
 
 const FirstTimeTooltip = ({ 

@@ -32,3 +32,6 @@ verify_jwt = true
 
 [functions.niche-wizard]
 verify_jwt = true
+
+[functions.analyze-uniqueness]
+verify_jwt = false

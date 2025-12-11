@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Package, ExternalLink, Star, Check, Wand2 } from "lucide-react";
+import { Package, ExternalLink, Star, Check, Wand2, Fingerprint } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PLRUpgrader from "@/components/PLRUpgrader";
+import { UniquenessChecker } from "@/components/UniquenessChecker";
 import FirstTimeTooltip, { TOOLTIP_CONTENT } from "@/components/FirstTimeTooltip";
 
 const plrSources = [
@@ -54,6 +55,7 @@ interface PLRSectionProps {
 
 const PLRSection = ({ isVisible }: PLRSectionProps) => {
   const [showUpgrader, setShowUpgrader] = useState(false);
+  const [showUniquenessChecker, setShowUniquenessChecker] = useState(false);
 
   if (!isVisible) return null;
 
@@ -77,21 +79,36 @@ const PLRSection = ({ isVisible }: PLRSectionProps) => {
             These trusted platforms offer ready-to-sell digital products that match your trending niches
           </p>
           
-          {/* PLR Upgrader Button */}
-          <FirstTimeTooltip
-            tooltipId="plr_upgrader"
-            content={TOOLTIP_CONTENT.plr_upgrader}
-            side="bottom"
-          >
-            <Button 
-              variant="hero" 
-              onClick={() => setShowUpgrader(true)}
-              className="mb-8"
+          {/* Action Buttons */}
+          <div className="flex flex-wrap justify-center gap-4 mb-8">
+            <FirstTimeTooltip
+              tooltipId="plr_upgrader"
+              content={TOOLTIP_CONTENT.plr_upgrader}
+              side="bottom"
             >
-              <Wand2 className="w-5 h-5" />
-              Upgrade Your PLR
-            </Button>
-          </FirstTimeTooltip>
+              <Button 
+                variant="hero" 
+                onClick={() => setShowUpgrader(true)}
+              >
+                <Wand2 className="w-5 h-5" />
+                Upgrade Your PLR
+              </Button>
+            </FirstTimeTooltip>
+            
+            <FirstTimeTooltip
+              tooltipId="uniqueness_checker"
+              content={TOOLTIP_CONTENT.uniqueness_checker}
+              side="bottom"
+            >
+              <Button 
+                variant="outline" 
+                onClick={() => setShowUniquenessChecker(true)}
+              >
+                <Fingerprint className="w-5 h-5" />
+                Check Uniqueness
+              </Button>
+            </FirstTimeTooltip>
+          </div>
         </motion.div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -168,6 +185,13 @@ const PLRSection = ({ isVisible }: PLRSectionProps) => {
       <PLRUpgrader 
         isOpen={showUpgrader} 
         onClose={() => setShowUpgrader(false)} 
+      />
+
+      {/* Uniqueness Checker Modal */}
+      <UniquenessChecker
+        isOpen={showUniquenessChecker}
+        onClose={() => setShowUniquenessChecker(false)}
+        initialType="plr_content"
       />
     </section>
   );
