@@ -386,6 +386,221 @@ export type Database = {
         }
         Relationships: []
       }
+      ugc_app_tag_assignments: {
+        Row: {
+          app_id: string | null
+          id: string
+          tag_id: string | null
+        }
+        Insert: {
+          app_id?: string | null
+          id?: string
+          tag_id?: string | null
+        }
+        Update: {
+          app_id?: string | null
+          id?: string
+          tag_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ugc_app_tag_assignments_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "ugc_apps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ugc_app_tag_assignments_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "ugc_app_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ugc_app_tags: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          tag_group: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          tag_group: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          tag_group?: string
+        }
+        Relationships: []
+      }
+      ugc_apps: {
+        Row: {
+          beginner_friendly_score: number | null
+          category: string[]
+          cons: string[] | null
+          consistency_score: number | null
+          content_types: string[]
+          countries_supported: string[] | null
+          created_at: string | null
+          currency: string | null
+          description: string
+          earning_potential_score: number | null
+          followers_required: string | null
+          how_it_works: string[] | null
+          id: string
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_pro_only: boolean | null
+          last_verified_at: string | null
+          logo_url: string | null
+          name: string
+          notes_for_creators: string | null
+          official_site_url: string | null
+          pay_model: string[]
+          platforms: string[]
+          primary_audience: string | null
+          pros: string[] | null
+          referral_notes: string | null
+          referral_program: boolean | null
+          risk_notes: string | null
+          short_tagline: string
+          signup_url_android: string | null
+          signup_url_ios: string | null
+          signup_url_web: string | null
+          slug: string
+          tips: string[] | null
+          typical_pay_max: number | null
+          typical_pay_min: number | null
+        }
+        Insert: {
+          beginner_friendly_score?: number | null
+          category: string[]
+          cons?: string[] | null
+          consistency_score?: number | null
+          content_types: string[]
+          countries_supported?: string[] | null
+          created_at?: string | null
+          currency?: string | null
+          description: string
+          earning_potential_score?: number | null
+          followers_required?: string | null
+          how_it_works?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_pro_only?: boolean | null
+          last_verified_at?: string | null
+          logo_url?: string | null
+          name: string
+          notes_for_creators?: string | null
+          official_site_url?: string | null
+          pay_model: string[]
+          platforms: string[]
+          primary_audience?: string | null
+          pros?: string[] | null
+          referral_notes?: string | null
+          referral_program?: boolean | null
+          risk_notes?: string | null
+          short_tagline: string
+          signup_url_android?: string | null
+          signup_url_ios?: string | null
+          signup_url_web?: string | null
+          slug: string
+          tips?: string[] | null
+          typical_pay_max?: number | null
+          typical_pay_min?: number | null
+        }
+        Update: {
+          beginner_friendly_score?: number | null
+          category?: string[]
+          cons?: string[] | null
+          consistency_score?: number | null
+          content_types?: string[]
+          countries_supported?: string[] | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string
+          earning_potential_score?: number | null
+          followers_required?: string | null
+          how_it_works?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_pro_only?: boolean | null
+          last_verified_at?: string | null
+          logo_url?: string | null
+          name?: string
+          notes_for_creators?: string | null
+          official_site_url?: string | null
+          pay_model?: string[]
+          platforms?: string[]
+          primary_audience?: string | null
+          pros?: string[] | null
+          referral_notes?: string | null
+          referral_program?: boolean | null
+          risk_notes?: string | null
+          short_tagline?: string
+          signup_url_android?: string | null
+          signup_url_ios?: string | null
+          signup_url_web?: string | null
+          slug?: string
+          tips?: string[] | null
+          typical_pay_max?: number | null
+          typical_pay_min?: number | null
+        }
+        Relationships: []
+      }
+      ugc_user_app_status: {
+        Row: {
+          app_id: string | null
+          created_at: string | null
+          estimated_monthly: number | null
+          id: string
+          notes: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          app_id?: string | null
+          created_at?: string | null
+          estimated_monthly?: number | null
+          id?: string
+          notes?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          app_id?: string | null
+          created_at?: string | null
+          estimated_monthly?: number | null
+          id?: string
+          notes?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ugc_user_app_status_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "ugc_apps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_achievements: {
         Row: {
           achievement_description: string | null
