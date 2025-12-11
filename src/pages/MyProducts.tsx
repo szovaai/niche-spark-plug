@@ -13,14 +13,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductBuild } from "@/types/productBuild";
 import { PlaybookProgress } from "@/types/playbook";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import Navbar from "@/components/Navbar";
-
 const MyProducts = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -107,24 +106,21 @@ const MyProducts = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="pt-24 px-4 text-center">
+      <DashboardLayout>
+        <div className="pt-6 px-4 text-center">
           <p className="text-muted-foreground">Please sign in to view your products.</p>
           <Button onClick={() => navigate("/auth")} className="mt-4">
             Sign In
           </Button>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      
-      <main className="pt-24 pb-12 px-4">
-        <div className="max-w-6xl mx-auto">
+    <DashboardLayout>
+      <div className="pb-12 px-4">
+        <div className="max-w-6xl mx-auto pt-6">
           {/* Header */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
             <div>
@@ -318,8 +314,8 @@ const MyProducts = () => {
             </div>
           )}
         </div>
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

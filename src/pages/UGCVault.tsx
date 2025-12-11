@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Compass, Layers, Calculator, Rocket, Crown, Lock } from 'lucide-react';
-import Navbar from '@/components/Navbar';
+import { DashboardLayout } from '@/components/DashboardLayout';
 import { UGCAppCard } from '@/components/ugc/UGCAppCard';
 import { UGCAppFilters } from '@/components/ugc/UGCAppFilters';
 import { UGCAppDetailModal } from '@/components/ugc/UGCAppDetailModal';
@@ -19,7 +19,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-
 export default function UGCVault() {
   const { user, role } = useAuth();
   const { toast } = useToast();
@@ -234,10 +233,8 @@ export default function UGCVault() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      
-      <main className="container mx-auto px-4 py-8">
+    <DashboardLayout>
+      <div className="container mx-auto px-4 py-6">
         {/* Header */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
@@ -409,7 +406,7 @@ export default function UGCVault() {
             <UGCQuickStart />
           </TabsContent>
         </Tabs>
-      </main>
+      </div>
 
       {/* App Detail Modal */}
       <UGCAppDetailModal
@@ -422,6 +419,6 @@ export default function UGCVault() {
         onNotesChange={updateAppNotes}
         onToggleBookmark={() => selectedApp && toggleBookmark(selectedApp)}
       />
-    </div>
+    </DashboardLayout>
   );
 }

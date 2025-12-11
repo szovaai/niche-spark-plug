@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import Navbar from "@/components/Navbar";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import TrendingFeed from "@/components/TrendingFeed";
 import NicheSnapshotCard from "@/components/NicheSnapshotCard";
 import FastCashFilterToggle from "@/components/FastCashFilterToggle";
@@ -104,9 +104,7 @@ const Discover = () => {
   const recentlyViewed = savedNiches.slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      
+    <DashboardLayout>
       {/* Onboarding Wizard */}
       {showOnboarding && (
         <OnboardingWizard
@@ -115,8 +113,8 @@ const Discover = () => {
         />
       )}
       
-      <main className="pt-24 pb-16 px-4">
-        <div className="max-w-6xl mx-auto">
+      <div className="pb-16 px-4">
+        <div className="max-w-6xl mx-auto pt-6">
           {/* Hero Search Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -287,7 +285,7 @@ const Discover = () => {
             </div>
           </div>
         </div>
-      </main>
+      </div>
 
       <UpgradeModal
         isOpen={showUpgradeModal}
@@ -305,7 +303,7 @@ const Discover = () => {
         onClose={() => setShowCompetitorClone(false)}
         onCreateProduct={handleCompetitorCloneCreate}
       />
-    </div>
+    </DashboardLayout>
   );
 };
 
