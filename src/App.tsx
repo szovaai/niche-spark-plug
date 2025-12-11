@@ -13,6 +13,7 @@ import LaunchPacks from "./pages/LaunchPacks";
 import Pricing from "./pages/Pricing";
 import MyProducts from "./pages/MyProducts";
 import MoneyMap from "./pages/MoneyMap";
+import UGCVault from "./pages/UGCVault";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/my-products" element={<MyProducts />} />
             <Route path="/money-map" element={<MoneyMap />} />
+            <Route path="/ugc-vault" element={<UGCVault />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Zap, Star, LogOut, User, Package, Crown, DollarSign, Boxes, Map, Menu, X, Search } from "lucide-react";
+import { Zap, Star, LogOut, User, Package, Crown, DollarSign, Boxes, Map, Menu, X, Search, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -34,6 +34,7 @@ const Navbar = () => {
 
   const navItems = [
     { path: "/discover", label: "Discover", icon: Search, showAlways: true },
+    { path: "/ugc-vault", label: "UGC Vault", icon: Video, showAlways: true },
     { path: "/my-products", label: "My Products", icon: Boxes, requiresAuth: true },
     { path: "/money-map", label: "Money Map", icon: Map, requiresAuth: true },
     { path: "/launch-packs", label: "Launch Packs", icon: Package, showAlways: true, proBadge: !isPro },
