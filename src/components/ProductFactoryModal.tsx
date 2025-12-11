@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sparkles, Loader2, ArrowLeft, Image, FileText } from "lucide-react";
+import { X, Sparkles, Loader2, ArrowLeft, Image, FileText, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductBlueprint, ProductType, NicheSnapshot, PRODUCT_TYPES } from "@/types/niche";
 import { PersonalizationData } from "@/types/personalization";
+import { BundleVariants } from "@/types/bundle";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ProductTypeCard from "./ProductTypeCard";
 import BlueprintDisplay from "./BlueprintDisplay";
 import EcoverFactory from "./EcoverFactory";
 import PersonalizationStep from "./PersonalizationStep";
+import BundleDisplay from "./BundleDisplay";
 
 interface ProductFactoryModalProps {
   isOpen: boolean;
@@ -18,7 +20,7 @@ interface ProductFactoryModalProps {
 }
 
 type Step = "select" | "personalize" | "generating" | "result";
-type ResultTab = "blueprint" | "ecovers";
+type ResultTab = "blueprint" | "ecovers" | "bundles";
 
 const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProps) => {
   const [step, setStep] = useState<Step>("select");
@@ -27,6 +29,8 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
   const [personalization, setPersonalization] = useState<PersonalizationData | null>(null);
   const [loading, setLoading] = useState(false);
   const [blueprint, setBlueprint] = useState<ProductBlueprint | null>(null);
+  const [bundles, setBundles] = useState<BundleVariants | null>(null);
+  const [bundleLoading, setBundleLoading] = useState(false);
 
   const handleTypeSelect = (type: ProductType) => {
     setSelectedType(type);
@@ -85,7 +89,37 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
   const handleRegenerate = () => {
     if (selectedType && personalization) {
       setStep("generating");
+      setBundles(null); // Reset bundles when regenerating
       generateBlueprint(selectedType, personalization);
+    }
+  };
+
+  const generateBundles = async () => {
+    if (!blueprint || !personalization) return;
+    
+    setBundleLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-bundle-variants", {
+        body: {
+          blueprint,
+          personalization,
+        },
+      });
+
+      if (error) throw error;
+      
+      if (data.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      setBundles(data);
+      toast.success("Bundle variants generated!");
+    } catch (error) {
+      console.error("Error generating bundles:", error);
+      toast.error("Failed to generate bundle variants. Please try again.");
+    } finally {
+      setBundleLoading(false);
     }
   };
 
@@ -97,6 +131,7 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
       setStep("personalize");
       setResultTab("blueprint");
       setBlueprint(null);
+      setBundles(null);
     }
   };
 
@@ -106,6 +141,7 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
       setStep("select");
       setResultTab("blueprint");
       setBlueprint(null);
+      setBundles(null);
       setSelectedType(null);
       setPersonalization(null);
     }, 300);
@@ -258,10 +294,10 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
                     )}
 
                     {/* Tab Switcher */}
-                    <div className="flex gap-2 p-1 bg-secondary/50 rounded-lg">
+                    <div className="flex gap-1 p-1 bg-secondary/50 rounded-lg">
                       <button
                         onClick={() => setResultTab("blueprint")}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-sm font-medium transition-all ${
                           resultTab === "blueprint"
                             ? "bg-card text-foreground shadow-sm"
                             : "text-muted-foreground hover:text-foreground"
@@ -272,14 +308,25 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
                       </button>
                       <button
                         onClick={() => setResultTab("ecovers")}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-sm font-medium transition-all ${
                           resultTab === "ecovers"
                             ? "bg-card text-foreground shadow-sm"
                             : "text-muted-foreground hover:text-foreground"
                         }`}
                       >
                         <Image className="w-4 h-4" />
-                        Ecovers & Promos
+                        Ecovers
+                      </button>
+                      <button
+                        onClick={() => setResultTab("bundles")}
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-sm font-medium transition-all ${
+                          resultTab === "bundles"
+                            ? "bg-card text-foreground shadow-sm"
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        <Package className="w-4 h-4" />
+                        Bundles
                       </button>
                     </div>
 
@@ -294,6 +341,43 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
 
                     {resultTab === "ecovers" && (
                       <EcoverFactory blueprint={blueprint} />
+                    )}
+
+                    {resultTab === "bundles" && (
+                      <div className="space-y-4">
+                        {!bundles ? (
+                          <div className="text-center py-12">
+                            <Package className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                            <h3 className="text-lg font-semibold mb-2">Create Product Bundle</h3>
+                            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                              Turn your product into a complete product line with a Lite version (tripwire), 
+                              Bonus add-on (upsell), and Premium Bundle (complete package).
+                            </p>
+                            <Button 
+                              onClick={generateBundles} 
+                              disabled={bundleLoading}
+                              className="gap-2"
+                            >
+                              {bundleLoading ? (
+                                <>
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                  Generating Bundle Variants...
+                                </>
+                              ) : (
+                                <>
+                                  <Sparkles className="w-4 h-4" />
+                                  Generate Bundle Variants
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        ) : (
+                          <BundleDisplay 
+                            bundles={bundles} 
+                            originalProductName={blueprint.productName} 
+                          />
+                        )}
+                      </div>
                     )}
                   </div>
                 )}
