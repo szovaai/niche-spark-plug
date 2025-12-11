@@ -57,7 +57,7 @@ serve(async (req) => {
   }
 
   try {
-    const { nicheName, nicheCategory, demandTier, competitionTier, productType, personalization } = await req.json();
+    const { nicheName, nicheCategory, demandTier, competitionTier, productType, personalization, plrContent } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -66,6 +66,9 @@ serve(async (req) => {
 
     console.log(`Generating personalized ${productType} blueprint for niche: ${nicheName}`);
     console.log(`Personalization:`, JSON.stringify(personalization));
+    if (plrContent) {
+      console.log(`PLR Mode enabled - transforming: ${plrContent.kitTitle}`);
+    }
 
     // Product-specific configurations with price tier adjustments
     const getPageCount = (baseMin: number, baseMax: number, priceTier: string): string => {
@@ -139,11 +142,31 @@ PERSONALIZATION REQUIREMENTS (MUST follow these exactly):
   }
 ` : "";
 
+    // PLR transformation directive
+    const PLR_DIRECTIVE = plrContent ? `
+IMPORTANT - PLR TRANSFORMATION MODE:
+You are transforming existing PLR content into a UNIQUE product. The original PLR is:
+- Title: ${plrContent.kitTitle}
+- Description: ${plrContent.description}
+${plrContent.contentSample ? `- Sample content: ${plrContent.contentSample.substring(0, 500)}...` : ''}
+- Intended use: ${plrContent.funnelRole || 'front_end'}
+
+YOUR TASK:
+1. REIMAGINE the structure - don't just copy the PLR layout
+2. REWRITE all content in your own voice, matching the personalization choices
+3. ADD unique angles and fresh perspectives not in the original
+4. DIFFERENTIATE through the specific audience and transformation focus
+5. Make it feel PREMIUM and ORIGINAL, not like recycled PLR
+6. The result should pass a plagiarism check - create truly unique content
+` : "";
+
     const systemPrompt = `You are an expert digital product creator and copywriter specializing in creating bestselling products for Etsy, Gumroad, and Creative Market.
 
 ${HUMAN_TONE_DIRECTIVE}
 
 ${PERSONALIZATION_DIRECTIVE}
+
+${PLR_DIRECTIVE}
 
 You're creating a complete product blueprint that a creator can use to build and launch a digital product TODAY.
 

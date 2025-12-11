@@ -44,6 +44,7 @@ export const TOOLTIP_CONTENT = {
   money_map: "Your 7-day action plan to first sale. Daily challenges, progress tracking, and step-by-step guidance.",
   launch_packs: "Pre-built product packages for trending niches. Complete with PLR sources, listing copy, and promo ideas.",
   niche_wizard: "Not sure where to start? Answer a few questions and we'll recommend the perfect niche for your skills.",
+  plr_quickstart: "Skip the blank page! Start from pre-curated PLR kits and let AI uniquify them into sellable products.",
   
   // Other
   competitor_clone: "Analyze any Etsy listing to find weaknesses and generate a better, differentiated version.",

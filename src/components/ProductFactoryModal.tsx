@@ -6,6 +6,7 @@ import { ProductBlueprint, ProductType, NicheSnapshot, PRODUCT_TYPES } from "@/t
 import { PersonalizationData } from "@/types/personalization";
 import { BundleVariants } from "@/types/bundle";
 import { LaunchKit } from "@/types/launchKit";
+import { PLRPrefill } from "@/types/plrVault";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ProductTypeCard from "./ProductTypeCard";
@@ -22,12 +23,13 @@ interface ProductFactoryModalProps {
   isOpen: boolean;
   onClose: () => void;
   niche: NicheSnapshot;
+  plrPrefill?: PLRPrefill;
 }
 
 type Step = "select" | "personalize" | "generating" | "result" | "complete-wizard";
 type ResultTab = "blueprint" | "ecovers" | "bundles" | "launchKit" | "firstSale" | "content";
 
-const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProps) => {
+const ProductFactoryModal = ({ isOpen, onClose, niche, plrPrefill }: ProductFactoryModalProps) => {
   const [step, setStep] = useState<Step>("select");
   const [resultTab, setResultTab] = useState<ResultTab>("blueprint");
   const [selectedType, setSelectedType] = useState<ProductType | null>(null);
@@ -79,6 +81,13 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
           competitionTier: niche.competitionTier,
           productType: type,
           personalization: personalizationData,
+          // Include PLR content if available for AI to uniquify
+          plrContent: plrPrefill ? {
+            kitTitle: plrPrefill.kitTitle,
+            description: plrPrefill.description,
+            contentSample: plrPrefill.contentSample,
+            funnelRole: plrPrefill.funnelRole,
+          } : undefined,
         },
       });
 
@@ -278,6 +287,19 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
               </div>
 
               <div className="p-6">
+                {/* PLR Mode Banner */}
+                {plrPrefill && step !== "result" && (
+                  <div className="mb-6 p-3 rounded-lg bg-primary/10 border border-primary/30 flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                      <FileText className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">PLR Mode: {plrPrefill.kitTitle}</p>
+                      <p className="text-xs text-muted-foreground">AI will uniquify and transform this content</p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Step: Select Product Type */}
                 {step === "select" && (
                   <div className="space-y-6">

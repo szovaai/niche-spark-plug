@@ -137,6 +137,96 @@ export type Database = {
         }
         Relationships: []
       }
+      plr_quickstart_kits: {
+        Row: {
+          created_at: string
+          description: string
+          difficulty_level: string | null
+          id: string
+          included_item_ids: string[] | null
+          is_featured: boolean | null
+          is_pro_only: boolean | null
+          niche_category: string
+          suggested_funnel_order: string[] | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          difficulty_level?: string | null
+          id?: string
+          included_item_ids?: string[] | null
+          is_featured?: boolean | null
+          is_pro_only?: boolean | null
+          niche_category: string
+          suggested_funnel_order?: string[] | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          difficulty_level?: string | null
+          id?: string
+          included_item_ids?: string[] | null
+          is_featured?: boolean | null
+          is_pro_only?: boolean | null
+          niche_category?: string
+          suggested_funnel_order?: string[] | null
+          title?: string
+        }
+        Relationships: []
+      }
+      plr_vault_items: {
+        Row: {
+          content_sample: string | null
+          created_at: string
+          description: string
+          funnel_role: string
+          id: string
+          is_active: boolean | null
+          is_pro_only: boolean | null
+          license_type: string
+          niche_category: string
+          product_type: string
+          suggested_price_max: number | null
+          suggested_price_min: number | null
+          tags: string[] | null
+          title: string
+        }
+        Insert: {
+          content_sample?: string | null
+          created_at?: string
+          description: string
+          funnel_role?: string
+          id?: string
+          is_active?: boolean | null
+          is_pro_only?: boolean | null
+          license_type?: string
+          niche_category: string
+          product_type: string
+          suggested_price_max?: number | null
+          suggested_price_min?: number | null
+          tags?: string[] | null
+          title: string
+        }
+        Update: {
+          content_sample?: string | null
+          created_at?: string
+          description?: string
+          funnel_role?: string
+          id?: string
+          is_active?: boolean | null
+          is_pro_only?: boolean | null
+          license_type?: string
+          niche_category?: string
+          product_type?: string
+          suggested_price_max?: number | null
+          suggested_price_min?: number | null
+          tags?: string[] | null
+          title?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
