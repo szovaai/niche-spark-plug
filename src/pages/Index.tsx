@@ -8,10 +8,14 @@ import InspirationOfTheDay from "@/components/InspirationOfTheDay";
 import DemoModeModal from "@/components/DemoModeModal";
 import OnboardingWizard from "@/components/OnboardingWizard";
 import NicheWizard from "@/components/NicheWizard";
+import { PLRQuickstartModal } from "@/components/PLRQuickstartModal";
+import ProductFactoryModal from "@/components/ProductFactoryModal";
 import FirstTimeTooltip, { TOOLTIP_CONTENT } from "@/components/FirstTimeTooltip";
 import { trendingTopics, nicheSnapshots } from "@/data/mockNiches";
+import { NicheSnapshot } from "@/types/niche";
+import { PLRPrefill } from "@/types/plrVault";
 import { motion } from "framer-motion";
-import { Sparkles, ArrowRight, Shield, Zap, BarChart3, Play, Check, Lock, Wand2, Map } from "lucide-react";
+import { Sparkles, ArrowRight, Shield, Zap, BarChart3, Play, Check, Lock, Wand2, Map, FileStack } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { useAuth } from "@/hooks/useAuth";
@@ -21,7 +25,30 @@ const Index = () => {
   const { user } = useAuth();
   const [showDemoModal, setShowDemoModal] = useState(false);
   const [showNicheWizard, setShowNicheWizard] = useState(false);
+  const [showPLRQuickstart, setShowPLRQuickstart] = useState(false);
+  const [showProductFactory, setShowProductFactory] = useState(false);
+  const [plrPrefill, setPLRPrefill] = useState<PLRPrefill | null>(null);
   const { showOnboarding, completeOnboarding, skipOnboarding } = useOnboarding();
+
+  // Create a dummy niche from PLR prefill for ProductFactory
+  const createNicheFromPLR = (prefill: PLRPrefill): NicheSnapshot => ({
+    id: `plr-${prefill.kitId || 'custom'}`,
+    name: prefill.kitTitle,
+    category: prefill.nicheCategory.replace('_', ' & '),
+    demandTier: "Hot" as const,
+    competitionTier: "Moderate" as const,
+    momentum: "rising" as const,
+    priceRange: { min: prefill.suggestedPriceMin || 12, max: prefill.suggestedPriceMax || 27 },
+    salesTier: "Hot" as const,
+    platform: "Etsy" as const,
+    launchSpeed: "1 Hour" as const,
+    launchabilityScore: 75,
+  });
+
+  const handlePLRSelect = (prefill: PLRPrefill) => {
+    setPLRPrefill(prefill);
+    setShowProductFactory(true);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -68,6 +95,21 @@ const Index = () => {
               >
                 <Map className="w-5 h-5 text-accent" />
                 7-Day Money Map
+              </Button>
+            </FirstTimeTooltip>
+            <FirstTimeTooltip
+              tooltipId="plr_quickstart"
+              content={TOOLTIP_CONTENT.plr_quickstart}
+              side="bottom"
+            >
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => setShowPLRQuickstart(true)}
+                className="gap-2"
+              >
+                <FileStack className="w-5 h-5 text-primary" />
+                Start from PLR Template
               </Button>
             </FirstTimeTooltip>
           </div>
@@ -162,6 +204,22 @@ const Index = () => {
 
       <DemoModeModal open={showDemoModal} onOpenChange={setShowDemoModal} />
       <NicheWizard isOpen={showNicheWizard} onClose={() => setShowNicheWizard(false)} />
+      <PLRQuickstartModal 
+        open={showPLRQuickstart} 
+        onClose={() => setShowPLRQuickstart(false)}
+        onSelectKit={handlePLRSelect}
+      />
+      {plrPrefill && (
+        <ProductFactoryModal
+          isOpen={showProductFactory}
+          onClose={() => {
+            setShowProductFactory(false);
+            setPLRPrefill(null);
+          }}
+          niche={createNicheFromPLR(plrPrefill)}
+          plrPrefill={plrPrefill}
+        />
+      )}
     </div>
   );
 };
