@@ -355,9 +355,13 @@ export default function UGCVault() {
                 {!isPro && filteredApps.length > 3 && (
                   <div className="mt-4">
                     <BlurOverlay 
-                      title={`${filteredApps.length - 3} more apps available`}
-                      description="Upgrade to Pro to unlock all UGC apps and tracking features"
-                    />
+                      isBlurred={true}
+                      message={`${filteredApps.length - 3} more apps available — Upgrade to Pro`}
+                      actionLabel="Upgrade to Pro"
+                      onAction={() => navigate('/pricing')}
+                    >
+                      <div className="h-48 bg-muted/20 rounded-lg" />
+                    </BlurOverlay>
                   </div>
                 )}
               </div>
