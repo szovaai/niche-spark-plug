@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sparkles, Loader2, ArrowLeft, Image, FileText, Package, Rocket, Zap, Target } from "lucide-react";
+import { X, Sparkles, Loader2, ArrowLeft, Image, FileText, Package, Rocket, Zap, Target, LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductBlueprint, ProductType, NicheSnapshot, PRODUCT_TYPES } from "@/types/niche";
 import { PersonalizationData } from "@/types/personalization";
@@ -16,6 +16,7 @@ import BundleDisplay from "./BundleDisplay";
 import LaunchKitDisplay from "./LaunchKitDisplay";
 import CompleteProductWizard from "./CompleteProductWizard";
 import FirstSalePlaybook from "./FirstSalePlaybook";
+import ContentMultiplierDisplay from "./ContentMultiplierDisplay";
 
 interface ProductFactoryModalProps {
   isOpen: boolean;
@@ -24,7 +25,7 @@ interface ProductFactoryModalProps {
 }
 
 type Step = "select" | "personalize" | "generating" | "result" | "complete-wizard";
-type ResultTab = "blueprint" | "ecovers" | "bundles" | "launchKit" | "firstSale";
+type ResultTab = "blueprint" | "ecovers" | "bundles" | "launchKit" | "firstSale" | "content";
 
 const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProps) => {
   const [step, setStep] = useState<Step>("select");
@@ -454,6 +455,17 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
                         <Target className="w-4 h-4" />
                         First Sale
                       </button>
+                      <button
+                        onClick={() => setResultTab("content")}
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-sm font-medium transition-all whitespace-nowrap ${
+                          resultTab === "content"
+                            ? "bg-card text-foreground shadow-sm"
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        <LayoutGrid className="w-4 h-4" />
+                        Content
+                      </button>
                     </div>
 
                     {/* Tab Content */}
@@ -542,6 +554,14 @@ const ProductFactoryModal = ({ isOpen, onClose, niche }: ProductFactoryModalProp
 
                     {resultTab === "firstSale" && personalization && (
                       <FirstSalePlaybook
+                        blueprint={blueprint}
+                        personalization={personalization}
+                        nicheName={niche.name}
+                      />
+                    )}
+
+                    {resultTab === "content" && personalization && (
+                      <ContentMultiplierDisplay
                         blueprint={blueprint}
                         personalization={personalization}
                         nicheName={niche.name}

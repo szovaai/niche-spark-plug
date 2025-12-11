@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Sparkles, Clock, Play, ArrowUpDown } from "lucide-react";
+import { Search, Sparkles, Clock, Play, ArrowUpDown, Copy } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,11 +20,13 @@ import InspirationOfTheDay from "@/components/InspirationOfTheDay";
 import DemoModeModal from "@/components/DemoModeModal";
 import OnboardingWizard from "@/components/OnboardingWizard";
 import FirstTimeTooltip, { TOOLTIP_CONTENT } from "@/components/FirstTimeTooltip";
+import CompetitorClone from "@/components/CompetitorClone";
 import { trendingTopics, nicheSnapshots, isFastCashNiche } from "@/data/mockNiches";
 import { useAuth } from "@/hooks/useAuth";
 import { useSavedNiches } from "@/hooks/useSavedNiches";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { toast } from "sonner";
+import { CompetitorAnalysis } from "@/types/competitorAnalysis";
 
 const categories = [
   "All",
@@ -47,6 +49,7 @@ const Discover = () => {
   const [sortBy, setSortBy] = useState<"relevance" | "xls-high" | "xls-low">("relevance");
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showDemoModal, setShowDemoModal] = useState(false);
+  const [showCompetitorClone, setShowCompetitorClone] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState("");
 
   const handleSearch = async (query: string) => {
@@ -71,6 +74,11 @@ const Discover = () => {
   const handleUpgradeClick = (reason: string) => {
     setUpgradeReason(reason);
     setShowUpgradeModal(true);
+  };
+
+  const handleCompetitorCloneCreate = (analysis: CompetitorAnalysis) => {
+    toast.success(`Ready to create: ${analysis.suggestedProduct.newTitle}`);
+    // This could navigate to Product Factory with pre-filled data
   };
 
   let filteredNiches = nicheSnapshots.filter((niche) => {
@@ -124,17 +132,28 @@ const Discover = () => {
             </p>
 
             {/* Demo Mode Button */}
-            {!user && (
+            <div className="flex gap-2 justify-center mb-4">
+              {!user && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowDemoModal(true)}
+                  className="gap-2"
+                >
+                  <Play className="w-4 h-4" />
+                  See How It Works
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setShowDemoModal(true)}
-                className="mb-4 gap-2"
+                onClick={() => setShowCompetitorClone(true)}
+                className="gap-2"
               >
-                <Play className="w-4 h-4" />
-                See How It Works
+                <Copy className="w-4 h-4" />
+                Clone Competitor
               </Button>
-            )}
+            </div>
 
             {/* Usage Badge for Free users */}
             {user && role === "free" && (
@@ -274,6 +293,12 @@ const Discover = () => {
       <DemoModeModal
         open={showDemoModal}
         onOpenChange={setShowDemoModal}
+      />
+
+      <CompetitorClone
+        isOpen={showCompetitorClone}
+        onClose={() => setShowCompetitorClone(false)}
+        onCreateProduct={handleCompetitorCloneCreate}
       />
     </div>
   );

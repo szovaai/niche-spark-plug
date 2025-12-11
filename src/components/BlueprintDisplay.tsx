@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ProductBlueprint, ProductType } from "@/types/niche";
 import { useState } from "react";
 import { toast } from "sonner";
-
+import PricingOptimizer from "./PricingOptimizer";
 interface BlueprintDisplayProps {
   blueprint: ProductBlueprint;
   onRegenerate: () => void;
@@ -301,6 +301,12 @@ const BlueprintDisplay = ({ blueprint, onRegenerate, loading }: BlueprintDisplay
           ))}
         </ul>
       </div>
+
+      {/* Pricing Optimizer */}
+      <PricingOptimizer 
+        priceRange={blueprint.priceRange} 
+        productType={blueprint.productType} 
+      />
 
       {/* Regenerate Button */}
       <div className="pt-4 border-t border-border">
