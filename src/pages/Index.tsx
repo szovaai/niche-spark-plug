@@ -7,22 +7,25 @@ import NicheSnapshotCard from "@/components/NicheSnapshotCard";
 import InspirationOfTheDay from "@/components/InspirationOfTheDay";
 import DemoModeModal from "@/components/DemoModeModal";
 import OnboardingWizard from "@/components/OnboardingWizard";
+import NicheWizard from "@/components/NicheWizard";
 import { trendingTopics, nicheSnapshots } from "@/data/mockNiches";
 import { motion } from "framer-motion";
-import { Sparkles, ArrowRight, Shield, Zap, BarChart3, Play, Check, Lock } from "lucide-react";
+import { Sparkles, ArrowRight, Shield, Zap, BarChart3, Play, Check, Lock, Wand2, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useOnboarding } from "@/hooks/useOnboarding";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [showDemoModal, setShowDemoModal] = useState(false);
+  const [showNicheWizard, setShowNicheWizard] = useState(false);
   const { showOnboarding, completeOnboarding, skipOnboarding } = useOnboarding();
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      {/* Onboarding Wizard */}
       {showOnboarding && (
         <OnboardingWizard
           onComplete={completeOnboarding}
@@ -31,6 +34,32 @@ const Index = () => {
       )}
       
       <HeroSection onGetStarted={() => navigate("/discover")} />
+      
+      {/* Quick Actions for New Users */}
+      <section className="py-8 px-4 border-b border-border">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => setShowNicheWizard(true)}
+              className="gap-2"
+            >
+              <Wand2 className="w-5 h-5 text-primary" />
+              Find My Perfect Niche
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => navigate("/money-map")}
+              className="gap-2"
+            >
+              <Map className="w-5 h-5 text-accent" />
+              7-Day Money Map
+            </Button>
+          </div>
+        </div>
+      </section>
       
       {/* Preview Section */}
       <section className="py-16 px-4 bg-secondary/20">
@@ -47,7 +76,6 @@ const Index = () => {
             </div>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Today's Digital Winners</h2>
             
-            {/* Demo Button */}
             <Button
               variant="outline"
               size="sm"
@@ -60,13 +88,11 @@ const Index = () => {
           </motion.div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left column: Trending + Inspiration */}
             <div className="space-y-6">
               <TrendingFeed topics={trendingTopics.slice(0, 5)} />
               <InspirationOfTheDay />
             </div>
             
-            {/* Right columns: Niche cards */}
             <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
               {nicheSnapshots.slice(0, 4).map((niche, index) => (
                 <NicheSnapshotCard key={niche.id} niche={niche} index={index} showBlur={true} />
@@ -79,7 +105,6 @@ const Index = () => {
               Explore All Niches <ArrowRight className="w-5 h-5" />
             </Button>
             
-            {/* Trust Badges */}
             <div className="flex items-center justify-center gap-6 mt-6 text-sm">
               <div className="flex items-center gap-1.5">
                 <Check className="w-4 h-4 text-green-500" />
@@ -122,10 +147,8 @@ const Index = () => {
         </div>
       </footer>
 
-      <DemoModeModal
-        open={showDemoModal}
-        onOpenChange={setShowDemoModal}
-      />
+      <DemoModeModal open={showDemoModal} onOpenChange={setShowDemoModal} />
+      <NicheWizard isOpen={showNicheWizard} onClose={() => setShowNicheWizard(false)} />
     </div>
   );
 };

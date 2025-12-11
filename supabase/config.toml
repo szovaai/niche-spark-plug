@@ -23,3 +23,12 @@ verify_jwt = true
 
 [functions.analyze-competitor]
 verify_jwt = false
+
+[functions.find-gaps]
+verify_jwt = true
+
+[functions.upgrade-plr]
+verify_jwt = true
+
+[functions.niche-wizard]
+verify_jwt = true
