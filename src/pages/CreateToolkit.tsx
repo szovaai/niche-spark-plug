@@ -555,6 +555,7 @@ const CreateToolkit = () => {
                     content,
                     salesLetter,
                     upsell,
+                    emailSequence,
                   }}
                   toolkitId={toolkitId}
                   onComplete={async () => {

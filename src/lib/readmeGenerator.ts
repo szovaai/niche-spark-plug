@@ -8,10 +8,11 @@ export interface ReadmeData {
   authorName?: string;
   components: ToolkitComponents;
   hasUpsell: boolean;
+  hasEmailSequence?: boolean;
 }
 
 export const generateReadme = (data: ReadmeData): string => {
-  const { title, subtitle, niche, targetAudience, authorName, components, hasUpsell } = data;
+  const { title, subtitle, niche, targetAudience, authorName, components, hasUpsell, hasEmailSequence } = data;
   
   const componentList: string[] = [];
   if (components.guide) componentList.push("📖 Main Guide (Guide.pdf)");
@@ -51,7 +52,8 @@ ${componentList.map(c => `  ${c}`).join('\n')}
 MARKETING FOLDER:
   🖼️  E-Cover (ecover.png) - Use for sales pages and promotions
   📧  Sales Letter (Sales-Letter.html) - Ready-to-use sales page template
-
+${hasEmailSequence ? `  📬  Email Sequence (Email-Sequence.txt/csv/html) - 14-day launch sequence
+` : ''}
 ${hasUpsell ? `UPSELL FOLDER:
   💰  Upsell Page (Upsell-Page.html) - One-time offer template
 ` : ''}

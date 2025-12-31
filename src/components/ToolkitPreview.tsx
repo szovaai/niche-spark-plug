@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { createToolkitZip, downloadSinglePDF, ToolkitData, BundleProgress } from "@/lib/zipBundler";
 import { ToolkitComponents, ToolkitContent, ToolkitUpsell } from "@/types/toolkit";
+import { EmailSequence14Day } from "@/types/emailSequence";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -29,6 +30,7 @@ interface ToolkitPreviewProps {
     content: ToolkitContent;
     salesLetter?: string;
     upsell?: ToolkitUpsell | null;
+    emailSequence?: EmailSequence14Day | null;
   };
   toolkitId: string | null;
   onComplete: () => void;
@@ -255,6 +257,14 @@ const ToolkitPreview = ({ toolkit, toolkitId, onComplete }: ToolkitPreviewProps)
                     <span>Upsell Page (${toolkit.upsell.price})</span>
                   </div>
                 )}
+                
+                {/* Email Sequence */}
+                {toolkit.emailSequence && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Mail className="w-4 h-4 text-purple-500" />
+                    <span>14-Day Email Sequence ({toolkit.emailSequence.emails?.length || 14} emails)</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -294,6 +304,7 @@ const ToolkitPreview = ({ toolkit, toolkitId, onComplete }: ToolkitPreviewProps)
                 { label: "Author identity added", done: !!toolkit.authorName },
                 { label: "E-cover uploaded", done: !!toolkit.ecoverUrl },
                 { label: "Sales letter written", done: !!toolkit.salesLetter },
+                { label: "Email sequence generated", done: !!toolkit.emailSequence, optional: true },
                 { label: "Content generated", done: Object.keys(toolkit.content).length > 0 },
                 { label: "Upsell configured", done: !!toolkit.upsell, optional: true },
               ].map((item, i) => (
@@ -379,7 +390,7 @@ const ToolkitPreview = ({ toolkit, toolkitId, onComplete }: ToolkitPreviewProps)
             </h4>
             <ul className="text-sm text-muted-foreground space-y-1">
               <li>📁 <strong>Main-Product/</strong> - All your PDFs (guide, worksheets, etc.)</li>
-              <li>📁 <strong>Marketing/</strong> - E-cover image + Sales Letter HTML</li>
+              <li>📁 <strong>Marketing/</strong> - E-cover image, Sales Letter HTML{toolkit.emailSequence ? ', Email Sequence (TXT/CSV/HTML)' : ''}</li>
               {toolkit.upsell && (
                 <li>📁 <strong>Upsell/</strong> - Upsell page template</li>
               )}
