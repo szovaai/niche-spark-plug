@@ -2,47 +2,44 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { 
-  Home, Package, Bookmark, DollarSign, Flame, Compass, 
-  Sparkles, Rocket, Map, Zap, Video, ArrowRight, Clock
+  Package, DollarSign, Flame, Plus, ArrowRight, Clock, 
+  Download, Sparkles, TrendingUp, Zap
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import InspirationOfTheDay from "@/components/InspirationOfTheDay";
 import RevenueGoalWidget from "@/components/RevenueGoalWidget";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 
 interface DashboardStats {
-  productsCreated: number;
-  savedNiches: number;
-  currentRevenue: number;
+  toolkitsCreated: number;
+  totalDownloads: number;
+  revenueEstimate: number;
   streakDays: number;
 }
 
-interface RecentActivity {
+interface RecentToolkit {
   id: string;
-  type: "product" | "niche";
-  name: string;
+  title: string;
+  status: string;
   created_at: string;
 }
 
-const shortcuts = [
-  { title: "Discover Niches", icon: Compass, url: "/discover", color: "text-primary" },
-  { title: "My Products", icon: Package, url: "/my-products", color: "text-green-500" },
-  { title: "Money Map", icon: Map, url: "/money-map", color: "text-yellow-500" },
-  { title: "Launch Packs", icon: Rocket, url: "/launch-packs", color: "text-accent", pro: true },
-  { title: "Saved Niches", icon: Bookmark, url: "/saved", color: "text-blue-500" },
-  { title: "UGC Vault", icon: Video, url: "/ugc-vault", color: "text-purple-500", pro: true },
+const hotNiches = [
+  { name: "AI Prompt Libraries", demand: 95, icon: "🤖" },
+  { name: "Traffic Generation", demand: 88, icon: "📈" },
+  { name: "Email Marketing Templates", demand: 85, icon: "📧" },
+  { name: "Social Media Schedulers", demand: 82, icon: "📱" },
 ];
 
 const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
+  const [recentToolkits, setRecentToolkits] = useState<RecentToolkit[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -55,41 +52,31 @@ const Dashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      // Fetch all data in parallel
-      const [productsRes, nichesRes, profileRes, revenueRes] = await Promise.all([
-        supabase.from("user_product_builds").select("id, product_name, created_at").order("created_at", { ascending: false }).limit(5),
-        supabase.from("saved_niches").select("id, niche_name, created_at").order("created_at", { ascending: false }).limit(5),
+      const [toolkitsRes, profileRes] = await Promise.all([
+        supabase
+          .from("toolkits")
+          .select("id, title, status, downloads, created_at")
+          .order("created_at", { ascending: false })
+          .limit(5),
         supabase.from("profiles").select("streak_days").eq("id", user!.id).maybeSingle(),
-        supabase.from("revenue_goals").select("current_amount").eq("is_active", true).maybeSingle(),
       ]);
 
-      // Build stats
+      const toolkits = toolkitsRes.data || [];
+      const totalDownloads = toolkits.reduce((sum, t) => sum + (t.downloads || 0), 0);
+
       setStats({
-        productsCreated: productsRes.data?.length || 0,
-        savedNiches: nichesRes.data?.length || 0,
-        currentRevenue: revenueRes.data?.current_amount || 0,
+        toolkitsCreated: toolkits.length,
+        totalDownloads,
+        revenueEstimate: totalDownloads * 17, // Rough estimate
         streakDays: profileRes.data?.streak_days || 0,
       });
 
-      // Build recent activity (merge and sort)
-      const products: RecentActivity[] = (productsRes.data || []).map(p => ({
-        id: p.id,
-        type: "product" as const,
-        name: p.product_name,
-        created_at: p.created_at,
-      }));
-      const niches: RecentActivity[] = (nichesRes.data || []).map(n => ({
-        id: n.id,
-        type: "niche" as const,
-        name: n.niche_name,
-        created_at: n.created_at,
-      }));
-      
-      const merged = [...products, ...niches]
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-        .slice(0, 5);
-      
-      setRecentActivity(merged);
+      setRecentToolkits(toolkits.map(t => ({
+        id: t.id,
+        title: t.title,
+        status: t.status,
+        created_at: t.created_at,
+      })));
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
     } finally {
@@ -122,6 +109,37 @@ const Dashboard = () => {
           </p>
         </motion.div>
 
+        {/* Hero CTA for New Users */}
+        {!loading && stats?.toolkitsCreated === 0 && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-accent/10 to-primary/5 border border-primary/20 p-8"
+          >
+            <div className="absolute inset-0 aurora-bg opacity-30" />
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="space-y-3 text-center md:text-left">
+                <h2 className="text-2xl md:text-3xl font-bold gradient-text">
+                  Create Your First Toolkit
+                </h2>
+                <p className="text-muted-foreground max-w-md">
+                  Build a complete digital product for WarriorPlus in under 60 minutes. 
+                  We'll guide you step by step.
+                </p>
+              </div>
+              <Button
+                onClick={() => navigate("/create")}
+                variant="hero"
+                size="lg"
+                className="gap-2 glow-primary"
+              >
+                <Plus className="w-5 h-5" />
+                Start Building
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {loading ? (
@@ -132,77 +150,39 @@ const Dashboard = () => {
             <>
               <StatCard 
                 icon={Package} 
-                label="Products Created" 
-                value={stats?.productsCreated || 0} 
-                color="text-green-500"
+                label="Toolkits Created" 
+                value={stats?.toolkitsCreated || 0} 
+                color="text-primary"
                 delay={0}
               />
               <StatCard 
-                icon={Bookmark} 
-                label="Saved Niches" 
-                value={stats?.savedNiches || 0} 
-                color="text-blue-500"
+                icon={Download} 
+                label="Total Downloads" 
+                value={stats?.totalDownloads || 0} 
+                color="text-green-500"
                 delay={0.1}
               />
               <StatCard 
                 icon={DollarSign} 
-                label="Revenue" 
-                value={`$${stats?.currentRevenue || 0}`} 
-                color="text-primary"
+                label="Est. Revenue" 
+                value={`$${stats?.revenueEstimate || 0}`} 
+                color="text-accent"
                 delay={0.2}
               />
               <StatCard 
                 icon={Flame} 
                 label="Current Streak" 
                 value={`${stats?.streakDays || 0} days`} 
-                color="text-accent"
+                color="text-orange-500"
                 delay={0.3}
               />
             </>
           )}
         </div>
 
-        {/* Quick Shortcuts */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="space-y-3"
-        >
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <Zap className="w-5 h-5 text-primary" />
-            Quick Shortcuts
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            {shortcuts.map((shortcut, i) => (
-              <motion.div
-                key={shortcut.url}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.1 + i * 0.05 }}
-              >
-                <Card 
-                  className="cursor-pointer hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/10 group"
-                  onClick={() => navigate(shortcut.url)}
-                >
-                  <CardContent className="p-4 flex flex-col items-center text-center gap-2">
-                    <div className={`p-2 rounded-lg bg-secondary group-hover:bg-primary/10 transition-colors`}>
-                      <shortcut.icon className={`w-5 h-5 ${shortcut.color}`} />
-                    </div>
-                    <span className="text-sm font-medium">{shortcut.title}</span>
-                    {shortcut.pro && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent/20 text-accent">PRO</span>
-                    )}
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
         {/* Two Column Layout */}
         <div className="grid md:grid-cols-2 gap-6">
-          {/* Recent Activity */}
+          {/* Recent Toolkits */}
           <motion.div
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
@@ -211,63 +191,70 @@ const Dashboard = () => {
           >
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <Clock className="w-5 h-5 text-muted-foreground" />
-              Recent Activity
+              Recent Toolkits
             </h2>
             <Card>
               <CardContent className="p-4">
                 {loading ? (
                   <div className="space-y-3">
                     {Array.from({ length: 3 }).map((_, i) => (
-                      <Skeleton key={i} className="h-10" />
+                      <Skeleton key={i} className="h-14" />
                     ))}
                   </div>
-                ) : recentActivity.length === 0 ? (
+                ) : recentToolkits.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
-                    <p>No activity yet</p>
+                    <Package className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <p>No toolkits yet</p>
                     <Button 
                       variant="link" 
-                      onClick={() => navigate("/discover")}
+                      onClick={() => navigate("/create")}
                       className="mt-2"
                     >
-                      Start discovering niches <ArrowRight className="w-4 h-4 ml-1" />
+                      Create your first toolkit <ArrowRight className="w-4 h-4 ml-1" />
                     </Button>
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {recentActivity.map((activity) => (
+                    {recentToolkits.map((toolkit) => (
                       <div 
-                        key={activity.id} 
-                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/50 transition-colors"
+                        key={toolkit.id} 
+                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-secondary/50 transition-colors cursor-pointer"
+                        onClick={() => navigate(`/toolkit/${toolkit.id}`)}
                       >
-                        <div className={`p-1.5 rounded ${activity.type === "product" ? "bg-green-500/10" : "bg-blue-500/10"}`}>
-                          {activity.type === "product" ? (
-                            <Package className="w-4 h-4 text-green-500" />
-                          ) : (
-                            <Bookmark className="w-4 h-4 text-blue-500" />
-                          )}
+                        <div className="p-2 rounded-lg bg-primary/10">
+                          <Package className="w-4 h-4 text-primary" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{activity.name}</p>
+                          <p className="text-sm font-medium truncate">{toolkit.title}</p>
                           <p className="text-xs text-muted-foreground">
-                            {activity.type === "product" ? "Product created" : "Niche saved"}
+                            {format(new Date(toolkit.created_at), "MMM d, yyyy")}
                           </p>
                         </div>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${
+                          toolkit.status === 'complete' 
+                            ? 'bg-green-500/20 text-green-400' 
+                            : 'bg-yellow-500/20 text-yellow-400'
+                        }`}>
+                          {toolkit.status}
+                        </span>
                       </div>
                     ))}
-                    <Button 
-                      variant="ghost" 
-                      className="w-full mt-2 text-muted-foreground"
-                      onClick={() => navigate(recentActivity[0]?.type === "product" ? "/my-products" : "/saved")}
-                    >
-                      View all <ArrowRight className="w-4 h-4 ml-1" />
-                    </Button>
+                    {recentToolkits.length > 0 && (
+                      <Button 
+                        variant="ghost" 
+                        className="w-full mt-2 text-muted-foreground"
+                        onClick={() => navigate("/my-toolkits")}
+                      >
+                        View all toolkits <ArrowRight className="w-4 h-4 ml-1" />
+                      </Button>
+                    )}
                   </div>
                 )}
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Inspiration */}
+          {/* Hot Niches */}
           <motion.div
             initial={{ opacity: 0, x: 10 }}
             animate={{ opacity: 1, x: 0 }}
@@ -275,18 +262,73 @@ const Dashboard = () => {
             className="space-y-3"
           >
             <h2 className="text-lg font-semibold flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-yellow-500" />
-              Today's Inspiration
+              <TrendingUp className="w-5 h-5 text-accent" />
+              Hot Niches on WarriorPlus
             </h2>
-            <InspirationOfTheDay />
+            <Card>
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  {hotNiches.map((niche, i) => (
+                    <motion.div
+                      key={niche.name}
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.4 + i * 0.1 }}
+                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-secondary/50 transition-colors cursor-pointer group"
+                      onClick={() => navigate(`/create?niche=${encodeURIComponent(niche.name)}`)}
+                    >
+                      <span className="text-2xl">{niche.icon}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium">{niche.name}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className="flex-1 h-1.5 bg-secondary rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-gradient-to-r from-primary to-accent rounded-full"
+                              style={{ width: `${niche.demand}%` }}
+                            />
+                          </div>
+                          <span className="text-xs text-muted-foreground">{niche.demand}%</span>
+                        </div>
+                      </div>
+                      <Zap className="w-4 h-4 text-accent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </motion.div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </motion.div>
         </div>
+
+        {/* Quick Tips */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <Card className="bg-gradient-to-br from-accent/5 to-primary/5 border-accent/20">
+            <CardContent className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="p-3 rounded-xl bg-accent/10">
+                  <Sparkles className="w-6 h-6 text-accent" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold mb-2">Pro Tip: The 60-Minute Launch Formula</h3>
+                  <p className="text-sm text-muted-foreground">
+                    The most successful WarriorPlus sellers focus on one thing: solving a specific problem 
+                    with a complete toolkit. Use our wizard to create your guide, worksheets, e-cover, 
+                    and sales letter all in one flow. Launch fast, iterate based on feedback.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Revenue Goal Widget */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.6 }}
         >
           <RevenueGoalWidget />
         </motion.div>
@@ -312,7 +354,7 @@ const StatCard = ({ icon: Icon, label, value, color, delay }: StatCardProps) => 
     <Card className="hover:border-primary/30 transition-colors">
       <CardContent className="p-4">
         <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg bg-secondary`}>
+          <div className="p-2 rounded-lg bg-secondary">
             <Icon className={`w-5 h-5 ${color}`} />
           </div>
           <div>

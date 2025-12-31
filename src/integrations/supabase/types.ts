@@ -386,6 +386,63 @@ export type Database = {
         }
         Relationships: []
       }
+      toolkits: {
+        Row: {
+          components: Json | null
+          content: Json | null
+          created_at: string
+          downloads: number
+          ecover_url: string | null
+          id: string
+          logo_url: string | null
+          niche: string
+          sales_letter: string | null
+          status: string
+          subtitle: string | null
+          target_audience: string | null
+          title: string
+          updated_at: string
+          upsell: Json | null
+          user_id: string
+        }
+        Insert: {
+          components?: Json | null
+          content?: Json | null
+          created_at?: string
+          downloads?: number
+          ecover_url?: string | null
+          id?: string
+          logo_url?: string | null
+          niche: string
+          sales_letter?: string | null
+          status?: string
+          subtitle?: string | null
+          target_audience?: string | null
+          title: string
+          updated_at?: string
+          upsell?: Json | null
+          user_id: string
+        }
+        Update: {
+          components?: Json | null
+          content?: Json | null
+          created_at?: string
+          downloads?: number
+          ecover_url?: string | null
+          id?: string
+          logo_url?: string | null
+          niche?: string
+          sales_letter?: string | null
+          status?: string
+          subtitle?: string | null
+          target_audience?: string | null
+          title?: string
+          updated_at?: string
+          upsell?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       ugc_app_tag_assignments: {
         Row: {
           app_id: string | null
