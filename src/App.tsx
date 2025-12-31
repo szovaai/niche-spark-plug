@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import CreateToolkit from "./pages/CreateToolkit";
 import MyToolkits from "./pages/MyToolkits";
+import Research from "./pages/Research";
 import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
 
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/create" element={<CreateToolkit />} />
             <Route path="/my-toolkits" element={<MyToolkits />} />
+            <Route path="/research" element={<Research />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
