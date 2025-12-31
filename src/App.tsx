@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import CreateToolkit from "./pages/CreateToolkit";
+import ToolkitBuilder from "./pages/ToolkitBuilder";
 import MyToolkits from "./pages/MyToolkits";
 import Research from "./pages/Research";
 import Pricing from "./pages/Pricing";
@@ -28,6 +29,8 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/create" element={<CreateToolkit />} />
             <Route path="/toolkit/:id" element={<CreateToolkit />} />
+            <Route path="/toolkit/builder" element={<ToolkitBuilder />} />
+            <Route path="/toolkit/builder/:id" element={<ToolkitBuilder />} />
             <Route path="/my-toolkits" element={<MyToolkits />} />
             <Route path="/research" element={<Research />} />
             <Route path="/pricing" element={<Pricing />} />
