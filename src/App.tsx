@@ -27,6 +27,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/create" element={<CreateToolkit />} />
+            <Route path="/toolkit/:id" element={<CreateToolkit />} />
             <Route path="/my-toolkits" element={<MyToolkits />} />
             <Route path="/research" element={<Research />} />
             <Route path="/pricing" element={<Pricing />} />
