@@ -1,10 +1,19 @@
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowRight, Save, Loader2, Sparkles } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ChevronDown, Loader2, Sparkles } from "lucide-react";
 import type { ToolkitComponents } from "@/types/toolkit";
 
 interface DashboardTabProps {
@@ -32,6 +41,19 @@ interface DashboardTabProps {
   generatingStep?: string;
 }
 
+const categoryOptions = [
+  "Business",
+  "Marketing",
+  "Health & Wellness",
+  "Personal Development",
+  "Finance",
+  "Productivity",
+  "Technology",
+  "Lifestyle",
+  "Education",
+  "Creative",
+];
+
 const componentOptions = [
   { id: "guide" as const, label: "Guide", description: "Main content with sections" },
   { id: "worksheet" as const, label: "Worksheet", description: "Interactive exercises" },
@@ -58,199 +80,198 @@ const DashboardTab = ({
   setAuthorBio,
   components,
   setComponents,
-  onSave,
-  isSaving,
   onContinue,
   onGenerateAll,
   isGeneratingAll,
   generatingStep,
 }: DashboardTabProps) => {
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+
   const toggleComponent = (id: keyof ToolkitComponents) => {
     setComponents({ ...components, [id]: !components[id] });
   };
 
+  const isFormValid = title.trim() && niche.trim() && authorName.trim() && Object.values(components).some(v => v);
+
   return (
-    <div className="grid md:grid-cols-2 gap-6">
-      {/* Toolkit Details */}
+    <div className="max-w-2xl mx-auto space-y-6">
+      {/* Page Header */}
+      <div className="text-center space-y-2">
+        <h1 className="text-2xl font-bold">Toolkit Details</h1>
+        <p className="text-muted-foreground">Enter your toolkit information to generate content</p>
+      </div>
+
+      {/* Main Form Card */}
       <Card className="glass-card">
-        <CardHeader>
-          <CardTitle>Toolkit Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="pt-6 space-y-5">
+          {/* Toolkit Title */}
           <div className="space-y-2">
-            <Label htmlFor="title">Title *</Label>
+            <Label htmlFor="title">
+              Toolkit Title <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g., The Traffic Blueprint Toolkit"
-              className="bg-muted/50"
+              className="bg-zinc-800/50 border-zinc-700"
             />
           </div>
+
+          {/* Subtitle */}
           <div className="space-y-2">
-            <Label htmlFor="subtitle">Subtitle</Label>
+            <Label htmlFor="subtitle" className="text-muted-foreground">
+              Subtitle (Optional)
+            </Label>
             <Input
               id="subtitle"
               value={subtitle}
               onChange={(e) => setSubtitle(e.target.value)}
               placeholder="e.g., Your Complete Guide to Buyer Traffic"
-              className="bg-muted/50"
+              className="bg-zinc-800/50 border-zinc-700"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="niche">Niche *</Label>
-            <Input
-              id="niche"
-              value={niche}
-              onChange={(e) => setNiche(e.target.value)}
-              placeholder="e.g., Digital Marketing"
-              className="bg-muted/50"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="audience">Target Audience</Label>
-            <Input
-              id="audience"
-              value={targetAudience}
-              onChange={(e) => setTargetAudience(e.target.value)}
-              placeholder="e.g., Online entrepreneurs"
-              className="bg-muted/50"
-            />
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* Author Identity */}
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle>Author Identity</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+          {/* Author Name */}
           <div className="space-y-2">
-            <Label htmlFor="authorName">Your Name</Label>
+            <Label htmlFor="authorName">
+              Author Name <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="authorName"
               value={authorName}
               onChange={(e) => setAuthorName(e.target.value)}
               placeholder="Your name"
-              className="bg-muted/50"
+              className="bg-zinc-800/50 border-zinc-700"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="authorTagline">Tagline</Label>
-            <Input
-              id="authorTagline"
-              value={authorTagline}
-              onChange={(e) => setAuthorTagline(e.target.value)}
-              placeholder="e.g., Digital Marketing Expert"
-              className="bg-muted/50"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="authorBio">Short Bio</Label>
-            <Textarea
-              id="authorBio"
-              value={authorBio}
-              onChange={(e) => setAuthorBio(e.target.value)}
-              placeholder="Brief bio for your toolkit..."
-              className="bg-muted/50 min-h-[80px]"
-            />
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* Component Selection */}
-      <Card className="glass-card md:col-span-2">
-        <CardHeader>
-          <CardTitle>Toolkit Components</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {componentOptions.map((option) => (
-              <label
-                key={option.id}
-                className="flex items-start gap-3 p-4 border border-border rounded-lg cursor-pointer hover:bg-muted/30 transition-colors"
-              >
-                <Checkbox
-                  checked={components[option.id]}
-                  onCheckedChange={() => toggleComponent(option.id)}
+          {/* Category Dropdown */}
+          <div className="space-y-2">
+            <Label htmlFor="category">
+              Category <span className="text-red-500">*</span>
+            </Label>
+            <Select value={niche} onValueChange={setNiche}>
+              <SelectTrigger className="bg-zinc-800/50 border-zinc-700">
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent className="bg-zinc-900 border-zinc-700 z-50">
+                {categoryOptions.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Advanced Settings */}
+          <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
+            <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-full py-2">
+              <ChevronDown className={`w-4 h-4 transition-transform ${advancedOpen ? 'rotate-180' : ''}`} />
+              Advanced Settings
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-5 pt-4">
+              {/* Target Audience */}
+              <div className="space-y-2">
+                <Label htmlFor="audience" className="text-muted-foreground">
+                  Target Audience
+                </Label>
+                <Input
+                  id="audience"
+                  value={targetAudience}
+                  onChange={(e) => setTargetAudience(e.target.value)}
+                  placeholder="e.g., Online entrepreneurs"
+                  className="bg-zinc-800/50 border-zinc-700"
                 />
-                <div>
-                  <p className="font-medium">{option.label}</p>
-                  <p className="text-sm text-muted-foreground">{option.description}</p>
+              </div>
+
+              {/* Author Tagline */}
+              <div className="space-y-2">
+                <Label htmlFor="authorTagline" className="text-muted-foreground">
+                  Author Tagline
+                </Label>
+                <Input
+                  id="authorTagline"
+                  value={authorTagline}
+                  onChange={(e) => setAuthorTagline(e.target.value)}
+                  placeholder="e.g., Digital Marketing Expert"
+                  className="bg-zinc-800/50 border-zinc-700"
+                />
+              </div>
+
+              {/* Author Bio */}
+              <div className="space-y-2">
+                <Label htmlFor="authorBio" className="text-muted-foreground">
+                  Short Bio
+                </Label>
+                <Textarea
+                  id="authorBio"
+                  value={authorBio}
+                  onChange={(e) => setAuthorBio(e.target.value)}
+                  placeholder="Brief bio for your toolkit..."
+                  className="bg-zinc-800/50 border-zinc-700 min-h-[80px]"
+                />
+              </div>
+
+              {/* Component Selection */}
+              <div className="space-y-3">
+                <Label className="text-muted-foreground">Toolkit Components</Label>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {componentOptions.map((option) => (
+                    <label
+                      key={option.id}
+                      className="flex items-start gap-3 p-3 border border-zinc-700 rounded-lg cursor-pointer hover:bg-muted/30 transition-colors"
+                    >
+                      <Checkbox
+                        checked={components[option.id]}
+                        onCheckedChange={() => toggleComponent(option.id)}
+                      />
+                      <div>
+                        <p className="font-medium text-sm">{option.label}</p>
+                        <p className="text-xs text-muted-foreground">{option.description}</p>
+                      </div>
+                    </label>
+                  ))}
                 </div>
-              </label>
-            ))}
-          </div>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         </CardContent>
       </Card>
 
-      {/* Action Buttons */}
-      <div className="md:col-span-2 flex flex-col gap-4">
-        {/* Generate All Button */}
-        {onGenerateAll && (
-          <Card className="border-primary/30 bg-primary/5">
-            <CardContent className="pt-6">
-              <div className="flex flex-col sm:flex-row items-center gap-4">
-                <div className="flex-1 text-center sm:text-left">
-                  <h3 className="font-semibold text-lg">Generate Complete Toolkit</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Auto-generate all content, cover, sales letter, and email sequence in one click
-                  </p>
-                  {isGeneratingAll && generatingStep && (
-                    <p className="text-sm text-primary mt-2 flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      {generatingStep}
-                    </p>
-                  )}
-                </div>
-                <Button
-                  size="lg"
-                  onClick={onGenerateAll}
-                  disabled={!title || !niche || !Object.values(components).some(v => v) || isGeneratingAll}
-                  className="gap-2 min-w-[200px]"
-                >
-                  {isGeneratingAll ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-5 h-5" />
-                      Generate All
-                    </>
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+      {/* Generate Button */}
+      <div className="space-y-4">
+        <Button
+          size="lg"
+          onClick={onGenerateAll}
+          disabled={!isFormValid || isGeneratingAll}
+          className="w-full gap-2 bg-amber-500 hover:bg-amber-600 text-black font-semibold h-14 text-base"
+        >
+          {isGeneratingAll ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              {generatingStep || "Generating..."}
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-5 h-5" />
+              Generate Toolkit Content
+            </>
+          )}
+        </Button>
 
-        {/* Regular Action Buttons */}
-        <div className="flex justify-between">
-          <Button variant="outline" onClick={onSave} disabled={isSaving || isGeneratingAll} className="gap-2">
-            {isSaving ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save className="w-4 h-4" />
-                Save Draft
-              </>
-            )}
-          </Button>
-          <Button
+        {/* Skip Link */}
+        <p className="text-center text-sm text-muted-foreground">
+          Or{" "}
+          <button
             onClick={onContinue}
-            disabled={!title || !niche || isGeneratingAll}
-            className="gap-2"
+            disabled={!title.trim() || !niche.trim() || isGeneratingAll}
+            className="text-primary hover:underline disabled:opacity-50 disabled:no-underline"
           >
-            Continue to Content Writer
-            <ArrowRight className="w-4 h-4" />
-          </Button>
-        </div>
+            skip to Content Writer to write manually
+          </button>
+        </p>
       </div>
     </div>
   );
