@@ -1,12 +1,15 @@
 import { motion } from "framer-motion";
-import { Zap, TrendingUp, Sparkles } from "lucide-react";
+import { Zap, Sparkles, Package, FileText, Download, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface HeroSectionProps {
   onGetStarted: () => void;
 }
 
 const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
+  const navigate = useNavigate();
+
   return (
     <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden px-4">
       {/* Aurora Background */}
@@ -17,7 +20,6 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-float" />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/15 rounded-full blur-3xl animate-float-delayed" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-gradient-to-r from-primary/10 via-accent/5 to-primary/10 rounded-full blur-3xl" />
-        {/* Extra orb for depth */}
         <div className="absolute top-1/3 right-1/3 w-64 h-64 bg-ocean-400/10 rounded-full blur-2xl animate-float" style={{ animationDelay: '1s' }} />
       </div>
       
@@ -33,7 +35,7 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-8"
         >
           <Sparkles className="w-4 h-4 text-primary" />
-          <span className="text-sm text-muted-foreground">Real-time Digital Product Trends</span>
+          <span className="text-sm text-muted-foreground">AI-Powered Toolkit Creator</span>
         </motion.div>
         
         {/* Main heading */}
@@ -43,10 +45,10 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="text-5xl md:text-7xl font-bold mb-6 leading-tight"
         >
-          <span className="text-foreground">Discover </span>
-          <span className="gradient-text glow-text">Trending</span>
+          <span className="text-foreground">Create </span>
+          <span className="gradient-text glow-text">Digital Toolkits</span>
           <br />
-          <span className="text-foreground">Digital Products</span>
+          <span className="text-foreground">In Minutes</span>
         </motion.h1>
         
         {/* Subheading */}
@@ -56,8 +58,8 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed"
         >
-          Spot profitable niches instantly. Get curated PLR recommendations. 
-          Build your digital product empire with data-driven insights.
+          Turn any idea into a complete, sellable toolkit with AI-generated content, 
+          professional e-covers, and ready-to-use sales pages. Download as PDF & ZIP.
         </motion.p>
         
         {/* CTA Buttons */}
@@ -67,13 +69,13 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
           transition={{ duration: 0.5, delay: 0.3 }}
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
-          <Button variant="hero" size="xl" onClick={onGetStarted} className="dual-glow">
-            <TrendingUp className="w-5 h-5" />
-            Show Me What's Trending
+          <Button variant="hero" size="xl" onClick={() => navigate("/create-toolkit")} className="dual-glow">
+            <Package className="w-5 h-5" />
+            Create Your Toolkit
           </Button>
-          <Button variant="outline" size="lg" className="hover:border-primary/50">
+          <Button variant="outline" size="lg" onClick={onGetStarted} className="hover:border-primary/50">
             <Zap className="w-4 h-4" />
-            How It Works
+            Explore Niches
           </Button>
         </motion.div>
         
@@ -85,9 +87,9 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
           className="grid grid-cols-3 gap-8 mt-16 max-w-lg mx-auto"
         >
           {[
-            { value: "10K+", label: "Products Analyzed" },
-            { value: "500+", label: "Niches Tracked" },
-            { value: "24/7", label: "Live Updates" },
+            { value: "7+", label: "Toolkit Templates" },
+            { value: "6", label: "Component Types" },
+            { value: "1-Click", label: "ZIP Download" },
           ].map((stat, index) => (
             <div key={index} className="text-center">
               <div className="text-2xl md:text-3xl font-bold gradient-text">{stat.value}</div>
