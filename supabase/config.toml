@@ -50,3 +50,6 @@ verify_jwt = true
 
 [functions.market-scanner]
 verify_jwt = false
+
+[functions.generate-email-sequence]
+verify_jwt = true
