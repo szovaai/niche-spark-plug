@@ -65,6 +65,9 @@ const CreateToolkit = () => {
   const [subtitle, setSubtitle] = useState("");
   const [niche, setNiche] = useState(searchParams.get("niche") || "");
   const [targetAudience, setTargetAudience] = useState("");
+  const [authorName, setAuthorName] = useState("");
+  const [authorTagline, setAuthorTagline] = useState("");
+  const [authorBio, setAuthorBio] = useState("");
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [ecoverUrl, setEcoverUrl] = useState<string | null>(null);
   const [components, setComponents] = useState<ToolkitComponents>({
@@ -309,6 +312,50 @@ const CreateToolkit = () => {
                           rows={2}
                         />
                       </div>
+
+                      {/* Author Identity Section */}
+                      <div className="pt-4 border-t border-border">
+                        <h3 className="text-sm font-semibold text-primary mb-3 flex items-center gap-2">
+                          ✍️ Author Identity
+                          <span className="text-xs font-normal text-muted-foreground">(Builds trust & increases perceived value)</span>
+                        </h3>
+                        
+                        <div className="space-y-3">
+                          <div>
+                            <Label htmlFor="authorName">Author Name *</Label>
+                            <Input
+                              id="authorName"
+                              placeholder="Your name or pen name (e.g., Sarah Mitchell)"
+                              value={authorName}
+                              onChange={(e) => setAuthorName(e.target.value)}
+                              className="mt-1"
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="authorTagline">Tagline (Optional)</Label>
+                            <Input
+                              id="authorTagline"
+                              placeholder="e.g., Digital Marketing Strategist | 10+ Years Experience"
+                              value={authorTagline}
+                              onChange={(e) => setAuthorTagline(e.target.value)}
+                              className="mt-1"
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="authorBio">Short Bio (Optional)</Label>
+                            <Textarea
+                              id="authorBio"
+                              placeholder="2-3 lines about you or your brand that builds credibility..."
+                              value={authorBio}
+                              onChange={(e) => setAuthorBio(e.target.value)}
+                              className="mt-1"
+                              rows={2}
+                            />
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -487,6 +534,9 @@ const CreateToolkit = () => {
                     subtitle,
                     niche,
                     targetAudience,
+                    authorName,
+                    authorTagline,
+                    authorBio,
                     logoUrl,
                     ecoverUrl,
                     components,
