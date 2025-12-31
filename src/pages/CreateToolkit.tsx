@@ -22,6 +22,7 @@ import EcoverGenerator from "@/components/EcoverGenerator";
 import SalesLetterGenerator from "@/components/SalesLetterGenerator";
 import UpsellCreator from "@/components/UpsellCreator";
 import ToolkitPreview from "@/components/ToolkitPreview";
+import PricingSuggester from "@/components/PricingSuggester";
 
 const steps = [
   { id: "niche", title: "Niche & Title", icon: Lightbulb },
@@ -109,7 +110,7 @@ const CreateToolkit = () => {
     if (!user) return;
     
     try {
-      const toolkitData = {
+      const toolkitData: any = {
         user_id: user.id,
         title,
         subtitle,
@@ -117,10 +118,10 @@ const CreateToolkit = () => {
         target_audience: targetAudience,
         logo_url: logoUrl,
         ecover_url: ecoverUrl,
-        components: components as unknown as Record<string, unknown>,
-        content: content as Record<string, unknown>,
+        components,
+        content,
         sales_letter: salesLetter,
-        upsell: upsell as Record<string, unknown> | null,
+        upsell,
         status: "draft",
       };
 
@@ -280,44 +281,52 @@ const CreateToolkit = () => {
               )}
 
               {currentStep === 2 && (
-                <Card>
-                  <CardContent className="p-6 space-y-6">
-                    <div className="text-center mb-8">
-                      <h2 className="text-2xl font-bold gradient-text">What's In Your Toolkit?</h2>
-                      <p className="text-muted-foreground mt-2">
-                        Select the components you want to include. More components = more value.
-                      </p>
-                    </div>
+                <div className="space-y-6">
+                  <Card>
+                    <CardContent className="p-6 space-y-6">
+                      <div className="text-center mb-8">
+                        <h2 className="text-2xl font-bold gradient-text">What's In Your Toolkit?</h2>
+                        <p className="text-muted-foreground mt-2">
+                          Select the components you want to include. More components = more value.
+                        </p>
+                      </div>
 
-                    <div className="grid md:grid-cols-2 gap-4">
-                      {componentOptions.map((option) => (
-                        <div
-                          key={option.id}
-                          className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
-                            components[option.id as keyof ToolkitComponents]
-                              ? 'border-primary bg-primary/5'
-                              : 'border-border hover:border-primary/50'
-                          } ${option.required ? 'opacity-100' : ''}`}
-                          onClick={() => handleComponentToggle(option.id as keyof ToolkitComponents)}
-                        >
-                          <div className="flex items-start gap-3">
-                            <Checkbox
-                              checked={components[option.id as keyof ToolkitComponents]}
-                              disabled={option.required}
-                            />
-                            <div>
-                              <p className="font-medium">
-                                {option.label}
-                                {option.required && <span className="text-xs text-primary ml-2">(Required)</span>}
-                              </p>
-                              <p className="text-sm text-muted-foreground">{option.description}</p>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        {componentOptions.map((option) => (
+                          <div
+                            key={option.id}
+                            className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                              components[option.id as keyof ToolkitComponents]
+                                ? 'border-primary bg-primary/5'
+                                : 'border-border hover:border-primary/50'
+                            } ${option.required ? 'opacity-100' : ''}`}
+                            onClick={() => handleComponentToggle(option.id as keyof ToolkitComponents)}
+                          >
+                            <div className="flex items-start gap-3">
+                              <Checkbox
+                                checked={components[option.id as keyof ToolkitComponents]}
+                                disabled={option.required}
+                              />
+                              <div>
+                                <p className="font-medium">
+                                  {option.label}
+                                  {option.required && <span className="text-xs text-primary ml-2">(Required)</span>}
+                                </p>
+                                <p className="text-sm text-muted-foreground">{option.description}</p>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Pricing Suggester */}
+                  <PricingSuggester 
+                    niche={niche}
+                    components={components}
+                  />
+                </div>
               )}
 
               {currentStep === 3 && (
