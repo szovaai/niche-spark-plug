@@ -149,7 +149,7 @@ const PricingSuggester = ({ niche, components, onPriceSelected }: PricingSuggest
           <div className="text-sm">
             <p className="font-medium text-accent">Pro Tip</p>
             <p className="text-muted-foreground">
-              WarriorPlus buyers expect value. With {componentCount} components, 
+              Digital product buyers expect value. With {componentCount} components, 
               the ${tiers.value.price} "Value" tier hits the sweet spot for conversions.
             </p>
           </div>
