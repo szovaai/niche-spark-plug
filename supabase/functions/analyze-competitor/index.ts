@@ -12,10 +12,10 @@ serve(async (req) => {
 
   try {
     const { url } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
 
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    if (!DEEPSEEK_API_KEY) {
+      throw new Error("DEEPSEEK_API_KEY is not configured");
     }
 
     console.log("Analyzing competitor URL:", url);
@@ -93,14 +93,14 @@ Return as JSON:
   "actionPlan": []
 }`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "deepseek-chat",
         messages: [
           { role: "system", content: "You are an expert Etsy product analyst. Return only valid JSON." },
           { role: "user", content: prompt },
@@ -110,8 +110,8 @@ Return as JSON:
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      throw new Error(`AI gateway error: ${response.status}`);
+      console.error("DeepSeek API error:", response.status, errorText);
+      throw new Error(`DeepSeek API error: ${response.status}`);
     }
 
     const data = await response.json();

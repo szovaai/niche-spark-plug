@@ -12,10 +12,10 @@ serve(async (req) => {
 
   try {
     const { nicheName, nicheCategory, demandTier, competitionTier } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
     
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    if (!DEEPSEEK_API_KEY) {
+      throw new Error("DEEPSEEK_API_KEY is not configured");
     }
 
     const systemPrompt = `You are an expert digital product strategist specializing in PLR (Private Label Rights) content and digital product creation for platforms like Etsy, Gumroad, and Shopify.
@@ -41,14 +41,16 @@ Always respond with valid JSON in this exact format:
 
 Provide specific, actionable recommendations that someone could implement today.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    console.log("Generating build pack for:", nicheName);
+
+    const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "deepseek-chat",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
@@ -64,14 +66,14 @@ Provide specific, actionable recommendations that someone could implement today.
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI usage limit reached. Please upgrade your plan." }), {
+        return new Response(JSON.stringify({ error: "API usage limit reached. Please check your DeepSeek account." }), {
           status: 402,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      throw new Error("AI gateway error");
+      console.error("DeepSeek API error:", response.status, errorText);
+      throw new Error("DeepSeek API error");
     }
 
     const data = await response.json();
@@ -87,6 +89,8 @@ Provide specific, actionable recommendations that someone could implement today.
       console.error("Failed to parse AI response:", content);
       throw new Error("Failed to parse AI response");
     }
+
+    console.log("Build pack generated successfully");
 
     return new Response(JSON.stringify(packData), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
