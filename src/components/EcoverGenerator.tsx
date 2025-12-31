@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Image, RefreshCw, Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface EcoverGeneratorProps {
   title: string;
@@ -12,18 +14,44 @@ interface EcoverGeneratorProps {
   existingEcover?: string | null;
 }
 
-const EcoverGenerator = ({ title, onEcoverGenerated, existingEcover }: EcoverGeneratorProps) => {
+const EcoverGenerator = ({ title, niche, onEcoverGenerated, existingEcover }: EcoverGeneratorProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [ecoverUrl, setEcoverUrl] = useState(existingEcover || "");
 
   const generateEcover = async () => {
     setIsGenerating(true);
-    setTimeout(() => {
-      const placeholder = `https://via.placeholder.com/600x800/1a1a2e/00d4ff?text=${encodeURIComponent(title.substring(0, 15))}`;
-      setEcoverUrl(placeholder);
-      onEcoverGenerated(placeholder);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-ecover", {
+        body: {
+          productName: title,
+          productType: "Digital Toolkit",
+          aesthetic: "modern, professional, clean",
+          primaryColor: "#00d4ff",
+          secondaryColor: "#1a1a2e",
+          moodKeywords: [niche, "premium", "digital product"],
+          ecoverType: "mockup"
+        }
+      });
+
+      if (error) {
+        console.error("Ecover generation error:", error);
+        toast.error("Failed to generate e-cover. Please try again.");
+        return;
+      }
+
+      if (data?.imageUrl) {
+        setEcoverUrl(data.imageUrl);
+        onEcoverGenerated(data.imageUrl);
+        toast.success("E-cover generated successfully!");
+      } else {
+        toast.error("No image returned. Please try again.");
+      }
+    } catch (err) {
+      console.error("Ecover error:", err);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
       setIsGenerating(false);
-    }, 2000);
+    }
   };
 
   return (
