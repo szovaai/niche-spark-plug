@@ -1,16 +1,11 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { 
-  Search, 
   Package, 
-  Map, 
-  Rocket, 
-  Star, 
-  Video, 
   CreditCard,
-  Crown,
   LogOut,
   ChevronLeft,
-  LayoutDashboard
+  LayoutDashboard,
+  Plus
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,7 +17,6 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -34,12 +28,7 @@ import {
 
 const mainNavItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Discover", url: "/discover", icon: Search },
-  { title: "My Products", url: "/my-products", icon: Package },
-  { title: "Money Map", url: "/money-map", icon: Map },
-  { title: "Launch Packs", url: "/launch-packs", icon: Rocket, isPro: true },
-  { title: "Saved", url: "/saved", icon: Star },
-  { title: "UGC Vault", url: "/ugc-vault", icon: Video, isPro: true },
+  { title: "My Toolkits", url: "/my-toolkits", icon: Package },
 ];
 
 const secondaryNavItems = [
@@ -49,6 +38,7 @@ const secondaryNavItems = [
 export function DashboardSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, role, signOut } = useAuth();
   const isCollapsed = state === "collapsed";
 
@@ -74,8 +64,26 @@ export function DashboardSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
+        {/* Create Toolkit CTA */}
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <div className={`px-2 ${isCollapsed ? 'px-1' : ''}`}>
+              <Button
+                onClick={() => navigate("/create")}
+                variant="hero"
+                size={isCollapsed ? "icon" : "default"}
+                className={`w-full gap-2 ${isCollapsed ? 'justify-center' : ''}`}
+              >
+                <Plus className="h-4 w-4 shrink-0" />
+                {!isCollapsed && <span>Create Toolkit</span>}
+              </Button>
+            </div>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarSeparator className="my-2" />
+
+        <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainNavItems.map((item) => (
@@ -92,9 +100,6 @@ export function DashboardSidebar() {
                     >
                       <item.icon className="h-4 w-4 shrink-0" />
                       <span className="truncate">{item.title}</span>
-                      {item.isPro && role === "free" && (
-                        <Crown className="h-3 w-3 text-accent ml-auto shrink-0" />
-                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
