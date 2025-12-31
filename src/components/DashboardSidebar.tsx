@@ -5,7 +5,8 @@ import {
   LogOut,
   ChevronLeft,
   LayoutDashboard,
-  Plus
+  Plus,
+  Search
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
@@ -28,6 +29,7 @@ import {
 
 const mainNavItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Research", url: "/research", icon: Search },
   { title: "My Toolkits", url: "/my-toolkits", icon: Package },
 ];
 
