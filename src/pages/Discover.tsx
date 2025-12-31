@@ -20,7 +20,7 @@ import InspirationOfTheDay from "@/components/InspirationOfTheDay";
 import DemoModeModal from "@/components/DemoModeModal";
 import OnboardingWizard from "@/components/OnboardingWizard";
 import FirstTimeTooltip, { TOOLTIP_CONTENT } from "@/components/FirstTimeTooltip";
-import CompetitorClone from "@/components/CompetitorClone";
+import StoreSpy from "@/components/StoreSpy";
 import { trendingTopics, nicheSnapshots, isFastCashNiche } from "@/data/mockNiches";
 import { useAuth } from "@/hooks/useAuth";
 import { useSavedNiches } from "@/hooks/useSavedNiches";
@@ -298,7 +298,7 @@ const Discover = () => {
         onOpenChange={setShowDemoModal}
       />
 
-      <CompetitorClone
+      <StoreSpy
         isOpen={showCompetitorClone}
         onClose={() => setShowCompetitorClone(false)}
         onCreateProduct={handleCompetitorCloneCreate}

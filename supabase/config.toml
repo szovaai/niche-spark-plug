@@ -47,3 +47,6 @@ verify_jwt = true
 
 [functions.generate-launch-accelerator]
 verify_jwt = true
+
+[functions.market-scanner]
+verify_jwt = false
