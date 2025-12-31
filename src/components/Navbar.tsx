@@ -64,21 +64,9 @@ const Navbar = () => {
             </span>
           </button>
           
-          {/* Desktop Nav links */}
+          {/* Desktop Nav links - minimal for landing page */}
           <div className="hidden md:flex items-center gap-6">
-            {filteredNavItems.map((item) => (
-              <button
-                key={item.path}
-                onClick={() => navigate(item.path)}
-                className={`text-sm transition-colors flex items-center gap-1 ${
-                  isActive(item.path) ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <item.icon className="w-4 h-4" />
-                {item.label}
-                {item.proBadge && <Crown className="w-3 h-3 text-accent" />}
-              </button>
-            ))}
+            {/* Nav links removed for cleaner landing page */}
           </div>
           
           {/* Auth Section + Mobile Menu */}
