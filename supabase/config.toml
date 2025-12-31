@@ -44,3 +44,6 @@ verify_jwt = true
 
 [functions.generate-sales-letter]
 verify_jwt = true
+
+[functions.generate-launch-accelerator]
+verify_jwt = true
