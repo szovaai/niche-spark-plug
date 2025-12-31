@@ -46,9 +46,16 @@ const ToolkitBuilder = () => {
   });
   const [content, setContent] = useState<ToolkitContent>({});
   const [salesLetter, setSalesLetter] = useState<string | null>(null);
+  const [emailSequence, setEmailSequence] = useState<{ day: number; subject: string; body: string }[]>([]);
+  const [upsell, setUpsell] = useState<{ title: string; description: string; price: number } | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [humanizeEnabled, setHumanizeEnabled] = useState(true);
   const [isGeneratingAll, setIsGeneratingAll] = useState(false);
+  const [isGeneratingMarketing, setIsGeneratingMarketing] = useState({
+    salesLetter: false,
+    emailSequence: false,
+    upsell: false,
+  });
 
   // Load existing toolkit
   useEffect(() => {
@@ -404,6 +411,119 @@ const ToolkitBuilder = () => {
     return descriptions[type] || "";
   };
 
+  // Generate Sales Letter
+  const handleGenerateSalesLetter = async () => {
+    if (!title || !niche) {
+      toast.error("Please fill in the toolkit title and niche first");
+      return;
+    }
+
+    setIsGeneratingMarketing(prev => ({ ...prev, salesLetter: true }));
+
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-sales-letter", {
+        body: {
+          title,
+          subtitle,
+          niche,
+          targetAudience,
+          components,
+          price: 17,
+          authorName,
+          keyBenefits: [
+            `Complete ${niche} toolkit`,
+            "Step-by-step guidance",
+            "Ready-to-use templates",
+          ],
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.salesLetter) {
+        setSalesLetter(data.salesLetter);
+        toast.success("Sales letter generated!");
+        saveToolkit();
+      }
+    } catch (error) {
+      console.error("Sales letter error:", error);
+      toast.error("Failed to generate sales letter");
+    } finally {
+      setIsGeneratingMarketing(prev => ({ ...prev, salesLetter: false }));
+    }
+  };
+
+  // Generate Email Sequence
+  const handleGenerateEmailSequence = async () => {
+    if (!title || !niche) {
+      toast.error("Please fill in the toolkit title and niche first");
+      return;
+    }
+
+    setIsGeneratingMarketing(prev => ({ ...prev, emailSequence: true }));
+
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-email-sequence", {
+        body: {
+          offerName: title,
+          targetAudience: targetAudience || "entrepreneurs",
+          keyBenefits: [
+            `Master ${niche}`,
+            "Save time with templates",
+            "Get results faster",
+          ],
+          uniqueMechanism: `The ${title} System`,
+          price: 17,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.emails) {
+        const formattedEmails = data.emails.map((email: { day: number; subject: string; openingHook?: string; storyAnalogy?: string; lessonTwist?: string; offerBridge?: string; cta?: string; ps?: string }) => ({
+          day: email.day,
+          subject: email.subject,
+          body: [
+            email.openingHook,
+            email.storyAnalogy,
+            email.lessonTwist,
+            email.offerBridge,
+            email.cta,
+            email.ps ? `P.S. ${email.ps}` : "",
+          ].filter(Boolean).join("\n\n"),
+        }));
+        setEmailSequence(formattedEmails);
+        toast.success("Email sequence generated!");
+      }
+    } catch (error) {
+      console.error("Email sequence error:", error);
+      toast.error("Failed to generate email sequence");
+    } finally {
+      setIsGeneratingMarketing(prev => ({ ...prev, emailSequence: false }));
+    }
+  };
+
+  // Generate Upsell
+  const handleGenerateUpsell = async () => {
+    if (!title || !niche) {
+      toast.error("Please fill in the toolkit title and niche first");
+      return;
+    }
+
+    setIsGeneratingMarketing(prev => ({ ...prev, upsell: true }));
+
+    // Generate a simple upsell based on the toolkit
+    setTimeout(() => {
+      setUpsell({
+        title: `${title} - Premium Edition`,
+        description: `Get the complete ${niche} system with video walkthroughs, done-for-you templates, and 1-on-1 support. Everything in the basic toolkit PLUS advanced strategies and personal guidance.`,
+        price: 47,
+      });
+      setIsGeneratingMarketing(prev => ({ ...prev, upsell: false }));
+      toast.success("Upsell offer generated!");
+    }, 1500);
+  };
+
   // Calculate progress
   const progressSteps = [
     { id: "topic", label: "Select Topic", completed: !!title && !!niche },
@@ -499,11 +619,12 @@ const ToolkitBuilder = () => {
         {activeTab === "marketing" && (
           <MarketingKitDashboard
             salesLetter={salesLetter || undefined}
-            emailSequence={[]}
-            upsell={undefined}
-            onRegenerateSalesLetter={() => toast.info("Sales letter generation coming soon")}
-            onRegenerateEmailSequence={() => toast.info("Email sequence generation coming soon")}
-            onRegenerateUpsell={() => toast.info("Upsell generation coming soon")}
+            emailSequence={emailSequence.map(e => ({ subject: e.subject, body: e.body }))}
+            upsell={upsell || undefined}
+            onRegenerateSalesLetter={handleGenerateSalesLetter}
+            onRegenerateEmailSequence={handleGenerateEmailSequence}
+            onRegenerateUpsell={handleGenerateUpsell}
+            isGenerating={isGeneratingMarketing}
           />
         )}
 
