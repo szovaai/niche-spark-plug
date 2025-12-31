@@ -229,40 +229,179 @@ const ToolkitBuilder = () => {
 
   // Regenerate a single chapter
   const handleRegenerateChapter = async (chapterId: string) => {
+    if (!title || !niche) {
+      toast.error("Please fill in the toolkit title and niche first");
+      return;
+    }
+
     setChapters(prev =>
       prev.map(c => (c.id === chapterId ? { ...c, status: "generating" as const } : c))
     );
-    
-    // Simulate generation (replace with actual API call)
-    setTimeout(() => {
+
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-toolkit-content", {
+        body: {
+          title,
+          niche,
+          targetAudience,
+          components,
+          singleChapter: chapterId,
+          humanize: humanizeEnabled,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.content?.[chapterId]) {
+        const generatedContent = data.content[chapterId];
+        
+        // Update the content state
+        setContent(prev => ({ ...prev, [chapterId]: generatedContent }));
+        
+        // Update the chapter with new content
+        setChapters(prev =>
+          prev.map(c => {
+            if (c.id !== chapterId) return c;
+            
+            const newContent = formatChapterContent(chapterId, generatedContent);
+            const wordCount = newContent?.split(/\s+/).length || 0;
+            
+            return {
+              ...c,
+              status: "complete" as const,
+              content: newContent,
+              wordCount,
+            };
+          })
+        );
+        
+        toast.success("Chapter generated successfully");
+      } else {
+        throw new Error("No content returned");
+      }
+    } catch (error) {
+      console.error("Chapter generation error:", error);
       setChapters(prev =>
-        prev.map(c =>
-          c.id === chapterId
-            ? { ...c, status: "complete" as const, wordCount: Math.floor(Math.random() * 1500) + 500 }
-            : c
-        )
+        prev.map(c => (c.id === chapterId ? { ...c, status: "pending" as const } : c))
       );
-      toast.success("Chapter regenerated");
-    }, 2000);
+      toast.error("Failed to generate chapter. Please try again.");
+    }
+  };
+
+  // Format chapter content based on type
+  const formatChapterContent = (type: string, data: unknown): string => {
+    if (!data) return "";
+    
+    switch (type) {
+      case "guide": {
+        const guide = data as { title?: string; sections?: { heading: string; content: string }[] };
+        return guide.sections?.map(s => `## ${s.heading}\n\n${s.content}`).join("\n\n---\n\n") || "";
+      }
+      case "worksheet": {
+        const worksheet = data as { exercises?: { title: string; instructions: string; fields?: string[] }[] };
+        return worksheet.exercises?.map(e => 
+          `### ${e.title}\n\n${e.instructions}\n\n${e.fields?.map(f => `- [ ] ${f}`).join("\n") || ""}`
+        ).join("\n\n---\n\n") || "";
+      }
+      case "checklist": {
+        const checklist = data as { items?: string[] };
+        return checklist.items?.map(item => `☐ ${item}`).join("\n") || "";
+      }
+      case "resourceList": {
+        const resources = data as { resources?: { name: string; description: string; url?: string }[] };
+        return resources.resources?.map(r => 
+          `**${r.name}**\n${r.description}${r.url ? `\n🔗 ${r.url}` : ""}`
+        ).join("\n\n") || "";
+      }
+      case "templates": {
+        const templates = data as { templates?: { name: string; content: string }[] };
+        return templates.templates?.map(t => `### ${t.name}\n\n${t.content}`).join("\n\n---\n\n") || "";
+      }
+      case "quiz": {
+        const quiz = data as { questions?: { question: string; options: string[]; correctIndex: number }[] };
+        return quiz.questions?.map((q, i) => 
+          `**Q${i + 1}: ${q.question}**\n${q.options.map((opt, j) => `  ${String.fromCharCode(65 + j)}) ${opt}`).join("\n")}`
+        ).join("\n\n") || "";
+      }
+      default:
+        return JSON.stringify(data, null, 2);
+    }
   };
 
   // Regenerate all chapters
   const handleRegenerateAll = async () => {
+    if (!title || !niche) {
+      toast.error("Please fill in the toolkit title and niche first");
+      return;
+    }
+
+    if (!Object.values(components).some(v => v)) {
+      toast.error("Please select at least one component");
+      return;
+    }
+
     setIsGeneratingAll(true);
     setChapters(prev => prev.map(c => ({ ...c, status: "generating" as const })));
-    
-    // Simulate generation
-    setTimeout(() => {
-      setChapters(prev =>
-        prev.map(c => ({
-          ...c,
-          status: "complete" as const,
-          wordCount: Math.floor(Math.random() * 1500) + 500,
-        }))
-      );
+
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-toolkit-content", {
+        body: {
+          title,
+          niche,
+          targetAudience,
+          components,
+          humanize: humanizeEnabled,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.content) {
+        // Update the content state with all generated content
+        setContent(data.content);
+        
+        // Rebuild chapters with new content
+        const updatedChapters: Chapter[] = [];
+        
+        for (const [key, value] of Object.entries(data.content)) {
+          if (components[key as keyof typeof components]) {
+            const formattedContent = formatChapterContent(key, value);
+            const chapterTitle = (value as { title?: string })?.title || key.charAt(0).toUpperCase() + key.slice(1);
+            
+            updatedChapters.push({
+              id: key,
+              type: key as Chapter["type"],
+              title: chapterTitle,
+              description: getChapterDescription(key),
+              content: formattedContent,
+              wordCount: formattedContent.split(/\s+/).length,
+              status: "complete",
+            });
+          }
+        }
+        
+        setChapters(updatedChapters);
+        toast.success("All chapters generated successfully");
+      }
+    } catch (error) {
+      console.error("Generation error:", error);
+      setChapters(prev => prev.map(c => ({ ...c, status: "pending" as const })));
+      toast.error("Failed to generate content. Please try again.");
+    } finally {
       setIsGeneratingAll(false);
-      toast.success("All chapters regenerated");
-    }, 3000);
+    }
+  };
+
+  const getChapterDescription = (type: string): string => {
+    const descriptions: Record<string, string> = {
+      guide: "Main guide content with sections",
+      worksheet: "Interactive exercises and activities",
+      checklist: "Action items and tasks",
+      resourceList: "Curated list of helpful resources",
+      templates: "Ready-to-use templates",
+      quiz: "Knowledge check questions",
+    };
+    return descriptions[type] || "";
   };
 
   // Calculate progress
