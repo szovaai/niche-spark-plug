@@ -10,6 +10,9 @@ export interface ToolkitData {
   subtitle?: string;
   niche: string;
   targetAudience?: string;
+  authorName?: string;
+  authorTagline?: string;
+  authorBio?: string;
   logoUrl?: string | null;
   ecoverUrl?: string | null;
   components: ToolkitComponents;
@@ -70,7 +73,8 @@ export const createToolkitZip = async (
       toolkit.title,
       toolkit.subtitle,
       toolkit.content,
-      toolkit.components
+      toolkit.components,
+      toolkit.authorName
     );
 
     // Add PDFs to main folder
@@ -115,10 +119,11 @@ export const createToolkitZip = async (
       subtitle: toolkit.subtitle,
       niche: toolkit.niche,
       targetAudience: toolkit.targetAudience,
+      authorName: toolkit.authorName,
       components: toolkit.components,
       hasUpsell: !!toolkit.upsell,
     });
-    zip.file("README.txt", readme);
+    zip.file("README-Launch.txt", readme);
 
     // Generate and download the ZIP file
     const zipBlob = await zip.generateAsync({ 
@@ -149,27 +154,27 @@ export const downloadSinglePDF = async (
 
   switch (pdfType) {
     case "guide":
-      pdf = generateGuidePDF(toolkit.content.guide, toolkit.title, toolkit.subtitle);
+      pdf = generateGuidePDF(toolkit.content.guide, toolkit.title, toolkit.subtitle, toolkit.authorName);
       filename = `${sanitizeFilename(toolkit.title)}-guide.pdf`;
       break;
     case "worksheet":
-      pdf = generateWorksheetPDF(toolkit.content.worksheet, toolkit.title);
+      pdf = generateWorksheetPDF(toolkit.content.worksheet, toolkit.title, toolkit.authorName);
       filename = `${sanitizeFilename(toolkit.title)}-worksheet.pdf`;
       break;
     case "checklist":
-      pdf = generateChecklistPDF(toolkit.content.checklist, toolkit.title);
+      pdf = generateChecklistPDF(toolkit.content.checklist, toolkit.title, toolkit.authorName);
       filename = `${sanitizeFilename(toolkit.title)}-checklist.pdf`;
       break;
     case "resourceList":
-      pdf = generateResourceListPDF(toolkit.content.resourceList, toolkit.title);
+      pdf = generateResourceListPDF(toolkit.content.resourceList, toolkit.title, toolkit.authorName);
       filename = `${sanitizeFilename(toolkit.title)}-resources.pdf`;
       break;
     case "templates":
-      pdf = generateTemplatesPDF(toolkit.content.templates, toolkit.title);
+      pdf = generateTemplatesPDF(toolkit.content.templates, toolkit.title, toolkit.authorName);
       filename = `${sanitizeFilename(toolkit.title)}-templates.pdf`;
       break;
     case "quiz":
-      pdf = generateQuizPDF(toolkit.content.quiz, toolkit.title);
+      pdf = generateQuizPDF(toolkit.content.quiz, toolkit.title, toolkit.authorName);
       filename = `${sanitizeFilename(toolkit.title)}-quiz.pdf`;
       break;
     default:

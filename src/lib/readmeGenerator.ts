@@ -5,12 +5,13 @@ export interface ReadmeData {
   subtitle?: string;
   niche: string;
   targetAudience?: string;
+  authorName?: string;
   components: ToolkitComponents;
   hasUpsell: boolean;
 }
 
 export const generateReadme = (data: ReadmeData): string => {
-  const { title, subtitle, niche, targetAudience, components, hasUpsell } = data;
+  const { title, subtitle, niche, targetAudience, authorName, components, hasUpsell } = data;
   
   const componentList: string[] = [];
   if (components.guide) componentList.push("📖 Main Guide (Guide.pdf)");
@@ -20,12 +21,16 @@ export const generateReadme = (data: ReadmeData): string => {
   if (components.templates) componentList.push("📋 Templates (Templates.pdf)");
   if (components.quiz) componentList.push("❓ Quiz/Assessment (Quiz.pdf)");
   
+  const authorSection = authorName ? `
+Created by: ${authorName}
+` : '';
+
   return `
 ================================================================================
                               ${title.toUpperCase()}
 ================================================================================
 ${subtitle ? `\n${subtitle}\n` : ''}
-
+${authorSection}
 Created with DigiStream Toolkit Creator
 Generated on: ${new Date().toLocaleDateString('en-US', { 
   weekday: 'long', 
@@ -52,6 +57,70 @@ ${hasUpsell ? `UPSELL FOLDER:
 ` : ''}
 
 ================================================================================
+                        🚀 48-HOUR LAUNCH CHECKLIST
+================================================================================
+
+Follow this step-by-step plan to get your first sale within 48 hours:
+
+HOUR 0-2: FINAL PREP
+  □ Review all PDFs - fix any typos or awkward phrasing
+  □ Customize the sales letter with your voice
+  □ Set your price point (see pricing guide below)
+  □ Prepare 3 bonus items or "fast action" incentives
+
+HOUR 2-4: PLATFORM SETUP  
+  □ Create/login to your selling platform account
+  □ Upload product files and e-cover
+  □ Write SEO-optimized title and description
+  □ Set up payment processing
+  □ Test the purchase flow yourself
+
+HOUR 4-8: MARKETING ASSETS
+  □ Create 3 social media posts announcing the launch
+  □ Write 2 emails for your list (teaser + launch day)
+  □ Make a simple Pinterest pin with the e-cover
+  □ Draft a "behind the scenes" story for Instagram
+
+HOUR 8-24: SOFT LAUNCH
+  □ Post to 2-3 Facebook groups (where allowed)
+  □ Share on Reddit in relevant subreddits
+  □ Email your personal network
+  □ Post first social media teaser
+
+HOUR 24-48: FULL LAUNCH
+  □ Send main launch email to your list
+  □ Go live on all social platforms
+  □ Engage with every comment and DM
+  □ Offer a 48-hour launch discount
+  □ Reach out to 3 potential affiliates
+
+================================================================================
+                              PRICING GUIDE
+================================================================================
+
+Based on what's included in your toolkit, here's the recommended pricing:
+
+BUDGET TIER ($7-$12)
+• 1-2 components
+• Quick win for impulse buyers
+• Great for building your customer list
+
+VALUE TIER ($17-$27)
+• 3-4 components
+• Sweet spot for most digital products
+• Strong perceived value vs. price
+
+PREMIUM TIER ($37-$67)
+• 5+ components
+• Includes worksheets, templates, and extras
+• Position as comprehensive solution
+
+${hasUpsell ? `
+PRO TIP: Your upsell is included! Use this to increase average order value
+by 40-60%. Price your upsell at 1.5-2x your main product price.
+` : ''}
+
+================================================================================
                               QUICK START GUIDE
 ================================================================================
 
@@ -68,19 +137,13 @@ ${hasUpsell ? `UPSELL FOLDER:
    - Contact information
 
 3. UPLOAD YOUR FILES
-   Choose your selling platform (WarriorPlus, JVZoo, Gumroad, etc.)
+   Choose your selling platform (WarriorPlus, JVZoo, Gumroad, Etsy, etc.)
    and upload:
    - The product files (PDFs) as your deliverable
    - The e-cover for your sales listing
    - Your customized sales page content
 
-4. SET YOUR PRICE
-   Based on the value you're providing:
-   - Basic toolkit: $7-17
-   - Standard toolkit with multiple components: $17-37
-   - Premium toolkit with all components: $37-67
-
-5. LAUNCH!
+4. LAUNCH!
    Submit your product for review and start promoting!
 
 ================================================================================
