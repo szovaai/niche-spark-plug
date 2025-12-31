@@ -136,7 +136,7 @@ const MyToolkits = () => {
             </div>
             <h2 className="text-xl font-semibold mb-2">No Toolkits Yet</h2>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Create your first digital product toolkit and start selling on WarriorPlus.
+              Create your first digital product toolkit and start selling anywhere.
             </p>
             <Button onClick={() => navigate("/create")} variant="hero" size="lg" className="gap-2">
               <Plus className="w-5 h-5" />

@@ -30,9 +30,9 @@ interface RecentToolkit {
 
 const hotNiches = [
   { name: "AI Prompt Libraries", demand: 95, icon: "🤖" },
-  { name: "Traffic Generation", demand: 88, icon: "📈" },
+  { name: "Productivity Systems", demand: 88, icon: "📈" },
   { name: "Email Marketing Templates", demand: 85, icon: "📧" },
-  { name: "Social Media Schedulers", demand: 82, icon: "📱" },
+  { name: "Content Creation Kits", demand: 82, icon: "📱" },
 ];
 
 const Dashboard = () => {
@@ -123,7 +123,7 @@ const Dashboard = () => {
                   Create Your First Toolkit
                 </h2>
                 <p className="text-muted-foreground max-w-md">
-                  Build a complete digital product for WarriorPlus in under 60 minutes. 
+                  Build a complete digital product in under 60 minutes. 
                   We'll guide you step by step.
                 </p>
               </div>
@@ -263,7 +263,7 @@ const Dashboard = () => {
           >
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-accent" />
-              Hot Niches on WarriorPlus
+              Hot Niches Right Now
             </h2>
             <Card>
               <CardContent className="p-4">
@@ -311,10 +311,10 @@ const Dashboard = () => {
                 <div className="p-3 rounded-xl bg-accent/10">
                   <Sparkles className="w-6 h-6 text-accent" />
                 </div>
-                <div className="flex-1">
+              <div className="flex-1">
                   <h3 className="font-semibold mb-2">Pro Tip: The 60-Minute Launch Formula</h3>
                   <p className="text-sm text-muted-foreground">
-                    The most successful WarriorPlus sellers focus on one thing: solving a specific problem 
+                    The most successful digital product sellers focus on one thing: solving a specific problem 
                     with a complete toolkit. Use our wizard to create your guide, worksheets, e-cover, 
                     and sales letter all in one flow. Launch fast, iterate based on feedback.
                   </p>
