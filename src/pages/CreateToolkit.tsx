@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   ArrowLeft, ArrowRight, Check, Loader2, 
   Lightbulb, Palette, FileText, Image, 
-  Mail, Gift, Download, Sparkles, LayoutTemplate
+  Mail, Gift, Download, Sparkles, LayoutTemplate, Send
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +20,7 @@ import { ToolkitComponents } from "@/types/toolkit";
 import LogoCreator from "@/components/LogoCreator";
 import EcoverGenerator from "@/components/EcoverGenerator";
 import SalesLetterGenerator from "@/components/SalesLetterGenerator";
+import EmailSequenceGenerator from "@/components/EmailSequenceGenerator";
 import UpsellCreator from "@/components/UpsellCreator";
 import ToolkitPreview from "@/components/ToolkitPreview";
 import PricingSuggester from "@/components/PricingSuggester";
@@ -34,6 +35,7 @@ const steps = [
   { id: "content", title: "Generate Content", icon: Sparkles },
   { id: "ecover", title: "E-Cover", icon: Image },
   { id: "sales", title: "Sales Letter", icon: Mail },
+  { id: "emails", title: "Email Sequence", icon: Send },
   { id: "upsell", title: "Upsell (Optional)", icon: Gift },
   { id: "download", title: "Download", icon: Download },
 ];
@@ -80,6 +82,7 @@ const CreateToolkit = () => {
   });
   const [content, setContent] = useState<any>({});
   const [salesLetter, setSalesLetter] = useState("");
+  const [emailSequence, setEmailSequence] = useState<any>(null);
   const [upsell, setUpsell] = useState<any>(null);
 
   useEffect(() => {
@@ -519,6 +522,15 @@ const CreateToolkit = () => {
               )}
 
               {currentStep === 7 && (
+                <EmailSequenceGenerator
+                  offerName={title}
+                  targetAudience={targetAudience || `${niche} enthusiasts`}
+                  price={17}
+                  onSequenceGenerated={setEmailSequence}
+                />
+              )}
+
+              {currentStep === 8 && (
                 <UpsellCreator
                   title={title}
                   niche={niche}
@@ -527,7 +539,7 @@ const CreateToolkit = () => {
                 />
               )}
 
-              {currentStep === 8 && (
+              {currentStep === 9 && (
                 <ToolkitPreview
                   toolkit={{
                     title,
@@ -561,7 +573,7 @@ const CreateToolkit = () => {
           </AnimatePresence>
 
           {/* Navigation Buttons */}
-          {currentStep < 8 && (
+          {currentStep < 9 && (
             <div className="flex justify-between mt-8">
               <Button
                 variant="outline"
