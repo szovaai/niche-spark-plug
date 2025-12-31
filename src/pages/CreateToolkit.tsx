@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   ArrowLeft, ArrowRight, Check, Loader2, 
   Lightbulb, Palette, FileText, Image, 
-  Mail, Gift, Download, Sparkles
+  Mail, Gift, Download, Sparkles, LayoutTemplate
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,8 +23,11 @@ import SalesLetterGenerator from "@/components/SalesLetterGenerator";
 import UpsellCreator from "@/components/UpsellCreator";
 import ToolkitPreview from "@/components/ToolkitPreview";
 import PricingSuggester from "@/components/PricingSuggester";
+import TemplateSelector from "@/components/TemplateSelector";
+import { ToolkitTemplate } from "@/data/toolkitTemplates";
 
 const steps = [
+  { id: "template", title: "Choose Template", icon: LayoutTemplate },
   { id: "niche", title: "Niche & Title", icon: Lightbulb },
   { id: "logo", title: "Create Logo", icon: Palette },
   { id: "components", title: "Select Components", icon: FileText },
@@ -54,6 +57,9 @@ const CreateToolkit = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [toolkitId, setToolkitId] = useState<string | null>(null);
   
+  // Template state
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  
   // Form state
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
@@ -79,9 +85,31 @@ const CreateToolkit = () => {
     }
   }, [user, navigate]);
 
+  const handleTemplateSelect = (template: ToolkitTemplate) => {
+    setSelectedTemplate(template.id);
+    
+    // Pre-populate fields from template (except for "blank")
+    if (template.id !== "blank") {
+      if (template.suggestedNiche) setNiche(template.suggestedNiche);
+      if (template.suggestedTitle) setTitle(template.suggestedTitle);
+      if (template.suggestedAudience) setTargetAudience(template.suggestedAudience);
+      setComponents(template.components);
+    }
+  };
+
   const handleNext = async () => {
-    // Validation
-    if (currentStep === 0 && (!title || !niche)) {
+    // Validation for template selection
+    if (currentStep === 0 && !selectedTemplate) {
+      toast({
+        title: "Choose a Template",
+        description: "Please select a template to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validation for niche & title
+    if (currentStep === 1 && (!title || !niche)) {
       toast({
         title: "Missing Information",
         description: "Please fill in the toolkit title and niche.",
@@ -90,8 +118,8 @@ const CreateToolkit = () => {
       return;
     }
 
-    // Save draft when moving forward
-    if (currentStep === 0 && !toolkitId) {
+    // Save draft when moving forward from niche step
+    if (currentStep === 1 && !toolkitId) {
       await saveDraft();
     }
 
@@ -214,11 +242,25 @@ const CreateToolkit = () => {
             >
               {currentStep === 0 && (
                 <Card>
+                  <CardContent className="p-6">
+                    <TemplateSelector
+                      selectedTemplate={selectedTemplate}
+                      onSelect={handleTemplateSelect}
+                    />
+                  </CardContent>
+                </Card>
+              )}
+
+              {currentStep === 1 && (
+                <Card>
                   <CardContent className="p-6 space-y-6">
                     <div className="text-center mb-8">
                       <h2 className="text-2xl font-bold gradient-text">What's Your Toolkit About?</h2>
                       <p className="text-muted-foreground mt-2">
-                        Pick a niche that solves a specific problem for your target audience.
+                        {selectedTemplate !== "blank" 
+                          ? "We've pre-filled some suggestions based on your template. Feel free to customize!"
+                          : "Pick a niche that solves a specific problem for your target audience."
+                        }
                       </p>
                     </div>
 
@@ -272,7 +314,7 @@ const CreateToolkit = () => {
                 </Card>
               )}
 
-              {currentStep === 1 && (
+              {currentStep === 2 && (
                 <LogoCreator 
                   brandName={title}
                   onLogoGenerated={setLogoUrl}
@@ -280,14 +322,17 @@ const CreateToolkit = () => {
                 />
               )}
 
-              {currentStep === 2 && (
+              {currentStep === 3 && (
                 <div className="space-y-6">
                   <Card>
                     <CardContent className="p-6 space-y-6">
                       <div className="text-center mb-8">
                         <h2 className="text-2xl font-bold gradient-text">What's In Your Toolkit?</h2>
                         <p className="text-muted-foreground mt-2">
-                          Select the components you want to include. More components = more value.
+                          {selectedTemplate !== "blank"
+                            ? "Components from your template are pre-selected. Adjust as needed."
+                            : "Select the components you want to include. More components = more value."
+                          }
                         </p>
                       </div>
 
@@ -329,7 +374,7 @@ const CreateToolkit = () => {
                 </div>
               )}
 
-              {currentStep === 3 && (
+              {currentStep === 4 && (
                 <Card>
                   <CardContent className="p-6 space-y-6">
                     <div className="text-center mb-8">
@@ -403,7 +448,7 @@ const CreateToolkit = () => {
                 </Card>
               )}
 
-              {currentStep === 4 && (
+              {currentStep === 5 && (
                 <EcoverGenerator
                   title={title}
                   subtitle={subtitle}
@@ -414,7 +459,7 @@ const CreateToolkit = () => {
                 />
               )}
 
-              {currentStep === 5 && (
+              {currentStep === 6 && (
                 <SalesLetterGenerator
                   title={title}
                   subtitle={subtitle}
@@ -426,7 +471,7 @@ const CreateToolkit = () => {
                 />
               )}
 
-              {currentStep === 6 && (
+              {currentStep === 7 && (
                 <UpsellCreator
                   title={title}
                   niche={niche}
@@ -435,7 +480,7 @@ const CreateToolkit = () => {
                 />
               )}
 
-              {currentStep === 7 && (
+              {currentStep === 8 && (
                 <ToolkitPreview
                   toolkit={{
                     title,
@@ -466,7 +511,7 @@ const CreateToolkit = () => {
           </AnimatePresence>
 
           {/* Navigation Buttons */}
-          {currentStep < 7 && (
+          {currentStep < 8 && (
             <div className="flex justify-between mt-8">
               <Button
                 variant="outline"
