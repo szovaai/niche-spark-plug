@@ -51,6 +51,8 @@ const ToolkitBuilder = () => {
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [humanizeEnabled, setHumanizeEnabled] = useState(true);
   const [isGeneratingAll, setIsGeneratingAll] = useState(false);
+  const [isGeneratingEverything, setIsGeneratingEverything] = useState(false);
+  const [generatingStep, setGeneratingStep] = useState("");
   const [isGeneratingMarketing, setIsGeneratingMarketing] = useState({
     salesLetter: false,
     emailSequence: false,
@@ -524,6 +526,167 @@ const ToolkitBuilder = () => {
     }, 1500);
   };
 
+  // Generate Everything in Sequence
+  const handleGenerateEverything = async () => {
+    if (!title || !niche) {
+      toast.error("Please fill in the toolkit title and niche first");
+      return;
+    }
+
+    if (!Object.values(components).some(v => v)) {
+      toast.error("Please select at least one component");
+      return;
+    }
+
+    setIsGeneratingEverything(true);
+
+    try {
+      // Step 1: Generate Content
+      setGeneratingStep("Generating content chapters...");
+      setIsGeneratingAll(true);
+      setChapters(prev => prev.map(c => ({ ...c, status: "generating" as const })));
+
+      const { data: contentData, error: contentError } = await supabase.functions.invoke("generate-toolkit-content", {
+        body: {
+          title,
+          niche,
+          targetAudience,
+          components,
+          humanize: humanizeEnabled,
+        },
+      });
+
+      if (contentError) throw contentError;
+
+      if (contentData?.content) {
+        setContent(contentData.content);
+        
+        const updatedChapters: Chapter[] = [];
+        for (const [key, value] of Object.entries(contentData.content)) {
+          if (components[key as keyof typeof components]) {
+            const formattedContent = formatChapterContent(key, value);
+            const chapterTitle = (value as { title?: string })?.title || key.charAt(0).toUpperCase() + key.slice(1);
+            
+            updatedChapters.push({
+              id: key,
+              type: key as Chapter["type"],
+              title: chapterTitle,
+              description: getChapterDescription(key),
+              content: formattedContent,
+              wordCount: formattedContent.split(/\s+/).length,
+              status: "complete",
+            });
+          }
+        }
+        setChapters(updatedChapters);
+      }
+      setIsGeneratingAll(false);
+
+      // Step 2: Generate Cover
+      setGeneratingStep("Creating e-cover...");
+      const { data: coverData, error: coverError } = await supabase.functions.invoke("generate-ecover", {
+        body: {
+          productName: title,
+          productType: "toolkit",
+          aesthetic: "modern",
+          primaryColor: "#3B82F6",
+          secondaryColor: "#1E40AF",
+          moodKeywords: [niche, "professional", "premium"],
+        },
+      });
+
+      if (coverError) {
+        console.error("Cover generation error:", coverError);
+        // Continue even if cover fails
+      } else if (coverData?.imageUrl) {
+        setEcoverUrl(coverData.imageUrl);
+      }
+
+      // Step 3: Generate Sales Letter
+      setGeneratingStep("Writing sales letter...");
+      const { data: salesData, error: salesError } = await supabase.functions.invoke("generate-sales-letter", {
+        body: {
+          title,
+          subtitle,
+          niche,
+          targetAudience,
+          components,
+          price: 17,
+          authorName,
+          keyBenefits: [
+            `Complete ${niche} toolkit`,
+            "Step-by-step guidance",
+            "Ready-to-use templates",
+          ],
+        },
+      });
+
+      if (salesError) {
+        console.error("Sales letter error:", salesError);
+        // Continue even if sales letter fails
+      } else if (salesData?.salesLetter) {
+        setSalesLetter(salesData.salesLetter);
+      }
+
+      // Step 4: Generate Email Sequence
+      setGeneratingStep("Creating email sequence...");
+      const { data: emailData, error: emailError } = await supabase.functions.invoke("generate-email-sequence", {
+        body: {
+          offerName: title,
+          targetAudience: targetAudience || "entrepreneurs",
+          keyBenefits: [
+            `Master ${niche}`,
+            "Save time with templates",
+            "Get results faster",
+          ],
+          uniqueMechanism: `The ${title} System`,
+          price: 17,
+        },
+      });
+
+      if (emailError) {
+        console.error("Email sequence error:", emailError);
+        // Continue even if email fails
+      } else if (emailData?.emails) {
+        const formattedEmails = emailData.emails.map((email: { day: number; subject: string; openingHook?: string; storyAnalogy?: string; lessonTwist?: string; offerBridge?: string; cta?: string; ps?: string }) => ({
+          day: email.day,
+          subject: email.subject,
+          body: [
+            email.openingHook,
+            email.storyAnalogy,
+            email.lessonTwist,
+            email.offerBridge,
+            email.cta,
+            email.ps ? `P.S. ${email.ps}` : "",
+          ].filter(Boolean).join("\n\n"),
+        }));
+        setEmailSequence(formattedEmails);
+      }
+
+      // Step 5: Generate Upsell
+      setGeneratingStep("Creating upsell offer...");
+      setUpsell({
+        title: `${title} - Premium Edition`,
+        description: `Get the complete ${niche} system with video walkthroughs, done-for-you templates, and 1-on-1 support. Everything in the basic toolkit PLUS advanced strategies and personal guidance.`,
+        price: 47,
+      });
+
+      // Save the toolkit
+      setGeneratingStep("Saving toolkit...");
+      await saveToolkit();
+
+      toast.success("Complete toolkit generated successfully!");
+      setActiveTab("content");
+    } catch (error) {
+      console.error("Generate everything error:", error);
+      toast.error("Some parts failed to generate. Check each tab for details.");
+    } finally {
+      setIsGeneratingEverything(false);
+      setIsGeneratingAll(false);
+      setGeneratingStep("");
+    }
+  };
+
   // Calculate progress
   const progressSteps = [
     { id: "topic", label: "Select Topic", completed: !!title && !!niche },
@@ -588,6 +751,9 @@ const ToolkitBuilder = () => {
             onSave={saveToolkit}
             isSaving={isSaving}
             onContinue={() => setActiveTab("content")}
+            onGenerateAll={handleGenerateEverything}
+            isGeneratingAll={isGeneratingEverything}
+            generatingStep={generatingStep}
           />
         )}
 

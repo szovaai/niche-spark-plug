@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowRight, Save, Loader2 } from "lucide-react";
+import { ArrowRight, Save, Loader2, Sparkles } from "lucide-react";
 import type { ToolkitComponents } from "@/types/toolkit";
 
 interface DashboardTabProps {
@@ -27,6 +27,9 @@ interface DashboardTabProps {
   onSave: () => void;
   isSaving: boolean;
   onContinue: () => void;
+  onGenerateAll?: () => void;
+  isGeneratingAll?: boolean;
+  generatingStep?: string;
 }
 
 const componentOptions = [
@@ -58,6 +61,9 @@ const DashboardTab = ({
   onSave,
   isSaving,
   onContinue,
+  onGenerateAll,
+  isGeneratingAll,
+  generatingStep,
 }: DashboardTabProps) => {
   const toggleComponent = (id: keyof ToolkitComponents) => {
     setComponents({ ...components, [id]: !components[id] });
@@ -180,28 +186,71 @@ const DashboardTab = ({
       </Card>
 
       {/* Action Buttons */}
-      <div className="md:col-span-2 flex justify-between">
-        <Button variant="outline" onClick={onSave} disabled={isSaving} className="gap-2">
-          {isSaving ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Saving...
-            </>
-          ) : (
-            <>
-              <Save className="w-4 h-4" />
-              Save Draft
-            </>
-          )}
-        </Button>
-        <Button
-          onClick={onContinue}
-          disabled={!title || !niche}
-          className="gap-2"
-        >
-          Continue to Content Writer
-          <ArrowRight className="w-4 h-4" />
-        </Button>
+      <div className="md:col-span-2 flex flex-col gap-4">
+        {/* Generate All Button */}
+        {onGenerateAll && (
+          <Card className="border-primary/30 bg-primary/5">
+            <CardContent className="pt-6">
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                <div className="flex-1 text-center sm:text-left">
+                  <h3 className="font-semibold text-lg">Generate Complete Toolkit</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Auto-generate all content, cover, sales letter, and email sequence in one click
+                  </p>
+                  {isGeneratingAll && generatingStep && (
+                    <p className="text-sm text-primary mt-2 flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      {generatingStep}
+                    </p>
+                  )}
+                </div>
+                <Button
+                  size="lg"
+                  onClick={onGenerateAll}
+                  disabled={!title || !niche || !Object.values(components).some(v => v) || isGeneratingAll}
+                  className="gap-2 min-w-[200px]"
+                >
+                  {isGeneratingAll ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-5 h-5" />
+                      Generate All
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Regular Action Buttons */}
+        <div className="flex justify-between">
+          <Button variant="outline" onClick={onSave} disabled={isSaving || isGeneratingAll} className="gap-2">
+            {isSaving ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                Save Draft
+              </>
+            )}
+          </Button>
+          <Button
+            onClick={onContinue}
+            disabled={!title || !niche || isGeneratingAll}
+            className="gap-2"
+          >
+            Continue to Content Writer
+            <ArrowRight className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );
