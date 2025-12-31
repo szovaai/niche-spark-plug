@@ -11,7 +11,7 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
   const navigate = useNavigate();
 
   return (
-    <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden px-4">
+    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden px-4 pt-24">
       {/* Aurora Background */}
       <div className="absolute inset-0 aurora-bg" />
       
