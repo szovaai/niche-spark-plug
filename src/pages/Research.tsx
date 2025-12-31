@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { 
-  Search, Wand2, Target, Link, Sparkles, 
+  Search, Wand2, Target, Eye, Sparkles, 
   ChevronRight, TrendingUp, Lightbulb
 } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -9,21 +9,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import NicheWizard from "@/components/NicheWizard";
 import GapFinder from "@/components/GapFinder";
-import CompetitorClone from "@/components/CompetitorClone";
+import StoreSpy from "@/components/StoreSpy";
 import { useNavigate } from "react-router-dom";
 import { CompetitorAnalysis } from "@/types/competitorAnalysis";
 
 const Research = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<"wizard" | "gaps" | "competitor" | null>(null);
+  const [activeTab, setActiveTab] = useState<"wizard" | "gaps" | "storespy" | null>(null);
   const [nicheWizardOpen, setNicheWizardOpen] = useState(false);
-  const [competitorCloneOpen, setCompetitorCloneOpen] = useState(false);
+  const [storeSpyOpen, setStoreSpyOpen] = useState(false);
 
   const handleCreateFromGap = (productSuggestion: string) => {
     navigate("/create", { state: { productType: productSuggestion } });
   };
 
-  const handleCreateFromCompetitor = (analysis: CompetitorAnalysis) => {
+  const handleCreateFromStoreSpy = (analysis: CompetitorAnalysis) => {
     navigate("/create", { 
       state: { 
         competitorAnalysis: analysis,
@@ -50,12 +50,12 @@ const Research = () => {
       action: () => setActiveTab("gaps"),
     },
     {
-      id: "competitor",
-      title: "Competitor Clone",
-      description: "Analyze Etsy listings and create differentiated, better versions",
-      icon: Link,
+      id: "storespy",
+      title: "Store Spy",
+      description: "See what's selling on Etsy and Gumroad right now and create better versions",
+      icon: Eye,
       color: "from-magenta-400 to-magenta-600",
-      action: () => setCompetitorCloneOpen(true),
+      action: () => setStoreSpyOpen(true),
     },
   ];
 
@@ -75,7 +75,7 @@ const Research = () => {
             Research Hub
           </h1>
           <p className="text-muted-foreground">
-            Find profitable niches, discover market gaps, and analyze competitors before building your toolkit.
+            Find profitable niches, discover market gaps, and spy on competitors before building your toolkit.
           </p>
         </motion.div>
 
@@ -134,7 +134,7 @@ const Research = () => {
                 <ul className="list-disc list-inside space-y-1">
                   <li>Start with Niche Wizard to find niches matching your skills</li>
                   <li>Use Gap Finder to identify underserved markets</li>
-                  <li>Analyze competitors to find differentiation angles</li>
+                  <li>Spy on competitors to find differentiation angles</li>
                 </ul>
               </CardContent>
             </Card>
@@ -186,11 +186,11 @@ const Research = () => {
           onClose={() => setNicheWizardOpen(false)} 
         />
 
-        {/* Competitor Clone Modal */}
-        <CompetitorClone
-          isOpen={competitorCloneOpen}
-          onClose={() => setCompetitorCloneOpen(false)}
-          onCreateProduct={handleCreateFromCompetitor}
+        {/* Store Spy Modal */}
+        <StoreSpy
+          isOpen={storeSpyOpen}
+          onClose={() => setStoreSpyOpen(false)}
+          onCreateProduct={handleCreateFromStoreSpy}
         />
       </div>
     </DashboardLayout>
