@@ -15,6 +15,7 @@ import DashboardTab from "@/components/toolkit/DashboardTab";
 import HistoryTab from "@/components/toolkit/HistoryTab";
 
 import type { Toolkit, ToolkitComponents, ToolkitContent } from "@/types/toolkit";
+import { createToolkitZip, downloadSinglePDF, type ToolkitData } from "@/lib/zipBundler";
 
 const ToolkitBuilder = () => {
   const { id } = useParams();
@@ -58,6 +59,8 @@ const ToolkitBuilder = () => {
     emailSequence: false,
     upsell: false,
   });
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState("");
 
   // Load existing toolkit
   useEffect(() => {
@@ -687,6 +690,155 @@ const ToolkitBuilder = () => {
     }
   };
 
+  // Download ZIP Bundle
+  const handleDownloadZip = async () => {
+    if (!title || !niche) {
+      toast.error("Please fill in the toolkit title and niche first");
+      return;
+    }
+
+    if (!Object.values(components).some(v => v)) {
+      toast.error("Please select at least one component");
+      return;
+    }
+
+    if (!chapters.some(c => c.status === "complete")) {
+      toast.error("Please generate content first");
+      return;
+    }
+
+    setIsDownloading(true);
+
+    try {
+      const toolkitData: ToolkitData = {
+        title,
+        subtitle,
+        niche,
+        targetAudience,
+        authorName,
+        authorTagline,
+        authorBio,
+        logoUrl,
+        ecoverUrl,
+        components,
+        content,
+        salesLetter: salesLetter || undefined,
+        upsell: upsell ? { type: "premium", ...upsell } : null,
+        emailSequence: emailSequence.length > 0 ? {
+          offerName: title,
+          targetAudience: targetAudience || "entrepreneurs",
+          price: 17,
+          sequenceTheme: `${niche} Success`,
+          narrativeArc: "Story-driven conversion sequence",
+          emails: emailSequence.map((e, i) => ({
+            day: e.day || i + 1,
+            focus: "origin-story" as const,
+            subject: e.subject,
+            previewText: e.subject.substring(0, 50),
+            openingHook: e.body.split("\n\n")[0] || "",
+            storyAnalogy: e.body.split("\n\n")[1] || "",
+            lessonTwist: e.body.split("\n\n")[2] || "",
+            offerBridge: e.body.split("\n\n")[3] || "",
+            cta: e.body.split("\n\n")[4] || "",
+            ps: "",
+          })),
+        } : null,
+      };
+
+      await createToolkitZip(toolkitData, (progress) => {
+        setDownloadProgress(`${progress.step} (${progress.current}/${progress.total})`);
+      });
+
+      toast.success("Toolkit ZIP downloaded successfully!");
+    } catch (error) {
+      console.error("Download error:", error);
+      toast.error("Failed to create ZIP bundle");
+    } finally {
+      setIsDownloading(false);
+      setDownloadProgress("");
+    }
+  };
+
+  // Download individual PDF
+  const handleDownloadPdf = async () => {
+    if (!content.guide && !content.worksheet && !content.checklist) {
+      toast.error("No content available to export as PDF");
+      return;
+    }
+
+    const toolkitData: ToolkitData = {
+      title,
+      subtitle,
+      niche,
+      targetAudience,
+      authorName,
+      components,
+      content,
+    };
+
+    try {
+      // Download guide if available
+      if (content.guide) {
+        await downloadSinglePDF("guide", toolkitData);
+        toast.success("Guide PDF downloaded");
+      } else if (content.worksheet) {
+        await downloadSinglePDF("worksheet", toolkitData);
+        toast.success("Worksheet PDF downloaded");
+      } else if (content.checklist) {
+        await downloadSinglePDF("checklist", toolkitData);
+        toast.success("Checklist PDF downloaded");
+      }
+    } catch (error) {
+      console.error("PDF download error:", error);
+      toast.error("Failed to download PDF");
+    }
+  };
+
+  // Download as TXT
+  const handleDownloadTxt = () => {
+    if (!chapters.some(c => c.content)) {
+      toast.error("No content available to export");
+      return;
+    }
+
+    const textContent = chapters
+      .filter(c => c.content)
+      .map(c => `=== ${c.title.toUpperCase()} ===\n\n${c.content}`)
+      .join("\n\n---\n\n");
+
+    const blob = new Blob([textContent], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${title.toLowerCase().replace(/\s+/g, "-")}-content.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast.success("Content exported as TXT");
+  };
+
+  // Copy all content
+  const handleCopyAll = async () => {
+    if (!chapters.some(c => c.content)) {
+      toast.error("No content available to copy");
+      return;
+    }
+
+    const textContent = chapters
+      .filter(c => c.content)
+      .map(c => `=== ${c.title.toUpperCase()} ===\n\n${c.content}`)
+      .join("\n\n---\n\n");
+
+    try {
+      await navigator.clipboard.writeText(textContent);
+      toast.success("All content copied to clipboard");
+    } catch (error) {
+      toast.error("Failed to copy content");
+    }
+  };
+
   // Calculate progress
   const progressSteps = [
     { id: "topic", label: "Select Topic", completed: !!title && !!niche },
@@ -710,9 +862,12 @@ const ToolkitBuilder = () => {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         toolkitTitle={title || "New Toolkit"}
-        onDownloadPdf={() => toast.info("PDF download coming soon")}
-        onDownloadTxt={() => toast.info("TXT download coming soon")}
-        onCopyAll={() => toast.info("Copy all coming soon")}
+        onDownloadZip={handleDownloadZip}
+        onDownloadPdf={handleDownloadPdf}
+        onDownloadTxt={handleDownloadTxt}
+        onCopyAll={handleCopyAll}
+        isDownloading={isDownloading}
+        downloadProgress={downloadProgress}
         onReset={() => {
           if (confirm("Are you sure you want to reset this toolkit?")) {
             setTitle("");

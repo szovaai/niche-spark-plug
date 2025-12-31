@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { 
   LayoutDashboard, 
   FileText, 
@@ -9,7 +8,9 @@ import {
   FileDown,
   Copy,
   RotateCcw,
-  ChevronLeft
+  ChevronLeft,
+  Package,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -22,9 +23,12 @@ interface ToolkitNavbarProps {
   onTabChange: (tab: TabId) => void;
   onDownloadPdf?: () => void;
   onDownloadTxt?: () => void;
+  onDownloadZip?: () => void;
   onCopyAll?: () => void;
   onReset?: () => void;
   toolkitTitle?: string;
+  isDownloading?: boolean;
+  downloadProgress?: string;
 }
 
 const tabs = [
@@ -40,9 +44,12 @@ const ToolkitNavbar = ({
   onTabChange,
   onDownloadPdf,
   onDownloadTxt,
+  onDownloadZip,
   onCopyAll,
   onReset,
-  toolkitTitle = "Untitled Toolkit"
+  toolkitTitle = "Untitled Toolkit",
+  isDownloading = false,
+  downloadProgress = ""
 }: ToolkitNavbarProps) => {
   const navigate = useNavigate();
 
@@ -63,16 +70,38 @@ const ToolkitNavbar = ({
             <h1 className="text-lg font-semibold text-foreground truncate max-w-[300px]">
               {toolkitTitle}
             </h1>
-            <p className="text-xs text-muted-foreground">Toolkit Builder</p>
+            <p className="text-xs text-muted-foreground">
+              {isDownloading ? downloadProgress : "Toolkit Builder"}
+            </p>
           </div>
         </div>
 
         {/* Download Actions */}
         <div className="flex items-center gap-2">
+          {/* Primary: Download ZIP Bundle */}
+          <Button
+            onClick={onDownloadZip}
+            disabled={isDownloading}
+            className="gap-2"
+          >
+            {isDownloading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="hidden sm:inline">Exporting...</span>
+              </>
+            ) : (
+              <>
+                <Package className="w-4 h-4" />
+                <span className="hidden sm:inline">Download ZIP</span>
+              </>
+            )}
+          </Button>
+          
           <Button
             variant="outline"
             size="sm"
             onClick={onDownloadPdf}
+            disabled={isDownloading}
             className="hidden sm:flex gap-2"
           >
             <Download className="w-4 h-4" />
@@ -82,6 +111,7 @@ const ToolkitNavbar = ({
             variant="outline"
             size="sm"
             onClick={onDownloadTxt}
+            disabled={isDownloading}
             className="hidden sm:flex gap-2"
           >
             <FileDown className="w-4 h-4" />
@@ -91,6 +121,7 @@ const ToolkitNavbar = ({
             variant="outline"
             size="sm"
             onClick={onCopyAll}
+            disabled={isDownloading}
             className="hidden md:flex gap-2"
           >
             <Copy className="w-4 h-4" />
@@ -100,6 +131,7 @@ const ToolkitNavbar = ({
             variant="ghost"
             size="icon"
             onClick={onReset}
+            disabled={isDownloading}
             className="text-muted-foreground hover:text-destructive"
           >
             <RotateCcw className="w-4 h-4" />
