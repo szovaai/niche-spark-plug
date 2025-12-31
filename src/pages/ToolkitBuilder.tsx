@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import type { Json } from "@/integrations/supabase/types";
 
 import ToolkitNavbar, { TabId } from "@/components/toolkit/ToolkitNavbar";
 import ProgressTimeline from "@/components/toolkit/ProgressTimeline";
@@ -82,7 +83,7 @@ const ToolkitBuilder = () => {
           setSalesLetter(data.sales_letter);
           
           // Build chapters from content
-          buildChaptersFromContent(data.content as ToolkitContent, data.components as ToolkitComponents);
+          buildChaptersFromContent(loadedContent, loadedComponents);
         }
       } catch (error) {
         console.error("Error loading toolkit:", error);
@@ -191,10 +192,10 @@ const ToolkitBuilder = () => {
         target_audience: targetAudience,
         logo_url: logoUrl,
         ecover_url: ecoverUrl,
-        components,
-        content,
+        components: JSON.parse(JSON.stringify(components)) as Json,
+        content: JSON.parse(JSON.stringify(content)) as Json,
         sales_letter: salesLetter,
-        status: "draft",
+        status: "draft" as const,
         updated_at: new Date().toISOString(),
       };
 
