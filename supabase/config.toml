@@ -38,3 +38,9 @@ verify_jwt = false
 
 [functions.generate-listing-kit]
 verify_jwt = true
+
+[functions.generate-toolkit-content]
+verify_jwt = true
+
+[functions.generate-sales-letter]
+verify_jwt = true

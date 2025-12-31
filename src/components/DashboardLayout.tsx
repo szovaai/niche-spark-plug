@@ -11,12 +11,9 @@ interface DashboardLayoutProps {
 
 const pageTitles: Record<string, string> = {
   "/dashboard": "Dashboard",
-  "/discover": "Discover",
-  "/my-products": "My Products",
-  "/money-map": "Money Map",
-  "/launch-packs": "Launch Packs",
-  "/saved": "Saved Niches",
-  "/ugc-vault": "UGC Vault",
+  "/create": "Create Toolkit",
+  "/my-toolkits": "My Toolkits",
+  "/pricing": "Pricing",
 };
 
 export function DashboardLayout({ children, title }: DashboardLayoutProps) {

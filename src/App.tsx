@@ -7,14 +7,9 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
-import Discover from "./pages/Discover";
-import NicheDetail from "./pages/NicheDetail";
-import Saved from "./pages/Saved";
-import LaunchPacks from "./pages/LaunchPacks";
+import CreateToolkit from "./pages/CreateToolkit";
+import MyToolkits from "./pages/MyToolkits";
 import Pricing from "./pages/Pricing";
-import MyProducts from "./pages/MyProducts";
-import MoneyMap from "./pages/MoneyMap";
-import UGCVault from "./pages/UGCVault";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,14 +25,9 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/discover" element={<Discover />} />
-            <Route path="/niche/:nicheId" element={<NicheDetail />} />
-            <Route path="/saved" element={<Saved />} />
-            <Route path="/launch-packs" element={<LaunchPacks />} />
+            <Route path="/create" element={<CreateToolkit />} />
+            <Route path="/my-toolkits" element={<MyToolkits />} />
             <Route path="/pricing" element={<Pricing />} />
-            <Route path="/my-products" element={<MyProducts />} />
-            <Route path="/money-map" element={<MoneyMap />} />
-            <Route path="/ugc-vault" element={<UGCVault />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
