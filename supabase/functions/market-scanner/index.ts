@@ -148,7 +148,7 @@ serve(async (req) => {
     }
 
     // Generate insights using AI
-    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
+    const deepseekApiKey = Deno.env.get('DEEPSEEK_API_KEY');
     let insights = {
       avgPrice: '$0',
       priceRange: { min: 0, max: 0 },
@@ -158,7 +158,7 @@ serve(async (req) => {
       missingElements: [] as string[],
     };
 
-    if (lovableApiKey && products.length > 0) {
+    if (deepseekApiKey && products.length > 0) {
       const prices = products.filter(p => p.priceValue > 0).map(p => p.priceValue);
       const avgPrice = prices.length > 0 ? prices.reduce((a, b) => a + b, 0) / prices.length : 0;
       const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
@@ -168,14 +168,14 @@ serve(async (req) => {
       insights.priceRange = { min: minPrice, max: maxPrice };
 
       try {
-        const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        const aiResponse = await fetch('https://api.deepseek.com/v1/chat/completions', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${lovableApiKey}`,
+            'Authorization': `Bearer ${deepseekApiKey}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            model: 'google/gemini-2.5-flash',
+            model: 'deepseek-chat',
             messages: [
               {
                 role: 'system',

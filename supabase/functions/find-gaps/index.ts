@@ -12,10 +12,10 @@ serve(async (req) => {
 
   try {
     const { nicheName } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
 
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    if (!DEEPSEEK_API_KEY) {
+      throw new Error("DEEPSEEK_API_KEY is not configured");
     }
 
     console.log(`Finding gaps for niche: ${nicheName}`);
@@ -89,14 +89,14 @@ Return a JSON object with this EXACT structure:
 
 Provide 3-5 items for each array. Be specific and actionable.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "deepseek-chat",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: `Analyze this niche for digital products and find opportunity gaps: "${nicheName}"\n\nThink about what products exist, what's missing, who's being ignored, and where the quick wins are.` }
@@ -107,7 +107,7 @@ Provide 3-5 items for each array. Be specific and actionable.`;
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
+      console.error("DeepSeek API error:", response.status, errorText);
       
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limits exceeded, please try again later." }), {
@@ -121,7 +121,7 @@ Provide 3-5 items for each array. Be specific and actionable.`;
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      throw new Error("AI gateway error");
+      throw new Error("DeepSeek API error");
     }
 
     const data = await response.json();
