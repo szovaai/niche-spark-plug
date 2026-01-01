@@ -451,15 +451,15 @@ const CoverCreatorFlow = ({
               </p>
             </div>
 
-            <div className="flex flex-col md:flex-row items-center gap-8">
-              {/* Cover Preview */}
-              <div className="flex-1 flex justify-center">
-                <div className="relative w-full max-w-md aspect-video rounded-lg overflow-hidden shadow-2xl border border-border">
+            <div className="flex flex-col items-center gap-8">
+              {/* Cover Preview - Full Size */}
+              <div className="w-full flex justify-center">
+                <div className="relative w-full max-w-5xl aspect-video rounded-lg overflow-hidden shadow-2xl border border-border">
                   {coverUrl ? (
                     <img
                       src={coverUrl}
                       alt="Generated Cover"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain bg-secondary/50"
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
@@ -469,8 +469,8 @@ const CoverCreatorFlow = ({
                 </div>
               </div>
 
-              {/* Actions */}
-              <div className="flex-shrink-0 space-y-4 w-full md:w-auto">
+              {/* Actions - Below Image */}
+              <div className="flex flex-col md:flex-row items-center gap-6">
                 <div className="space-y-2">
                   <h3 className="font-semibold text-lg">{title}</h3>
                   {subtitle && (
@@ -481,7 +481,7 @@ const CoverCreatorFlow = ({
                   )}
                 </div>
 
-                <div className="flex flex-col gap-2 pt-4">
+                <div className="flex flex-wrap justify-center gap-3">
                   <Button
                     onClick={handleStartOver}
                     variant="outline"
