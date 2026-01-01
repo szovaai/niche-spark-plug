@@ -132,10 +132,55 @@ const CreateToolkit = () => {
   // Auto-generate thesis when reaching Step 4 if empty
   useEffect(() => {
     if (currentStep === 4 && !thesis && title && niche) {
-      const generatedThesis = `This toolkit is built on the idea that ${niche.toLowerCase()} mastery is achieved through a systematic approach of focused learning, practical application, and consistent reinforcement. ${targetAudience ? `Designed specifically for ${targetAudience.toLowerCase()}, ` : ""}the framework guides users from understanding core concepts to implementing real-world solutions, using actionable tools that reinforce progress at each stage.`;
-      setThesis(generatedThesis);
+      // Trigger AI generation automatically on first visit to step 4
+      handleRegenerateThesis();
     }
-  }, [currentStep, thesis, title, niche, targetAudience]);
+  }, [currentStep, thesis, title, niche]);
+
+  const handleRegenerateThesis = async () => {
+    if (!title || !niche) {
+      toast({
+        title: "Missing Information",
+        description: "Title and niche are required to generate a thesis.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsRegeneratingThesis(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-thesis', {
+        body: {
+          title,
+          niche,
+          targetAudience,
+          components,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.thesis) {
+        setThesis(data.thesis);
+        toast({
+          title: "Thesis Generated",
+          description: "Your core framework thesis has been created.",
+        });
+      }
+    } catch (error) {
+      console.error('Error generating thesis:', error);
+      // Fallback to simple thesis
+      const fallbackThesis = `This toolkit is built on the idea that ${niche.toLowerCase()} mastery is achieved through a systematic approach of focused learning, practical application, and consistent reinforcement. ${targetAudience ? `Designed specifically for ${targetAudience.toLowerCase()}, ` : ""}the framework guides users from understanding core concepts to implementing real-world solutions, using actionable tools that reinforce progress at each stage.`;
+      setThesis(fallbackThesis);
+      toast({
+        title: "Using Default Thesis",
+        description: "AI generation unavailable. You can edit the thesis manually.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRegeneratingThesis(false);
+    }
+  };
 
   const handleTemplateSelect = (template: ToolkitTemplate) => {
     setSelectedTemplate(template.id);
@@ -557,15 +602,7 @@ const CreateToolkit = () => {
                     onThesisChange={setThesis}
                     lockFramework={lockFramework}
                     onLockChange={setLockFramework}
-                    onRegenerateThesis={async () => {
-                      setIsRegeneratingThesis(true);
-                      try {
-                        const generatedThesis = `This toolkit is built on the idea that ${niche.toLowerCase()} mastery is achieved through a systematic approach of focused learning, practical application, and consistent reinforcement. ${targetAudience ? `Designed specifically for ${targetAudience.toLowerCase()}, ` : ""}the framework guides users from understanding core concepts to implementing real-world solutions, using actionable tools that reinforce progress at each stage.`;
-                        setThesis(generatedThesis);
-                      } finally {
-                        setIsRegeneratingThesis(false);
-                      }
-                    }}
+                    onRegenerateThesis={handleRegenerateThesis}
                     isRegenerating={isRegeneratingThesis}
                   />
 
