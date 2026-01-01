@@ -7,12 +7,15 @@ const corsHeaders = {
 
 interface LogoRequest {
   brandName: string;
+  // New: Single natural language prompt
+  brandDescription?: string;
+  // Legacy: Structured fields for advanced mode
   tagline?: string;
-  primaryColor: string;
-  secondaryColor: string;
-  brandStyle: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  brandStyle?: string;
   keyElements?: string;
-  logoStyle: string;
+  logoStyle?: string;
 }
 
 serve(async (req) => {
@@ -23,6 +26,7 @@ serve(async (req) => {
   try {
     const { 
       brandName, 
+      brandDescription,
       tagline, 
       primaryColor, 
       secondaryColor, 
@@ -37,15 +41,37 @@ serve(async (req) => {
       throw new Error("FAL_API_KEY is not configured");
     }
 
-    console.log(`Generating logo for: ${brandName} (${logoStyle} style)`);
+    console.log(`Generating logo for: ${brandName}`);
+    console.log(`Mode: ${brandDescription ? 'Single Prompt' : 'Advanced'}`);
 
-    // Build the detailed prompt
-    const prompt = `Create a distinctive, professional logo for the brand "${brandName}".
+    let prompt: string;
+
+    if (brandDescription) {
+      // New: Single prompt mode - let AI infer everything
+      prompt = `Create a distinctive, professional logo for the brand "${brandName}".
+
+Brand description and vibe:
+${brandDescription}
+
+Requirements:
+- Infer the ideal color palette from the description
+- Choose the most appropriate logo style (wordmark, icon, geometric, abstract, etc.)
+- Clean, professional, and unique design
+- Simple enough to work at small sizes
+- Modern and memorable
+- Suitable for digital products and toolkits
+- Square format with solid or gradient background
+- High contrast and readable
+- Vector-style crisp edges
+- Do NOT include any text in the logo unless it's a wordmark style`;
+    } else {
+      // Legacy: Structured prompt for advanced mode
+      prompt = `Create a distinctive, professional logo for the brand "${brandName}".
 ${tagline ? `Tagline: ${tagline}` : ""}
-Color scheme: ${primaryColor} as primary color and ${secondaryColor} as secondary/accent color.
-Brand style: ${brandStyle}
+Color scheme: ${primaryColor || "#00d4ff"} as primary color and ${secondaryColor || "#1a1a2e"} as secondary/accent color.
+Brand style: ${brandStyle || "modern"}
 ${keyElements ? `Key elements to incorporate: ${keyElements}` : ""}
-Logo style: ${logoStyle}
+Logo style: ${logoStyle || "abstract-icon"}
 
 Requirements:
 - Clean, professional, and unique design
@@ -55,6 +81,7 @@ Requirements:
 - Square format with transparent or solid background
 - High contrast and readable
 - Vector-style crisp edges`;
+    }
 
     const response = await fetch("https://fal.run/fal-ai/flux/schnell", {
       method: "POST",
