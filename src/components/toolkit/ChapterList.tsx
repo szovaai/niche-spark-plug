@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Sparkles, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import ChapterCard from "./ChapterCard";
 import ChapterViewModal from "./ChapterViewModal";
 
@@ -21,8 +19,6 @@ interface ChapterListProps {
   onRegenerate: (chapterId: string) => void;
   onRegenerateAll: () => void;
   isGeneratingAll?: boolean;
-  humanizeEnabled?: boolean;
-  onHumanizeToggle?: (enabled: boolean) => void;
 }
 
 const ChapterList = ({
@@ -30,8 +26,6 @@ const ChapterList = ({
   onRegenerate,
   onRegenerateAll,
   isGeneratingAll = false,
-  humanizeEnabled = true,
-  onHumanizeToggle,
 }: ChapterListProps) => {
   const [expandedChapter, setExpandedChapter] = useState<string | null>(null);
   const [viewingChapter, setViewingChapter] = useState<Chapter | null>(null);
@@ -41,22 +35,12 @@ const ChapterList = ({
 
   return (
     <div className="space-y-6">
-      {/* AI Writing Options Bar */}
+      {/* Stats and Actions Bar */}
       <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-card border border-border rounded-lg">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <Switch
-              id="humanize"
-              checked={humanizeEnabled}
-              onCheckedChange={onHumanizeToggle}
-            />
-            <Label htmlFor="humanize" className="text-sm font-medium cursor-pointer">
-              Humanize Writing
-            </Label>
-          </div>
-          <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Sparkles className="w-4 h-4 text-primary" />
-            <span>AI-powered natural language optimization</span>
+            <span>AI-powered humanized writing</span>
           </div>
         </div>
         
