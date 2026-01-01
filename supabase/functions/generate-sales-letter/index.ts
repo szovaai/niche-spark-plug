@@ -23,33 +23,79 @@ interface PromptBoxData {
   bonusesIncluded: string;
 }
 
-type SalesLetterStyle = 'neutral' | 'direct-response' | 'story-selling' | 'aggressive' | 'conversational';
+// DigiStream Conversion Pattern - Proprietary Framework
+const DCP_FRAMEWORK = `
+=== DIGISTREAM CONVERSION PATTERN (DCP) ===
 
-// Style-specific prompt modifiers (applied ONLY in polish phase)
-const STYLE_MODIFIERS: Record<SalesLetterStyle, string> = {
-  'neutral': `Apply a balanced, professional persuasion style. Use clear language, 
-logical structure, and focus on benefits. Avoid hype or exaggeration. 
-Keep the tone platform-friendly and universally appealing.`,
+CORE PHILOSOPHY:
+Conversion comes from: Clarity → Belief → Momentum → Action
+NOT from hype, stories, or authority alone.
 
-  'direct-response': `Apply a persuasion style inspired by classic direct-response copywriting 
-principles. Use confident, authoritative language with clear problem-solution 
-framing. Focus on logic-based persuasion and direct calls to action. 
-No storytelling fluff - get to the point with clarity.`,
+This pattern balances the best-performing mechanics from proven copywriting into one 
+repeatable system that works across all traffic types.
 
-  'story-selling': `Apply a persuasion style inspired by modern funnel and narrative marketing. 
-Open with a relatable personal or situational story. Build to a clear 
-turning point ("the realization"). Lead with emotional engagement, 
-then support with logic. Use a softer, guided call to action.`,
+=== DCP SECTIONS (APPLY IN THIS EXACT ORDER) ===
 
-  'aggressive': `Apply a bold, no-nonsense persuasion style. Use strong opening hooks 
-and pattern interrupts. Write with confident, decisive language using 
-short, punchy sentences. Create a clear "listen up" authority presence.
-Maintain intensity without crossing into hype.`,
+1. PRECISION HOOK (Clarity First)
+   - Immediately tell: Who this is for + What problem it solves + Why keep reading
+   - NO hype, NO curiosity tricks, NO vague claims
+   - Be specific and direct
+   - Example: "Build buyer-intent traffic from Facebook Groups — without ads, spamming, or daily posting."
 
-  'conversational': `Apply a friendly, human-first persuasion style. Write like a 1-to-1 
-conversation with a friend. Use plain language and reduce sales pressure. 
-Emphasize trust and simplicity. Make it feel approachable and authentic.`,
-};
+2. CONTEXTUAL RELEVANCE (Relatable Reality)
+   - Make reader feel: "This matches what I'm dealing with right now"
+   - Focus on situations, not personal backstory
+   - Short and grounded (2-3 sentences max)
+   - Empathetic but not dramatic
+
+3. THE REAL PROBLEM (Reframe)
+   - Explain why past attempts didn't work
+   - Not their fault - the problem is structural
+   - Root cause clarity: "Traffic isn't the problem. Intent mismatch is."
+   - Diagnose the hidden issue
+
+4. THE SHIFT (New Way of Thinking)
+   - Introduce the mental model behind the solution
+   - ONE idea only, easy to remember
+   - This is where belief changes
+   - The "aha moment" they've been missing
+
+5. THE SYSTEM (Logical Proof)
+   - Answer: "How does this actually work?"
+   - Use steps, pillars, or simple sequences
+   - No fluff, no mystique
+   - Confidence through clarity
+
+6. THE OFFER REVEAL (Low Pressure)
+   - Present product as the natural next step
+   - A tool, not a miracle
+   - Calm confidence > excitement
+   - Position as reducing effort, not promising magic
+
+7. WHAT'S INCLUDED (Value Clarity)
+   - Each item answers: What it is + What it helps with + Why it matters
+   - Feature → Benefit breakdown
+   - Use EXACT components from raw draft
+   - No invented bonuses
+
+8. USAGE PATH (Momentum Builder)
+   - Day 1: [Quick Win]
+   - Day 2: [Next Step]  
+   - Day 3: [Result]
+   - Show how fast they can get value
+
+9. FIT FILTER (Trust Builder)
+   - "This is perfect for you if..."
+   - "This is NOT for you if..."
+   - Qualification increases trust AND conversions
+   - Be honest about who should skip this
+
+10. CALM CLOSE (Action Without Pressure)
+    - Invite action without scarcity abuse or fake urgency
+    - Confident CTA: "Get instant access for $X"
+    - No aggression, no countdown timers, no "only 7 left"
+    - Trust the value to speak for itself
+`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -69,7 +115,6 @@ serve(async (req) => {
       contentSummary,
       promptBoxData,
       rawDraft,
-      style = "neutral" // NEW: Sales letter style archetype
     } = await req.json();
     
     const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
@@ -81,7 +126,6 @@ serve(async (req) => {
     let systemPrompt = "";
     
     // PHASE 1: RAW DRAFT - Clarity-focused, no persuasion, just organization
-    // NOTE: Style is NEVER applied here - only in polish phase
     if (phase === "raw") {
       const pb = promptBoxData as PromptBoxData;
       
@@ -119,56 +163,44 @@ This should feel like: "Here's what this is and why it might help you."
 
 Format as clean HTML with <p>, <h2>, <ul>, <li> tags. Keep paragraphs short (2-3 sentences max).`;
 
-    // PHASE 2: POLISH - Apply framework AND style WITHOUT re-interpreting the offer
+    // PHASE 2: POLISH - Apply DigiStream Conversion Pattern WITHOUT re-interpreting the offer
     } else if (phase === "polish") {
-      const selectedStyle = (style as SalesLetterStyle) || 'neutral';
-      const styleModifier = STYLE_MODIFIERS[selectedStyle] || STYLE_MODIFIERS['neutral'];
-      
-      systemPrompt = `You are a direct-response copywriter applying a proven framework to an existing draft.
-You enhance structure and emotional resonance WITHOUT changing what the offer is.
-You NEVER add fake testimonials or made-up statistics.
+      systemPrompt = `You are a conversion-focused copywriter applying the DigiStream Conversion Pattern to an existing draft.
+
+You enhance structure and persuasion WITHOUT changing what the offer is.
+You NEVER add fake testimonials, made-up statistics, or invented claims.
 You work ONLY with the raw draft provided - do not re-interpret or change the core offer.
 
-=== STYLE DIRECTIVE ===
-${styleModifier}`;
+TONE: Calm confidence. Clarity over hype. Trust over urgency.`;
 
-      prompt = `Take this EXACT raw draft and restructure it using our Proprietary Salesletter Framework.
+      prompt = `Take this EXACT raw draft and restructure it using the DigiStream Conversion Pattern (DCP).
 
 === RAW DRAFT (preserve the offer EXACTLY as described) ===
 ${rawDraft}
 
-=== FRAMEWORK SECTIONS (apply IN THIS ORDER) ===
-1. PRE-HEADLINE: Pattern interrupt or curiosity trigger (1 line)
-2. HEADLINE: Specific benefit + transformation promise from the raw draft
-3. SUBHEADLINE: Expands on headline, adds credibility without fake claims
-4. RELATABLE STORY: Problem they recognize, told in their words (from raw draft's problem)
-5. THE REAL PROBLEM: Root cause most people miss - expand on raw draft's problem
-6. THE SHIFT: The "aha moment" or new approach this product offers
-7. INTRODUCE THE OFFER: What it is, positioned as the solution (from raw draft)
-8. WHAT'S INCLUDED: Feature → Benefit breakdown (use EXACT components from raw draft)
-9. HOW IT WORKS: Simple 3-step process
-10. WHO IT'S FOR / NOT FOR: Qualification section
-11. CALM CLOSE: Confident, non-pushy CTA with price ($${price || 17})
+${DCP_FRAMEWORK}
 
 === CRITICAL RULES ===
 1. Keep the SAME offer, price, and components from the raw draft - DO NOT change them
 2. DO NOT invent fake testimonials or statistics
-3. Make the headline SPECIFIC to this exact product
-4. Add emotional resonance WITHOUT being fake or salesy
+3. DO NOT use hype words like "breakthrough", "revolutionary", "secret", "amazing"
+4. Apply calm confidence throughout - not excitement or pressure
 5. Use the transformation language from the raw draft
-6. Apply the STYLE DIRECTIVE throughout - adjust tone, pacing, and emphasis accordingly
-7. Format as professional HTML with:
-   - Clear section headings
+6. Format as professional HTML with:
+   - Clear section headings (h2, h3)
    - Styled bullet points for benefits
    - A prominent "Get Instant Access" button section
    - Visual hierarchy with subheadlines
+   - Clean, readable paragraphs (2-3 sentences max)
 
 === ADDITIONAL CONTEXT ===
 Product: ${title}
 Niche: ${niche}
 Target Audience: ${(promptBoxData as PromptBoxData)?.whoItsFor || targetAudience || "digital entrepreneurs"}
 Price: $${price || 17}
-Applied Style: ${selectedStyle}`;
+
+Remember: Conversion comes from Clarity → Belief → Momentum → Action. 
+NOT from hype, pressure, or fake scarcity.`;
 
 
     // LEGACY MODE - Original behavior for backwards compatibility
@@ -178,7 +210,7 @@ Applied Style: ${selectedStyle}`;
       if (contentSummary) {
         const summary = contentSummary as ContentSummary;
         
-        prompt = `Write a complete, high-converting AICPBSAWN sales letter for "${title}" in the ${niche} niche.
+        prompt = `Write a complete, high-converting sales letter for "${title}" in the ${niche} niche using the DigiStream Conversion Pattern.
 
 TARGET AUDIENCE: ${targetAudience || "entrepreneurs and digital product creators"}
 PRICE: $${price || 17}
@@ -202,36 +234,18 @@ ${summary.specificBenefits?.map(b => `• ${b}`).join("\n") || keyBenefits?.join
 === PAIN POINTS TO ADDRESS ===
 ${summary.painPointsAddressed?.map(p => `• ${p}`).join("\n") || ""}
 
-=== QUOTABLE INSIGHTS (Use in testimonial-style callouts) ===
-${summary.quotableInsights?.map(q => `"${q}"`).join("\n") || ""}
-
 COMPONENTS INCLUDED: ${activeComponents.join(", ")}
 
-Write the sales letter using the AICPBSAWN framework:
-A = Attention (pattern interrupt headline)
-I = Interest (hook them with a story or surprising fact)  
-C = Credibility (establish authority)
-P = Prove (evidence, case studies, specifics from the chapters)
-B = Benefits (use the SPECIFIC benefits above, not generic ones)
-S = Scarcity (limited time/quantity)
-A = Action (clear CTA with button)
-W = Warn (what happens if they don't act)
-N = Now (final urgency push)
+${DCP_FRAMEWORK}
 
-CRITICAL INSTRUCTIONS:
-1. Reference ACTUAL chapter content and the unique mechanisms by name
-2. Use SPECIFIC benefits from the content, not generic marketing fluff
-3. Include the table of contents as a "Here's What You'll Discover" section
-4. Quote at least one of the "quotable insights" in a callout box
-5. Format as clean, semantic HTML with modern styling classes
-6. Make it feel like YOU know exactly what's in this product`;
+CRITICAL: Reference ACTUAL chapter content. Use SPECIFIC benefits, not generic marketing fluff. Format as clean HTML.`;
 
       } else {
-        prompt = `Write a complete AICPBSAWN sales letter for "${title}" in ${niche} targeting ${targetAudience || "entrepreneurs"}. Price: $${price || 17}. Components: ${activeComponents.join(", ")}. ${keyBenefits?.length ? `Benefits: ${keyBenefits.join(", ")}` : ""} ${uniqueMechanism ? `Unique mechanism: ${uniqueMechanism}` : ""} Format as clean HTML.`;
+        prompt = `Write a complete sales letter for "${title}" in ${niche} targeting ${targetAudience || "entrepreneurs"}. Price: $${price || 17}. Components: ${activeComponents.join(", ")}. ${keyBenefits?.length ? `Benefits: ${keyBenefits.join(", ")}` : ""} ${uniqueMechanism ? `Unique mechanism: ${uniqueMechanism}` : ""} Use the DigiStream Conversion Pattern. Format as clean HTML.`;
       }
     }
 
-    console.log(`Generating ${phase} sales letter for:`, title, `| Style: ${style}`);
+    console.log(`Generating ${phase} sales letter for:`, title);
 
     const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
       method: "POST",
@@ -267,7 +281,7 @@ CRITICAL INSTRUCTIONS:
       .replace(/â€/g, '"')
       .replace(/â€"/g, "-");
 
-    return new Response(JSON.stringify({ salesLetter, phase, style }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ salesLetter, phase }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {
     console.error("Error:", error);
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });

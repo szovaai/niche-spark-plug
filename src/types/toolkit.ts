@@ -1,21 +1,5 @@
 export type WritingStyle = 'conversational' | 'professional' | 'storytelling' | 'step-by-step';
 
-// Sales Letter Style Archetypes
-export type SalesLetterStyle = 
-  | 'neutral'           // Default - Balanced, professional
-  | 'direct-response'   // Authority-driven, logic-based
-  | 'story-selling'     // Funnel-driven narrative
-  | 'aggressive'        // Hard-hitting, pattern interrupts
-  | 'conversational';   // Modern, casual, human-first
-
-export interface SalesLetterStyleOption {
-  id: SalesLetterStyle;
-  name: string;
-  description: string;
-  bestFor: string[];
-  icon: string;
-}
-
 export interface ToolkitComponents {
   guide: boolean;
   worksheet: boolean;
