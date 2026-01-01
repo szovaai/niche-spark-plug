@@ -62,12 +62,12 @@ const EcoverGenerator = ({ title, niche, onEcoverGenerated, existingEcover }: Ec
           <p className="text-muted-foreground mt-2">Create a professional product cover image.</p>
         </div>
 
-        <div className="flex flex-col items-center gap-6">
-          <div className="w-64 h-80 rounded-xl border-2 border-dashed border-border flex items-center justify-center bg-secondary/50 overflow-hidden">
+        <div className="flex flex-col items-center gap-6 w-full">
+          <div className="w-full max-w-4xl aspect-video rounded-xl border-2 border-dashed border-border flex items-center justify-center bg-secondary/50 overflow-hidden">
             {ecoverUrl ? (
-              <img src={ecoverUrl} alt="E-Cover" className="w-full h-full object-cover" />
+              <img src={ecoverUrl} alt="E-Cover" className="w-full h-full object-contain" />
             ) : (
-              <Image className="w-16 h-16 text-muted-foreground/30" />
+              <Image className="w-20 h-20 text-muted-foreground/30" />
             )}
           </div>
 
