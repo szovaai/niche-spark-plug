@@ -13,6 +13,7 @@ import MyToolkits from "./pages/MyToolkits";
 import Research from "./pages/Research";
 import Pricing from "./pages/Pricing";
 import Launch from "./pages/Launch";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/research" element={<Research />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/launch/:id" element={<Launch />} />
+            <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

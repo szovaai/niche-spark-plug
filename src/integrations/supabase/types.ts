@@ -315,6 +315,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          api_keys: Json | null
           created_at: string | null
           display_name: string | null
           email: string | null
@@ -334,6 +335,7 @@ export type Database = {
           views_today: number | null
         }
         Insert: {
+          api_keys?: Json | null
           created_at?: string | null
           display_name?: string | null
           email?: string | null
@@ -353,6 +355,7 @@ export type Database = {
           views_today?: number | null
         }
         Update: {
+          api_keys?: Json | null
           created_at?: string | null
           display_name?: string | null
           email?: string | null
