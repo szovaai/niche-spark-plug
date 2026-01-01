@@ -48,7 +48,9 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
           <span className="text-foreground">Create </span>
           <span className="gradient-text glow-text">Digital Toolkits</span>
           <br />
-          <span className="text-foreground">In Minutes</span>
+          <span className="text-foreground">You Can Sell — </span>
+          <span className="gradient-text glow-text">In Minutes</span>
+          <span className="text-foreground">, Not Weeks</span>
         </motion.h1>
         
         {/* Subheading */}
