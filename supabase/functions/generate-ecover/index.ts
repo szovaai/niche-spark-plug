@@ -6,14 +6,21 @@ const corsHeaders = {
 };
 
 interface EcoverRequest {
-  toolkitTitle: string;
+  // New simple format from EcoverGenerator
+  productName?: string;
+  productType?: string;
+  aesthetic?: string;
+  moodKeywords?: string[];
+  ecoverType?: string;
+  // Existing detailed format from CoverCreatorFlow
+  toolkitTitle?: string;
   subtitle?: string;
   authorName?: string;
   componentsIncluded?: string[];
-  coverStyle: string;
-  mockupType: string;
-  primaryColor: string;
-  secondaryColor: string;
+  coverStyle?: string;
+  mockupType?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
   additionalElements?: string;
   niche?: string;
 }
@@ -24,26 +31,27 @@ serve(async (req) => {
   }
 
   try {
-    const { 
-      toolkitTitle, 
-      subtitle,
-      authorName,
-      componentsIncluded, 
-      coverStyle, 
-      mockupType,
-      primaryColor, 
-      secondaryColor, 
-      additionalElements,
-      niche
-    } = await req.json() as EcoverRequest;
+    const body = await req.json() as EcoverRequest;
     
-    const FAL_API_KEY = Deno.env.get("FAL_API_KEY");
+    // Support both simple and detailed formats
+    const title = body.productName || body.toolkitTitle || "Digital Product";
+    const style = body.coverStyle || "professional";
+    const mockup = body.mockupType || body.ecoverType || "3d-book";
+    const primary = body.primaryColor || "#00d4ff";
+    const secondary = body.secondaryColor || "#1a1a2e";
+    const niche = body.niche || (body.moodKeywords?.join(", ") || "digital product");
+    const subtitle = body.subtitle;
+    const authorName = body.authorName;
+    const componentsIncluded = body.componentsIncluded;
+    const additionalElements = body.additionalElements;
     
-    if (!FAL_API_KEY) {
-      throw new Error("FAL_API_KEY is not configured");
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    
+    if (!LOVABLE_API_KEY) {
+      throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    console.log(`Generating ${coverStyle} cover for: ${toolkitTitle} (${mockupType})`);
+    console.log(`Generating ${style} cover for: ${title} (${mockup})`);
 
     // Build style-specific descriptions
     const styleDescriptions: Record<string, string> = {
@@ -70,15 +78,15 @@ serve(async (req) => {
 
     const prompt = `Create a professional, premium-quality digital product cover:
 
-Title: "${toolkitTitle}"
+Title: "${title}"
 ${subtitle ? `Subtitle: "${subtitle}"` : ""}
 ${authorName ? `Author: ${authorName}` : ""}
-${niche ? `Niche: ${niche}` : ""}
+Niche: ${niche}
 ${componentsText}
 
-Visual Style: ${styleDescriptions[coverStyle] || styleDescriptions.professional}
-Mockup Type: ${mockupDescriptions[mockupType] || mockupDescriptions["3d-book"]}
-Color Palette: ${primaryColor} as primary, ${secondaryColor} as accent
+Visual Style: ${styleDescriptions[style] || styleDescriptions.professional}
+Mockup Type: ${mockupDescriptions[mockup] || mockupDescriptions["3d-book"]}
+Color Palette: ${primary} as primary, ${secondary} as accent
 ${additionalElements ? `Additional elements: ${additionalElements}` : ""}
 
 Requirements:
@@ -91,23 +99,28 @@ Requirements:
 - Subtle lighting and shadows for depth
 - Ready for immediate commercial use`;
 
-    const response = await fetch("https://fal.run/fal-ai/seedream-v4", {
+    // Use Lovable AI (Gemini) for image generation
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Key ${FAL_API_KEY}`,
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        prompt,
-        image_size: { width: 1920, height: 1080 },
-        num_images: 1,
-        enable_safety_checker: true,
+        model: "google/gemini-2.5-flash-image-preview",
+        messages: [
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        modalities: ["image", "text"]
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("FAL API error:", response.status, errorText);
+      console.error("Lovable AI error:", response.status, errorText);
       
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), {
@@ -116,25 +129,32 @@ Requirements:
         });
       }
       
-      throw new Error(`FAL API error: ${response.status}`);
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: "Payment required. Please add funds to continue." }), {
+          status: 402,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      
+      throw new Error(`Image generation error: ${response.status}`);
     }
 
     const data = await response.json();
     
-    // FAL returns images array with url property
-    const imageUrl = data.images?.[0]?.url;
+    // Lovable AI returns images in message.images array
+    const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
 
     if (!imageUrl) {
-      console.error("No image in FAL response:", data);
+      console.error("No image in response:", data);
       throw new Error("Failed to generate cover image");
     }
 
-    console.log(`Successfully generated ${coverStyle} cover for ${toolkitTitle}`);
+    console.log(`Successfully generated ${style} cover for ${title}`);
 
     return new Response(JSON.stringify({ 
       imageUrl,
-      coverStyle,
-      mockupType,
+      coverStyle: style,
+      mockupType: mockup,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
