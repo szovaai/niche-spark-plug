@@ -54,6 +54,20 @@ export interface ToolkitContent {
   };
 }
 
+export interface ContentSummary {
+  mainTransformation: string;
+  chapterThemes: {
+    chapter: string;
+    theme: string;
+    keyTakeaway: string;
+  }[];
+  uniqueMechanisms: string[];
+  specificBenefits: string[];
+  painPointsAddressed: string[];
+  quotableInsights: string[];
+  tableOfContents: string[];
+}
+
 export interface ToolkitUpsell {
   type: 'premium' | 'video' | 'dfy';
   title: string;
