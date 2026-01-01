@@ -99,7 +99,7 @@ AESTHETIC: ${style}, premium SaaS product launch style`;
         model: "gpt-image-1",
         prompt,
         n: 1,
-        size: "1792x1024",
+        size: "1536x1024",
         quality: "high",
       }),
     });
