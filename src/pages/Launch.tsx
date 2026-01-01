@@ -17,7 +17,7 @@ import confetti from "canvas-confetti";
 const Launch = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   
   const [toolkit, setToolkit] = useState<ToolkitLaunchData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,11 +26,15 @@ const Launch = () => {
   const [progressId, setProgressId] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!user && !authLoading) {
+      navigate("/auth");
+      return;
+    }
     if (id && user) {
       fetchToolkit();
       fetchProgress();
     }
-  }, [id, user]);
+  }, [id, user, authLoading]);
 
   const fetchToolkit = async () => {
     const { data, error } = await supabase
@@ -127,7 +131,7 @@ const Launch = () => {
     hasProductName: !!toolkit?.title,
   };
 
-  if (loading || !toolkit) {
+  if (authLoading || loading || !toolkit) {
     return (
       <DashboardLayout title="Launch">
         <div className="flex items-center justify-center h-64">
