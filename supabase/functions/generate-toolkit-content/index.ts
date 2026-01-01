@@ -67,11 +67,42 @@ CRITICAL WRITING STYLE:
 `;
 
 const componentPrompts: Record<string, string> = {
-  guide: `Create a comprehensive guide with 10-12 chapters. Each chapter needs a heading and detailed content (300-500 words per chapter). Include practical examples, action steps, and real-world applications. Make each chapter build on the previous one for a logical learning progression.
-  
-Return as: { "title": "Guide Title", "sections": [{ "heading": "Chapter 1: ...", "content": "..." }, { "heading": "Chapter 2: ...", "content": "..." }, ...] }
+  guide: `Create an IN-DEPTH, COMPREHENSIVE guide with 10-12 detailed chapters. This guide should be approximately 2,500-3,000 words TOTAL (200-300 words per chapter MINIMUM).
 
-IMPORTANT: Generate exactly 10-12 chapters. Each chapter should be substantial and valuable on its own.`,
+CHAPTER REQUIREMENTS - EACH CHAPTER MUST INCLUDE:
+1. Opening Hook (1-2 sentences): Start with a compelling question, surprising statistic, or relatable scenario
+2. Core Teaching (4-6 sentences): Main concept explanation with specific examples and data points
+3. Step-by-Step Actions (3-5 numbered steps): Specific, actionable steps the reader can implement TODAY
+4. Real-World Example (2-3 sentences): Brief case study, "Imagine this..." scenario, or before/after story
+5. Pro Tip Box: One insider secret or shortcut most people miss
+6. Common Mistake Warning: What to avoid and why
+7. Key Takeaway: One sentence summary of the chapter's main lesson
+8. Transition: Bridge sentence to the next chapter
+
+CONTENT DEPTH REQUIREMENTS:
+- Use SPECIFIC numbers, percentages, timeframes, and metrics (not vague estimates like "a lot" or "soon")
+- Include "If/Then" scenarios: "If you're a beginner, do X. If you're more advanced, try Y instead."
+- Add troubleshooting guidance: "If this doesn't work, check that..." or "Common blockers include..."
+- Reference specific tools, methods, frameworks, or resources by name where appropriate
+- Include psychological insights, motivation boosters, and mindset shifts
+- Provide templates, scripts, or fill-in-the-blank frameworks where helpful
+
+CONTENT STRUCTURE:
+- Chapter 1: Hook them with a compelling "why" and quick win they can achieve today
+- Chapters 2-4: Foundation concepts with actionable frameworks
+- Chapters 5-8: Core implementation strategies with detailed walkthroughs
+- Chapters 9-10: Advanced tactics and optimization techniques
+- Chapters 11-12: Scaling, troubleshooting, and next steps
+
+TONE REQUIREMENTS:
+- Conversational and encouraging ("You've got this", "Here's where it gets exciting")
+- Results-oriented ("By the end of this chapter, you'll be able to...")
+- Actionable ("Right now, open your [X] and...", "Your homework: spend 15 minutes on...")
+- Expert but approachable - like advice from a successful mentor who's been in their shoes
+
+Return as: { "title": "Guide Title", "sections": [{ "heading": "Chapter 1: [Descriptive Title]", "content": "[200-300 word detailed content following the structure above...]" }, ...] }
+
+CRITICAL: Generate EXACTLY 10-12 substantial chapters. Each chapter should feel like a complete mini-lesson that provides standalone value while building toward mastery. NO FLUFF - every sentence should teach, inspire, or prompt action.`,
   
   worksheet: `Create an interactive worksheet with 4-6 exercises. Each exercise needs a title, clear instructions, and 3-5 fill-in fields/prompts. Return as: { "title": "Worksheet Title", "exercises": [{ "title": "...", "instructions": "...", "fields": ["field1", "field2"] }] }`,
   
@@ -174,7 +205,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation, just the JSON ob
             },
             body: JSON.stringify({
               model: providerConfig.model,
-              max_tokens: 4000,
+              max_tokens: component === 'guide' ? 8000 : 4000,
               system: systemPrompt,
               messages: [{ role: 'user', content: `Generate the ${component} content now.` }],
             }),
@@ -198,6 +229,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation, just the JSON ob
               model: providerConfig.model,
               messages,
               temperature: 0.7,
+              max_tokens: component === 'guide' ? 8000 : 4000,
             }),
           });
 
@@ -221,6 +253,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation, just the JSON ob
             model: "deepseek-chat",
             messages,
             temperature: 0.7,
+            max_tokens: component === 'guide' ? 8000 : 4000,
           }),
         });
 
