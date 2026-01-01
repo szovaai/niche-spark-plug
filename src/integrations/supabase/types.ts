@@ -451,6 +451,10 @@ export type Database = {
           logo_url: string | null
           niche: string
           sales_letter: string | null
+          sales_offer_details: Json | null
+          salesletter_polished: string | null
+          salesletter_raw: string | null
+          salesletter_step: string | null
           status: string
           subtitle: string | null
           target_audience: string | null
@@ -473,6 +477,10 @@ export type Database = {
           logo_url?: string | null
           niche: string
           sales_letter?: string | null
+          sales_offer_details?: Json | null
+          salesletter_polished?: string | null
+          salesletter_raw?: string | null
+          salesletter_step?: string | null
           status?: string
           subtitle?: string | null
           target_audience?: string | null
@@ -495,6 +503,10 @@ export type Database = {
           logo_url?: string | null
           niche?: string
           sales_letter?: string | null
+          sales_offer_details?: Json | null
+          salesletter_polished?: string | null
+          salesletter_raw?: string | null
+          salesletter_step?: string | null
           status?: string
           subtitle?: string | null
           target_audience?: string | null

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Mail, RefreshCw, Copy, Download, Check, Sparkles, ArrowRight, RotateCcw } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Mail, RefreshCw, Copy, Download, Check, Sparkles, ArrowRight, RotateCcw, Zap, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { ToolkitComponents } from "@/types/toolkit";
+import { ToolkitComponents, ToolkitContent, GuideSection } from "@/types/toolkit";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { generateSalesLetterHTML } from "@/lib/salesLetterExport";
@@ -24,6 +24,16 @@ interface SalesLetterGeneratorProps {
   existingSalesLetter?: string;
   price?: number;
   authorName?: string;
+  // New props for auto-fill
+  thesis?: string;
+  guideSections?: GuideSection[];
+  content?: ToolkitContent;
+  // Persisted state
+  savedOfferDetails?: PromptBoxData;
+  savedRawDraft?: string;
+  savedPolishedLetter?: string;
+  savedStep?: Phase;
+  onStateChange?: (state: { offerDetails: PromptBoxData; rawDraft: string; polishedLetter: string; step: Phase }) => void;
 }
 
 interface PromptBoxData {
@@ -45,16 +55,27 @@ const SalesLetterGenerator = ({
   onSalesLetterGenerated, 
   existingSalesLetter,
   price = 17,
-  authorName
+  authorName,
+  thesis,
+  guideSections,
+  content,
+  savedOfferDetails,
+  savedRawDraft,
+  savedPolishedLetter,
+  savedStep,
+  onStateChange,
 }: SalesLetterGeneratorProps) => {
-  const [currentPhase, setCurrentPhase] = useState<Phase>(existingSalesLetter ? 'polished' : 'input');
+  const [currentPhase, setCurrentPhase] = useState<Phase>(savedStep || (existingSalesLetter ? 'polished' : 'input'));
   const [isGenerating, setIsGenerating] = useState(false);
-  const [rawDraft, setRawDraft] = useState("");
-  const [polishedLetter, setPolishedLetter] = useState(existingSalesLetter || "");
+  const [isFillingFromToolkit, setIsFillingFromToolkit] = useState(false);
+  const [isOneClickGenerating, setIsOneClickGenerating] = useState(false);
+  const [oneClickStep, setOneClickStep] = useState<1 | 2 | 3 | null>(null);
+  const [rawDraft, setRawDraft] = useState(savedRawDraft || "");
+  const [polishedLetter, setPolishedLetter] = useState(savedPolishedLetter || existingSalesLetter || "");
   const [copied, setCopied] = useState(false);
   const [promptBoxOpen, setPromptBoxOpen] = useState(true);
   
-  const [promptBoxData, setPromptBoxData] = useState<PromptBoxData>({
+  const [promptBoxData, setPromptBoxData] = useState<PromptBoxData>(savedOfferDetails || {
     whatProductIs: "",
     whoItsFor: targetAudience || "",
     mainProblem: "",
@@ -62,8 +83,65 @@ const SalesLetterGenerator = ({
     bonusesIncluded: "",
   });
 
+  // Persist state changes
+  useEffect(() => {
+    if (onStateChange) {
+      onStateChange({
+        offerDetails: promptBoxData,
+        rawDraft,
+        polishedLetter,
+        step: currentPhase,
+      });
+    }
+  }, [promptBoxData, rawDraft, polishedLetter, currentPhase, onStateChange]);
+
   const updatePromptBox = (field: keyof PromptBoxData, value: string) => {
     setPromptBoxData(prev => ({ ...prev, [field]: value }));
+  };
+
+  // NEW: Fill from Toolkit using AI
+  const fillFromToolkit = async () => {
+    if (!title || !niche) {
+      toast.error("Please ensure the toolkit has a title and niche defined.");
+      return;
+    }
+
+    setIsFillingFromToolkit(true);
+    try {
+      toast.info("Analyzing your toolkit to generate offer details...");
+      
+      const { data, error } = await supabase.functions.invoke("generate-offer-details", {
+        body: {
+          title,
+          niche,
+          targetAudience,
+          thesis,
+          components,
+          guideSections,
+          content,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.offerDetails) {
+        setPromptBoxData({
+          whatProductIs: data.offerDetails.whatProductIs || "",
+          whoItsFor: data.offerDetails.whoItsFor || targetAudience || "",
+          mainProblem: data.offerDetails.mainProblem || "",
+          desiredOutcome: data.offerDetails.desiredOutcome || "",
+          bonusesIncluded: data.offerDetails.bonusesIncluded || "",
+        });
+        toast.success("Offer details filled from your toolkit!");
+      } else {
+        throw new Error("No offer details returned");
+      }
+    } catch (error) {
+      console.error("Error filling from toolkit:", error);
+      toast.error("Failed to generate offer details. Please fill manually.");
+    } finally {
+      setIsFillingFromToolkit(false);
+    }
   };
 
   const generateRawDraft = async () => {
@@ -90,18 +168,20 @@ const SalesLetterGenerator = ({
         setCurrentPhase('raw');
         setPromptBoxOpen(false);
         toast.success("Raw draft generated! Review it, then polish with our framework.");
+        return true;
       } else {
         throw new Error("No sales letter returned");
       }
     } catch (error) {
       console.error("Error generating raw draft:", error);
       toast.error("Failed to generate raw draft. Please try again.");
+      return false;
     } finally {
       setIsGenerating(false);
     }
   };
 
-  const polishWithFramework = async () => {
+  const polishWithFramework = async (draftToPolish?: string) => {
     setIsGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-sales-letter", {
@@ -115,7 +195,7 @@ const SalesLetterGenerator = ({
           price,
           authorName,
           promptBoxData,
-          rawDraft,
+          rawDraft: draftToPolish || rawDraft,
         },
       });
 
@@ -126,14 +206,122 @@ const SalesLetterGenerator = ({
         onSalesLetterGenerated(data.salesLetter);
         setCurrentPhase('polished');
         toast.success("Sales letter polished with our Proprietary Framework!");
+        return true;
       } else {
         throw new Error("No sales letter returned");
       }
     } catch (error) {
       console.error("Error polishing sales letter:", error);
       toast.error("Failed to polish sales letter. Please try again.");
+      return false;
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  // NEW: One-Click Generate (Fill → Raw → Polish)
+  const oneClickGenerate = async () => {
+    if (!title || !niche) {
+      toast.error("Please ensure the toolkit has a title and niche defined.");
+      return;
+    }
+
+    setIsOneClickGenerating(true);
+    
+    try {
+      // Step 1: Fill from Toolkit (if empty)
+      const hasOfferDetails = promptBoxData.whatProductIs || promptBoxData.mainProblem;
+      if (!hasOfferDetails) {
+        setOneClickStep(1);
+        toast.info("Step 1/3: Generating offer details from your toolkit...");
+        
+        const { data: fillData, error: fillError } = await supabase.functions.invoke("generate-offer-details", {
+          body: {
+            title,
+            niche,
+            targetAudience,
+            thesis,
+            components,
+            guideSections,
+            content,
+          },
+        });
+
+        if (fillError) throw fillError;
+
+        if (fillData?.offerDetails) {
+          setPromptBoxData({
+            whatProductIs: fillData.offerDetails.whatProductIs || "",
+            whoItsFor: fillData.offerDetails.whoItsFor || targetAudience || "",
+            mainProblem: fillData.offerDetails.mainProblem || "",
+            desiredOutcome: fillData.offerDetails.desiredOutcome || "",
+            bonusesIncluded: fillData.offerDetails.bonusesIncluded || "",
+          });
+        }
+      }
+
+      // Step 2: Generate Raw Draft
+      setOneClickStep(2);
+      toast.info("Step 2/3: Generating raw draft...");
+      
+      const { data: rawData, error: rawError } = await supabase.functions.invoke("generate-sales-letter", {
+        body: {
+          phase: "raw",
+          title,
+          subtitle,
+          niche,
+          targetAudience: promptBoxData.whoItsFor || targetAudience || "Online entrepreneurs",
+          components,
+          price,
+          authorName,
+          promptBoxData,
+        },
+      });
+
+      if (rawError) throw rawError;
+
+      if (!rawData?.salesLetter) {
+        throw new Error("No raw draft returned");
+      }
+
+      setRawDraft(rawData.salesLetter);
+
+      // Step 3: Polish with Framework
+      setOneClickStep(3);
+      toast.info("Step 3/3: Polishing with Proprietary Framework...");
+      
+      const { data: polishData, error: polishError } = await supabase.functions.invoke("generate-sales-letter", {
+        body: {
+          phase: "polish",
+          title,
+          subtitle,
+          niche,
+          targetAudience: promptBoxData.whoItsFor || targetAudience,
+          components,
+          price,
+          authorName,
+          promptBoxData,
+          rawDraft: rawData.salesLetter,
+        },
+      });
+
+      if (polishError) throw polishError;
+
+      if (polishData?.salesLetter) {
+        setPolishedLetter(polishData.salesLetter);
+        onSalesLetterGenerated(polishData.salesLetter);
+        setCurrentPhase('polished');
+        setPromptBoxOpen(false);
+        toast.success("Sales letter complete! Review your polished version.");
+      } else {
+        throw new Error("No polished letter returned");
+      }
+    } catch (error) {
+      console.error("One-click generation error:", error);
+      toast.error("Generation failed. Please try the manual steps.");
+    } finally {
+      setIsOneClickGenerating(false);
+      setOneClickStep(null);
     }
   };
 
@@ -206,6 +394,42 @@ const SalesLetterGenerator = ({
     </div>
   );
 
+  // Auto-fill bar component
+  const AutoFillBar = () => (
+    <div className="flex items-center justify-between p-4 bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 rounded-lg mb-4">
+      <div className="flex items-center gap-3">
+        <div className="p-2 bg-primary/10 rounded-lg">
+          <Sparkles className="w-5 h-5 text-primary" />
+        </div>
+        <div>
+          <p className="font-medium text-sm">Auto-build from toolkit</p>
+          <p className="text-xs text-muted-foreground">Uses your Title, Audience, Thesis, Components, and Content</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={fillFromToolkit}
+          disabled={isFillingFromToolkit || isOneClickGenerating}
+          className="gap-2"
+        >
+          {isFillingFromToolkit ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Filling...
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-4 h-4" />
+              Fill from Toolkit
+            </>
+          )}
+        </Button>
+      </div>
+    </div>
+  );
+
   const PromptBox = () => (
     <Collapsible open={promptBoxOpen} onOpenChange={setPromptBoxOpen}>
       <CollapsibleTrigger asChild>
@@ -213,13 +437,18 @@ const SalesLetterGenerator = ({
           <div className="flex items-center gap-2">
             <Mail className="w-5 h-5 text-primary" />
             <span className="font-medium">Describe Your Offer (Raw Input)</span>
+            {promptBoxData.whatProductIs && (
+              <Badge variant="secondary" className="ml-2 bg-emerald-500/10 text-emerald-600">
+                Filled
+              </Badge>
+            )}
           </div>
           <ChevronDown className={`w-5 h-5 transition-transform ${promptBoxOpen ? 'rotate-180' : ''}`} />
         </div>
       </CollapsibleTrigger>
       <CollapsibleContent className="mt-4 space-y-4">
         <p className="text-sm text-muted-foreground">
-          Enter the details below. If you provide minimal input, we'll intelligently fill gaps using WarriorPlus-style best practices.
+          Enter the details below, or use "Fill from Toolkit" to auto-generate these from your toolkit data.
         </p>
         
         <div className="grid gap-4">
@@ -319,7 +548,7 @@ const SalesLetterGenerator = ({
       <div className="flex flex-wrap justify-center gap-3">
         <Button 
           variant="hero" 
-          onClick={polishWithFramework} 
+          onClick={() => polishWithFramework()} 
           disabled={isGenerating} 
           className="gap-2"
         >
@@ -437,7 +666,7 @@ const SalesLetterGenerator = ({
         
         <Button 
           variant="ghost" 
-          onClick={polishWithFramework} 
+          onClick={() => polishWithFramework()} 
           disabled={isGenerating} 
           className="gap-2"
         >
@@ -472,23 +701,56 @@ const SalesLetterGenerator = ({
         {/* Phase 1: Input */}
         {currentPhase === 'input' && (
           <div className="space-y-6">
+            {/* One-Click Generate Button */}
+            <div className="text-center p-6 border-2 border-dashed border-primary/30 rounded-lg bg-primary/5">
+              <Zap className="w-10 h-10 mx-auto text-primary mb-3" />
+              <h3 className="font-semibold text-lg mb-2">Recommended: One-Click Generate</h3>
+              <p className="text-sm text-muted-foreground mb-4 max-w-md mx-auto">
+                Automatically fills offer details from your toolkit, generates a raw draft, and polishes it with our framework.
+              </p>
+              <Button 
+                variant="hero" 
+                size="lg"
+                onClick={oneClickGenerate}
+                disabled={isOneClickGenerating || !title || !niche}
+                className="gap-2"
+              >
+                {isOneClickGenerating ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    {oneClickStep === 1 && "Step 1/3: Filling details..."}
+                    {oneClickStep === 2 && "Step 2/3: Generating draft..."}
+                    {oneClickStep === 3 && "Step 3/3: Polishing..."}
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-5 h-5" />
+                    Generate Sales Letter (Recommended)
+                  </>
+                )}
+              </Button>
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">
+                  Or customize manually
+                </span>
+              </div>
+            </div>
+            
+            <AutoFillBar />
             <PromptBox />
             
-            {!promptBoxOpen && (
-              <div className="text-center py-8 border-2 border-dashed rounded-lg">
-                <Mail className="w-12 h-12 mx-auto text-muted-foreground/30 mb-4" />
-                <p className="text-muted-foreground mb-2">
-                  Open the Prompt Box above to describe your offer.
-                </p>
-              </div>
-            )}
-            
             {promptBoxOpen && (
-              <div className="flex justify-center">
+              <div className="flex justify-center gap-3">
                 <Button 
                   variant="hero" 
                   onClick={generateRawDraft} 
-                  disabled={isGenerating || !promptBoxData.whatProductIs.trim()} 
+                  disabled={isGenerating || !promptBoxData.whatProductIs}
                   className="gap-2"
                 >
                   {isGenerating ? (
@@ -500,32 +762,23 @@ const SalesLetterGenerator = ({
                 </Button>
               </div>
             )}
+            
+            {!promptBoxOpen && !promptBoxData.whatProductIs && (
+              <div className="text-center py-8 border-2 border-dashed rounded-lg">
+                <Mail className="w-12 h-12 mx-auto text-muted-foreground/30 mb-4" />
+                <p className="text-muted-foreground mb-2">
+                  Open the Prompt Box above to describe your offer.
+                </p>
+              </div>
+            )}
           </div>
         )}
 
         {/* Phase 2: Raw Draft */}
-        {currentPhase === 'raw' && (
-          <>
-            <PromptBox />
-            <RawDraftView />
-          </>
-        )}
+        {currentPhase === 'raw' && <RawDraftView />}
 
         {/* Phase 3: Polished */}
-        {currentPhase === 'polished' && (
-          <>
-            {rawDraft && <PromptBox />}
-            <PolishedView />
-          </>
-        )}
-
-        {isGenerating && (
-          <div className="text-center text-sm text-muted-foreground animate-pulse">
-            {currentPhase === 'input' 
-              ? "Crafting your conversational raw draft..." 
-              : "Applying our Proprietary Framework for maximum conversion..."}
-          </div>
-        )}
+        {currentPhase === 'polished' && <PolishedView />}
       </CardContent>
     </Card>
   );
