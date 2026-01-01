@@ -106,9 +106,9 @@ const SalesLetterGenerator = ({
     <Card>
       <CardContent className="p-6 space-y-6">
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold gradient-text">AICPBSAWN Sales Letter</h2>
+          <h2 className="text-2xl font-bold gradient-text">Salesletter Framework</h2>
           <p className="text-muted-foreground mt-2">
-            Generate a professional, conversion-optimized sales letter using the proven framework.
+            Generate a professional, conversion-optimized sales letter using our proprietary framework.
           </p>
         </div>
 
@@ -172,7 +172,7 @@ const SalesLetterGenerator = ({
           <div className="text-center py-12 border-2 border-dashed rounded-lg">
             <Mail className="w-12 h-12 mx-auto text-muted-foreground/30 mb-4" />
             <p className="text-muted-foreground mb-2">
-              Generate a complete sales letter using the AICPBSAWN framework.
+              Generate a complete sales letter using our proprietary Salesletter Framework.
             </p>
             <p className="text-sm text-muted-foreground">
               Includes: Preheadline, Headline, Story, Benefits, Scarcity, CTA, and more.
