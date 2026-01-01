@@ -1,3 +1,4 @@
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -6,13 +7,11 @@ const corsHeaders = {
 };
 
 interface EcoverRequest {
-  // New simple format from EcoverGenerator
   productName?: string;
   productType?: string;
   aesthetic?: string;
   moodKeywords?: string[];
   ecoverType?: string;
-  // Existing detailed format from CoverCreatorFlow
   toolkitTitle?: string;
   subtitle?: string;
   authorName?: string;
@@ -33,237 +32,81 @@ serve(async (req) => {
   try {
     const body = await req.json() as EcoverRequest;
     
-    // Support both simple and detailed formats
     const title = body.productName || body.toolkitTitle || "Digital Product";
     const style = body.coverStyle || "professional";
-    const mockup = body.mockupType || body.ecoverType || "3d-book";
+    const mockup = body.mockupType || body.ecoverType || "premium-bundle";
     const primary = body.primaryColor || "#00d4ff";
     const secondary = body.secondaryColor || "#1a1a2e";
     const niche = body.niche || (body.moodKeywords?.join(", ") || "digital product");
-    const subtitle = body.subtitle;
-    const authorName = body.authorName;
-    const componentsIncluded = body.componentsIncluded;
-    const additionalElements = body.additionalElements;
+    const subtitle = body.subtitle || "";
+    const authorName = body.authorName || "";
+    const componentsIncluded = body.componentsIncluded || [];
     
-    const FAL_API_KEY = Deno.env.get("FAL_API_KEY");
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
     
-    if (!FAL_API_KEY) {
-      throw new Error("FAL_API_KEY is not configured");
+    if (!OPENAI_API_KEY) {
+      throw new Error("OPENAI_API_KEY is not configured");
     }
 
-    console.log(`Generating ${style} cover for: ${title} (${mockup})`);
+    console.log(`Generating ${style} cover for: ${title} (${mockup}) using OpenAI GPT-Image-1`);
 
-    // Build style-specific descriptions with enhanced spacing notes - NO TEXT ON IMAGES
-    const styleDescriptions: Record<string, string> = {
-      minimalist: "Clean lines, generous whitespace (40%+ of frame), each element isolated with breathing room, subtle shadows, elegant simplicity, modern minimalist aesthetic, NO TEXT",
-      bold: "Vibrant colors, strong contrasts, dynamic angles, energetic composition, eye-catching design with powerful visual impact, clear separation between elements, NO TEXT",
-      futuristic: "Tech-inspired gradients, geometric patterns, holographic edges, floating elements with subtle glow underneath each component, neon accents, modern SaaS aesthetic, sleek glass-morphism surfaces, NO TEXT",
-      professional: "Corporate elegance, boardroom-ready presentation, components arranged like a premium unboxing experience, muted tones, sophisticated layout, business-focused, trustworthy premium appearance, NO TEXT",
-      creative: "Artistic flair, unique textures, unexpected compositions, standout visual identity with creative edge, generous negative space between artistic elements, NO TEXT",
-    };
+    // Build component list for the prompt
+    const componentsList = componentsIncluded.length > 0 
+      ? componentsIncluded.join(", ")
+      : "Guide, Worksheets, Checklists, Templates, Resources";
 
-    // Component-to-visual mapping: Maps toolkit components to specific visual elements
-    // CRITICAL: All visuals should have BLANK covers/screens - no text rendered
-    const componentToVisualMap: Record<string, { visual: string; device?: string }> = {
-      "guide": { visual: "thick 3D hardcover book (200+ pages feel) with BLANK embossed cover, positioned center-left as HERO element", device: "book" },
-      "worksheet": { visual: "spiral-bound notebook with visible metal rings, slightly fanned open showing BLANK lined pages", device: "notebook" },
-      "checklist": { visual: "laminated checklist cards fanned out like playing cards, showing checkbox graphics with checkmarks, NO TEXT", device: "cards" },
-      "resource list": { visual: "modern folder with color-coded document tabs peeking out, papers visible with abstract patterns", device: "folder" },
-      "templates": { visual: "MacBook Pro displaying dashboard/editor UI with abstract charts and KPIs, NO READABLE TEXT", device: "laptop" },
-      "quiz": { visual: "iPad tablet showing interactive quiz/funnel interface with abstract UI elements", device: "tablet" },
-      "email sequence": { visual: "iPhone showing mobile companion app with abstract progress UI", device: "phone" },
-      "sales letter": { visual: "additional screen/tablet showing abstract sales page preview", device: "tablet" },
-    };
+    // Build a clear, structured prompt for GPT-Image-1 which handles text well
+    const prompt = `Create a premium digital product bundle hero image for sales pages:
 
-    // Build visual elements list from actual components
-    const buildComponentVisuals = (components: string[]): string[] => {
-      const visuals: string[] = [];
-      const defaultComponents = ["guide", "worksheet", "checklist", "resource list", "templates"];
-      const compsToUse = components.length > 0 ? components : defaultComponents;
-      
-      compsToUse.forEach(comp => {
-        const key = Object.keys(componentToVisualMap).find(k => 
-          comp.toLowerCase().includes(k.toLowerCase()) || k.includes(comp.toLowerCase())
-        );
-        if (key) {
-          visuals.push(`- ${comp.toUpperCase()}: ${componentToVisualMap[key].visual}`);
-        } else {
-          visuals.push(`- ${comp}: premium printed materials or digital asset display with BLANK covers`);
-        }
-      });
-      
-      return visuals;
-    };
+PRODUCT TITLE: "${title}"
+${subtitle ? `SUBTITLE: "${subtitle}"` : ""}
+${authorName ? `BY: ${authorName}` : ""}
 
-    const visualElements = buildComponentVisuals(componentsIncluded || []);
-    const componentsText = `BUNDLE COMPONENTS TO VISUALIZE (ALL WITH BLANK COVERS - NO TEXT):\n${visualElements.join("\n")}`;
+VISUAL COMPOSITION:
+- Premium 3D book mockup with the title "${title}" in bold, modern sans-serif typography on the cover
+- MacBook Pro displaying a sleek dashboard UI
+- iPad showing app interface
+- Scattered worksheets and documents
+- All arranged in an elegant arc on a dark gradient surface
 
-    // Build mockup-specific descriptions for digital product bundles
-    // CRITICAL: NO TEXT ALLOWED - All mockups show clean product visuals only
-    const mockupDescriptions: Record<string, string> = {
-      "premium-bundle": `Ultra-premium digital product bundle hero image in the style of high-end SaaS product launches:
+STYLE:
+- Dark gradient background (${secondary} to darker)
+- Glowing ${primary} accent arc connecting elements
+- Soft studio lighting from top-left
+- Individual realistic shadows for each item
+- Premium, high-ticket aesthetic ($497+ value look)
 
-CRITICAL: NO TEXT ALLOWED ON ANY ELEMENT
-- Do NOT render any text, titles, labels, or typography on the image
-- All books, screens, and materials should have BLANK or abstract pattern covers
-- Text will be added separately by the user
-- Clean, professional product photography aesthetic
+TYPOGRAPHY REQUIREMENTS:
+- Title "${title}" must be clearly legible on the book cover
+- Use bold, modern sans-serif font
+- Clean, professional text rendering
+- High contrast against the cover background
 
-COMPOSITION & LAYOUT:
-- Dark gradient background (#0a0a12 to #1a1a2e) with subtle reflective surface beneath products
-- Glowing cyan/teal arc (${primary}) sweeping elegantly from left to right, connecting all elements
-- Products arranged in elegant arc formation: Book (left) → Laptop (center-back) → Tablet (right) → Phone (far right)
-- Scattered worksheets/documents anchoring the bottom-center
+COMPONENTS SHOWN: ${componentsList}
 
-DEVICE MOCKUPS (All with BLANK covers/screens - no text):
-${visualElements.join("\n")}
+FORMAT: 1792x1024 landscape, sales-page hero quality
+AESTHETIC: ${style}, premium SaaS product launch style`;
 
-LIGHTING & EFFECTS:
-- Soft studio lighting from top-left (45 degrees)
-- Each item casts individual realistic shadow
-- Subtle rim lighting on device edges (${primary} tint)
-- Glowing arc/swoosh effect connecting elements (${primary})
-- Clean ambient occlusion where products meet surface
+    console.log("Sending prompt to OpenAI GPT-Image-1...");
 
-FINAL REQUIREMENTS:
-- 1920x1080 landscape, sales-page hero quality
-- Should look like a $497-$997 premium digital system
-- Professional enough for WarriorPlus, Gumroad, ClickBank front pages
-- NO cluttered elements - generous spacing between all items
-- ABSOLUTELY NO TEXT OR TYPOGRAPHY - clean product mockup only
-- Ready for immediate commercial use`,
-      "3d-book": "3D hardcover book mockup with BLANK cover, realistic shadows and depth, slightly angled perspective showing cover and spine, premium binding details, generous space around the book, NO TEXT",
-      "laptop": "Digital product displayed on a premium MacBook Pro screen with abstract UI dashboard (no readable text), modern minimalist workspace background, soft ambient lighting, clean desk with space around device",
-      "floating-pages": "Floating paper pages with soft individual shadows, BLANK pages with subtle abstract patterns, arranged in an artistic scattered pattern with generous gaps between each page, NO TEXT",
-      "phone-mockup": "Product displayed on a modern iPhone screen with abstract app UI (no text), clean gradient background and ample negative space, suggesting mobile-friendly digital access",
-      "tablet": "Premium iPad displaying abstract dashboard UI (no text), elegant accessories nearby, suggesting digital toolkit accessibility, clean surface with breathing room",
-      "bundle-stack": `Premium digital product bundle hero display: Elegantly spaced 3D arrangement on a clean surface - main guide as thick hardcover book with BLANK cover (center-left, prominent), spiral-bound worksheets with visible metal rings and BLANK pages (center-right, slightly behind), laminated checklist cards fanned out artfully showing abstract checkboxes (front-left), resource folder with visible color-coded document tabs peeking out (front-right), and bonus template sheets with abstract patterns scattered artfully (back). CRITICAL: Each element has generous breathing room (15-20% gaps) between components. Individual realistic drop shadows and ambient occlusion for each piece. Clean gradient background with soft studio lighting from top-left and subtle rim lighting for premium depth. ABSOLUTELY NO TEXT OR TYPOGRAPHY ON ANY ELEMENT.`,
-    };
-
-    // Detect if this is a bundle/toolkit type product
-    const isPremiumBundle = mockup === "premium-bundle";
-    const isBundleProduct = isPremiumBundle || mockup === "bundle-stack" || 
-      title.toLowerCase().includes("toolkit") || 
-      title.toLowerCase().includes("bundle") ||
-      title.toLowerCase().includes("system") ||
-      title.toLowerCase().includes("blueprint");
-
-    // Build premium bundle-specific prompt with enhanced spacing and detail
-    const bundlePromptAddition = (isBundleProduct && !isPremiumBundle) ? `
-CRITICAL BUNDLE VISUALIZATION REQUIREMENTS:
-
-SPACING & ARRANGEMENT:
-- Leave GENEROUS negative space between each component (at least 15-20% gaps between items)
-- Fan out components in an elegant arc or diagonal arrangement, minimal overlapping
-- Use rule of thirds composition with main product at key intersection point
-- Components should BREATHE - not crowded or touching each other
-
-DETAILED COMPONENT RENDERING:
-${visualElements.join("\n")}
-
-LIGHTING & SHADOWS:
-- Each component casts its OWN individual realistic shadow for depth and separation
-- Soft directional studio lighting from top-left (45 degrees)
-- Subtle rim lighting on edges for premium dimensional feel
-- Ambient occlusion where components meet the surface
-
-SCALE & COMPOSITION:
-- Components should be LARGE and clearly distinguishable, filling the frame generously (80% fill)
-- Clean gradient or subtle textured surface background, not distracting
-- Premium unboxing experience aesthetic
-- Each item should be instantly recognizable as a distinct valuable component` : "";
-
-    // For premium-bundle, use the mockup description directly as it's comprehensive
-    const prompt = isPremiumBundle 
-      ? `Create a premium, sales-ready digital product bundle hero image:
-
-CRITICAL INSTRUCTION - NO TEXT ALLOWED:
-- Do NOT render any text, titles, labels, or typography anywhere in the image
-- All books should have BLANK embossed covers (no titles)
-- All screens should show abstract UI patterns (no readable text)
-- All documents should have abstract patterns (no text)
-- The user will add their own text/branding separately
-- This is a CLEAN PRODUCT MOCKUP only
-
-PRODUCT CONTEXT (for styling only - do not render as text):
-Niche/Topic: ${niche}
-
-${mockupDescriptions["premium-bundle"]}
-
-COLOR SCHEME:
-- Primary accent: ${primary} (for glowing arc, rim lighting)
-- Background: ${secondary} transitioning to darker (#0a0a12)
-
-${additionalElements ? `ADDITIONAL STYLING ELEMENTS: ${additionalElements}` : ""}
-
-CRITICAL REQUIREMENTS:
-- Ultra-professional, high-ticket digital product aesthetic
-- Clean, SPACIOUS composition with clear focal point
-- Perfect for sales pages and marketing materials
-- Eye-catching hero image that converts browsers to buyers
-- NO cluttered elements - generous 15-20% spacing between all items
-- ABSOLUTELY NO TEXT, TITLES, LABELS, OR TYPOGRAPHY ANYWHERE
-- Ready for immediate commercial use on any marketplace`
-      : `Create a premium, sales-ready digital product bundle hero image:
-
-CRITICAL INSTRUCTION - NO TEXT ALLOWED:
-- Do NOT render any text, titles, labels, or typography anywhere in the image
-- All books should have BLANK embossed covers (no titles)
-- All screens should show abstract UI patterns (no readable text)
-- All documents should have abstract patterns or subtle textures (no text)
-- The user will add their own text/branding separately
-- This is a CLEAN PRODUCT MOCKUP only
-
-PRODUCT CONTEXT (for styling only - do not render as text):
-Niche/Topic: ${niche}
-${componentsText}
-
-VISUAL STYLE: ${styleDescriptions[style] || styleDescriptions.professional}
-
-MOCKUP TYPE: ${mockupDescriptions[mockup] || mockupDescriptions["bundle-stack"]}
-
-COLOR SCHEME:
-- Primary: ${primary} (use for accents, glows, rim lighting)
-- Secondary: ${secondary} (use for backgrounds, subtle details)
-- Ensure high contrast and visual depth
-${bundlePromptAddition}
-
-${additionalElements ? `ADDITIONAL STYLING ELEMENTS: ${additionalElements}` : ""}
-
-CRITICAL REQUIREMENTS:
-- Ultra-professional, WarriorPlus/Gumroad bestseller quality
-- Clean, SPACIOUS composition with clear focal point and breathing room
-- Perfect for sales pages, marketing materials, and social media
-- Eye-catching hero image that converts browsers to buyers
-- 16:9 landscape aspect ratio, optimized for web display at 1920x1080
-- Premium digital product aesthetic with modern design sensibility
-- Individual realistic shadows for each component, ambient lighting with rim highlights
-- ABSOLUTELY NO TEXT, TITLES, LABELS, OR TYPOGRAPHY ANYWHERE IN THE IMAGE
-- Should look like a $497+ premium digital product bundle
-- Ready for immediate commercial use on any marketplace
-- IMPORTANT: Generous spacing between all elements, no crowding`;
-
-    // Use FAL AI (flux-pro) for high-quality image generation with larger dimensions
-    const response = await fetch("https://fal.run/fal-ai/flux-pro/v1.1", {
+    const response = await fetch("https://api.openai.com/v1/images/generations", {
       method: "POST",
       headers: {
-        Authorization: `Key ${FAL_API_KEY}`,
+        "Authorization": `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        model: "gpt-image-1",
         prompt,
-        image_size: {
-          width: 1920,
-          height: 1080
-        },
-        num_images: 1,
-        safety_tolerance: "2",
+        n: 1,
+        size: "1792x1024",
+        quality: "high",
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("FAL API error:", response.status, errorText);
+      console.error("OpenAI API error:", response.status, errorText);
       
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), {
@@ -272,20 +115,35 @@ CRITICAL REQUIREMENTS:
         });
       }
       
-      throw new Error(`FAL API error: ${response.status}`);
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: "OpenAI billing issue. Please check your API key." }), {
+          status: 402,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      
+      if (response.status === 400) {
+        console.error("Bad request - prompt may have issues:", errorText);
+        throw new Error("Invalid request to image API");
+      }
+      
+      throw new Error(`OpenAI API error: ${response.status}`);
     }
 
     const data = await response.json();
+    console.log("OpenAI response received successfully");
     
-    // FAL returns images array with url property
-    const imageUrl = data.images?.[0]?.url;
+    // GPT-Image-1 returns base64 by default in b64_json field
+    const imageBase64 = data.data?.[0]?.b64_json;
 
-    if (!imageUrl) {
-      console.error("No image in response:", data);
+    if (!imageBase64) {
+      console.error("No image in response:", JSON.stringify(data).substring(0, 500));
       throw new Error("Failed to generate cover image");
     }
 
-    console.log(`Successfully generated ${style} cover for ${title}`);
+    const imageUrl = `data:image/png;base64,${imageBase64}`;
+
+    console.log(`Successfully generated ${style} cover for "${title}" with GPT-Image-1`);
 
     return new Response(JSON.stringify({ 
       imageUrl,
