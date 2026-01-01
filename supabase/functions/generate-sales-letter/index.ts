@@ -15,11 +15,20 @@ interface ContentSummary {
   tableOfContents: string[];
 }
 
+interface PromptBoxData {
+  whatProductIs: string;
+  whoItsFor: string;
+  mainProblem: string;
+  desiredOutcome: string;
+  bonusesIncluded: string;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
     const { 
+      phase = "legacy", // "raw", "polish", or "legacy" for backwards compatibility
       title, 
       subtitle, 
       niche, 
@@ -29,7 +38,9 @@ serve(async (req) => {
       authorName, 
       keyBenefits, 
       uniqueMechanism,
-      contentSummary 
+      contentSummary,
+      promptBoxData,
+      rawDraft
     } = await req.json();
     
     const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
@@ -37,13 +48,96 @@ serve(async (req) => {
 
     const activeComponents = Object.entries(components || {}).filter(([_, enabled]) => enabled).map(([name]) => name);
     
-    // Build enhanced prompt with content summary
-    let enhancedPrompt = "";
+    let prompt = "";
+    let systemPrompt = "";
     
-    if (contentSummary) {
-      const summary = contentSummary as ContentSummary;
+    // PHASE 1: RAW DRAFT - Conversational, unpolished, clarity-focused
+    if (phase === "raw") {
+      const pb = promptBoxData as PromptBoxData;
       
-      enhancedPrompt = `Write a complete, high-converting AICPBSAWN sales letter for "${title}" in the ${niche} niche.
+      systemPrompt = `You are a friendly copywriter helping someone explain their product clearly. 
+You write like you're explaining something to a friend over coffee - honest, direct, helpful.
+NO hype. NO fake stats. NO testimonials. NO urgency tactics. Just pure clarity.`;
+
+      prompt = `Write a first draft sales letter for "${title}". This is a "thinking draft" - not polished, not persuasive, just CLEAR.
+
+PRODUCT DETAILS FROM USER:
+${pb?.whatProductIs ? `• What it is: ${pb.whatProductIs}` : `• Product: ${title} - a digital toolkit in the ${niche} niche`}
+${pb?.whoItsFor ? `• Who it's for: ${pb.whoItsFor}` : `• Audience: ${targetAudience || "online entrepreneurs"}`}
+${pb?.mainProblem ? `• Problem it solves: ${pb.mainProblem}` : ""}
+${pb?.desiredOutcome ? `• Desired outcome: ${pb.desiredOutcome}` : ""}
+${pb?.bonusesIncluded ? `• What's included: ${pb.bonusesIncluded}` : `• Components: ${activeComponents.join(", ")}`}
+
+PRICE: $${price || 17}
+
+REQUIREMENTS FOR THIS RAW DRAFT:
+1. Write in a natural, conversational tone
+2. NO fake statistics or made-up numbers
+3. NO fake testimonials or case studies
+4. NO hype language or pressure tactics
+5. Focus entirely on CLARITY - help the reader understand what this is and why it matters
+6. Use simple language - no jargon
+7. Be honest about what the product is and isn't
+
+STRUCTURE (keep it simple):
+- Open with a relatable situation or problem
+- Explain what the product is clearly
+- List what's included (if provided)
+- Explain the main benefit/transformation
+- Simple closing with price
+
+This should feel like: "Here's what this is and why it might help you."
+
+Format as clean HTML with basic styling. Keep paragraphs short.`;
+
+    // PHASE 2: POLISH - Apply the Proprietary Framework
+    } else if (phase === "polish") {
+      systemPrompt = `You are a master direct-response copywriter who specializes in converting readers into buyers.
+You take raw, honest copy and transform it using proven persuasion frameworks while keeping authenticity.
+You never add fake testimonials or made-up statistics - you enhance structure and emotional resonance.`;
+
+      prompt = `Take this raw sales letter draft and REWRITE it using our Proprietary Salesletter Framework (AICPBSAWN).
+
+=== RAW DRAFT TO POLISH ===
+${rawDraft}
+
+=== FRAMEWORK TO APPLY ===
+A = ATTENTION: Pattern-interrupt headline that stops the scroll. Make it specific to the offer.
+I = INTEREST: Hook them with a relatable story, surprising insight, or "aha moment" about their problem.
+C = CREDIBILITY: Establish why this solution works (without fake testimonials - use logic, specificity, or methodology).
+P = PROVE: Use specifics from the product content. Reference actual chapters, methods, or frameworks included.
+B = BENEFITS: Transform features into concrete outcomes. Make benefits specific and measurable where possible.
+S = SCARCITY: Add genuine reason to act now (limited launch price, bonus expiration, etc.)
+A = ACTION: Clear, compelling call-to-action with button-style formatting.
+W = WARN: What happens if they don't solve this problem? Paint the cost of inaction.
+N = NOW: Final urgency push and confident close.
+
+=== ADDITIONAL CONTEXT ===
+Product: ${title}
+${subtitle ? `Subtitle: ${subtitle}` : ""}
+Niche: ${niche}
+Target Audience: ${(promptBoxData as PromptBoxData)?.whoItsFor || targetAudience || "digital entrepreneurs"}
+Price: $${price || 17}
+Components: ${activeComponents.join(", ")}
+
+=== CRITICAL RULES ===
+1. Keep the authentic voice from the raw draft
+2. DO NOT invent fake testimonials or statistics
+3. Make the headline SPECIFIC to this product, not generic
+4. Reference actual product components/chapters where possible
+5. Format as professional HTML with modern styling classes
+6. Add visual hierarchy with subheadlines, bullet points, and call-out boxes
+7. Include a styled "Buy Now" button section
+8. The final version should feel premium and conversion-optimized`;
+
+    // LEGACY MODE - Original behavior for backwards compatibility
+    } else {
+      systemPrompt = "You are an expert copywriter who writes sales letters that feel personal and specific, never generic. You reference actual product content to build credibility.";
+      
+      if (contentSummary) {
+        const summary = contentSummary as ContentSummary;
+        
+        prompt = `Write a complete, high-converting AICPBSAWN sales letter for "${title}" in the ${niche} niche.
 
 TARGET AUDIENCE: ${targetAudience || "entrepreneurs and digital product creators"}
 PRICE: $${price || 17}
@@ -91,12 +185,12 @@ CRITICAL INSTRUCTIONS:
 5. Format as clean, semantic HTML with modern styling classes
 6. Make it feel like YOU know exactly what's in this product`;
 
-    } else {
-      // Fallback to basic prompt if no content summary
-      enhancedPrompt = `Write a complete AICPBSAWN sales letter for "${title}" in ${niche} targeting ${targetAudience || "entrepreneurs"}. Price: $${price || 17}. Components: ${activeComponents.join(", ")}. ${keyBenefits?.length ? `Benefits: ${keyBenefits.join(", ")}` : ""} ${uniqueMechanism ? `Unique mechanism: ${uniqueMechanism}` : ""} Format as clean HTML.`;
+      } else {
+        prompt = `Write a complete AICPBSAWN sales letter for "${title}" in ${niche} targeting ${targetAudience || "entrepreneurs"}. Price: $${price || 17}. Components: ${activeComponents.join(", ")}. ${keyBenefits?.length ? `Benefits: ${keyBenefits.join(", ")}` : ""} ${uniqueMechanism ? `Unique mechanism: ${uniqueMechanism}` : ""} Format as clean HTML.`;
+      }
     }
 
-    console.log("Generating content-aware sales letter for:", title);
+    console.log(`Generating ${phase} sales letter for:`, title);
 
     const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
       method: "POST",
@@ -104,11 +198,11 @@ CRITICAL INSTRUCTIONS:
       body: JSON.stringify({ 
         model: "deepseek-chat", 
         messages: [
-          { role: "system", content: "You are an expert copywriter who writes sales letters that feel personal and specific, never generic. You reference actual product content to build credibility." },
-          { role: "user", content: enhancedPrompt }
+          { role: "system", content: systemPrompt },
+          { role: "user", content: prompt }
         ],
-        temperature: 0.8,
-        max_tokens: 4000,
+        temperature: phase === "raw" ? 0.7 : 0.8,
+        max_tokens: phase === "raw" ? 2500 : 4000,
       }),
     });
 
@@ -120,7 +214,7 @@ CRITICAL INSTRUCTIONS:
     const data = await response.json();
     const salesLetter = data.choices?.[0]?.message?.content || "";
 
-    return new Response(JSON.stringify({ salesLetter }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ salesLetter, phase }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {
     console.error("Error:", error);
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
