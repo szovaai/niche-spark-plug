@@ -21,46 +21,58 @@ const Launch = () => {
   
   const [toolkit, setToolkit] = useState<ToolkitLaunchData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedPlatform, setSelectedPlatform] = useState<LaunchPlatform | null>(null);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [progressId, setProgressId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user && !authLoading) {
+    // Wait for auth to fully resolve
+    if (authLoading) return;
+    
+    if (!user) {
       navigate("/auth");
       return;
     }
-    if (id && user) {
+    
+    if (id) {
       fetchToolkit();
       fetchProgress();
     }
   }, [id, user, authLoading]);
 
   const fetchToolkit = async () => {
-    const { data, error } = await supabase
-      .from("toolkits")
-      .select("*")
-      .eq("id", id)
-      .single();
+    try {
+      const { data, error: fetchError } = await supabase
+        .from("toolkits")
+        .select("*")
+        .eq("id", id)
+        .single();
 
-    if (error) {
-      toast.error("Failed to load toolkit");
-      navigate("/my-toolkits");
-      return;
+      if (fetchError) {
+        console.error("Toolkit fetch error:", fetchError);
+        setError("Could not load this toolkit. It may not exist or you don't have access.");
+        setLoading(false);
+        return;
+      }
+
+      setToolkit({
+        id: data.id,
+        title: data.title,
+        subtitle: data.subtitle,
+        niche: data.niche,
+        targetAudience: data.target_audience,
+        ecoverUrl: data.ecover_url,
+        salesLetter: data.sales_letter,
+        components: data.components as Record<string, boolean>,
+        content: data.content as Record<string, unknown>,
+      });
+      setLoading(false);
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      setError("An unexpected error occurred.");
+      setLoading(false);
     }
-
-    setToolkit({
-      id: data.id,
-      title: data.title,
-      subtitle: data.subtitle,
-      niche: data.niche,
-      targetAudience: data.target_audience,
-      ecoverUrl: data.ecover_url,
-      salesLetter: data.sales_letter,
-      components: data.components as Record<string, boolean>,
-      content: data.content as Record<string, unknown>,
-    });
-    setLoading(false);
   };
 
   const fetchProgress = async () => {
@@ -130,6 +142,21 @@ const Launch = () => {
     hasPrice: true,
     hasProductName: !!toolkit?.title,
   };
+
+  if (error) {
+    return (
+      <DashboardLayout title="Launch">
+        <div className="max-w-md mx-auto text-center py-16">
+          <Rocket className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+          <h2 className="text-xl font-semibold mb-2">Toolkit Not Found</h2>
+          <p className="text-muted-foreground mb-6">{error}</p>
+          <Button onClick={() => navigate("/my-toolkits")}>
+            Back to My Toolkits
+          </Button>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   if (authLoading || loading || !toolkit) {
     return (
