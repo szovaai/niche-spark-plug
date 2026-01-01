@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Store, ShoppingBag, Palette, FileText, Calculator, Zap, Search, ArrowRight, Check } from "lucide-react";
+import { Sparkles, ShoppingBag, BookOpen, Briefcase, Heart, GraduationCap, Rocket, ArrowRight, Check, Package, Wand2 } from "lucide-react";
 
 interface OnboardingWizardProps {
   onComplete: (preferences: { platform: string; interests: string[] }) => void;
@@ -9,16 +9,16 @@ interface OnboardingWizardProps {
 }
 
 const platforms = [
-  { id: "etsy", label: "Etsy", icon: Store, description: "Handmade & vintage marketplace" },
-  { id: "shopify", label: "Shopify", icon: ShoppingBag, description: "Your own online store" },
-  { id: "both", label: "Both", icon: Sparkles, description: "Sell everywhere" },
+  { id: "gumroad", label: "Gumroad", icon: ShoppingBag, description: "Simple digital product sales" },
+  { id: "warriorplus", label: "WarriorPlus", icon: Rocket, description: "Internet marketing marketplace" },
+  { id: "other", label: "Other / Not Sure", icon: Sparkles, description: "Explore all options" },
 ];
 
-const productTypes = [
-  { id: "printables", label: "Printables", icon: FileText },
-  { id: "planners", label: "Planners", icon: Calculator },
-  { id: "art", label: "Digital Art", icon: Palette },
-  { id: "templates", label: "Templates", icon: FileText },
+const nicheInterests = [
+  { id: "business", label: "Business & Money", icon: Briefcase },
+  { id: "health", label: "Health & Wellness", icon: Heart },
+  { id: "learning", label: "Skills & Learning", icon: GraduationCap },
+  { id: "creative", label: "Creative & Hobbies", icon: BookOpen },
 ];
 
 const OnboardingWizard = ({ onComplete, onSkip }: OnboardingWizardProps) => {
@@ -46,14 +46,14 @@ const OnboardingWizard = ({ onComplete, onSkip }: OnboardingWizardProps) => {
       className="text-center space-y-6"
     >
       <div className="w-20 h-20 mx-auto bg-gradient-to-br from-primary to-primary/60 rounded-full flex items-center justify-center">
-        <Sparkles className="w-10 h-10 text-primary-foreground" />
+        <Package className="w-10 h-10 text-primary-foreground" />
       </div>
-      <h2 className="text-3xl font-bold text-foreground">Welcome to DigiStream!</h2>
+      <h2 className="text-3xl font-bold text-foreground">Welcome to Toolkit Creator!</h2>
       <p className="text-muted-foreground text-lg max-w-md mx-auto">
-        Let's find your first profitable digital product in under 60 minutes.
+        Create professional digital toolkits you can sell — in minutes, not weeks.
       </p>
       <Button size="lg" onClick={() => setStep(1)} className="gap-2">
-        Let's Go <ArrowRight className="w-4 h-4" />
+        Let's Get Started <ArrowRight className="w-4 h-4" />
       </Button>
     </motion.div>,
 
@@ -66,8 +66,8 @@ const OnboardingWizard = ({ onComplete, onSkip }: OnboardingWizardProps) => {
       className="space-y-6"
     >
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-foreground">Where do you want to sell?</h2>
-        <p className="text-muted-foreground mt-2">We'll tailor recommendations to your platform</p>
+        <h2 className="text-2xl font-bold text-foreground">Where will you sell?</h2>
+        <p className="text-muted-foreground mt-2">We'll optimize your toolkit for your platform</p>
       </div>
       <div className="grid gap-3">
         {platforms.map(p => (
@@ -101,7 +101,7 @@ const OnboardingWizard = ({ onComplete, onSkip }: OnboardingWizardProps) => {
       </Button>
     </motion.div>,
 
-    // Step 2: Product Interests
+    // Step 2: Niche Interests
     <motion.div
       key="interests"
       initial={{ opacity: 0, y: 20 }}
@@ -110,11 +110,11 @@ const OnboardingWizard = ({ onComplete, onSkip }: OnboardingWizardProps) => {
       className="space-y-6"
     >
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-foreground">What interests you?</h2>
-        <p className="text-muted-foreground mt-2">Select all that apply (or skip)</p>
+        <h2 className="text-2xl font-bold text-foreground">What topics interest you?</h2>
+        <p className="text-muted-foreground mt-2">We'll suggest toolkit ideas in these areas</p>
       </div>
       <div className="grid grid-cols-2 gap-3">
-        {productTypes.map(p => (
+        {nicheInterests.map(p => (
           <button
             key={p.id}
             onClick={() => toggleInterest(p.id)}
@@ -125,7 +125,7 @@ const OnboardingWizard = ({ onComplete, onSkip }: OnboardingWizardProps) => {
             }`}
           >
             <p.icon className={`w-6 h-6 ${interests.includes(p.id) ? "text-primary" : "text-muted-foreground"}`} />
-            <span className="font-medium text-foreground">{p.label}</span>
+            <span className="font-medium text-foreground text-sm text-center">{p.label}</span>
           </button>
         ))}
       </div>
@@ -134,7 +134,7 @@ const OnboardingWizard = ({ onComplete, onSkip }: OnboardingWizardProps) => {
       </Button>
     </motion.div>,
 
-    // Step 3: Mini Tutorial
+    // Step 3: How It Works
     <motion.div
       key="tutorial"
       initial={{ opacity: 0, y: 20 }}
@@ -143,39 +143,39 @@ const OnboardingWizard = ({ onComplete, onSkip }: OnboardingWizardProps) => {
       className="space-y-6"
     >
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-foreground">Here's how DigiStream works</h2>
+        <h2 className="text-2xl font-bold text-foreground">Here's how it works</h2>
       </div>
       <div className="space-y-4">
         <div className="flex items-start gap-4 p-4 bg-card rounded-xl border border-border">
           <div className="p-2 bg-primary/20 rounded-lg">
-            <Zap className="w-5 h-5 text-primary" />
+            <Wand2 className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <div className="font-semibold text-foreground">Launchability Score™</div>
-            <div className="text-sm text-muted-foreground">Every niche has a 0-100 score showing how easy and profitable it is to launch.</div>
+            <div className="font-semibold text-foreground">AI-Powered Creation</div>
+            <div className="text-sm text-muted-foreground">Generate complete guides, worksheets, and checklists with one click.</div>
           </div>
         </div>
         <div className="flex items-start gap-4 p-4 bg-card rounded-xl border border-border">
           <div className="p-2 bg-accent/20 rounded-lg">
-            <Sparkles className="w-5 h-5 text-accent-foreground" />
+            <Package className="w-5 h-5 text-accent-foreground" />
           </div>
           <div>
-            <div className="font-semibold text-foreground">Build My Pack</div>
-            <div className="text-sm text-muted-foreground">One click generates your product title, description, and launch plan.</div>
+            <div className="font-semibold text-foreground">Professional Toolkit</div>
+            <div className="text-sm text-muted-foreground">Get a complete product bundle with cover, sales page, and email sequence.</div>
           </div>
         </div>
         <div className="flex items-start gap-4 p-4 bg-card rounded-xl border border-border">
           <div className="p-2 bg-secondary rounded-lg">
-            <Search className="w-5 h-5 text-secondary-foreground" />
+            <Rocket className="w-5 h-5 text-secondary-foreground" />
           </div>
           <div>
-            <div className="font-semibold text-foreground">Find Hot Niches</div>
-            <div className="text-sm text-muted-foreground">Search or browse trending niches sorted by launch potential.</div>
+            <div className="font-semibold text-foreground">Launch & Sell</div>
+            <div className="text-sm text-muted-foreground">Follow our step-by-step launch guide to make your first sale.</div>
           </div>
         </div>
       </div>
       <Button size="lg" onClick={handleComplete} className="w-full gap-2">
-        Start Exploring <Sparkles className="w-4 h-4" />
+        Create My First Toolkit <Sparkles className="w-4 h-4" />
       </Button>
     </motion.div>,
   ];
