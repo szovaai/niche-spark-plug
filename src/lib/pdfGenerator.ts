@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import { ToolkitContent, ToolkitComponents } from "@/types/toolkit";
+import { sanitizeForPDF } from "./textSanitizer";
 
 // PDF Styling Constants - Enhanced Professional Design
 const PDF_STYLES = {
@@ -85,9 +86,9 @@ const checkNewPage = (doc: jsPDF, y: number, requiredSpace: number = 30): number
   return y;
 };
 
-// Helper to wrap text and return lines
+// Helper to wrap text and return lines (with sanitization)
 const wrapText = (doc: jsPDF, text: string, maxWidth: number): string[] => {
-  return doc.splitTextToSize(text, maxWidth);
+  return doc.splitTextToSize(sanitizeForPDF(text), maxWidth);
 };
 
 // Helper to draw a decorative box
@@ -246,10 +247,10 @@ export const generateGuidePDF = (
     doc.setFont("helvetica", "bold");
     doc.text(`${index + 1}.`, PDF_STYLES.margins.left + 5, y);
     
-    // Chapter title
+    // Chapter title - sanitized
     doc.setTextColor(...PDF_STYLES.textColor);
     doc.setFont("helvetica", "normal");
-    doc.text(section.heading, PDF_STYLES.margins.left + 15, y);
+    doc.text(sanitizeForPDF(section.heading), PDF_STYLES.margins.left + 15, y);
     
     // Dotted line to page number
     doc.setDrawColor(...PDF_STYLES.lightGray);
@@ -282,17 +283,18 @@ export const generateGuidePDF = (
     doc.setFont("helvetica", "bold");
     doc.text(`${index + 1}`, PDF_STYLES.margins.left + 8, y, { align: "center" });
     
-    // Section heading
+    // Section heading - sanitized
     doc.setFontSize(PDF_STYLES.fontSize.heading);
     doc.setTextColor(...PDF_STYLES.primaryColor);
     doc.setFont("helvetica", "bold");
-    doc.text(section.heading, PDF_STYLES.margins.left + 20, y);
+    const sanitizedHeading = sanitizeForPDF(section.heading);
+    doc.text(sanitizedHeading, PDF_STYLES.margins.left + 20, y);
     y += 5;
     
     // Underline
     doc.setDrawColor(...PDF_STYLES.accentColor);
     doc.setLineWidth(0.5);
-    doc.line(PDF_STYLES.margins.left + 20, y, PDF_STYLES.margins.left + 20 + doc.getTextWidth(section.heading), y);
+    doc.line(PDF_STYLES.margins.left + 20, y, PDF_STYLES.margins.left + 20 + doc.getTextWidth(sanitizedHeading), y);
     y += 15;
     
     // Section content with paragraph formatting
