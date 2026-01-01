@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { generateSalesLetterHTML } from "@/lib/salesLetterExport";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
+import { sanitizeHTML } from "@/lib/sanitize";
 
 interface SalesLetterGeneratorProps {
   title: string;
@@ -546,7 +547,7 @@ const SalesLetterGenerator = ({
       
       <div 
         className="prose prose-sm max-w-none dark:prose-invert border rounded-lg p-6 max-h-[300px] overflow-y-auto bg-background"
-        dangerouslySetInnerHTML={{ __html: rawDraft }}
+        dangerouslySetInnerHTML={{ __html: sanitizeHTML(rawDraft) }}
       />
 
       {/* DCP Info Card */}
@@ -627,7 +628,7 @@ const SalesLetterGenerator = ({
         <TabsContent value="preview" className="mt-4">
           <div 
             className="prose prose-sm max-w-none dark:prose-invert border rounded-lg p-6 max-h-[400px] overflow-y-auto bg-background"
-            dangerouslySetInnerHTML={{ __html: polishedLetter }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHTML(polishedLetter) }}
           />
         </TabsContent>
         
@@ -652,7 +653,7 @@ const SalesLetterGenerator = ({
               </div>
               <div 
                 className="prose prose-sm max-w-none dark:prose-invert border rounded-lg p-4 max-h-[300px] overflow-y-auto bg-muted/30 text-sm"
-                dangerouslySetInnerHTML={{ __html: rawDraft }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHTML(rawDraft) }}
               />
             </div>
             <div>
@@ -662,7 +663,7 @@ const SalesLetterGenerator = ({
               </div>
               <div 
                 className="prose prose-sm max-w-none dark:prose-invert border rounded-lg p-4 max-h-[300px] overflow-y-auto bg-background text-sm"
-                dangerouslySetInnerHTML={{ __html: polishedLetter }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHTML(polishedLetter) }}
               />
             </div>
           </div>
