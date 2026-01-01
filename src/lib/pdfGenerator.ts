@@ -2,86 +2,93 @@ import jsPDF from "jspdf";
 import { ToolkitContent, ToolkitComponents } from "@/types/toolkit";
 import { sanitizeForPDF } from "./textSanitizer";
 
-// PDF Styling Constants - Enhanced Professional Design
+// PDF Styling Constants - Modern Premium Design (Solana Ocean Glass Blue Theme)
 const PDF_STYLES = {
-  primaryColor: [139, 92, 246] as [number, number, number], // Purple
-  accentColor: [20, 184, 166] as [number, number, number], // Teal
-  textColor: [30, 30, 30] as [number, number, number],
-  lightGray: [100, 100, 100] as [number, number, number],
-  veryLightGray: [245, 245, 250] as [number, number, number],
-  warmWhite: [252, 251, 250] as [number, number, number],
-  darkPurple: [88, 28, 135] as [number, number, number],
+  // Primary ocean blue theme
+  primaryColor: [0, 120, 212] as [number, number, number], // Ocean Blue
+  accentColor: [236, 72, 153] as [number, number, number], // Magenta/Pink accent
+  secondaryColor: [56, 189, 248] as [number, number, number], // Light cyan
+  
+  // Text colors
+  textColor: [15, 23, 42] as [number, number, number], // Slate 900
+  textMuted: [100, 116, 139] as [number, number, number], // Slate 500
+  textLight: [148, 163, 184] as [number, number, number], // Slate 400
+  
+  // Background colors
+  bgLight: [248, 250, 252] as [number, number, number], // Slate 50
+  bgCard: [241, 245, 249] as [number, number, number], // Slate 100
+  white: [255, 255, 255] as [number, number, number],
+  
+  // Dark theme accents
+  darkNavy: [15, 23, 42] as [number, number, number], // For headers
+  
   fontSize: {
-    title: 32,
-    heading: 20,
-    subheading: 14,
-    body: 11,
+    hero: 36,
+    title: 28,
+    heading: 18,
+    subheading: 13,
+    body: 10.5,
     small: 9,
-    tiny: 8,
+    tiny: 7.5,
   },
   margins: {
-    top: 25,
-    bottom: 30,
-    left: 25,
-    right: 25,
+    top: 30,
+    bottom: 25,
+    left: 22,
+    right: 22,
   },
-  lineHeight: 6,
+  lineHeight: 5.5,
 };
 
 const pageWidth = 210; // A4 width in mm
 const pageHeight = 297; // A4 height in mm
 const contentWidth = pageWidth - PDF_STYLES.margins.left - PDF_STYLES.margins.right;
 
-// Helper to add page numbers with style
+// Helper to add modern page numbers
 const addPageNumber = (doc: jsPDF, pageNum: number, totalPages?: number) => {
-  doc.setFontSize(PDF_STYLES.fontSize.small);
-  doc.setTextColor(...PDF_STYLES.lightGray);
-  const pageText = totalPages ? `${pageNum} of ${totalPages}` : `${pageNum}`;
-  doc.text(pageText, pageWidth / 2, pageHeight - 12, { align: "center" });
+  doc.setFontSize(PDF_STYLES.fontSize.tiny);
+  doc.setTextColor(...PDF_STYLES.textLight);
+  const pageText = totalPages ? `${pageNum} / ${totalPages}` : `${pageNum}`;
+  doc.text(pageText, pageWidth / 2, pageHeight - 10, { align: "center" });
 };
 
-// Helper to add decorative footer
+// Helper to add minimal footer
 const addFooter = (doc: jsPDF, authorName?: string) => {
-  // Decorative line
+  // Thin accent line
   doc.setDrawColor(...PDF_STYLES.primaryColor);
-  doc.setLineWidth(0.3);
-  doc.line(PDF_STYLES.margins.left, pageHeight - 20, pageWidth - PDF_STYLES.margins.right, pageHeight - 20);
+  doc.setLineWidth(0.2);
+  doc.line(PDF_STYLES.margins.left, pageHeight - 18, pageWidth - PDF_STYLES.margins.right, pageHeight - 18);
   
   if (authorName) {
     doc.setFontSize(PDF_STYLES.fontSize.tiny);
-    doc.setTextColor(...PDF_STYLES.lightGray);
-    doc.text(`© ${new Date().getFullYear()} ${authorName}`, PDF_STYLES.margins.left, pageHeight - 15);
+    doc.setTextColor(...PDF_STYLES.textLight);
+    doc.text(`© ${new Date().getFullYear()} ${authorName}`, PDF_STYLES.margins.left, pageHeight - 12);
   }
 };
 
-// Helper to add header with decorative elements
+// Helper to add modern header bar
 const addHeader = (doc: jsPDF, title: string, authorName?: string) => {
-  // Subtle background bar
-  doc.setFillColor(...PDF_STYLES.veryLightGray);
-  doc.rect(0, 0, pageWidth, 22, "F");
+  // Clean top border
+  doc.setFillColor(...PDF_STYLES.primaryColor);
+  doc.rect(0, 0, pageWidth, 3, "F");
   
   doc.setFontSize(PDF_STYLES.fontSize.small);
   doc.setTextColor(...PDF_STYLES.primaryColor);
   doc.setFont("helvetica", "bold");
-  doc.text(title, PDF_STYLES.margins.left, 14);
+  doc.text(title.toUpperCase(), PDF_STYLES.margins.left, 14);
   
   if (authorName) {
-    doc.setTextColor(...PDF_STYLES.lightGray);
+    doc.setTextColor(...PDF_STYLES.textMuted);
     doc.setFont("helvetica", "normal");
     doc.text(authorName, pageWidth - PDF_STYLES.margins.right, 14, { align: "right" });
   }
-  
-  // Accent line
-  doc.setDrawColor(...PDF_STYLES.primaryColor);
-  doc.setLineWidth(0.5);
-  doc.line(PDF_STYLES.margins.left, 20, pageWidth - PDF_STYLES.margins.right, 20);
 };
 
 // Helper to check and add new page if needed
 const checkNewPage = (doc: jsPDF, y: number, requiredSpace: number = 30): number => {
   if (y > pageHeight - PDF_STYLES.margins.bottom - requiredSpace) {
     doc.addPage();
-    return PDF_STYLES.margins.top + 15;
+    return PDF_STYLES.margins.top + 10;
   }
   return y;
 };
@@ -91,119 +98,149 @@ const wrapText = (doc: jsPDF, text: string, maxWidth: number): string[] => {
   return doc.splitTextToSize(sanitizeForPDF(text), maxWidth);
 };
 
-// Helper to draw a decorative box
-const drawAccentBox = (doc: jsPDF, x: number, y: number, width: number, height: number) => {
-  doc.setFillColor(...PDF_STYLES.veryLightGray);
-  doc.setDrawColor(...PDF_STYLES.primaryColor);
+// Helper to draw a modern card box
+const drawModernCard = (doc: jsPDF, x: number, y: number, width: number, height: number, accentLeft: boolean = false) => {
+  // Subtle shadow effect (light gray background offset)
+  doc.setFillColor(230, 235, 240);
+  doc.roundedRect(x + 1, y + 1, width, height, 2, 2, "F");
+  
+  // Main card
+  doc.setFillColor(...PDF_STYLES.white);
+  doc.setDrawColor(226, 232, 240);
   doc.setLineWidth(0.3);
-  doc.roundedRect(x, y, width, height, 3, 3, "FD");
+  doc.roundedRect(x, y, width, height, 2, 2, "FD");
+  
+  // Left accent bar
+  if (accentLeft) {
+    doc.setFillColor(...PDF_STYLES.primaryColor);
+    doc.roundedRect(x, y, 3, height, 2, 0, "F");
+  }
 };
 
-// Helper to add a "Pro Tip" or callout box
+// Helper to add a callout box
 const addCalloutBox = (doc: jsPDF, text: string, type: "tip" | "note" | "important", y: number): number => {
-  const labels = { tip: "💡 Pro Tip", note: "📝 Note", important: "⚡ Key Point" };
-  const boxHeight = 20 + wrapText(doc, text, contentWidth - 20).length * 5;
+  const labels = { tip: "PRO TIP", note: "NOTE", important: "KEY POINT" };
+  const colors = { 
+    tip: PDF_STYLES.accentColor, 
+    note: PDF_STYLES.secondaryColor, 
+    important: PDF_STYLES.primaryColor 
+  };
   
-  drawAccentBox(doc, PDF_STYLES.margins.left, y, contentWidth, boxHeight);
+  const lines = wrapText(doc, text, contentWidth - 20);
+  const boxHeight = 18 + lines.length * 5;
   
-  doc.setFontSize(PDF_STYLES.fontSize.small);
+  drawModernCard(doc, PDF_STYLES.margins.left, y, contentWidth, boxHeight, true);
+  
+  // Override accent color based on type
+  doc.setFillColor(...colors[type]);
+  doc.roundedRect(PDF_STYLES.margins.left, y, 3, boxHeight, 2, 0, "F");
+  
+  doc.setFontSize(PDF_STYLES.fontSize.tiny);
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(...PDF_STYLES.accentColor);
-  doc.text(labels[type], PDF_STYLES.margins.left + 5, y + 8);
+  doc.setTextColor(...colors[type]);
+  doc.text(labels[type], PDF_STYLES.margins.left + 10, y + 8);
   
-  doc.setFont("helvetica", "italic");
+  doc.setFont("helvetica", "normal");
   doc.setTextColor(...PDF_STYLES.textColor);
   doc.setFontSize(PDF_STYLES.fontSize.body);
-  const lines = wrapText(doc, text, contentWidth - 15);
   lines.forEach((line, i) => {
-    doc.text(line, PDF_STYLES.margins.left + 5, y + 15 + (i * 5));
+    doc.text(line, PDF_STYLES.margins.left + 10, y + 15 + (i * 5));
   });
   
   return y + boxHeight + 8;
 };
 
-// Generate Enhanced Cover Page
+// Generate Modern Cover Page
 const generateCoverPage = (
   doc: jsPDF,
   title: string,
   subtitle?: string,
   authorName?: string
 ) => {
-  // Full page gradient background (simulated)
-  doc.setFillColor(...PDF_STYLES.warmWhite);
+  // Full page dark navy gradient background
+  doc.setFillColor(...PDF_STYLES.darkNavy);
   doc.rect(0, 0, pageWidth, pageHeight, "F");
   
-  // Decorative top accent bar
-  doc.setFillColor(...PDF_STYLES.primaryColor);
-  doc.rect(0, 0, pageWidth, 12, "F");
+  // Decorative gradient overlay (simulated with shapes)
+  doc.setFillColor(30, 64, 175); // Blue 800
+  doc.circle(-30, 50, 120, "F");
+  doc.setFillColor(79, 70, 229); // Indigo 600
+  doc.circle(pageWidth + 40, pageHeight - 80, 150, "F");
   
-  // Decorative corner accents
-  doc.setFillColor(...PDF_STYLES.accentColor);
-  doc.triangle(0, 12, 30, 12, 0, 42, "F");
-  doc.triangle(pageWidth, 12, pageWidth - 30, 12, pageWidth, 42, "F");
+  // Accent geometric shape
+  doc.setFillColor(236, 72, 153, 40); // Pink with transparency simulated
+  doc.circle(pageWidth - 30, 80, 40, "F");
   
-  // Main title area with subtle background
+  // Top accent line
+  doc.setFillColor(...PDF_STYLES.secondaryColor);
+  doc.rect(0, 0, pageWidth, 4, "F");
+  
+  // Main content card
   doc.setFillColor(255, 255, 255);
-  doc.roundedRect(20, 80, pageWidth - 40, 100, 5, 5, "F");
+  doc.roundedRect(25, 85, pageWidth - 50, 130, 8, 8, "F");
   
-  // Shadow effect for title box
-  doc.setDrawColor(220, 220, 225);
-  doc.setLineWidth(0.5);
-  doc.roundedRect(20, 80, pageWidth - 40, 100, 5, 5, "S");
+  // Card border
+  doc.setDrawColor(...PDF_STYLES.primaryColor);
+  doc.setLineWidth(1);
+  doc.roundedRect(25, 85, pageWidth - 50, 130, 8, 8, "S");
   
   // Title
-  doc.setFontSize(PDF_STYLES.fontSize.title);
-  doc.setTextColor(...PDF_STYLES.darkPurple);
+  doc.setFontSize(PDF_STYLES.fontSize.hero);
+  doc.setTextColor(...PDF_STYLES.darkNavy);
   doc.setFont("helvetica", "bold");
   
-  const titleLines = wrapText(doc, title, contentWidth - 20);
-  let y = 115;
+  const titleLines = wrapText(doc, title, contentWidth - 30);
+  let y = 125;
   titleLines.forEach((line) => {
     doc.text(line, pageWidth / 2, y, { align: "center" });
-    y += 14;
+    y += 16;
   });
+  
+  // Divider line
+  doc.setDrawColor(...PDF_STYLES.primaryColor);
+  doc.setLineWidth(2);
+  doc.line(pageWidth / 2 - 25, y + 5, pageWidth / 2 + 25, y + 5);
+  y += 20;
   
   // Subtitle
   if (subtitle) {
-    y += 5;
     doc.setFontSize(PDF_STYLES.fontSize.subheading);
-    doc.setTextColor(...PDF_STYLES.lightGray);
+    doc.setTextColor(...PDF_STYLES.textMuted);
     doc.setFont("helvetica", "normal");
-    const subtitleLines = wrapText(doc, subtitle, contentWidth - 20);
+    const subtitleLines = wrapText(doc, subtitle, contentWidth - 30);
     subtitleLines.forEach((line) => {
       doc.text(line, pageWidth / 2, y, { align: "center" });
-      y += 8;
+      y += 7;
     });
   }
   
-  // Decorative divider
-  doc.setDrawColor(...PDF_STYLES.accentColor);
-  doc.setLineWidth(1);
-  doc.line(pageWidth / 2 - 30, 200, pageWidth / 2 + 30, 200);
-  
-  // Author name with styling
+  // Author section at bottom
   if (authorName) {
-    doc.setFontSize(PDF_STYLES.fontSize.subheading);
-    doc.setTextColor(...PDF_STYLES.primaryColor);
-    doc.setFont("helvetica", "bold");
-    doc.text("Created by", pageWidth / 2, 220, { align: "center" });
+    // Author card
+    doc.setFillColor(...PDF_STYLES.white);
+    doc.roundedRect(pageWidth / 2 - 45, 235, 90, 30, 4, 4, "F");
+    doc.setDrawColor(226, 232, 240);
+    doc.setLineWidth(0.5);
+    doc.roundedRect(pageWidth / 2 - 45, 235, 90, 30, 4, 4, "S");
     
-    doc.setFontSize(PDF_STYLES.fontSize.heading);
+    doc.setFontSize(PDF_STYLES.fontSize.tiny);
+    doc.setTextColor(...PDF_STYLES.textMuted);
+    doc.text("CREATED BY", pageWidth / 2, 247, { align: "center" });
+    
+    doc.setFontSize(PDF_STYLES.fontSize.subheading);
     doc.setTextColor(...PDF_STYLES.textColor);
-    doc.text(authorName, pageWidth / 2, 235, { align: "center" });
+    doc.setFont("helvetica", "bold");
+    doc.text(authorName, pageWidth / 2, 258, { align: "center" });
   }
   
-  // Bottom decorative elements
+  // Bottom accent bar
   doc.setFillColor(...PDF_STYLES.primaryColor);
-  doc.rect(0, pageHeight - 15, pageWidth, 15, "F");
+  doc.rect(0, pageHeight - 8, pageWidth, 8, "F");
   
-  doc.setFillColor(...PDF_STYLES.accentColor);
-  doc.rect(0, pageHeight - 18, pageWidth, 3, "F");
-  
-  // Year
-  doc.setFontSize(PDF_STYLES.fontSize.small);
+  // Year watermark
+  doc.setFontSize(PDF_STYLES.fontSize.tiny);
   doc.setTextColor(255, 255, 255);
-  doc.text(`© ${new Date().getFullYear()}`, pageWidth / 2, pageHeight - 5, { align: "center" });
+  doc.text(`© ${new Date().getFullYear()}`, pageWidth / 2, pageHeight - 2, { align: "center" });
 };
 
 // Generate Guide PDF with enhanced formatting
@@ -253,7 +290,7 @@ export const generateGuidePDF = (
     doc.text(sanitizeForPDF(section.heading), PDF_STYLES.margins.left + 15, y);
     
     // Dotted line to page number
-    doc.setDrawColor(...PDF_STYLES.lightGray);
+    doc.setDrawColor(...PDF_STYLES.textLight);
     doc.setLineDashPattern([1, 2], 0);
     const textWidth = doc.getTextWidth(section.heading);
     doc.line(PDF_STYLES.margins.left + 18 + textWidth, y, pageWidth - PDF_STYLES.margins.right - 10, y);
@@ -380,7 +417,7 @@ export const generateWorksheetPDF = (
     y += 20;
     
     // Instructions box
-    doc.setFillColor(...PDF_STYLES.veryLightGray);
+    doc.setFillColor(...PDF_STYLES.bgCard);
     const instructionLines = wrapText(doc, exercise.instructions, contentWidth - 15);
     const instructionHeight = 15 + (instructionLines.length * 6);
     doc.roundedRect(PDF_STYLES.margins.left, y, contentWidth, instructionHeight, 2, 2, "F");
@@ -422,7 +459,7 @@ export const generateWorksheetPDF = (
       y += 10;
       
       // Writing area with box
-      doc.setDrawColor(...PDF_STYLES.lightGray);
+      doc.setDrawColor(...PDF_STYLES.textLight);
       doc.setFillColor(255, 255, 255);
       doc.roundedRect(PDF_STYLES.margins.left, y, contentWidth, 30, 2, 2, "FD");
       
@@ -467,11 +504,11 @@ export const generateChecklistPDF = (
   y += 5;
   
   // Progress tracker bar
-  doc.setDrawColor(...PDF_STYLES.lightGray);
-  doc.setFillColor(...PDF_STYLES.veryLightGray);
+  doc.setDrawColor(...PDF_STYLES.textLight);
+  doc.setFillColor(...PDF_STYLES.bgCard);
   doc.roundedRect(PDF_STYLES.margins.left, y, contentWidth, 8, 2, 2, "FD");
   doc.setFontSize(PDF_STYLES.fontSize.tiny);
-  doc.setTextColor(...PDF_STYLES.lightGray);
+  doc.setTextColor(...PDF_STYLES.textLight);
   doc.text(`Track your progress: ${content.items.length} items to complete`, PDF_STYLES.margins.left + 5, y + 5);
   y += 18;
   
@@ -490,7 +527,7 @@ export const generateChecklistPDF = (
     
     // Alternating row background
     if (index % 2 === 0) {
-      doc.setFillColor(...PDF_STYLES.veryLightGray);
+      doc.setFillColor(...PDF_STYLES.bgCard);
       doc.rect(PDF_STYLES.margins.left, y - 5, contentWidth, 12, "F");
     }
     
@@ -501,7 +538,7 @@ export const generateChecklistPDF = (
     
     // Item number
     doc.setFontSize(PDF_STYLES.fontSize.tiny);
-    doc.setTextColor(...PDF_STYLES.lightGray);
+    doc.setTextColor(...PDF_STYLES.textLight);
     doc.text(`${index + 1}.`, PDF_STYLES.margins.left + 12, y);
     
     // Item text
@@ -518,16 +555,16 @@ export const generateChecklistPDF = (
   // Completion section
   y += 10;
   y = checkNewPage(doc, y, 40);
-  drawAccentBox(doc, PDF_STYLES.margins.left, y, contentWidth, 35);
+  drawModernCard(doc, PDF_STYLES.margins.left, y, contentWidth, 35, true);
   doc.setFontSize(PDF_STYLES.fontSize.subheading);
   doc.setTextColor(...PDF_STYLES.primaryColor);
   doc.setFont("helvetica", "bold");
-  doc.text("🎉 Completion Notes", PDF_STYLES.margins.left + 5, y + 10);
+  doc.text("🎉 Completion Notes", PDF_STYLES.margins.left + 10, y + 10);
   doc.setFontSize(PDF_STYLES.fontSize.body);
-  doc.setTextColor(...PDF_STYLES.lightGray);
+  doc.setTextColor(...PDF_STYLES.textMuted);
   doc.setFont("helvetica", "italic");
-  doc.text("Date completed: _______________", PDF_STYLES.margins.left + 5, y + 22);
-  doc.text("Key takeaway: _______________________________________________", PDF_STYLES.margins.left + 5, y + 30);
+  doc.text("Date completed: _______________", PDF_STYLES.margins.left + 10, y + 22);
+  doc.text("Key takeaway: _______________________________________________", PDF_STYLES.margins.left + 10, y + 30);
   
   addFooter(doc, authorName);
   addPageNumber(doc, pageNum);
@@ -646,7 +683,7 @@ export const generateTemplatesPDF = (
     y += 20;
     
     // Copy instruction
-    doc.setFillColor(...PDF_STYLES.veryLightGray);
+    doc.setFillColor(...PDF_STYLES.bgCard);
     doc.roundedRect(PDF_STYLES.margins.left, y, contentWidth, 12, 2, 2, "F");
     doc.setFontSize(PDF_STYLES.fontSize.small);
     doc.setTextColor(...PDF_STYLES.accentColor);
@@ -690,7 +727,7 @@ export const generateTemplatesPDF = (
       y = PDF_STYLES.margins.top + 25;
       
       doc.setFontSize(PDF_STYLES.fontSize.small);
-      doc.setTextColor(...PDF_STYLES.lightGray);
+      doc.setTextColor(...PDF_STYLES.textMuted);
       doc.setFont("helvetica", "italic");
       doc.text(`(${template.name} continued)`, PDF_STYLES.margins.left, y);
       y += 10;
@@ -745,10 +782,10 @@ export const generateQuizPDF = (
   y += 10;
   
   // Instructions box
-  doc.setFillColor(...PDF_STYLES.veryLightGray);
+  doc.setFillColor(...PDF_STYLES.bgCard);
   doc.roundedRect(PDF_STYLES.margins.left, y, contentWidth, 15, 2, 2, "F");
   doc.setFontSize(PDF_STYLES.fontSize.small);
-  doc.setTextColor(...PDF_STYLES.lightGray);
+  doc.setTextColor(...PDF_STYLES.textMuted);
   doc.setFont("helvetica", "italic");
   doc.text("Circle the best answer for each question. Check your answers at the end!", PDF_STYLES.margins.left + 5, y + 9);
   y += 25;
@@ -822,10 +859,10 @@ export const generateQuizPDF = (
   y += 25;
   
   // Warning to not peek
-  doc.setFillColor(...PDF_STYLES.veryLightGray);
+  doc.setFillColor(...PDF_STYLES.bgCard);
   doc.roundedRect(PDF_STYLES.margins.left, y, contentWidth, 12, 2, 2, "F");
   doc.setFontSize(PDF_STYLES.fontSize.small);
-  doc.setTextColor(...PDF_STYLES.lightGray);
+  doc.setTextColor(...PDF_STYLES.textMuted);
   doc.setFont("helvetica", "italic");
   doc.text("⚠️ Complete the quiz before checking your answers!", PDF_STYLES.margins.left + 5, y + 8);
   y += 20;
@@ -852,11 +889,11 @@ export const generateQuizPDF = (
   
   // Score section
   const scoreY = y + Math.ceil(content.questions.length / 3) * 12 + 20;
-  drawAccentBox(doc, PDF_STYLES.margins.left, scoreY, contentWidth, 40);
+  drawModernCard(doc, PDF_STYLES.margins.left, scoreY, contentWidth, 40, true);
   doc.setFontSize(PDF_STYLES.fontSize.subheading);
   doc.setTextColor(...PDF_STYLES.primaryColor);
   doc.setFont("helvetica", "bold");
-  doc.text("📊 Your Score", PDF_STYLES.margins.left + 5, scoreY + 12);
+  doc.text("📊 Your Score", PDF_STYLES.margins.left + 10, scoreY + 12);
   
   doc.setFontSize(PDF_STYLES.fontSize.body);
   doc.setTextColor(...PDF_STYLES.textColor);
