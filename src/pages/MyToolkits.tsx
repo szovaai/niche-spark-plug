@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { 
   Package, Plus, Download, Trash2, MoreVertical, 
-  Clock, CheckCircle, Edit, ExternalLink
+  Clock, CheckCircle, Edit, ExternalLink, Rocket
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -204,6 +204,12 @@ const MyToolkits = () => {
                             <ExternalLink className="w-4 h-4 mr-2" />
                             View Details
                           </DropdownMenuItem>
+                          {toolkit.status === 'complete' && (
+                            <DropdownMenuItem onClick={() => navigate(`/launch/${toolkit.id}`)}>
+                              <Rocket className="w-4 h-4 mr-2" />
+                              Launch
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuItem onClick={() => navigate(`/create?edit=${toolkit.id}`)}>
                             <Edit className="w-4 h-4 mr-2" />
                             Edit
@@ -229,23 +235,33 @@ const MyToolkits = () => {
                       </span>
                     </div>
 
-                    <Button 
-                      variant={toolkit.status === 'complete' ? "hero" : "outline"}
-                      className="w-full"
-                      onClick={() => navigate(`/toolkit/${toolkit.id}`)}
-                    >
-                      {toolkit.status === 'complete' ? (
-                        <>
+                    {toolkit.status === 'complete' ? (
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button 
+                          variant="outline"
+                          onClick={() => navigate(`/toolkit/${toolkit.id}`)}
+                        >
                           <Download className="w-4 h-4 mr-2" />
                           Download
-                        </>
-                      ) : (
-                        <>
-                          <Edit className="w-4 h-4 mr-2" />
-                          Continue Editing
-                        </>
-                      )}
-                    </Button>
+                        </Button>
+                        <Button 
+                          variant="hero"
+                          onClick={() => navigate(`/launch/${toolkit.id}`)}
+                        >
+                          <Rocket className="w-4 h-4 mr-2" />
+                          Launch
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button 
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => navigate(`/toolkit/${toolkit.id}`)}
+                      >
+                        <Edit className="w-4 h-4 mr-2" />
+                        Continue Editing
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
               </motion.div>

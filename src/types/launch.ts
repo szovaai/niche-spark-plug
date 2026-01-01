@@ -57,3 +57,28 @@ export interface ToolkitLaunchData {
   content: Record<string, unknown>;
   emailSequence?: unknown;
 }
+
+// Outsource types
+export type OutsourceCategory = 
+  | 'funnel-specialist' 
+  | 'static-website' 
+  | 'gumroad-expert' 
+  | 'payment-integration' 
+  | 'launch-assistant';
+
+export interface OutsourceProvider {
+  id: OutsourceCategory;
+  title: string;
+  icon: string;
+  bestFor: string;
+  searchTerms: string[];
+  lookFor: string[];
+  typicalCost: string;
+  platforms: LaunchPlatform[];
+}
+
+export interface OutsourceTask {
+  id: string;
+  task: string;
+  included: boolean;
+}
