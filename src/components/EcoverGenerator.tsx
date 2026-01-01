@@ -20,7 +20,12 @@ const EcoverGenerator = ({ title, niche, onEcoverGenerated, existingEcover }: Ec
 
   const generateEcover = async () => {
     setIsGenerating(true);
+    toast.info("Generating your e-cover... This takes about 45-60 seconds.");
+    
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 min timeout
+      
       const { data, error } = await supabase.functions.invoke("generate-ecover", {
         body: {
           productName: title,
@@ -32,6 +37,8 @@ const EcoverGenerator = ({ title, niche, onEcoverGenerated, existingEcover }: Ec
           ecoverType: "mockup"
         }
       });
+      
+      clearTimeout(timeoutId);
 
       if (error) {
         console.error("Ecover generation error:", error);
@@ -44,11 +51,16 @@ const EcoverGenerator = ({ title, niche, onEcoverGenerated, existingEcover }: Ec
         onEcoverGenerated(data.imageUrl);
         toast.success("E-cover generated successfully!");
       } else {
+        console.error("No image in response:", data);
         toast.error("No image returned. Please try again.");
       }
     } catch (err) {
       console.error("Ecover error:", err);
-      toast.error("Something went wrong. Please try again.");
+      if (err instanceof Error && err.name === 'AbortError') {
+        toast.error("Generation timed out. Please try again.");
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
     } finally {
       setIsGenerating(false);
     }
@@ -72,8 +84,17 @@ const EcoverGenerator = ({ title, niche, onEcoverGenerated, existingEcover }: Ec
           </div>
 
           <Button variant="hero" onClick={generateEcover} disabled={isGenerating} className="gap-2">
-            {isGenerating ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Image className="w-4 h-4" />}
-            {ecoverUrl ? "Regenerate E-Cover" : "Generate E-Cover"}
+            {isGenerating ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                Generating (~60s)...
+              </>
+            ) : (
+              <>
+                <Image className="w-4 h-4" />
+                {ecoverUrl ? "Regenerate E-Cover" : "Generate E-Cover"}
+              </>
+            )}
           </Button>
 
           {ecoverUrl && (
