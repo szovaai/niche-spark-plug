@@ -367,7 +367,12 @@ serve(async (req) => {
       targetAudience, 
       components, 
       singleChapter, 
-      writingStyle = "conversational" 
+      writingStyle = "conversational",
+      // New: Section-level generation parameters
+      sectionId,
+      sectionNumber,
+      sectionTitle,
+      thesis,
     } = await req.json();
     
     // Check for BYOK first
@@ -384,6 +389,153 @@ serve(async (req) => {
     // Get the appropriate style directive
     const styleDirective = STYLE_DIRECTIVES[writingStyle] || DEFAULT_HUMAN_DIRECTIVE;
 
+    const provider = byokConfig ? byokConfig.provider : 'deepseek';
+
+    // === SECTION-LEVEL GENERATION MODE ===
+    if (sectionId && sectionNumber && sectionTitle) {
+      console.log(`Generating section ${sectionNumber}: "${sectionTitle}" for toolkit "${title}"`);
+      
+      const sectionPrompt = `Generate Section ${sectionNumber}: "${sectionTitle}" for a guide about "${niche}".
+
+=== CONTEXT ===
+- Toolkit Title: "${title}"
+- Target Audience: ${targetAudience || "entrepreneurs and professionals"}
+- Core Thesis: ${thesis || `This guide helps readers master ${niche} through practical, actionable steps.`}
+
+=== SECTION REQUIREMENTS ===
+Generate 350-450 words for this section ONLY. Include:
+
+1. OPENING HOOK (2-3 sentences): Start with a compelling question, surprising statistic, or relatable pain point.
+
+2. CORE TEACHING (4-6 sentences): Main concept with specific context. Explain "what" and "why this matters."
+
+3. ACTION STEPS (3-5 numbered items): Specific, do-it-TODAY instructions with clear action verbs.
+
+4. REAL-WORLD EXAMPLE (3-4 sentences): Named example with specific metrics and results.
+
+5. PRO TIP (2-3 sentences): Insider shortcut or hack most people miss.
+
+6. COMMON MISTAKE WARNING (2-3 sentences): What to avoid and how to fix it.
+
+7. KEY TAKEAWAY (1 sentence): The single most important lesson, memorable and quotable.
+
+8. TRANSITION (1 sentence): Bridge to the next section that creates curiosity.
+
+${styleDirective}
+
+=== OUTPUT FORMAT ===
+Return ONLY the section content as plain text (NOT JSON). Write the section directly, ready to be placed in the guide.`;
+
+      const messages = [
+        { role: "system", content: `You are an expert content creator writing a section of a comprehensive guide. ${styleDirective}` },
+        { role: "user", content: sectionPrompt }
+      ];
+
+      let contentText = "";
+
+      if (byokConfig) {
+        const providerConfig = getProviderConfig(byokConfig.provider);
+        
+        if (providerConfig.isAnthropic) {
+          const response = await fetch(providerConfig.endpoint, {
+            method: 'POST',
+            headers: {
+              'x-api-key': byokConfig.apiKey,
+              'anthropic-version': '2023-06-01',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              model: providerConfig.model,
+              max_tokens: 2000,
+              system: `You are an expert content creator. ${styleDirective}`,
+              messages: [{ role: 'user', content: sectionPrompt }],
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Anthropic API error: ${response.status}`);
+          }
+
+          const data = await response.json();
+          contentText = data.content?.[0]?.text || "";
+        } else {
+          const response = await fetch(providerConfig.endpoint, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${byokConfig.apiKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: providerConfig.model,
+              messages,
+              temperature: 0.7,
+              max_tokens: 2000,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`${byokConfig.provider} API error: ${response.status}`);
+          }
+
+          const data = await response.json();
+          contentText = data.choices?.[0]?.message?.content || "";
+        }
+      } else {
+        const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "deepseek-chat",
+            messages,
+            temperature: 0.7,
+            max_tokens: 2000,
+          }),
+        });
+
+        if (!response.ok) {
+          const status = response.status;
+          if (status === 429) {
+            return new Response(
+              JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
+              { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+          throw new Error(`DeepSeek API error: ${status}`);
+        }
+
+        const data = await response.json();
+        contentText = data.choices?.[0]?.message?.content || "";
+      }
+
+      // Sanitize the output
+      const sanitizedContent = contentText
+        .replace(/[\u2018\u2019\u201A\u201B]/g, "'")
+        .replace(/[\u201C\u201D\u201E\u201F]/g, '"')
+        .replace(/[\u2013\u2014\u2015]/g, "-")
+        .replace(/[\u200B\u200C\u200D\uFEFF]/g, "")
+        .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "")
+        .replace(/Ø=/g, "")
+        .replace(/[ÜÚÝþ]/g, "")
+        .trim();
+
+      const wordCount = sanitizedContent.split(/\s+/).filter(Boolean).length;
+      console.log(`Generated section ${sectionNumber} with ${wordCount} words`);
+
+      return new Response(
+        JSON.stringify({ 
+          sectionId,
+          content: sanitizedContent,
+          wordCount,
+          generatedAt: new Date().toISOString() 
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // === ORIGINAL COMPONENT GENERATION MODE ===
     // Determine which components to generate
     let componentsToGenerate: string[] = [];
     
@@ -402,7 +554,6 @@ serve(async (req) => {
       );
     }
 
-    const provider = byokConfig ? byokConfig.provider : 'deepseek';
     console.log(`Generating toolkit "${title}" with style: ${writingStyle}, components: ${componentsToGenerate.join(", ")}, provider: ${provider}`);
 
     const content: Record<string, unknown> = {};

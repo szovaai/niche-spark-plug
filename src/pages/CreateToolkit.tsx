@@ -16,7 +16,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { ToolkitComponents, WritingStyle } from "@/types/toolkit";
+import { ToolkitComponents, WritingStyle, GuideSection, GUIDE_SECTION_TEMPLATES } from "@/types/toolkit";
 
 import EcoverGenerator from "@/components/EcoverGenerator";
 import SalesLetterGenerator from "@/components/SalesLetterGenerator";
@@ -29,6 +29,7 @@ import ContentStatusCard from "@/components/toolkit/ContentStatusCard";
 import ContentControlsBar from "@/components/toolkit/ContentControlsBar";
 import ComponentRow, { ComponentStatus } from "@/components/toolkit/ComponentRow";
 import ThesisFrameworkCard from "@/components/toolkit/ThesisFrameworkCard";
+import GuideSectionBuilder from "@/components/toolkit/GuideSectionBuilder";
 import { ToolkitTemplate } from "@/data/toolkitTemplates";
 
 const steps = [
@@ -60,6 +61,9 @@ const CreateToolkit = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   
+  // Check for edit mode (resume from saved toolkit)
+  const editToolkitId = searchParams.get("edit");
+  
   // Load saved progress from localStorage
   const savedProgress = localStorage.getItem(WIZARD_STORAGE_KEY);
   const initialState = savedProgress ? JSON.parse(savedProgress) : null;
@@ -67,6 +71,7 @@ const CreateToolkit = () => {
   const [currentStep, setCurrentStep] = useState(initialState?.currentStep || 0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [toolkitId, setToolkitId] = useState<string | null>(initialState?.toolkitId || null);
+  const [isLoadingToolkit, setIsLoadingToolkit] = useState(!!editToolkitId);
   
   // Template state
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(initialState?.selectedTemplate || null);
@@ -105,6 +110,12 @@ const CreateToolkit = () => {
   const [lockFramework, setLockFramework] = useState(true);
   const [isRegeneratingThesis, setIsRegeneratingThesis] = useState(false);
 
+  // Guide Section Builder state
+  const [guideSections, setGuideSections] = useState<GuideSection[]>(
+    initialState?.guideSections || [...GUIDE_SECTION_TEMPLATES]
+  );
+  const [generatingSectionId, setGeneratingSectionId] = useState<string | null>(null);
+
   // Component metadata
   const componentMeta: Record<string, { title: string; description: string; estimatedSize: string }> = {
     guide: { title: "Main Guide", description: "Core educational content with sections", estimatedSize: "Est. ~25 pages" },
@@ -115,18 +126,77 @@ const CreateToolkit = () => {
     quiz: { title: "Quiz/Assessment", description: "Self-evaluation tool", estimatedSize: "10 questions" },
   };
 
-  // Calculate selected components
+  // Calculate selected components (excluding guide since it uses section builder)
   const selectedComponentIds = Object.entries(components)
-    .filter(([_, isSelected]) => isSelected)
+    .filter(([id, isSelected]) => isSelected && id !== 'guide')
     .map(([id]) => id);
 
-  const completedCount = selectedComponentIds.filter(id => componentStatus[id] === "complete").length;
+  const guideComplete = guideSections.every(s => s.status === "complete");
+  const completedCount = selectedComponentIds.filter(id => componentStatus[id] === "complete").length + (guideComplete ? 1 : 0);
+  const totalComponentCount = selectedComponentIds.length + (components.guide ? 1 : 0);
   const totalWords = selectedComponentIds.reduce((acc, id) => {
     const componentContent = content[id];
     if (!componentContent) return acc;
     const text = JSON.stringify(componentContent);
     return acc + text.split(/\s+/).length;
-  }, 0);
+  }, 0) + guideSections.reduce((acc, s) => acc + s.wordCount, 0);
+
+  // Load toolkit from database if editing
+  useEffect(() => {
+    const loadToolkit = async () => {
+      if (!editToolkitId || !user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from("toolkits")
+          .select("*")
+          .eq("id", editToolkitId)
+          .single();
+
+        if (error) throw error;
+        if (!data) throw new Error("Toolkit not found");
+
+        // Restore state from database
+        setToolkitId(data.id);
+        setTitle(data.title);
+        setSubtitle(data.subtitle || "");
+        setNiche(data.niche);
+        setTargetAudience(data.target_audience || "");
+        setLogoUrl(data.logo_url);
+        setEcoverUrl(data.ecover_url);
+        setComponents(data.components as ToolkitComponents || { guide: true, worksheet: false, checklist: false, resourceList: false, templates: false, quiz: false });
+        setContent(data.content || {});
+        setSalesLetter(data.sales_letter || "");
+        setUpsell(data.upsell || null);
+        setCurrentStep((data as any).wizard_step || 3); // Default to content step
+        setThesis((data as any).thesis || "");
+        setWritingStyle(((data as any).writing_style as WritingStyle) || "conversational");
+        
+        // Restore guide sections if available
+        const savedSections = (data as any).guide_sections;
+        if (savedSections && Array.isArray(savedSections) && savedSections.length > 0) {
+          setGuideSections(savedSections as GuideSection[]);
+        }
+
+        toast({
+          title: "Toolkit Loaded",
+          description: "Resuming from where you left off.",
+        });
+      } catch (error) {
+        console.error("Error loading toolkit:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load toolkit.",
+          variant: "destructive",
+        });
+        navigate("/my-toolkits");
+      } finally {
+        setIsLoadingToolkit(false);
+      }
+    };
+
+    loadToolkit();
+  }, [editToolkitId, user]);
 
   useEffect(() => {
     if (!user) {
@@ -154,9 +224,12 @@ const CreateToolkit = () => {
       salesLetter,
       emailSequence,
       upsell,
+      guideSections,
+      thesis,
+      writingStyle,
     };
     localStorage.setItem(WIZARD_STORAGE_KEY, JSON.stringify(progressData));
-  }, [currentStep, toolkitId, selectedTemplate, title, subtitle, niche, targetAudience, authorName, authorTagline, authorBio, logoUrl, ecoverUrl, components, content, salesLetter, emailSequence, upsell]);
+  }, [currentStep, toolkitId, selectedTemplate, title, subtitle, niche, targetAudience, authorName, authorTagline, authorBio, logoUrl, ecoverUrl, components, content, salesLetter, emailSequence, upsell, guideSections, thesis, writingStyle]);
 
   // Clear saved progress when toolkit is completed
   const clearSavedProgress = () => {
@@ -165,11 +238,10 @@ const CreateToolkit = () => {
 
   // Auto-generate thesis when reaching Step 3 (content step) if empty
   useEffect(() => {
-    if (currentStep === 3 && !thesis && title && niche) {
-      // Trigger AI generation automatically on first visit to content step
+    if (currentStep === 3 && !thesis && title && niche && !isLoadingToolkit) {
       handleRegenerateThesis();
     }
-  }, [currentStep, thesis, title, niche]);
+  }, [currentStep, thesis, title, niche, isLoadingToolkit]);
 
   const handleRegenerateThesis = async () => {
     if (!title || !niche) {
@@ -282,6 +354,10 @@ const CreateToolkit = () => {
         sales_letter: salesLetter,
         upsell,
         status: "draft",
+        wizard_step: currentStep,
+        guide_sections: guideSections,
+        thesis,
+        writing_style: writingStyle,
       };
 
       if (toolkitId) {
@@ -295,6 +371,94 @@ const CreateToolkit = () => {
       console.error("Error saving draft:", error);
     }
   };
+
+  // Generate a single guide section
+  const generateGuideSection = useCallback(async (sectionId: string) => {
+    const section = guideSections.find(s => s.id === sectionId);
+    if (!section) return;
+
+    setGeneratingSectionId(sectionId);
+    setGuideSections(prev => prev.map(s => 
+      s.id === sectionId ? { ...s, status: "generating" as const } : s
+    ));
+
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-toolkit-content", {
+        body: {
+          title,
+          niche,
+          targetAudience,
+          writingStyle,
+          sectionId,
+          sectionNumber: section.number,
+          sectionTitle: section.title,
+          thesis,
+        },
+      });
+
+      if (error) throw error;
+
+      setGuideSections(prev => prev.map(s => 
+        s.id === sectionId ? { 
+          ...s, 
+          status: "complete" as const, 
+          content: data.content,
+          wordCount: data.wordCount || data.content.split(/\s+/).length,
+        } : s
+      ));
+
+      toast({
+        title: "Section Generated!",
+        description: `Section ${section.number}: ${section.title} is ready.`,
+      });
+
+      // Auto-save after generation
+      saveDraft();
+    } catch (error) {
+      console.error(`Error generating section ${sectionId}:`, error);
+      setGuideSections(prev => prev.map(s => 
+        s.id === sectionId ? { ...s, status: "error" as const } : s
+      ));
+      toast({
+        title: "Generation Failed",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setGeneratingSectionId(null);
+    }
+  }, [title, niche, targetAudience, writingStyle, thesis, guideSections, toast]);
+
+  // Compile guide from sections
+  const compileGuide = useCallback(() => {
+    const pendingSections = guideSections.filter(s => s.status !== "complete");
+    if (pendingSections.length > 0) {
+      toast({
+        title: "Sections Incomplete",
+        description: `${pendingSections.length} section(s) still need to be generated.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const compiledGuide = {
+      title: title,
+      sections: guideSections.map(s => ({
+        heading: `Chapter ${s.number}: ${s.title}`,
+        content: s.content || "",
+      })),
+    };
+
+    setContent((prev: any) => ({ ...prev, guide: compiledGuide }));
+    setComponentStatus(prev => ({ ...prev, guide: "complete" }));
+
+    toast({
+      title: "Guide Compiled!",
+      description: "Your complete guide is ready.",
+    });
+
+    saveDraft();
+  }, [guideSections, title, toast]);
 
   const handleComponentToggle = (componentId: keyof ToolkitComponents) => {
     if (componentId === "guide") return; // Guide is required
