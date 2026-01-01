@@ -128,6 +128,56 @@ export type Database = {
         }
         Relationships: []
       }
+      launch_progress: {
+        Row: {
+          completed_steps: string[] | null
+          created_at: string | null
+          first_sale_date: string | null
+          id: string
+          launched_at: string | null
+          live_url: string | null
+          selected_platform: string | null
+          started_at: string | null
+          toolkit_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_steps?: string[] | null
+          created_at?: string | null
+          first_sale_date?: string | null
+          id?: string
+          launched_at?: string | null
+          live_url?: string | null
+          selected_platform?: string | null
+          started_at?: string | null
+          toolkit_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_steps?: string[] | null
+          created_at?: string | null
+          first_sale_date?: string | null
+          id?: string
+          launched_at?: string | null
+          live_url?: string | null
+          selected_platform?: string | null
+          started_at?: string | null
+          toolkit_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "launch_progress_toolkit_id_fkey"
+            columns: ["toolkit_id"]
+            isOneToOne: false
+            referencedRelation: "toolkits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       niche_blueprint_usage: {
         Row: {
           blueprint_hash: string
