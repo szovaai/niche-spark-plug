@@ -7,12 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { ToolkitComponents, ToolkitContent, GuideSection } from "@/types/toolkit";
+import { ToolkitComponents, ToolkitContent, GuideSection, SalesLetterStyle } from "@/types/toolkit";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { generateSalesLetterHTML } from "@/lib/salesLetterExport";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
+import SalesLetterStyleSelector from "@/components/SalesLetterStyleSelector";
 
 interface SalesLetterGeneratorProps {
   title: string;
@@ -33,7 +34,8 @@ interface SalesLetterGeneratorProps {
   savedRawDraft?: string;
   savedPolishedLetter?: string;
   savedStep?: Phase;
-  onStateChange?: (state: { offerDetails: PromptBoxData; rawDraft: string; polishedLetter: string; step: Phase }) => void;
+  savedStyle?: SalesLetterStyle;
+  onStateChange?: (state: { offerDetails: PromptBoxData; rawDraft: string; polishedLetter: string; step: Phase; style: SalesLetterStyle }) => void;
 }
 
 interface PromptBoxData {
@@ -45,6 +47,15 @@ interface PromptBoxData {
 }
 
 type Phase = 'input' | 'raw' | 'polished';
+
+// Style name mapping for display
+const STYLE_NAMES: Record<SalesLetterStyle, string> = {
+  'neutral': 'Neutral / Balanced',
+  'direct-response': 'Classic Direct Response',
+  'story-selling': 'Story Selling',
+  'aggressive': 'Aggressive Authority',
+  'conversational': 'Conversational / Modern',
+};
 
 const SalesLetterGenerator = ({ 
   title, 
@@ -63,6 +74,7 @@ const SalesLetterGenerator = ({
   savedRawDraft,
   savedPolishedLetter,
   savedStep,
+  savedStyle,
   onStateChange,
 }: SalesLetterGeneratorProps) => {
   const [currentPhase, setCurrentPhase] = useState<Phase>(savedStep || (existingSalesLetter ? 'polished' : 'input'));
@@ -74,6 +86,8 @@ const SalesLetterGenerator = ({
   const [polishedLetter, setPolishedLetter] = useState(savedPolishedLetter || existingSalesLetter || "");
   const [copied, setCopied] = useState(false);
   const [promptBoxOpen, setPromptBoxOpen] = useState(true);
+  const [selectedStyle, setSelectedStyle] = useState<SalesLetterStyle>(savedStyle || 'neutral');
+  const [appliedStyle, setAppliedStyle] = useState<SalesLetterStyle | null>(savedStyle || null);
   
   const [promptBoxData, setPromptBoxData] = useState<PromptBoxData>(savedOfferDetails || {
     whatProductIs: "",
@@ -91,15 +105,16 @@ const SalesLetterGenerator = ({
         rawDraft,
         polishedLetter,
         step: currentPhase,
+        style: selectedStyle,
       });
     }
-  }, [promptBoxData, rawDraft, polishedLetter, currentPhase, onStateChange]);
+  }, [promptBoxData, rawDraft, polishedLetter, currentPhase, selectedStyle, onStateChange]);
 
   const updatePromptBox = (field: keyof PromptBoxData, value: string) => {
     setPromptBoxData(prev => ({ ...prev, [field]: value }));
   };
 
-  // NEW: Fill from Toolkit using AI
+  // Fill from Toolkit using AI
   const fillFromToolkit = async () => {
     if (!title || !niche) {
       toast.error("Please ensure the toolkit has a title and niche defined.");
@@ -167,7 +182,7 @@ const SalesLetterGenerator = ({
         setRawDraft(data.salesLetter);
         setCurrentPhase('raw');
         setPromptBoxOpen(false);
-        toast.success("Raw draft generated! Review it, then polish with our framework.");
+        toast.success("Raw draft generated! Select a style and polish with our framework.");
         return true;
       } else {
         throw new Error("No sales letter returned");
@@ -181,8 +196,10 @@ const SalesLetterGenerator = ({
     }
   };
 
-  const polishWithFramework = async (draftToPolish?: string) => {
+  const polishWithFramework = async (draftToPolish?: string, styleToApply?: SalesLetterStyle) => {
     setIsGenerating(true);
+    const styleForPolish = styleToApply || selectedStyle;
+    
     try {
       const { data, error } = await supabase.functions.invoke("generate-sales-letter", {
         body: {
@@ -196,6 +213,7 @@ const SalesLetterGenerator = ({
           authorName,
           promptBoxData,
           rawDraft: draftToPolish || rawDraft,
+          style: styleForPolish,
         },
       });
 
@@ -203,9 +221,10 @@ const SalesLetterGenerator = ({
 
       if (data?.salesLetter) {
         setPolishedLetter(data.salesLetter);
+        setAppliedStyle(styleForPolish);
         onSalesLetterGenerated(data.salesLetter);
         setCurrentPhase('polished');
-        toast.success("Sales letter polished with our Proprietary Framework!");
+        toast.success(`Sales letter polished with ${STYLE_NAMES[styleForPolish]} style!`);
         return true;
       } else {
         throw new Error("No sales letter returned");
@@ -219,7 +238,7 @@ const SalesLetterGenerator = ({
     }
   };
 
-  // NEW: One-Click Generate (Fill → Raw → Polish)
+  // One-Click Generate (Fill → Raw → Polish with neutral style)
   const oneClickGenerate = async () => {
     if (!title || !niche) {
       toast.error("Please ensure the toolkit has a title and niche defined.");
@@ -231,6 +250,8 @@ const SalesLetterGenerator = ({
     try {
       // Step 1: Fill from Toolkit (if empty)
       const hasOfferDetails = promptBoxData.whatProductIs || promptBoxData.mainProblem;
+      let currentPromptData = promptBoxData;
+      
       if (!hasOfferDetails) {
         setOneClickStep(1);
         toast.info("Step 1/3: Generating offer details from your toolkit...");
@@ -250,13 +271,14 @@ const SalesLetterGenerator = ({
         if (fillError) throw fillError;
 
         if (fillData?.offerDetails) {
-          setPromptBoxData({
+          currentPromptData = {
             whatProductIs: fillData.offerDetails.whatProductIs || "",
             whoItsFor: fillData.offerDetails.whoItsFor || targetAudience || "",
             mainProblem: fillData.offerDetails.mainProblem || "",
             desiredOutcome: fillData.offerDetails.desiredOutcome || "",
             bonusesIncluded: fillData.offerDetails.bonusesIncluded || "",
-          });
+          };
+          setPromptBoxData(currentPromptData);
         }
       }
 
@@ -270,11 +292,11 @@ const SalesLetterGenerator = ({
           title,
           subtitle,
           niche,
-          targetAudience: promptBoxData.whoItsFor || targetAudience || "Online entrepreneurs",
+          targetAudience: currentPromptData.whoItsFor || targetAudience || "Online entrepreneurs",
           components,
           price,
           authorName,
-          promptBoxData,
+          promptBoxData: currentPromptData,
         },
       });
 
@@ -286,9 +308,9 @@ const SalesLetterGenerator = ({
 
       setRawDraft(rawData.salesLetter);
 
-      // Step 3: Polish with Framework
+      // Step 3: Polish with Framework (using neutral style by default)
       setOneClickStep(3);
-      toast.info("Step 3/3: Polishing with Proprietary Framework...");
+      toast.info("Step 3/3: Polishing with Proprietary Framework (Neutral style)...");
       
       const { data: polishData, error: polishError } = await supabase.functions.invoke("generate-sales-letter", {
         body: {
@@ -296,12 +318,13 @@ const SalesLetterGenerator = ({
           title,
           subtitle,
           niche,
-          targetAudience: promptBoxData.whoItsFor || targetAudience,
+          targetAudience: currentPromptData.whoItsFor || targetAudience,
           components,
           price,
           authorName,
-          promptBoxData,
+          promptBoxData: currentPromptData,
           rawDraft: rawData.salesLetter,
+          style: 'neutral', // One-click always uses neutral
         },
       });
 
@@ -309,10 +332,12 @@ const SalesLetterGenerator = ({
 
       if (polishData?.salesLetter) {
         setPolishedLetter(polishData.salesLetter);
+        setSelectedStyle('neutral');
+        setAppliedStyle('neutral');
         onSalesLetterGenerated(polishData.salesLetter);
         setCurrentPhase('polished');
         setPromptBoxOpen(false);
-        toast.success("Sales letter complete! Review your polished version.");
+        toast.success("Sales letter complete! You can re-polish with a different style if desired.");
       } else {
         throw new Error("No polished letter returned");
       }
@@ -357,6 +382,7 @@ const SalesLetterGenerator = ({
     setCurrentPhase('input');
     setRawDraft("");
     setPolishedLetter("");
+    setAppliedStyle(null);
     setPromptBoxOpen(true);
     onSalesLetterGenerated("");
   };
@@ -526,7 +552,7 @@ const SalesLetterGenerator = ({
   );
 
   const RawDraftView = () => (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <h3 className="text-lg font-semibold">Draft v1 (Raw)</h3>
@@ -537,13 +563,22 @@ const SalesLetterGenerator = ({
       </div>
       
       <p className="text-sm text-muted-foreground">
-        This is your unpolished, honest draft. Review it, then polish with our Proprietary Framework to add conversion elements.
+        This is your unpolished, honest draft. Select a persuasion style below, then polish with our Proprietary Framework.
       </p>
       
       <div 
-        className="prose prose-sm max-w-none dark:prose-invert border rounded-lg p-6 max-h-[400px] overflow-y-auto bg-background"
+        className="prose prose-sm max-w-none dark:prose-invert border rounded-lg p-6 max-h-[300px] overflow-y-auto bg-background"
         dangerouslySetInnerHTML={{ __html: rawDraft }}
       />
+
+      {/* Style Selector - appears in raw draft view */}
+      <div className="border rounded-lg p-4 bg-muted/20">
+        <SalesLetterStyleSelector
+          selectedStyle={selectedStyle}
+          onStyleChange={setSelectedStyle}
+          disabled={isGenerating}
+        />
+      </div>
       
       <div className="flex flex-wrap justify-center gap-3">
         <Button 
@@ -557,7 +592,7 @@ const SalesLetterGenerator = ({
           ) : (
             <Sparkles className="w-4 h-4" />
           )}
-          Polish with Framework
+          Polish with {STYLE_NAMES[selectedStyle]} Style
         </Button>
         
         <Button 
@@ -584,13 +619,18 @@ const SalesLetterGenerator = ({
 
   const PolishedView = () => (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <h3 className="text-lg font-semibold">Final (Framework Applied)</h3>
           <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
             Conversion Optimized
           </Badge>
         </div>
+        {appliedStyle && (
+          <Badge variant="outline" className="text-xs">
+            Style: {STYLE_NAMES[appliedStyle]}
+          </Badge>
+        )}
       </div>
       
       <Tabs defaultValue="preview" className="w-full">
@@ -644,6 +684,41 @@ const SalesLetterGenerator = ({
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Re-polish with different style */}
+      <Collapsible>
+        <CollapsibleTrigger asChild>
+          <Button variant="ghost" size="sm" className="w-full gap-2 text-muted-foreground">
+            <RefreshCw className="w-4 h-4" />
+            Re-polish with Different Style
+            <ChevronDown className="w-4 h-4" />
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="pt-4">
+          <div className="border rounded-lg p-4 bg-muted/20 space-y-4">
+            <SalesLetterStyleSelector
+              selectedStyle={selectedStyle}
+              onStyleChange={setSelectedStyle}
+              disabled={isGenerating}
+            />
+            <div className="flex justify-center">
+              <Button
+                variant="outline"
+                onClick={() => polishWithFramework()}
+                disabled={isGenerating || selectedStyle === appliedStyle}
+                className="gap-2"
+              >
+                {isGenerating ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4" />
+                )}
+                Apply {STYLE_NAMES[selectedStyle]} Style
+              </Button>
+            </div>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
       
       <div className="flex flex-wrap justify-center gap-3">
         <Button 
@@ -666,16 +741,6 @@ const SalesLetterGenerator = ({
         
         <Button 
           variant="ghost" 
-          onClick={() => polishWithFramework()} 
-          disabled={isGenerating} 
-          className="gap-2"
-        >
-          <RefreshCw className={`w-4 h-4 ${isGenerating ? 'animate-spin' : ''}`} />
-          Re-Polish
-        </Button>
-        
-        <Button 
-          variant="ghost" 
           onClick={startOver} 
           className="gap-2 text-muted-foreground"
         >
@@ -692,7 +757,7 @@ const SalesLetterGenerator = ({
         <div className="text-center mb-4">
           <h2 className="text-2xl font-bold gradient-text">Proprietary Salesletter Framework</h2>
           <p className="text-muted-foreground mt-2">
-            Two-phase engine: Generate a raw draft, then polish with our conversion framework.
+            Two-phase engine: Generate a raw draft, select a style, then polish with our conversion framework.
           </p>
         </div>
 
@@ -706,7 +771,7 @@ const SalesLetterGenerator = ({
               <Zap className="w-10 h-10 mx-auto text-primary mb-3" />
               <h3 className="font-semibold text-lg mb-2">Recommended: One-Click Generate</h3>
               <p className="text-sm text-muted-foreground mb-4 max-w-md mx-auto">
-                Automatically fills offer details from your toolkit, generates a raw draft, and polishes it with our framework.
+                Automatically fills offer details, generates a raw draft, and polishes with our framework using the Neutral style.
               </p>
               <Button 
                 variant="hero" 
@@ -774,7 +839,7 @@ const SalesLetterGenerator = ({
           </div>
         )}
 
-        {/* Phase 2: Raw Draft */}
+        {/* Phase 2: Raw Draft + Style Selection */}
         {currentPhase === 'raw' && <RawDraftView />}
 
         {/* Phase 3: Polished */}

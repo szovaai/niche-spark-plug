@@ -23,6 +23,34 @@ interface PromptBoxData {
   bonusesIncluded: string;
 }
 
+type SalesLetterStyle = 'neutral' | 'direct-response' | 'story-selling' | 'aggressive' | 'conversational';
+
+// Style-specific prompt modifiers (applied ONLY in polish phase)
+const STYLE_MODIFIERS: Record<SalesLetterStyle, string> = {
+  'neutral': `Apply a balanced, professional persuasion style. Use clear language, 
+logical structure, and focus on benefits. Avoid hype or exaggeration. 
+Keep the tone platform-friendly and universally appealing.`,
+
+  'direct-response': `Apply a persuasion style inspired by classic direct-response copywriting 
+principles. Use confident, authoritative language with clear problem-solution 
+framing. Focus on logic-based persuasion and direct calls to action. 
+No storytelling fluff - get to the point with clarity.`,
+
+  'story-selling': `Apply a persuasion style inspired by modern funnel and narrative marketing. 
+Open with a relatable personal or situational story. Build to a clear 
+turning point ("the realization"). Lead with emotional engagement, 
+then support with logic. Use a softer, guided call to action.`,
+
+  'aggressive': `Apply a bold, no-nonsense persuasion style. Use strong opening hooks 
+and pattern interrupts. Write with confident, decisive language using 
+short, punchy sentences. Create a clear "listen up" authority presence.
+Maintain intensity without crossing into hype.`,
+
+  'conversational': `Apply a friendly, human-first persuasion style. Write like a 1-to-1 
+conversation with a friend. Use plain language and reduce sales pressure. 
+Emphasize trust and simplicity. Make it feel approachable and authentic.`,
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -40,7 +68,8 @@ serve(async (req) => {
       uniqueMechanism,
       contentSummary,
       promptBoxData,
-      rawDraft
+      rawDraft,
+      style = "neutral" // NEW: Sales letter style archetype
     } = await req.json();
     
     const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
@@ -52,6 +81,7 @@ serve(async (req) => {
     let systemPrompt = "";
     
     // PHASE 1: RAW DRAFT - Clarity-focused, no persuasion, just organization
+    // NOTE: Style is NEVER applied here - only in polish phase
     if (phase === "raw") {
       const pb = promptBoxData as PromptBoxData;
       
@@ -89,12 +119,18 @@ This should feel like: "Here's what this is and why it might help you."
 
 Format as clean HTML with <p>, <h2>, <ul>, <li> tags. Keep paragraphs short (2-3 sentences max).`;
 
-    // PHASE 2: POLISH - Apply framework WITHOUT re-interpreting the offer
+    // PHASE 2: POLISH - Apply framework AND style WITHOUT re-interpreting the offer
     } else if (phase === "polish") {
+      const selectedStyle = (style as SalesLetterStyle) || 'neutral';
+      const styleModifier = STYLE_MODIFIERS[selectedStyle] || STYLE_MODIFIERS['neutral'];
+      
       systemPrompt = `You are a direct-response copywriter applying a proven framework to an existing draft.
 You enhance structure and emotional resonance WITHOUT changing what the offer is.
 You NEVER add fake testimonials or made-up statistics.
-You work ONLY with the raw draft provided - do not re-interpret or change the core offer.`;
+You work ONLY with the raw draft provided - do not re-interpret or change the core offer.
+
+=== STYLE DIRECTIVE ===
+${styleModifier}`;
 
       prompt = `Take this EXACT raw draft and restructure it using our Proprietary Salesletter Framework.
 
@@ -120,7 +156,8 @@ ${rawDraft}
 3. Make the headline SPECIFIC to this exact product
 4. Add emotional resonance WITHOUT being fake or salesy
 5. Use the transformation language from the raw draft
-6. Format as professional HTML with:
+6. Apply the STYLE DIRECTIVE throughout - adjust tone, pacing, and emphasis accordingly
+7. Format as professional HTML with:
    - Clear section headings
    - Styled bullet points for benefits
    - A prominent "Get Instant Access" button section
@@ -130,7 +167,8 @@ ${rawDraft}
 Product: ${title}
 Niche: ${niche}
 Target Audience: ${(promptBoxData as PromptBoxData)?.whoItsFor || targetAudience || "digital entrepreneurs"}
-Price: $${price || 17}`;
+Price: $${price || 17}
+Applied Style: ${selectedStyle}`;
 
 
     // LEGACY MODE - Original behavior for backwards compatibility
@@ -193,7 +231,7 @@ CRITICAL INSTRUCTIONS:
       }
     }
 
-    console.log(`Generating ${phase} sales letter for:`, title);
+    console.log(`Generating ${phase} sales letter for:`, title, `| Style: ${style}`);
 
     const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
       method: "POST",
@@ -229,7 +267,7 @@ CRITICAL INSTRUCTIONS:
       .replace(/â€/g, '"')
       .replace(/â€"/g, "-");
 
-    return new Response(JSON.stringify({ salesLetter, phase }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ salesLetter, phase, style }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {
     console.error("Error:", error);
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });

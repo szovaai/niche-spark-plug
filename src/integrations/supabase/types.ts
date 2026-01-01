@@ -455,6 +455,7 @@ export type Database = {
           salesletter_polished: string | null
           salesletter_raw: string | null
           salesletter_step: string | null
+          salesletter_style: string | null
           status: string
           subtitle: string | null
           target_audience: string | null
@@ -481,6 +482,7 @@ export type Database = {
           salesletter_polished?: string | null
           salesletter_raw?: string | null
           salesletter_step?: string | null
+          salesletter_style?: string | null
           status?: string
           subtitle?: string | null
           target_audience?: string | null
@@ -507,6 +509,7 @@ export type Database = {
           salesletter_polished?: string | null
           salesletter_raw?: string | null
           salesletter_step?: string | null
+          salesletter_style?: string | null
           status?: string
           subtitle?: string | null
           target_audience?: string | null
