@@ -446,6 +446,7 @@ export type Database = {
           created_at: string
           downloads: number
           ecover_url: string | null
+          guide_sections: Json | null
           id: string
           logo_url: string | null
           niche: string
@@ -453,10 +454,13 @@ export type Database = {
           status: string
           subtitle: string | null
           target_audience: string | null
+          thesis: string | null
           title: string
           updated_at: string
           upsell: Json | null
           user_id: string
+          wizard_step: number | null
+          writing_style: string | null
         }
         Insert: {
           components?: Json | null
@@ -464,6 +468,7 @@ export type Database = {
           created_at?: string
           downloads?: number
           ecover_url?: string | null
+          guide_sections?: Json | null
           id?: string
           logo_url?: string | null
           niche: string
@@ -471,10 +476,13 @@ export type Database = {
           status?: string
           subtitle?: string | null
           target_audience?: string | null
+          thesis?: string | null
           title: string
           updated_at?: string
           upsell?: Json | null
           user_id: string
+          wizard_step?: number | null
+          writing_style?: string | null
         }
         Update: {
           components?: Json | null
@@ -482,6 +490,7 @@ export type Database = {
           created_at?: string
           downloads?: number
           ecover_url?: string | null
+          guide_sections?: Json | null
           id?: string
           logo_url?: string | null
           niche?: string
@@ -489,10 +498,13 @@ export type Database = {
           status?: string
           subtitle?: string | null
           target_audience?: string | null
+          thesis?: string | null
           title?: string
           updated_at?: string
           upsell?: Json | null
           user_id?: string
+          wizard_step?: number | null
+          writing_style?: string | null
         }
         Relationships: []
       }
