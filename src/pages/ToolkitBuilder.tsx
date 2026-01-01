@@ -14,7 +14,7 @@ import MarketingKitDashboard from "@/components/toolkit/MarketingKitDashboard";
 import DashboardTab from "@/components/toolkit/DashboardTab";
 import HistoryTab from "@/components/toolkit/HistoryTab";
 
-import type { Toolkit, ToolkitComponents, ToolkitContent } from "@/types/toolkit";
+import type { Toolkit, ToolkitComponents, ToolkitContent, WritingStyle } from "@/types/toolkit";
 import { createToolkitZip, downloadSinglePDF, type ToolkitData } from "@/lib/zipBundler";
 
 const ToolkitBuilder = () => {
@@ -50,7 +50,7 @@ const ToolkitBuilder = () => {
   const [emailSequence, setEmailSequence] = useState<{ day: number; subject: string; body: string }[]>([]);
   const [upsell, setUpsell] = useState<{ title: string; description: string; price: number } | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
-  const [humanizeEnabled, setHumanizeEnabled] = useState(true);
+  const [writingStyle, setWritingStyle] = useState<WritingStyle>("conversational");
   const [isGeneratingAll, setIsGeneratingAll] = useState(false);
   const [isGeneratingEverything, setIsGeneratingEverything] = useState(false);
   const [generatingStep, setGeneratingStep] = useState("");
@@ -258,7 +258,7 @@ const ToolkitBuilder = () => {
           targetAudience,
           components,
           singleChapter: chapterId,
-          humanize: humanizeEnabled,
+          writingStyle,
         },
       });
 
@@ -362,7 +362,7 @@ const ToolkitBuilder = () => {
           niche,
           targetAudience,
           components,
-          humanize: humanizeEnabled,
+          writingStyle,
         },
       });
 
@@ -555,7 +555,7 @@ const ToolkitBuilder = () => {
           niche,
           targetAudience,
           components,
-          humanize: humanizeEnabled,
+          writingStyle,
         },
       });
 
@@ -903,6 +903,8 @@ const ToolkitBuilder = () => {
             setAuthorBio={setAuthorBio}
             components={components}
             setComponents={setComponents}
+            writingStyle={writingStyle}
+            setWritingStyle={setWritingStyle}
             onSave={saveToolkit}
             isSaving={isSaving}
             onContinue={() => setActiveTab("content")}
@@ -918,8 +920,6 @@ const ToolkitBuilder = () => {
             onRegenerate={handleRegenerateChapter}
             onRegenerateAll={handleRegenerateAll}
             isGeneratingAll={isGeneratingAll}
-            humanizeEnabled={humanizeEnabled}
-            onHumanizeToggle={setHumanizeEnabled}
           />
         )}
 

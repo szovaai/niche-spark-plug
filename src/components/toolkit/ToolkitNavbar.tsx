@@ -33,7 +33,7 @@ interface ToolkitNavbarProps {
 
 const tabs = [
   { id: "dashboard" as TabId, label: "Dashboard", icon: LayoutDashboard },
-  { id: "content" as TabId, label: "Content Writer", icon: FileText },
+  { id: "content" as TabId, label: "Your Toolkit", icon: FileText },
   { id: "cover" as TabId, label: "Cover Creator", icon: Image },
   { id: "marketing" as TabId, label: "Marketing Kit", icon: Megaphone },
   { id: "history" as TabId, label: "History", icon: History },

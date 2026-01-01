@@ -1,3 +1,5 @@
+export type WritingStyle = 'conversational' | 'professional' | 'storytelling' | 'step-by-step';
+
 export interface ToolkitComponents {
   guide: boolean;
   worksheet: boolean;

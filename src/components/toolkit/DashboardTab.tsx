@@ -14,7 +14,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ChevronDown, Loader2, Sparkles } from "lucide-react";
-import type { ToolkitComponents } from "@/types/toolkit";
+import type { ToolkitComponents, WritingStyle } from "@/types/toolkit";
+import StyleSelector from "./StyleSelector";
 
 interface DashboardTabProps {
   title: string;
@@ -33,6 +34,8 @@ interface DashboardTabProps {
   setAuthorBio: (value: string) => void;
   components: ToolkitComponents;
   setComponents: (value: ToolkitComponents) => void;
+  writingStyle: WritingStyle;
+  setWritingStyle: (value: WritingStyle) => void;
   onSave: () => void;
   isSaving: boolean;
   onContinue: () => void;
@@ -80,6 +83,8 @@ const DashboardTab = ({
   setAuthorBio,
   components,
   setComponents,
+  writingStyle,
+  setWritingStyle,
   onContinue,
   onGenerateAll,
   isGeneratingAll,
@@ -164,6 +169,9 @@ const DashboardTab = ({
               </SelectContent>
             </Select>
           </div>
+
+          {/* Writing Style Selector */}
+          <StyleSelector value={writingStyle} onChange={setWritingStyle} />
 
           {/* Advanced Settings */}
           <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
@@ -256,7 +264,7 @@ const DashboardTab = ({
           ) : (
             <>
               <Sparkles className="w-5 h-5" />
-              Generate Toolkit Content
+              Generate Your Toolkit
             </>
           )}
         </Button>
@@ -269,7 +277,7 @@ const DashboardTab = ({
             disabled={!title.trim() || !niche.trim() || isGeneratingAll}
             className="text-primary hover:underline disabled:opacity-50 disabled:no-underline"
           >
-            skip to Content Writer to write manually
+            skip to Your Toolkit to write manually
           </button>
         </p>
       </div>

@@ -5,7 +5,56 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const HUMAN_TONE_DIRECTIVE = `
+// Style-specific directives
+const STYLE_DIRECTIVES: Record<string, string> = {
+  conversational: `
+WRITING STYLE - CONVERSATIONAL:
+- Write like you're chatting with a friend over coffee. Keep it warm and approachable.
+- Use contractions naturally (you're, it's, don't, we'll).
+- Include personality touches: "Here's the thing...", "Pro tip:", "Quick win:", "The secret?".
+- Write in second person (you, your) to speak directly to the reader.
+- Vary sentence length. Mix short punchy sentences with longer flowing ones.
+- Avoid corporate buzzwords (leverage, utilize, synergy, optimize).
+- Sound confident but not salesy. Be helpful, not pushy.
+- Add encouraging phrases: "You've got this", "Here's where it gets exciting".
+`,
+  professional: `
+WRITING STYLE - PROFESSIONAL:
+- Write with authority and expertise. You're the trusted advisor.
+- Use clear, precise language. Every word should earn its place.
+- Structure content logically with clear transitions between ideas.
+- Include data-driven insights and evidence-based recommendations.
+- Maintain a formal but not stiff tone. Accessible expertise.
+- Use industry terminology appropriately, but explain when needed.
+- Focus on actionable outcomes and measurable results.
+- Sound like a consultant delivering high-value insights.
+`,
+  storytelling: `
+WRITING STYLE - STORYTELLING:
+- Open with hooks that draw readers in. Create curiosity.
+- Use the "before and after" narrative arc throughout.
+- Include real-world examples, case studies, and analogies.
+- Paint pictures with words. Help readers visualize success.
+- Build tension before revealing solutions ("But here's what most people miss...").
+- Connect emotionally to the reader's pain points and aspirations.
+- Use metaphors to explain complex concepts simply.
+- End sections with compelling transitions that keep readers engaged.
+`,
+  "step-by-step": `
+WRITING STYLE - STEP-BY-STEP:
+- Lead with action. Every section should have clear, numbered steps.
+- Use imperative verbs: "Open", "Click", "Write", "Review", "Send".
+- Include specific details: exact numbers, timeframes, measurements.
+- Add checkpoints: "Before moving on, make sure you've..."
+- Anticipate questions and address them inline.
+- Use bullet points and numbered lists liberally.
+- Include "Quick Reference" boxes for key takeaways.
+- Keep explanations concise - focus on what to do, not why (unless critical).
+`,
+};
+
+// Default humanization (fallback if no style selected)
+const DEFAULT_HUMAN_DIRECTIVE = `
 CRITICAL WRITING STYLE:
 - Write like a real person, not a robot. Use contractions naturally (you're, it's, don't).
 - Vary sentence length. Mix short punchy sentences with longer flowing ones.
@@ -17,13 +66,17 @@ CRITICAL WRITING STYLE:
 `;
 
 const componentPrompts: Record<string, string> = {
-  guide: `Create a comprehensive guide with 4-6 sections. Each section needs a heading and detailed content (200-400 words per section). Include practical examples and action steps. Return as: { "title": "Guide Title", "sections": [{ "heading": "...", "content": "..." }] }`,
+  guide: `Create a comprehensive guide with 10-12 chapters. Each chapter needs a heading and detailed content (300-500 words per chapter). Include practical examples, action steps, and real-world applications. Make each chapter build on the previous one for a logical learning progression.
+  
+Return as: { "title": "Guide Title", "sections": [{ "heading": "Chapter 1: ...", "content": "..." }, { "heading": "Chapter 2: ...", "content": "..." }, ...] }
+
+IMPORTANT: Generate exactly 10-12 chapters. Each chapter should be substantial and valuable on its own.`,
   
   worksheet: `Create an interactive worksheet with 4-6 exercises. Each exercise needs a title, clear instructions, and 3-5 fill-in fields/prompts. Return as: { "title": "Worksheet Title", "exercises": [{ "title": "...", "instructions": "...", "fields": ["field1", "field2"] }] }`,
   
-  checklist: `Create an actionable checklist with 15-25 items. Each item should be a specific, actionable task (not vague). Start with action verbs. Return as: { "title": "Checklist Title", "items": ["Task 1", "Task 2", ...] }`,
+  checklist: `Create an actionable checklist organized into 3-4 phases. Each phase should have 5-8 specific, actionable tasks. Start items with action verbs. Return as: { "title": "Checklist Title", "items": ["Phase 1: Setup", "☐ Task 1", "☐ Task 2", "Phase 2: Implementation", "☐ Task 3", ...] }`,
   
-  resourceList: `Create a curated resource list with 8-12 resources. Include tools, websites, books, or services. Each needs a name, description, and optional URL placeholder. Return as: { "title": "Resource Title", "resources": [{ "name": "...", "description": "...", "url": "https://..." }] }`,
+  resourceList: `Create a curated resource list with 8-12 resources organized by category. Include tools, websites, books, or services. Each needs a name, description, and optional URL placeholder. Return as: { "title": "Resource Title", "resources": [{ "name": "...", "description": "...", "url": "https://..." }] }`,
   
   templates: `Create 3-5 ready-to-use templates. Each template needs a name and full content that users can copy and customize. Return as: { "title": "Templates Title", "templates": [{ "name": "Template Name", "content": "Full template text..." }] }`,
   
@@ -36,21 +89,29 @@ serve(async (req) => {
   }
 
   try {
-    const { title, niche, targetAudience, components, singleChapter, humanize = true } = await req.json();
+    const { 
+      title, 
+      niche, 
+      targetAudience, 
+      components, 
+      singleChapter, 
+      writingStyle = "conversational" 
+    } = await req.json();
     
     const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
     if (!DEEPSEEK_API_KEY) {
       throw new Error("DEEPSEEK_API_KEY is not configured");
     }
 
+    // Get the appropriate style directive
+    const styleDirective = STYLE_DIRECTIVES[writingStyle] || DEFAULT_HUMAN_DIRECTIVE;
+
     // Determine which components to generate
     let componentsToGenerate: string[] = [];
     
     if (singleChapter) {
-      // Generate only one specific chapter
       componentsToGenerate = [singleChapter];
     } else {
-      // Generate all enabled components
       componentsToGenerate = Object.entries(components || {})
         .filter(([_, enabled]) => enabled)
         .map(([name]) => name);
@@ -63,17 +124,18 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Generating toolkit content for "${title}" - components: ${componentsToGenerate.join(", ")}`);
+    console.log(`Generating toolkit "${title}" with style: ${writingStyle}, components: ${componentsToGenerate.join(", ")}`);
 
     const content: Record<string, unknown> = {};
 
-    // Generate each component
     for (const component of componentsToGenerate) {
       const componentPrompt = componentPrompts[component];
       if (!componentPrompt) continue;
 
-      const systemPrompt = `You are an expert content creator for digital products. ${humanize ? HUMAN_TONE_DIRECTIVE : ""}
-      
+      const systemPrompt = `You are an expert content creator for digital products.
+
+${styleDirective}
+
 Context:
 - Toolkit Title: "${title}"
 - Niche: ${niche}
@@ -114,14 +176,13 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation, just the JSON ob
           );
         }
         console.error(`DeepSeek API error for ${component}:`, status);
-        continue; // Skip this component but continue with others
+        continue;
       }
 
       const data = await response.json();
       const contentText = data.choices?.[0]?.message?.content || "";
       
       try {
-        // Clean the response and parse JSON
         const cleanedText = contentText
           .replace(/```json\n?/g, '')
           .replace(/```\n?/g, '')
@@ -131,7 +192,6 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation, just the JSON ob
         console.log(`Successfully generated ${component}`);
       } catch (parseError) {
         console.error(`Failed to parse ${component} content:`, parseError);
-        // Create a fallback structure
         content[component] = createFallbackContent(component, title);
       }
     }
