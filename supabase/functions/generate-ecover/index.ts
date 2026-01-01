@@ -55,49 +55,80 @@ serve(async (req) => {
 
     // Build style-specific descriptions
     const styleDescriptions: Record<string, string> = {
-      minimalist: "Clean lines, generous white space, subtle shadows, elegant simplicity, refined typography",
-      bold: "Vibrant colors, strong contrasts, dynamic angles, energetic composition, eye-catching design",
-      futuristic: "Tech-inspired gradients, geometric patterns, neon accents, modern aesthetic, sleek surfaces",
-      professional: "Corporate elegance, muted tones, sophisticated layout, business-focused, trustworthy appearance",
-      creative: "Artistic flair, unique textures, unexpected compositions, standout visual identity",
+      minimalist: "Clean lines, generous white space, subtle shadows, elegant simplicity, refined typography, modern minimalist aesthetic",
+      bold: "Vibrant colors, strong contrasts, dynamic angles, energetic composition, eye-catching design with powerful visual impact",
+      futuristic: "Tech-inspired gradients, geometric patterns, neon accents, modern SaaS aesthetic, sleek glass-morphism surfaces",
+      professional: "Corporate elegance, muted tones, sophisticated layout, business-focused, trustworthy premium appearance",
+      creative: "Artistic flair, unique textures, unexpected compositions, standout visual identity with creative edge",
     };
 
-    // Build mockup-specific descriptions
+    // Build mockup-specific descriptions for digital product bundles
     const mockupDescriptions: Record<string, string> = {
-      "3d-book": "3D hardcover book mockup with realistic shadows and depth, slightly angled perspective showing cover and spine",
-      "laptop": "Digital product displayed on a premium laptop screen with modern workspace background",
-      "floating-pages": "Floating paper pages with soft shadows, arranged in an artistic scattered pattern",
-      "phone-mockup": "Product displayed on a modern smartphone screen with clean background",
-      "tablet": "Premium tablet displaying the product cover with elegant accessories nearby",
-      "bundle-stack": "Multiple products stacked together showing variety and value, 3D arrangement",
+      "3d-book": "3D hardcover book mockup with realistic shadows and depth, slightly angled perspective showing cover and spine, premium binding details",
+      "laptop": "Digital product displayed on a premium MacBook Pro screen with modern minimalist workspace background, soft ambient lighting",
+      "floating-pages": "Floating paper pages with soft shadows, arranged in an artistic scattered pattern suggesting multiple resources and worksheets",
+      "phone-mockup": "Product displayed on a modern iPhone screen with clean gradient background, suggesting mobile-friendly digital access",
+      "tablet": "Premium iPad displaying the product cover with elegant accessories nearby, suggesting digital toolkit accessibility",
+      "bundle-stack": "Premium digital product bundle display: 3D arrangement showing multiple components - main guide as hardcover book, spiral-bound worksheets, checklist cards, and resource folders stacked together with realistic shadows, suggesting comprehensive value and multiple deliverables",
     };
 
-    const componentsText = componentsIncluded?.length 
-      ? `Including: ${componentsIncluded.join(", ")}` 
-      : "";
+    // Generate bundle component descriptions for richer prompts
+    const bundleComponents = componentsIncluded?.length 
+      ? componentsIncluded 
+      : ["Core Guide", "Worksheets", "Checklists", "Resource Lists", "Templates"];
+    
+    const componentsText = `Bundle includes: ${bundleComponents.join(", ")}`;
 
-    const prompt = `Create a professional, premium-quality digital product cover:
+    // Detect if this is a bundle/toolkit type product
+    const isBundleProduct = mockup === "bundle-stack" || 
+      title.toLowerCase().includes("toolkit") || 
+      title.toLowerCase().includes("bundle") ||
+      title.toLowerCase().includes("system") ||
+      title.toLowerCase().includes("blueprint");
 
+    // Build premium bundle-specific prompt
+    const bundlePromptAddition = isBundleProduct ? `
+IMPORTANT BUNDLE VISUALIZATION:
+- Show multiple physical product representations: hardcover book for main guide, spiral notebooks for worksheets, laminated cards for checklists, folder with papers for resources
+- Arrange in an attractive 3D composition suggesting premium value
+- Each component should be visually distinct but color-coordinated
+- Add subtle icons or labels suggesting: "Guide", "Worksheets", "Checklists", "Resources"
+- Include visual elements like checkmarks, progress indicators, or step numbers
+- Style should evoke a premium SaaS dashboard or modern course platform aesthetic
+- Add subtle glows, reflections, and depth shadows for premium feel` : "";
+
+    const prompt = `Create a premium, sales-ready digital product bundle hero image:
+
+PRODUCT DETAILS:
 Title: "${title}"
-${subtitle ? `Subtitle: "${subtitle}"` : ""}
-${authorName ? `Author: ${authorName}` : ""}
-Niche: ${niche}
+${subtitle ? `Subtitle: "${subtitle}"` : "Tagline: Complete System for Success"}
+${authorName ? `By: ${authorName}` : ""}
+Niche/Topic: ${niche}
 ${componentsText}
 
-Visual Style: ${styleDescriptions[style] || styleDescriptions.professional}
-Mockup Type: ${mockupDescriptions[mockup] || mockupDescriptions["3d-book"]}
-Color Palette: ${primary} as primary, ${secondary} as accent
-${additionalElements ? `Additional elements: ${additionalElements}` : ""}
+VISUAL STYLE: ${styleDescriptions[style] || styleDescriptions.professional}
 
-Requirements:
-- Ultra-professional, bestseller quality
-- Clean, uncluttered composition
-- Perfect for marketing and sales pages
-- Eye-catching hero image quality
-- 16:9 landscape aspect ratio
-- Premium digital product aesthetic
-- Subtle lighting and shadows for depth
-- Ready for immediate commercial use`;
+MOCKUP TYPE: ${mockupDescriptions[mockup] || mockupDescriptions["bundle-stack"]}
+
+COLOR SCHEME:
+- Primary: ${primary} (use for main elements, titles, accents)
+- Secondary: ${secondary} (use for backgrounds, subtle details)
+- Ensure high contrast and readability
+${bundlePromptAddition}
+
+${additionalElements ? `ADDITIONAL ELEMENTS: ${additionalElements}` : ""}
+
+CRITICAL REQUIREMENTS:
+- Ultra-professional, WarriorPlus/Gumroad bestseller quality
+- Clean, uncluttered composition with clear focal point
+- Perfect for sales pages, marketing materials, and social media
+- Eye-catching hero image that converts browsers to buyers
+- 16:9 landscape aspect ratio, optimized for web display
+- Premium digital product aesthetic with modern design sensibility
+- Subtle lighting, realistic shadows, and depth for professional feel
+- NO text overlays - clean product visualization only
+- Should look like a $297+ premium digital product
+- Ready for immediate commercial use on any marketplace`;
 
     // Use FAL AI (flux-pro) for high-quality image generation
     const response = await fetch("https://fal.run/fal-ai/flux-pro/v1.1", {
