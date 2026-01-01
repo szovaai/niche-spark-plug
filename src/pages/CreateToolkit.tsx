@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   ArrowLeft, ArrowRight, Check, Loader2, 
-  Lightbulb, Palette, FileText, Image, 
+  Lightbulb, FileText, Image, 
   Mail, Gift, Download, Sparkles, LayoutTemplate, Send, Zap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ToolkitComponents, WritingStyle } from "@/types/toolkit";
-import LogoCreator from "@/components/LogoCreator";
+
 import EcoverGenerator from "@/components/EcoverGenerator";
 import SalesLetterGenerator from "@/components/SalesLetterGenerator";
 import EmailSequenceGenerator from "@/components/EmailSequenceGenerator";
@@ -34,7 +34,6 @@ import { ToolkitTemplate } from "@/data/toolkitTemplates";
 const steps = [
   { id: "template", title: "Choose Template", icon: LayoutTemplate },
   { id: "niche", title: "Niche & Title", icon: Lightbulb },
-  { id: "logo", title: "Create Logo", icon: Palette },
   { id: "components", title: "Select Components", icon: FileText },
   { id: "content", title: "Build Your Toolkit", icon: Sparkles },
   { id: "ecover", title: "E-Cover", icon: Image },
@@ -43,6 +42,8 @@ const steps = [
   { id: "upsell", title: "Upsell (Optional)", icon: Gift },
   { id: "download", title: "Download", icon: Download },
 ];
+
+const WIZARD_STORAGE_KEY = "toolkit-wizard-progress";
 
 const componentOptions = [
   { id: "guide", label: "Main Guide/Ebook", description: "Core content piece", required: true },
@@ -59,24 +60,28 @@ const CreateToolkit = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   
-  const [currentStep, setCurrentStep] = useState(0);
+  // Load saved progress from localStorage
+  const savedProgress = localStorage.getItem(WIZARD_STORAGE_KEY);
+  const initialState = savedProgress ? JSON.parse(savedProgress) : null;
+  
+  const [currentStep, setCurrentStep] = useState(initialState?.currentStep || 0);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [toolkitId, setToolkitId] = useState<string | null>(null);
+  const [toolkitId, setToolkitId] = useState<string | null>(initialState?.toolkitId || null);
   
   // Template state
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(initialState?.selectedTemplate || null);
   
   // Form state
-  const [title, setTitle] = useState("");
-  const [subtitle, setSubtitle] = useState("");
-  const [niche, setNiche] = useState(searchParams.get("niche") || "");
-  const [targetAudience, setTargetAudience] = useState("");
-  const [authorName, setAuthorName] = useState("");
-  const [authorTagline, setAuthorTagline] = useState("");
-  const [authorBio, setAuthorBio] = useState("");
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
-  const [ecoverUrl, setEcoverUrl] = useState<string | null>(null);
-  const [components, setComponents] = useState<ToolkitComponents>({
+  const [title, setTitle] = useState(initialState?.title || "");
+  const [subtitle, setSubtitle] = useState(initialState?.subtitle || "");
+  const [niche, setNiche] = useState(initialState?.niche || searchParams.get("niche") || "");
+  const [targetAudience, setTargetAudience] = useState(initialState?.targetAudience || "");
+  const [authorName, setAuthorName] = useState(initialState?.authorName || "");
+  const [authorTagline, setAuthorTagline] = useState(initialState?.authorTagline || "");
+  const [authorBio, setAuthorBio] = useState(initialState?.authorBio || "");
+  const [logoUrl, setLogoUrl] = useState<string | null>(initialState?.logoUrl || null);
+  const [ecoverUrl, setEcoverUrl] = useState<string | null>(initialState?.ecoverUrl || null);
+  const [components, setComponents] = useState<ToolkitComponents>(initialState?.components || {
     guide: true,
     worksheet: false,
     checklist: false,
@@ -84,10 +89,10 @@ const CreateToolkit = () => {
     templates: false,
     quiz: false,
   });
-  const [content, setContent] = useState<any>({});
-  const [salesLetter, setSalesLetter] = useState("");
-  const [emailSequence, setEmailSequence] = useState<any>(null);
-  const [upsell, setUpsell] = useState<any>(null);
+  const [content, setContent] = useState<any>(initialState?.content || {});
+  const [salesLetter, setSalesLetter] = useState(initialState?.salesLetter || "");
+  const [emailSequence, setEmailSequence] = useState<any>(initialState?.emailSequence || null);
+  const [upsell, setUpsell] = useState<any>(initialState?.upsell || null);
 
   // Content generation state
   const [writingStyle, setWritingStyle] = useState<WritingStyle>("conversational");
@@ -129,10 +134,39 @@ const CreateToolkit = () => {
     }
   }, [user, navigate]);
 
-  // Auto-generate thesis when reaching Step 4 if empty
+  // Save progress to localStorage whenever state changes
   useEffect(() => {
-    if (currentStep === 4 && !thesis && title && niche) {
-      // Trigger AI generation automatically on first visit to step 4
+    const progressData = {
+      currentStep,
+      toolkitId,
+      selectedTemplate,
+      title,
+      subtitle,
+      niche,
+      targetAudience,
+      authorName,
+      authorTagline,
+      authorBio,
+      logoUrl,
+      ecoverUrl,
+      components,
+      content,
+      salesLetter,
+      emailSequence,
+      upsell,
+    };
+    localStorage.setItem(WIZARD_STORAGE_KEY, JSON.stringify(progressData));
+  }, [currentStep, toolkitId, selectedTemplate, title, subtitle, niche, targetAudience, authorName, authorTagline, authorBio, logoUrl, ecoverUrl, components, content, salesLetter, emailSequence, upsell]);
+
+  // Clear saved progress when toolkit is completed
+  const clearSavedProgress = () => {
+    localStorage.removeItem(WIZARD_STORAGE_KEY);
+  };
+
+  // Auto-generate thesis when reaching Step 3 (content step) if empty
+  useEffect(() => {
+    if (currentStep === 3 && !thesis && title && niche) {
+      // Trigger AI generation automatically on first visit to content step
       handleRegenerateThesis();
     }
   }, [currentStep, thesis, title, niche]);
@@ -349,14 +383,28 @@ const CreateToolkit = () => {
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <Button
-              variant="ghost"
-              onClick={() => navigate("/dashboard")}
-              className="mb-4"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
-            </Button>
+            <div className="flex items-center justify-between mb-4">
+              <Button
+                variant="ghost"
+                onClick={() => navigate("/dashboard")}
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Dashboard
+              </Button>
+              {initialState && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    clearSavedProgress();
+                    window.location.reload();
+                  }}
+                  className="text-muted-foreground hover:text-destructive"
+                >
+                  Start Fresh
+                </Button>
+              )}
+            </div>
             
             {/* Progress Bar */}
             <div className="space-y-2">
@@ -526,14 +574,6 @@ const CreateToolkit = () => {
               )}
 
               {currentStep === 2 && (
-                <LogoCreator 
-                  brandName={title}
-                  onLogoGenerated={setLogoUrl}
-                  existingLogo={logoUrl}
-                />
-              )}
-
-              {currentStep === 3 && (
                 <div className="space-y-6">
                   <Card>
                     <CardContent className="p-6 space-y-6">
@@ -585,7 +625,7 @@ const CreateToolkit = () => {
                 </div>
               )}
 
-              {currentStep === 4 && (
+              {currentStep === 3 && (
                 <div className="space-y-6">
                   {/* Status Card */}
                   <ContentStatusCard
@@ -676,7 +716,7 @@ const CreateToolkit = () => {
                 </div>
               )}
 
-              {currentStep === 5 && (
+              {currentStep === 4 && (
                 <EcoverGenerator
                   title={title}
                   subtitle={subtitle}
@@ -687,7 +727,7 @@ const CreateToolkit = () => {
                 />
               )}
 
-              {currentStep === 6 && (
+              {currentStep === 5 && (
                 <SalesLetterGenerator
                   title={title}
                   subtitle={subtitle}
@@ -699,7 +739,7 @@ const CreateToolkit = () => {
                 />
               )}
 
-              {currentStep === 7 && (
+              {currentStep === 6 && (
                 <EmailSequenceGenerator
                   offerName={title}
                   targetAudience={targetAudience || `${niche} enthusiasts`}
@@ -708,7 +748,7 @@ const CreateToolkit = () => {
                 />
               )}
 
-              {currentStep === 8 && (
+              {currentStep === 7 && (
                 <UpsellCreator
                   title={title}
                   niche={niche}
@@ -717,7 +757,7 @@ const CreateToolkit = () => {
                 />
               )}
 
-              {currentStep === 9 && (
+              {currentStep === 8 && (
                 <ToolkitPreview
                   toolkit={{
                     title,
@@ -740,6 +780,7 @@ const CreateToolkit = () => {
                     if (toolkitId) {
                       await supabase.from("toolkits").update({ status: "complete" }).eq("id", toolkitId);
                     }
+                    clearSavedProgress();
                     toast({
                       title: "Toolkit Complete! 🎉",
                       description: "Your toolkit has been saved and is ready to download.",
@@ -752,7 +793,7 @@ const CreateToolkit = () => {
           </AnimatePresence>
 
           {/* Navigation Buttons */}
-          {currentStep < 9 && (
+          {currentStep < 8 && (
             <div className="flex justify-between mt-8">
               <Button
                 variant="outline"
