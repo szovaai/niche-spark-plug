@@ -14,7 +14,7 @@ import MarketingKitDashboard from "@/components/toolkit/MarketingKitDashboard";
 import DashboardTab from "@/components/toolkit/DashboardTab";
 import HistoryTab from "@/components/toolkit/HistoryTab";
 
-import type { Toolkit, ToolkitComponents, ToolkitContent, WritingStyle } from "@/types/toolkit";
+import type { Toolkit, ToolkitComponents, ToolkitContent, WritingStyle, ContentSummary } from "@/types/toolkit";
 import { createToolkitZip, downloadSinglePDF, type ToolkitData } from "@/lib/zipBundler";
 
 const ToolkitBuilder = () => {
@@ -51,6 +51,7 @@ const ToolkitBuilder = () => {
   const [upsell, setUpsell] = useState<{ title: string; description: string; price: number } | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [writingStyle, setWritingStyle] = useState<WritingStyle>("conversational");
+  const [contentSummary, setContentSummary] = useState<ContentSummary | null>(null);
   const [isGeneratingAll, setIsGeneratingAll] = useState(false);
   const [isGeneratingEverything, setIsGeneratingEverything] = useState(false);
   const [generatingStep, setGeneratingStep] = useState("");
@@ -435,7 +436,8 @@ const ToolkitBuilder = () => {
           components,
           price: 17,
           authorName,
-          keyBenefits: [
+          contentSummary, // Pass the extracted content summary
+          keyBenefits: contentSummary?.specificBenefits || [
             `Complete ${niche} toolkit`,
             "Step-by-step guidance",
             "Ready-to-use templates",
@@ -472,12 +474,13 @@ const ToolkitBuilder = () => {
         body: {
           offerName: title,
           targetAudience: targetAudience || "entrepreneurs",
-          keyBenefits: [
+          contentSummary, // Pass the extracted content summary
+          keyBenefits: contentSummary?.specificBenefits || [
             `Master ${niche}`,
             "Save time with templates",
             "Get results faster",
           ],
-          uniqueMechanism: `The ${title} System`,
+          uniqueMechanism: contentSummary?.uniqueMechanisms?.[0] || `The ${title} System`,
           price: 17,
         },
       });
@@ -542,6 +545,7 @@ const ToolkitBuilder = () => {
     }
 
     setIsGeneratingEverything(true);
+    let extractedSummary: ContentSummary | null = null;
 
     try {
       // Step 1: Generate Content
@@ -582,10 +586,32 @@ const ToolkitBuilder = () => {
           }
         }
         setChapters(updatedChapters);
+
+        // Step 2: Extract Content Summary for Marketing
+        setGeneratingStep("Extracting key themes...");
+        try {
+          const { data: summaryData, error: summaryError } = await supabase.functions.invoke("extract-content-summary", {
+            body: {
+              content: contentData.content,
+              title,
+              niche,
+              targetAudience,
+            },
+          });
+
+          if (!summaryError && summaryData) {
+            extractedSummary = summaryData as ContentSummary;
+            setContentSummary(extractedSummary);
+            console.log("Content summary extracted:", extractedSummary);
+          }
+        } catch (summaryErr) {
+          console.error("Summary extraction failed (continuing):", summaryErr);
+          // Continue even if extraction fails
+        }
       }
       setIsGeneratingAll(false);
 
-      // Step 2: Generate Cover
+      // Step 3: Generate Cover
       setGeneratingStep("Creating e-cover...");
       const { data: coverData, error: coverError } = await supabase.functions.invoke("generate-ecover", {
         body: {
@@ -605,8 +631,8 @@ const ToolkitBuilder = () => {
         setEcoverUrl(coverData.imageUrl);
       }
 
-      // Step 3: Generate Sales Letter
-      setGeneratingStep("Writing sales letter...");
+      // Step 4: Generate Sales Letter (with content summary)
+      setGeneratingStep("Writing tailored sales letter...");
       const { data: salesData, error: salesError } = await supabase.functions.invoke("generate-sales-letter", {
         body: {
           title,
@@ -616,7 +642,8 @@ const ToolkitBuilder = () => {
           components,
           price: 17,
           authorName,
-          keyBenefits: [
+          contentSummary: extractedSummary,
+          keyBenefits: extractedSummary?.specificBenefits || [
             `Complete ${niche} toolkit`,
             "Step-by-step guidance",
             "Ready-to-use templates",
@@ -631,18 +658,19 @@ const ToolkitBuilder = () => {
         setSalesLetter(salesData.salesLetter);
       }
 
-      // Step 4: Generate Email Sequence
-      setGeneratingStep("Creating email sequence...");
+      // Step 5: Generate Email Sequence (with content summary)
+      setGeneratingStep("Creating story-driven emails...");
       const { data: emailData, error: emailError } = await supabase.functions.invoke("generate-email-sequence", {
         body: {
           offerName: title,
           targetAudience: targetAudience || "entrepreneurs",
-          keyBenefits: [
+          contentSummary: extractedSummary,
+          keyBenefits: extractedSummary?.specificBenefits || [
             `Master ${niche}`,
             "Save time with templates",
             "Get results faster",
           ],
-          uniqueMechanism: `The ${title} System`,
+          uniqueMechanism: extractedSummary?.uniqueMechanisms?.[0] || `The ${title} System`,
           price: 17,
         },
       });
@@ -666,7 +694,7 @@ const ToolkitBuilder = () => {
         setEmailSequence(formattedEmails);
       }
 
-      // Step 5: Generate Upsell
+      // Step 6: Generate Upsell
       setGeneratingStep("Creating upsell offer...");
       setUpsell({
         title: `${title} - Premium Edition`,
