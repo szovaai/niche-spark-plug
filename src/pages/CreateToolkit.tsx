@@ -164,7 +164,7 @@ const CreateToolkit = () => {
         setTargetAudience(data.target_audience || "");
         setLogoUrl(data.logo_url);
         setEcoverUrl(data.ecover_url);
-        setComponents(data.components as ToolkitComponents || { guide: true, worksheet: false, checklist: false, resourceList: false, templates: false, quiz: false });
+        setComponents((data.components as unknown as ToolkitComponents) || { guide: true, worksheet: false, checklist: false, resourceList: false, templates: false, quiz: false });
         setContent(data.content || {});
         setSalesLetter(data.sales_letter || "");
         setUpsell(data.upsell || null);

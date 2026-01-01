@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, ArrowRight, Loader2, Download, RotateCcw, Sparkles, Book, Laptop, FileText, Smartphone, Tablet, Layers } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, Download, RotateCcw, Sparkles, Book, Laptop, FileText, Smartphone, Tablet, Layers, Package } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,12 +62,13 @@ const coverStyles: CoverStyle[] = [
 ];
 
 const mockupTypes: MockupType[] = [
+  { id: "premium-bundle", name: "Premium Bundle", description: "Complete system with all devices & components", icon: Package },
+  { id: "bundle-stack", name: "Bundle Stack", description: "Multiple products stacked together", icon: Layers },
   { id: "3d-book", name: "3D Book", description: "Classic 3D hardcover mockup", icon: Book },
   { id: "laptop", name: "Laptop Screen", description: "Digital product on laptop", icon: Laptop },
-  { id: "floating-pages", name: "Floating Pages", description: "Artistic scattered pages", icon: FileText },
-  { id: "phone-mockup", name: "Phone Display", description: "Mobile-friendly showcase", icon: Smartphone },
   { id: "tablet", name: "Tablet View", description: "Premium tablet display", icon: Tablet },
-  { id: "bundle-stack", name: "Bundle Stack", description: "Multiple products stacked", icon: Layers },
+  { id: "phone-mockup", name: "Phone Display", description: "Mobile-friendly showcase", icon: Smartphone },
+  { id: "floating-pages", name: "Floating Pages", description: "Artistic scattered pages", icon: FileText },
 ];
 
 const colorPresets = [
@@ -361,17 +362,24 @@ const CoverCreatorFlow = ({
             <div className="grid md:grid-cols-3 gap-4">
               {mockupTypes.map((mockup) => {
                 const Icon = mockup.icon;
+                const isRecommended = mockup.id === "premium-bundle";
                 return (
                   <button
                     key={mockup.id}
                     onClick={() => setSelectedMockup(mockup)}
                     className={cn(
-                      "p-6 rounded-lg border-2 text-left transition-all hover:border-primary/50",
+                      "p-6 rounded-lg border-2 text-left transition-all hover:border-primary/50 relative",
                       selectedMockup?.id === mockup.id
                         ? "border-primary bg-primary/10"
-                        : "border-border bg-card/50"
+                        : "border-border bg-card/50",
+                      isRecommended && "ring-2 ring-primary/30"
                     )}
                   >
+                    {isRecommended && (
+                      <span className="absolute -top-2 -right-2 px-2 py-0.5 bg-primary text-primary-foreground text-xs font-bold rounded-full">
+                        Recommended
+                      </span>
+                    )}
                     <div className="flex items-center gap-3 mb-3">
                       <Icon
                         className={cn(
@@ -390,6 +398,20 @@ const CoverCreatorFlow = ({
                 );
               })}
             </div>
+
+            {/* Components Preview for bundle types */}
+            {(selectedMockup?.id === "premium-bundle" || selectedMockup?.id === "bundle-stack") && componentsIncluded.length > 0 && (
+              <div className="p-4 bg-muted/30 rounded-lg border border-border">
+                <p className="text-sm font-medium mb-2">Visual elements based on your toolkit:</p>
+                <div className="flex flex-wrap gap-2">
+                  {componentsIncluded.map((comp) => (
+                    <span key={comp} className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">
+                      {comp}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="flex justify-between pt-4">
               <Button variant="outline" onClick={() => setStep(2)} className="gap-2">

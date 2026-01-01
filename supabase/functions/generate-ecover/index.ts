@@ -62,54 +62,92 @@ serve(async (req) => {
       creative: "Artistic flair, unique textures, unexpected compositions, standout visual identity with creative edge, generous negative space between artistic elements",
     };
 
-    // Component-specific visual descriptions for rich bundle mockups
-    const componentVisuals: Record<string, string> = {
-      "Core Guide": "thick hardcover book (200+ pages feel) with embossed title and gold/silver accents",
-      "Guide": "thick hardcover book (200+ pages feel) with embossed title and premium binding",
-      "Worksheets": "spiral-bound notebook, slightly fanned open, showing clean lined pages with accent color headers",
-      "Worksheet": "spiral-bound notebook with visible metal rings, slightly open showing clean pages",
-      "Checklists": "laminated cards fanned out like playing cards, visible checkboxes with check marks",
-      "Checklist": "laminated checklist card with visible checkbox graphics and checkmarks",
-      "Resource Lists": "manila folder with color-coded document tabs visible, papers peeking out",
-      "Resource List": "organized folder with visible document tabs and reference sheets",
-      "Templates": "printable sheets with placeholder boxes and professional grid layouts",
-      "Template": "clean template sheet with structured layout boxes and form fields",
-      "Bonuses": "sealed envelope or bonus badge/ribbon element suggesting extra value",
-      "Quiz": "interactive quiz cards with multiple choice bubbles visible",
+    // Component-to-visual mapping: Maps toolkit components to specific visual elements
+    const componentToVisualMap: Record<string, { visual: string; device?: string }> = {
+      "guide": { visual: "thick 3D hardcover book (200+ pages feel) with embossed title, positioned center-left as HERO element", device: "book" },
+      "worksheet": { visual: "spiral-bound notebook with visible metal rings, slightly fanned open showing lined pages", device: "notebook" },
+      "checklist": { visual: "laminated checklist cards fanned out like playing cards, showing checkbox graphics with checkmarks", device: "cards" },
+      "resource list": { visual: "modern folder with color-coded document tabs peeking out, papers visible", device: "folder" },
+      "templates": { visual: "MacBook Pro displaying dashboard/editor UI with charts and KPIs", device: "laptop" },
+      "quiz": { visual: "iPad tablet showing interactive quiz/funnel interface", device: "tablet" },
+      "email sequence": { visual: "iPhone showing mobile companion app with checklist/progress UI", device: "phone" },
+      "sales letter": { visual: "additional screen/tablet showing sales page preview", device: "tablet" },
     };
+
+    // Build visual elements list from actual components
+    const buildComponentVisuals = (components: string[]): string[] => {
+      const visuals: string[] = [];
+      const defaultComponents = ["guide", "worksheet", "checklist", "resource list", "templates"];
+      const compsToUse = components.length > 0 ? components : defaultComponents;
+      
+      compsToUse.forEach(comp => {
+        const key = Object.keys(componentToVisualMap).find(k => 
+          comp.toLowerCase().includes(k.toLowerCase()) || k.includes(comp.toLowerCase())
+        );
+        if (key) {
+          visuals.push(`- ${comp.toUpperCase()}: ${componentToVisualMap[key].visual}`);
+        } else {
+          visuals.push(`- ${comp}: premium printed materials or digital asset display`);
+        }
+      });
+      
+      return visuals;
+    };
+
+    const visualElements = buildComponentVisuals(componentsIncluded || []);
+    const componentsText = `BUNDLE COMPONENTS TO VISUALIZE:\n${visualElements.join("\n")}`;
 
     // Build mockup-specific descriptions for digital product bundles
     const mockupDescriptions: Record<string, string> = {
+      "premium-bundle": `Ultra-premium digital product bundle hero image in the style of high-end SaaS product launches:
+
+COMPOSITION & LAYOUT (Critical):
+- Dark gradient background (#0a0a12 to #1a1a2e) with subtle reflective surface beneath products
+- Glowing cyan/teal arc (${primary}) sweeping elegantly from left to right, connecting all elements
+- Products arranged in elegant arc formation: Book (left) → Laptop (center-back) → Tablet (right) → Phone (far right)
+- Scattered worksheets/documents anchoring the bottom-center
+- LARGE product title "${title}" rendered in center using ${primary} accent with modern bold typography
+
+DEVICE MOCKUPS (All must be present and premium):
+${visualElements.join("\n")}
+
+LIGHTING & EFFECTS:
+- Soft studio lighting from top-left (45 degrees)
+- Each item casts individual realistic shadow
+- Subtle rim lighting on device edges (${primary} tint)
+- Glowing arc/swoosh effect connecting elements (${primary})
+- Clean ambient occlusion where products meet surface
+
+TYPOGRAPHY (Product Title):
+- Large, bold product title in center-bottom or center
+- Use mixed typography: lighter word + bold keyword (like "4-hour offer ACCELERATOR")
+- ${primary} accent on key word
+- Modern sans-serif font style
+
+FINAL REQUIREMENTS:
+- 1920x1080 landscape, sales-page hero quality
+- Should look like a $497-$997 premium digital system
+- Professional enough for WarriorPlus, Gumroad, ClickBank front pages
+- NO cluttered elements - generous spacing between all items
+- Ready for immediate commercial use`,
       "3d-book": "3D hardcover book mockup with realistic shadows and depth, slightly angled perspective showing cover and spine, premium binding details, generous space around the book",
       "laptop": "Digital product displayed on a premium MacBook Pro screen with modern minimalist workspace background, soft ambient lighting, clean desk with space around device",
       "floating-pages": "Floating paper pages with soft individual shadows, arranged in an artistic scattered pattern with generous gaps between each page, suggesting multiple resources and worksheets",
       "phone-mockup": "Product displayed on a modern iPhone screen with clean gradient background and ample negative space, suggesting mobile-friendly digital access",
       "tablet": "Premium iPad displaying the product cover with elegant accessories nearby, suggesting digital toolkit accessibility, clean surface with breathing room",
-      "bundle-stack": "Premium digital product bundle hero display: Elegantly spaced 3D arrangement on a clean surface - main guide as thick hardcover book (center-left, prominent), spiral-bound worksheets with visible metal rings (center-right, slightly behind), laminated checklist cards fanned out artfully (front-left), resource folder with visible color-coded document tabs peeking out (front-right), and bonus template sheets scattered artfully (back). CRITICAL: Each element has generous breathing room (15-20% gaps) between components. Individual realistic drop shadows and ambient occlusion for each piece. Clean gradient background with soft studio lighting from top-left and subtle rim lighting for premium depth.",
+      "bundle-stack": `Premium digital product bundle hero display: Elegantly spaced 3D arrangement on a clean surface - main guide as thick hardcover book (center-left, prominent), spiral-bound worksheets with visible metal rings (center-right, slightly behind), laminated checklist cards fanned out artfully (front-left), resource folder with visible color-coded document tabs peeking out (front-right), and bonus template sheets scattered artfully (back). CRITICAL: Each element has generous breathing room (15-20% gaps) between components. Individual realistic drop shadows and ambient occlusion for each piece. Clean gradient background with soft studio lighting from top-left and subtle rim lighting for premium depth.`,
     };
 
-    // Generate bundle component descriptions for richer prompts
-    const bundleComponents = componentsIncluded?.length 
-      ? componentsIncluded 
-      : ["Core Guide", "Worksheets", "Checklists", "Resource Lists", "Templates"];
-    
-    // Build detailed component descriptions
-    const detailedComponents = bundleComponents.map(comp => {
-      const key = Object.keys(componentVisuals).find(k => comp.toLowerCase().includes(k.toLowerCase()));
-      return key ? `${comp}: ${componentVisuals[key]}` : comp;
-    }).join("\n- ");
-
-    const componentsText = `Bundle includes:\n- ${detailedComponents}`;
-
     // Detect if this is a bundle/toolkit type product
-    const isBundleProduct = mockup === "bundle-stack" || 
+    const isPremiumBundle = mockup === "premium-bundle";
+    const isBundleProduct = isPremiumBundle || mockup === "bundle-stack" || 
       title.toLowerCase().includes("toolkit") || 
       title.toLowerCase().includes("bundle") ||
       title.toLowerCase().includes("system") ||
       title.toLowerCase().includes("blueprint");
 
     // Build premium bundle-specific prompt with enhanced spacing and detail
-    const bundlePromptAddition = isBundleProduct ? `
+    const bundlePromptAddition = (isBundleProduct && !isPremiumBundle) ? `
 CRITICAL BUNDLE VISUALIZATION REQUIREMENTS:
 
 SPACING & ARRANGEMENT:
@@ -119,11 +157,7 @@ SPACING & ARRANGEMENT:
 - Components should BREATHE - not crowded or touching each other
 
 DETAILED COMPONENT RENDERING:
-- MAIN GUIDE: Thick 3D hardcover book (200+ pages feel) with embossed title, positioned center-left as hero element
-- WORKSHEETS: Spiral-bound notebook with visible metal binding rings, slightly open showing lined pages with subtle accent colors
-- CHECKLISTS: Laminated cards fanned out like a premium deck of cards, showing checkbox graphics with some checked
-- RESOURCE FOLDER: Modern folder with visible color-coded document tabs peeking out, suggesting organized materials
-- BONUS TEMPLATES: Loose printable sheets or cards scattered artfully in the scene, showing structured layouts
+${visualElements.join("\n")}
 
 LIGHTING & SHADOWS:
 - Each component casts its OWN individual realistic shadow for depth and separation
@@ -137,7 +171,32 @@ SCALE & COMPOSITION:
 - Premium unboxing experience aesthetic
 - Each item should be instantly recognizable as a distinct valuable component` : "";
 
-    const prompt = `Create a premium, sales-ready digital product bundle hero image:
+    // For premium-bundle, use the mockup description directly as it's comprehensive
+    const prompt = isPremiumBundle 
+      ? `Create a premium, sales-ready digital product bundle hero image:
+
+PRODUCT DETAILS:
+Title: "${title}"
+${subtitle ? `Subtitle: "${subtitle}"` : ""}
+${authorName ? `By: ${authorName}` : ""}
+Niche/Topic: ${niche}
+
+${mockupDescriptions["premium-bundle"]}
+
+COLOR SCHEME:
+- Primary accent: ${primary} (for glowing arc, title accents, rim lighting)
+- Background: ${secondary} transitioning to darker (#0a0a12)
+
+${additionalElements ? `ADDITIONAL ELEMENTS: ${additionalElements}` : ""}
+
+CRITICAL REQUIREMENTS:
+- Ultra-professional, high-ticket digital product aesthetic
+- Clean, SPACIOUS composition with clear focal point
+- Perfect for sales pages and marketing materials
+- Eye-catching hero image that converts browsers to buyers
+- NO cluttered elements - generous 15-20% spacing between all items
+- Ready for immediate commercial use on any marketplace`
+      : `Create a premium, sales-ready digital product bundle hero image:
 
 PRODUCT DETAILS:
 Title: "${title}"
