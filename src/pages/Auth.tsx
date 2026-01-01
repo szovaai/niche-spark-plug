@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Zap, Mail, Lock, User, ArrowRight, Loader2 } from "lucide-react";
+import { Zap, Mail, Lock, User, ArrowRight, Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,10 +11,12 @@ import { z } from "zod";
 const emailSchema = z.string().email("Please enter a valid email");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
 
+type AuthMode = 'signin' | 'signup' | 'forgot';
+
 const Auth = () => {
   const navigate = useNavigate();
-  const { user, signIn, signUp } = useAuth();
-  const [isSignUp, setIsSignUp] = useState(false);
+  const { user, signIn, signUp, resetPassword } = useAuth();
+  const [mode, setMode] = useState<AuthMode>('signin');
   const [loading, setLoading] = useState(false);
   
   const [email, setEmail] = useState("");
@@ -36,9 +38,12 @@ const Auth = () => {
       newErrors.email = emailResult.error.errors[0].message;
     }
     
-    const passwordResult = passwordSchema.safeParse(password);
-    if (!passwordResult.success) {
-      newErrors.password = passwordResult.error.errors[0].message;
+    // Only validate password for signin/signup, not forgot
+    if (mode !== 'forgot') {
+      const passwordResult = passwordSchema.safeParse(password);
+      if (!passwordResult.success) {
+        newErrors.password = passwordResult.error.errors[0].message;
+      }
     }
     
     setErrors(newErrors);
@@ -53,7 +58,15 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      if (isSignUp) {
+      if (mode === 'forgot') {
+        const { error } = await resetPassword(email);
+        if (error) {
+          toast.error(error.message);
+        } else {
+          toast.success("Password reset email sent! Check your inbox.");
+          setMode('signin');
+        }
+      } else if (mode === 'signup') {
         const { error } = await signUp(email, password, displayName);
         if (error) {
           if (error.message.includes("already registered")) {
@@ -83,6 +96,30 @@ const Auth = () => {
     }
   };
 
+  const getHeading = () => {
+    switch (mode) {
+      case 'signup': return "Create Your Account";
+      case 'forgot': return "Reset Password";
+      default: return "Welcome Back";
+    }
+  };
+
+  const getSubheading = () => {
+    switch (mode) {
+      case 'signup': return "Start discovering profitable digital product niches";
+      case 'forgot': return "Enter your email and we'll send you a reset link";
+      default: return "Sign in to continue your research";
+    }
+  };
+
+  const getButtonText = () => {
+    switch (mode) {
+      case 'signup': return "Create Account";
+      case 'forgot': return "Send Reset Link";
+      default: return "Sign In";
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden">
       {/* Background */}
@@ -105,19 +142,13 @@ const Auth = () => {
               Digi<span className="gradient-text">Stream</span>
             </span>
           </div>
-          <h1 className="text-2xl font-bold mb-2">
-            {isSignUp ? "Create Your Account" : "Welcome Back"}
-          </h1>
-          <p className="text-muted-foreground">
-            {isSignUp 
-              ? "Start discovering profitable digital product niches" 
-              : "Sign in to continue your research"}
-          </p>
+          <h1 className="text-2xl font-bold mb-2">{getHeading()}</h1>
+          <p className="text-muted-foreground">{getSubheading()}</p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="glass-card rounded-2xl p-6 space-y-4">
-          {isSignUp && (
+          {mode === 'signup' && (
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">Display Name</label>
               <div className="relative">
@@ -150,22 +181,35 @@ const Auth = () => {
             )}
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Password</label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <Input
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={`pl-10 ${errors.password ? "border-destructive" : ""}`}
-              />
+          {mode !== 'forgot' && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-foreground">Password</label>
+                {mode === 'signin' && (
+                  <button
+                    type="button"
+                    onClick={() => setMode('forgot')}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    Forgot password?
+                  </button>
+                )}
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={`pl-10 ${errors.password ? "border-destructive" : ""}`}
+                />
+              </div>
+              {errors.password && (
+                <p className="text-xs text-destructive">{errors.password}</p>
+              )}
             </div>
-            {errors.password && (
-              <p className="text-xs text-destructive">{errors.password}</p>
-            )}
-          </div>
+          )}
 
           <Button
             type="submit"
@@ -178,24 +222,37 @@ const Auth = () => {
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
               <>
-                {isSignUp ? "Create Account" : "Sign In"}
+                {getButtonText()}
                 <ArrowRight className="w-5 h-5" />
               </>
             )}
           </Button>
 
-          <div className="text-center pt-4 border-t border-border">
-            <p className="text-sm text-muted-foreground">
-              {isSignUp ? "Already have an account?" : "Don't have an account?"}
+          {mode === 'forgot' ? (
+            <div className="text-center pt-4 border-t border-border">
               <button
                 type="button"
-                onClick={() => setIsSignUp(!isSignUp)}
-                className="text-primary hover:underline ml-1 font-medium"
+                onClick={() => setMode('signin')}
+                className="text-sm text-primary hover:underline inline-flex items-center gap-1"
               >
-                {isSignUp ? "Sign In" : "Sign Up Free"}
+                <ArrowLeft className="w-4 h-4" />
+                Back to Sign In
               </button>
-            </p>
-          </div>
+            </div>
+          ) : (
+            <div className="text-center pt-4 border-t border-border">
+              <p className="text-sm text-muted-foreground">
+                {mode === 'signup' ? "Already have an account?" : "Don't have an account?"}
+                <button
+                  type="button"
+                  onClick={() => setMode(mode === 'signup' ? 'signin' : 'signup')}
+                  className="text-primary hover:underline ml-1 font-medium"
+                >
+                  {mode === 'signup' ? "Sign In" : "Sign Up Free"}
+                </button>
+              </p>
+            </div>
+          )}
         </form>
 
         {/* Back Link */}
