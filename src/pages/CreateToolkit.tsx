@@ -106,9 +106,11 @@ const CreateToolkit = () => {
   const [generatingComponentId, setGeneratingComponentId] = useState<string | null>(null);
   
   // Thesis/Framework state
-  const [thesis, setThesis] = useState("");
-  const [lockFramework, setLockFramework] = useState(true);
+  const [thesis, setThesis] = useState(initialState?.thesis || "");
+  const [lockFramework, setLockFramework] = useState(initialState?.lockFramework ?? true);
   const [isRegeneratingThesis, setIsRegeneratingThesis] = useState(false);
+  const [thesisMode, setThesisMode] = useState<'manual' | 'ai'>(initialState?.thesisMode || 'ai');
+  const [isImprovingThesis, setIsImprovingThesis] = useState(false);
 
   // Guide Section Builder state
   const [guideSections, setGuideSections] = useState<GuideSection[]>(
@@ -227,21 +229,23 @@ const CreateToolkit = () => {
       guideSections,
       thesis,
       writingStyle,
+      thesisMode,
+      lockFramework,
     };
     localStorage.setItem(WIZARD_STORAGE_KEY, JSON.stringify(progressData));
-  }, [currentStep, toolkitId, selectedTemplate, title, subtitle, niche, targetAudience, authorName, authorTagline, authorBio, logoUrl, ecoverUrl, components, content, salesLetter, emailSequence, upsell, guideSections, thesis, writingStyle]);
+  }, [currentStep, toolkitId, selectedTemplate, title, subtitle, niche, targetAudience, authorName, authorTagline, authorBio, logoUrl, ecoverUrl, components, content, salesLetter, emailSequence, upsell, guideSections, thesis, writingStyle, thesisMode, lockFramework]);
 
   // Clear saved progress when toolkit is completed
   const clearSavedProgress = () => {
     localStorage.removeItem(WIZARD_STORAGE_KEY);
   };
 
-  // Auto-generate thesis when reaching Step 3 (content step) if empty
+  // Auto-generate thesis when reaching Step 3 (content step) if empty AND in AI mode
   useEffect(() => {
-    if (currentStep === 3 && !thesis && title && niche && !isLoadingToolkit) {
+    if (currentStep === 3 && !thesis && title && niche && !isLoadingToolkit && thesisMode === 'ai') {
       handleRegenerateThesis();
     }
-  }, [currentStep, thesis, title, niche, isLoadingToolkit]);
+  }, [currentStep, thesis, title, niche, isLoadingToolkit, thesisMode]);
 
   const handleRegenerateThesis = async () => {
     if (!title || !niche) {
@@ -286,6 +290,58 @@ const CreateToolkit = () => {
     } finally {
       setIsRegeneratingThesis(false);
     }
+  };
+
+  // AI thesis improvement handlers
+  const handleImproveThesis = async (mode: 'improve_clarity' | 'make_specific' | 'simplify') => {
+    if (!thesis) return;
+
+    setIsImprovingThesis(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-thesis', {
+        body: {
+          title,
+          niche,
+          targetAudience,
+          components,
+          existingThesis: thesis,
+          mode,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.thesis) {
+        setThesis(data.thesis);
+        toast({
+          title: "Thesis Improved",
+          description: mode === 'improve_clarity' 
+            ? "Your thesis is now clearer." 
+            : mode === 'make_specific' 
+            ? "Your thesis is now more specific."
+            : "Your thesis has been simplified.",
+        });
+      }
+    } catch (error) {
+      console.error('Error improving thesis:', error);
+      toast({
+        title: "Improvement Failed",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsImprovingThesis(false);
+    }
+  };
+
+  // Source data for thesis card
+  const thesisSourceData = {
+    title,
+    niche,
+    targetAudience,
+    components: Object.entries(components)
+      .filter(([_, v]) => v)
+      .map(([k]) => componentMeta[k]?.title || k),
   };
 
   const handleTemplateSelect = (template: ToolkitTemplate) => {
@@ -808,6 +864,13 @@ const CreateToolkit = () => {
                     onLockChange={setLockFramework}
                     onRegenerateThesis={handleRegenerateThesis}
                     isRegenerating={isRegeneratingThesis}
+                    thesisMode={thesisMode}
+                    onThesisModeChange={setThesisMode}
+                    sourceData={thesisSourceData}
+                    onImproveClarity={() => handleImproveThesis('improve_clarity')}
+                    onMakeSpecific={() => handleImproveThesis('make_specific')}
+                    onSimplify={() => handleImproveThesis('simplify')}
+                    isImproving={isImprovingThesis}
                   />
 
                   {/* Controls Bar */}
