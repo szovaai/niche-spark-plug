@@ -881,6 +881,23 @@ const CreateToolkit = () => {
                     onStyleChange={setWritingStyle}
                   />
 
+                  {/* Main Guide Section Builder - Only show if guide component is selected */}
+                  {components.guide && (
+                    <GuideSectionBuilder
+                      sections={guideSections}
+                      onSectionsChange={setGuideSections}
+                      thesis={thesis}
+                      title={title}
+                      niche={niche}
+                      targetAudience={targetAudience}
+                      writingStyle={writingStyle}
+                      onGenerateSection={generateGuideSection}
+                      onCompileGuide={compileGuide}
+                      isGenerating={!!generatingSectionId}
+                      generatingSectionId={generatingSectionId}
+                    />
+                  )}
+
                   {/* Component List Header */}
                   <div className="flex items-center justify-between">
                     <div>
