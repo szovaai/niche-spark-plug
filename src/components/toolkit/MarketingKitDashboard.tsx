@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { sanitizeHTML } from "@/lib/sanitize";
 
 interface MarketingSection {
   id: string;
@@ -239,7 +240,7 @@ const MarketingKitDashboard = ({
                   {section.id === "salesLetter" && salesLetter && (
                     <div
                       className="prose prose-invert max-w-none text-sm"
-                      dangerouslySetInnerHTML={{ __html: salesLetter }}
+                      dangerouslySetInnerHTML={{ __html: sanitizeHTML(salesLetter) }}
                     />
                   )}
                   
