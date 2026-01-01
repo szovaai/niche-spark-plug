@@ -6,7 +6,8 @@ import {
   ChevronLeft,
   LayoutDashboard,
   Plus,
-  Search
+  Search,
+  Rocket
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
@@ -31,6 +32,7 @@ const mainNavItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Research", url: "/research", icon: Search },
   { title: "My Toolkits", url: "/my-toolkits", icon: Package },
+  { title: "Launch", url: "/my-toolkits", icon: Rocket, badge: "🚀" },
 ];
 
 const secondaryNavItems = [

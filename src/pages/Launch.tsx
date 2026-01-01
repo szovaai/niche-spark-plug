@@ -7,7 +7,8 @@ import { LaunchHeader } from "@/components/launch/LaunchHeader";
 import { PlatformSelector } from "@/components/launch/PlatformSelector";
 import { LaunchStepList } from "@/components/launch/LaunchStepList";
 import { QuickExport } from "@/components/launch/QuickExport";
-import { LaunchPlatform, LaunchChecklist, ToolkitLaunchData, LaunchProgress } from "@/types/launch";
+import { OutsourceSection } from "@/components/launch/OutsourceSection";
+import { LaunchPlatform, LaunchChecklist, ToolkitLaunchData } from "@/types/launch";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -165,6 +166,9 @@ const Launch = () => {
             onStepToggle={handleStepToggle}
           />
         )}
+
+        {/* Outsource Section */}
+        <OutsourceSection platform={selectedPlatform} />
 
         {selectedPlatform && completedSteps.length > 10 && (
           <div className="text-center p-8 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-xl border border-primary/30">
