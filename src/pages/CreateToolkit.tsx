@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   ArrowLeft, ArrowRight, Check, Loader2, 
   Lightbulb, Palette, FileText, Image, 
-  Mail, Gift, Download, Sparkles, LayoutTemplate, Send
+  Mail, Gift, Download, Sparkles, LayoutTemplate, Send, Zap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,7 +16,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { ToolkitComponents } from "@/types/toolkit";
+import { ToolkitComponents, WritingStyle } from "@/types/toolkit";
 import LogoCreator from "@/components/LogoCreator";
 import EcoverGenerator from "@/components/EcoverGenerator";
 import SalesLetterGenerator from "@/components/SalesLetterGenerator";
@@ -25,6 +25,9 @@ import UpsellCreator from "@/components/UpsellCreator";
 import ToolkitPreview from "@/components/ToolkitPreview";
 import PricingSuggester from "@/components/PricingSuggester";
 import TemplateSelector from "@/components/TemplateSelector";
+import ContentStatusCard from "@/components/toolkit/ContentStatusCard";
+import ContentControlsBar from "@/components/toolkit/ContentControlsBar";
+import ComponentRow, { ComponentStatus } from "@/components/toolkit/ComponentRow";
 import { ToolkitTemplate } from "@/data/toolkitTemplates";
 
 const steps = [
@@ -32,7 +35,7 @@ const steps = [
   { id: "niche", title: "Niche & Title", icon: Lightbulb },
   { id: "logo", title: "Create Logo", icon: Palette },
   { id: "components", title: "Select Components", icon: FileText },
-  { id: "content", title: "Generate Content", icon: Sparkles },
+  { id: "content", title: "Build Your Toolkit", icon: Sparkles },
   { id: "ecover", title: "E-Cover", icon: Image },
   { id: "sales", title: "Sales Letter", icon: Mail },
   { id: "emails", title: "Email Sequence", icon: Send },
@@ -84,6 +87,35 @@ const CreateToolkit = () => {
   const [salesLetter, setSalesLetter] = useState("");
   const [emailSequence, setEmailSequence] = useState<any>(null);
   const [upsell, setUpsell] = useState<any>(null);
+
+  // Content generation state
+  const [writingStyle, setWritingStyle] = useState<WritingStyle>("conversational");
+  const [humanize, setHumanize] = useState(true);
+  const [componentStatus, setComponentStatus] = useState<Record<string, ComponentStatus>>({});
+  const [generatingComponentId, setGeneratingComponentId] = useState<string | null>(null);
+
+  // Component metadata
+  const componentMeta: Record<string, { title: string; description: string; estimatedSize: string }> = {
+    guide: { title: "Main Guide", description: "Core educational content with sections", estimatedSize: "Est. ~25 pages" },
+    worksheet: { title: "Worksheet Pack", description: "Interactive exercises", estimatedSize: "Includes 5 worksheets" },
+    checklist: { title: "Checklist", description: "Step-by-step action items", estimatedSize: "Quick reference format" },
+    resourceList: { title: "Resource List", description: "Curated tools and links", estimatedSize: "Valuable external resources" },
+    templates: { title: "Templates", description: "Copy-paste swipe files", estimatedSize: "Ready-to-use formats" },
+    quiz: { title: "Quiz/Assessment", description: "Self-evaluation tool", estimatedSize: "10 questions" },
+  };
+
+  // Calculate selected components
+  const selectedComponentIds = Object.entries(components)
+    .filter(([_, isSelected]) => isSelected)
+    .map(([id]) => id);
+
+  const completedCount = selectedComponentIds.filter(id => componentStatus[id] === "complete").length;
+  const totalWords = selectedComponentIds.reduce((acc, id) => {
+    const componentContent = content[id];
+    if (!componentContent) return acc;
+    const text = JSON.stringify(componentContent);
+    return acc + text.split(/\s+/).length;
+  }, 0);
 
   useEffect(() => {
     if (!user) {
@@ -178,6 +210,76 @@ const CreateToolkit = () => {
       [componentId]: !prev[componentId],
     }));
   };
+
+  // Generate a single component
+  const generateSingleComponent = useCallback(async (componentId: string) => {
+    setGeneratingComponentId(componentId);
+    setComponentStatus(prev => ({ ...prev, [componentId]: "generating" }));
+
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-toolkit-content", {
+        body: {
+          title,
+          niche,
+          targetAudience,
+          components: { [componentId]: true },
+          writingStyle,
+          humanize,
+        },
+      });
+
+      if (error) throw error;
+
+      setContent((prev: any) => ({
+        ...prev,
+        [componentId]: data.content[componentId],
+      }));
+      setComponentStatus(prev => ({ ...prev, [componentId]: "complete" }));
+
+      toast({
+        title: "Component Generated!",
+        description: `${componentMeta[componentId]?.title || componentId} is ready.`,
+      });
+    } catch (error) {
+      console.error(`Error generating ${componentId}:`, error);
+      setComponentStatus(prev => ({ ...prev, [componentId]: "error" }));
+      toast({
+        title: "Generation Failed",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setGeneratingComponentId(null);
+    }
+  }, [title, niche, targetAudience, writingStyle, humanize, toast, componentMeta]);
+
+  // Generate all remaining components
+  const generateAllRemaining = useCallback(async () => {
+    const pendingComponents = selectedComponentIds.filter(
+      id => componentStatus[id] !== "complete"
+    );
+
+    if (pendingComponents.length === 0) {
+      toast({
+        title: "All Done!",
+        description: "All components have already been generated.",
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+
+    for (const componentId of pendingComponents) {
+      await generateSingleComponent(componentId);
+    }
+
+    setIsGenerating(false);
+
+    toast({
+      title: "Toolkit Complete! 🎉",
+      description: "All components have been generated.",
+    });
+  }, [selectedComponentIds, componentStatus, generateSingleComponent, toast]);
 
   const currentStepData = steps[currentStep];
   const progress = ((currentStep + 1) / steps.length) * 100;
@@ -425,77 +527,84 @@ const CreateToolkit = () => {
               )}
 
               {currentStep === 4 && (
-                <Card>
-                  <CardContent className="p-6 space-y-6">
-                    <div className="text-center mb-8">
-                      <h2 className="text-2xl font-bold gradient-text">Generate Your Content</h2>
-                      <p className="text-muted-foreground mt-2">
-                        Our AI will create human-quality content for each component you selected.
+                <div className="space-y-6">
+                  {/* Status Card */}
+                  <ContentStatusCard
+                    title={title}
+                    niche={niche}
+                    completedCount={completedCount}
+                    totalCount={selectedComponentIds.length}
+                    totalWords={totalWords}
+                  />
+
+                  {/* Controls Bar */}
+                  <ContentControlsBar
+                    humanize={humanize}
+                    onHumanizeChange={setHumanize}
+                    writingStyle={writingStyle}
+                    onStyleChange={setWritingStyle}
+                  />
+
+                  {/* Component List Header */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-foreground">Components</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {selectedComponentIds.length - completedCount} remaining
                       </p>
                     </div>
+                    <Button
+                      variant="hero"
+                      size="sm"
+                      onClick={generateAllRemaining}
+                      disabled={isGenerating || completedCount === selectedComponentIds.length}
+                      className="gap-2"
+                    >
+                      <Zap className="w-4 h-4" />
+                      Generate All Remaining
+                    </Button>
+                  </div>
 
-                    <div className="text-center py-12">
-                      {isGenerating ? (
-                        <div className="space-y-4">
-                          <Loader2 className="w-12 h-12 mx-auto text-primary animate-spin" />
-                          <p className="text-muted-foreground">Generating your toolkit content...</p>
-                        </div>
-                      ) : (
-                        <div className="space-y-4">
-                          <Sparkles className="w-12 h-12 mx-auto text-primary" />
-                          <p className="text-muted-foreground">
-                            Click "Generate Content" to create all your toolkit materials.
-                          </p>
-                          <Button
-                            variant="hero"
-                            size="lg"
-                            onClick={async () => {
-                              setIsGenerating(true);
-                              try {
-                                const { data, error } = await supabase.functions.invoke("generate-toolkit-content", {
-                                  body: {
-                                    title,
-                                    niche,
-                                    targetAudience,
-                                    components,
-                                  },
-                                });
-                                if (error) throw error;
-                                setContent(data.content);
-                                toast({
-                                  title: "Content Generated!",
-                                  description: "Your toolkit content is ready.",
-                                });
-                              } catch (error) {
-                                console.error("Error generating content:", error);
-                                toast({
-                                  title: "Generation Failed",
-                                  description: "Please try again.",
-                                  variant: "destructive",
-                                });
-                              } finally {
-                                setIsGenerating(false);
-                              }
-                            }}
-                            className="gap-2"
-                          >
-                            <Sparkles className="w-5 h-5" />
-                            Generate Content
-                          </Button>
-                        </div>
-                      )}
-                    </div>
+                  {/* Component Rows */}
+                  <div className="space-y-3">
+                    {selectedComponentIds.map((componentId, index) => (
+                      <ComponentRow
+                        key={componentId}
+                        number={index + 1}
+                        id={componentId}
+                        title={componentMeta[componentId]?.title || componentId}
+                        description={componentMeta[componentId]?.description || ""}
+                        estimatedSize={componentMeta[componentId]?.estimatedSize || ""}
+                        status={componentStatus[componentId] || "pending"}
+                        wordCount={
+                          content[componentId]
+                            ? JSON.stringify(content[componentId]).split(/\s+/).length
+                            : undefined
+                        }
+                        onGenerate={() => generateSingleComponent(componentId)}
+                        onView={() => {
+                          toast({
+                            title: componentMeta[componentId]?.title || componentId,
+                            description: "Component preview will open in the final step.",
+                          });
+                        }}
+                        disabled={isGenerating && generatingComponentId !== componentId}
+                      />
+                    ))}
+                  </div>
 
-                    {Object.keys(content).length > 0 && (
-                      <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4">
-                        <div className="flex items-center gap-2 text-green-400">
-                          <Check className="w-5 h-5" />
-                          <span className="font-medium">Content generated successfully!</span>
-                        </div>
+                  {/* All Complete Message */}
+                  {completedCount === selectedComponentIds.length && completedCount > 0 && (
+                    <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4">
+                      <div className="flex items-center gap-2 text-green-400">
+                        <Check className="w-5 h-5" />
+                        <span className="font-medium">
+                          All components generated! You can proceed to the next step.
+                        </span>
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
+                    </div>
+                  )}
+                </div>
               )}
 
               {currentStep === 5 && (
