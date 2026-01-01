@@ -60,7 +60,7 @@ const MarketingKitDashboard = ({
     {
       id: "salesLetter",
       title: "Sales Letter",
-      description: "AICPBSAWN framework sales page",
+      description: "Proprietary Salesletter Framework",
       icon: FileText,
       status: salesLetter ? "complete" : isGenerating.salesLetter ? "generating" : "pending",
       content: salesLetter,

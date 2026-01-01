@@ -28,6 +28,7 @@ import TemplateSelector from "@/components/TemplateSelector";
 import ContentStatusCard from "@/components/toolkit/ContentStatusCard";
 import ContentControlsBar from "@/components/toolkit/ContentControlsBar";
 import ComponentRow, { ComponentStatus } from "@/components/toolkit/ComponentRow";
+import ThesisFrameworkCard from "@/components/toolkit/ThesisFrameworkCard";
 import { ToolkitTemplate } from "@/data/toolkitTemplates";
 
 const steps = [
@@ -93,6 +94,11 @@ const CreateToolkit = () => {
   const [humanize, setHumanize] = useState(true);
   const [componentStatus, setComponentStatus] = useState<Record<string, ComponentStatus>>({});
   const [generatingComponentId, setGeneratingComponentId] = useState<string | null>(null);
+  
+  // Thesis/Framework state
+  const [thesis, setThesis] = useState("");
+  const [lockFramework, setLockFramework] = useState(true);
+  const [isRegeneratingThesis, setIsRegeneratingThesis] = useState(false);
 
   // Component metadata
   const componentMeta: Record<string, { title: string; description: string; estimatedSize: string }> = {
@@ -122,6 +128,14 @@ const CreateToolkit = () => {
       navigate("/auth");
     }
   }, [user, navigate]);
+
+  // Auto-generate thesis when reaching Step 4 if empty
+  useEffect(() => {
+    if (currentStep === 4 && !thesis && title && niche) {
+      const generatedThesis = `This toolkit is built on the idea that ${niche.toLowerCase()} mastery is achieved through a systematic approach of focused learning, practical application, and consistent reinforcement. ${targetAudience ? `Designed specifically for ${targetAudience.toLowerCase()}, ` : ""}the framework guides users from understanding core concepts to implementing real-world solutions, using actionable tools that reinforce progress at each stage.`;
+      setThesis(generatedThesis);
+    }
+  }, [currentStep, thesis, title, niche, targetAudience]);
 
   const handleTemplateSelect = (template: ToolkitTemplate) => {
     setSelectedTemplate(template.id);
@@ -535,6 +549,24 @@ const CreateToolkit = () => {
                     completedCount={completedCount}
                     totalCount={selectedComponentIds.length}
                     totalWords={totalWords}
+                  />
+
+                  {/* Thesis & Framework Card */}
+                  <ThesisFrameworkCard
+                    thesis={thesis}
+                    onThesisChange={setThesis}
+                    lockFramework={lockFramework}
+                    onLockChange={setLockFramework}
+                    onRegenerateThesis={async () => {
+                      setIsRegeneratingThesis(true);
+                      try {
+                        const generatedThesis = `This toolkit is built on the idea that ${niche.toLowerCase()} mastery is achieved through a systematic approach of focused learning, practical application, and consistent reinforcement. ${targetAudience ? `Designed specifically for ${targetAudience.toLowerCase()}, ` : ""}the framework guides users from understanding core concepts to implementing real-world solutions, using actionable tools that reinforce progress at each stage.`;
+                        setThesis(generatedThesis);
+                      } finally {
+                        setIsRegeneratingThesis(false);
+                      }
+                    }}
+                    isRegenerating={isRegeneratingThesis}
                   />
 
                   {/* Controls Bar */}
