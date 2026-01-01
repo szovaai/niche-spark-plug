@@ -62,3 +62,6 @@ verify_jwt = true
 
 [functions.generate-thesis]
 verify_jwt = true
+
+[functions.generate-offer-details]
+verify_jwt = true

@@ -980,6 +980,10 @@ const CreateToolkit = () => {
                   components={components}
                   onSalesLetterGenerated={setSalesLetter}
                   existingSalesLetter={salesLetter}
+                  authorName={authorName}
+                  thesis={thesis}
+                  guideSections={guideSections}
+                  content={content}
                 />
               )}
 
