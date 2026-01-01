@@ -930,6 +930,10 @@ const ToolkitBuilder = () => {
             initialAuthor={authorName}
             niche={niche}
             existingCover={ecoverUrl}
+            logoUrl={logoUrl}
+            componentsIncluded={Object.entries(components)
+              .filter(([_, enabled]) => enabled)
+              .map(([key]) => key.charAt(0).toUpperCase() + key.slice(1))}
             onCoverGenerated={(url) => {
               setEcoverUrl(url);
               saveToolkit();

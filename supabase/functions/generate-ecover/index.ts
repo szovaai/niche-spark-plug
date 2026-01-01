@@ -6,13 +6,16 @@ const corsHeaders = {
 };
 
 interface EcoverRequest {
-  productName: string;
-  productType: string;
-  aesthetic: string;
+  toolkitTitle: string;
+  subtitle?: string;
+  authorName?: string;
+  componentsIncluded?: string[];
+  coverStyle: string;
+  mockupType: string;
   primaryColor: string;
   secondaryColor: string;
-  moodKeywords: string[];
-  ecoverType: "mockup" | "thumbnail" | "pinterest" | "instagram";
+  additionalElements?: string;
+  niche?: string;
 }
 
 serve(async (req) => {
@@ -21,109 +24,117 @@ serve(async (req) => {
   }
 
   try {
-    const { productName, productType, aesthetic, primaryColor, secondaryColor, moodKeywords, ecoverType } = await req.json() as EcoverRequest;
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const { 
+      toolkitTitle, 
+      subtitle,
+      authorName,
+      componentsIncluded, 
+      coverStyle, 
+      mockupType,
+      primaryColor, 
+      secondaryColor, 
+      additionalElements,
+      niche
+    } = await req.json() as EcoverRequest;
     
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    const FAL_API_KEY = Deno.env.get("FAL_API_KEY");
+    
+    if (!FAL_API_KEY) {
+      throw new Error("FAL_API_KEY is not configured");
     }
 
-    console.log(`Generating ${ecoverType} for: ${productName}`);
+    console.log(`Generating ${coverStyle} cover for: ${toolkitTitle} (${mockupType})`);
 
-    // Build prompt based on ecover type
-    const prompts: Record<string, string> = {
-      mockup: `Create a professional 3D product mockup for a digital product called "${productName}". 
-        Product type: ${productType}. 
-        Style: ${aesthetic}, ${moodKeywords.join(", ")}. 
-        Colors: ${primaryColor} and ${secondaryColor}.
-        Show the product displayed on a modern device or as floating pages with soft shadows.
-        Clean white or light gradient background. Professional lighting. 
-        Etsy bestseller quality. Ultra high resolution.
-        16:9 aspect ratio landscape hero image.`,
-      
-      thumbnail: `Create a stunning Etsy listing thumbnail for "${productName}".
-        Product type: ${productType}.
-        Style: ${aesthetic}, ${moodKeywords.join(", ")}.
-        Colors: ${primaryColor} and ${secondaryColor}.
-        Eye-catching composition with the product as hero.
-        Clean, professional, premium feel.
-        1:1 square aspect ratio.
-        Bright, well-lit, Etsy bestseller aesthetic.
-        Ultra high resolution.`,
-      
-      pinterest: `Create a tall Pinterest pin for "${productName}".
-        Product type: ${productType}.
-        Style: ${aesthetic}, ${moodKeywords.join(", ")}.
-        Colors: ${primaryColor} and ${secondaryColor}.
-        2:3 tall aspect ratio.
-        Eye-catching, scroll-stopping design.
-        Include visual of the product with lifestyle context.
-        Text overlay style that's readable.
-        Pinterest viral aesthetic. Ultra high resolution.`,
-      
-      instagram: `Create an Instagram post image for "${productName}".
-        Product type: ${productType}.
-        Style: ${aesthetic}, ${moodKeywords.join(", ")}.
-        Colors: ${primaryColor} and ${secondaryColor}.
-        1:1 square aspect ratio.
-        Clean, modern, aesthetic feed-worthy design.
-        Show the product in an aspirational lifestyle context.
-        Instagram influencer quality. Ultra high resolution.`,
+    // Build style-specific descriptions
+    const styleDescriptions: Record<string, string> = {
+      minimalist: "Clean lines, generous white space, subtle shadows, elegant simplicity, refined typography",
+      bold: "Vibrant colors, strong contrasts, dynamic angles, energetic composition, eye-catching design",
+      futuristic: "Tech-inspired gradients, geometric patterns, neon accents, modern aesthetic, sleek surfaces",
+      professional: "Corporate elegance, muted tones, sophisticated layout, business-focused, trustworthy appearance",
+      creative: "Artistic flair, unique textures, unexpected compositions, standout visual identity",
     };
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    // Build mockup-specific descriptions
+    const mockupDescriptions: Record<string, string> = {
+      "3d-book": "3D hardcover book mockup with realistic shadows and depth, slightly angled perspective showing cover and spine",
+      "laptop": "Digital product displayed on a premium laptop screen with modern workspace background",
+      "floating-pages": "Floating paper pages with soft shadows, arranged in an artistic scattered pattern",
+      "phone-mockup": "Product displayed on a modern smartphone screen with clean background",
+      "tablet": "Premium tablet displaying the product cover with elegant accessories nearby",
+      "bundle-stack": "Multiple products stacked together showing variety and value, 3D arrangement",
+    };
+
+    const componentsText = componentsIncluded?.length 
+      ? `Including: ${componentsIncluded.join(", ")}` 
+      : "";
+
+    const prompt = `Create a professional, premium-quality digital product cover:
+
+Title: "${toolkitTitle}"
+${subtitle ? `Subtitle: "${subtitle}"` : ""}
+${authorName ? `Author: ${authorName}` : ""}
+${niche ? `Niche: ${niche}` : ""}
+${componentsText}
+
+Visual Style: ${styleDescriptions[coverStyle] || styleDescriptions.professional}
+Mockup Type: ${mockupDescriptions[mockupType] || mockupDescriptions["3d-book"]}
+Color Palette: ${primaryColor} as primary, ${secondaryColor} as accent
+${additionalElements ? `Additional elements: ${additionalElements}` : ""}
+
+Requirements:
+- Ultra-professional, bestseller quality
+- Clean, uncluttered composition
+- Perfect for marketing and sales pages
+- Eye-catching hero image quality
+- 16:9 landscape aspect ratio
+- Premium digital product aesthetic
+- Subtle lighting and shadows for depth
+- Ready for immediate commercial use`;
+
+    const response = await fetch("https://fal.run/fal-ai/seedream-v4", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Key ${FAL_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image-preview",
-        messages: [
-          { 
-            role: "user", 
-            content: prompts[ecoverType] || prompts.mockup
-          }
-        ],
-        modalities: ["image", "text"],
+        prompt,
+        image_size: { width: 1920, height: 1080 },
+        num_images: 1,
+        enable_safety_checker: true,
       }),
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error("FAL API error:", response.status, errorText);
+      
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), {
           status: 429,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI usage limit reached. Please upgrade your plan." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      throw new Error("AI gateway error");
+      
+      throw new Error(`FAL API error: ${response.status}`);
     }
 
     const data = await response.json();
     
-    // Extract image from the response
-    const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-    const textContent = data.choices?.[0]?.message?.content || "";
+    // FAL returns images array with url property
+    const imageUrl = data.images?.[0]?.url;
 
     if (!imageUrl) {
-      console.error("No image in response:", data);
-      throw new Error("Failed to generate image");
+      console.error("No image in FAL response:", data);
+      throw new Error("Failed to generate cover image");
     }
 
-    console.log(`Successfully generated ${ecoverType} for ${productName}`);
+    console.log(`Successfully generated ${coverStyle} cover for ${toolkitTitle}`);
 
     return new Response(JSON.stringify({ 
       imageUrl,
-      ecoverType,
-      description: textContent
+      coverStyle,
+      mockupType,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
