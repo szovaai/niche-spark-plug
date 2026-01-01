@@ -51,15 +51,16 @@ serve(async (req) => {
     let prompt = "";
     let systemPrompt = "";
     
-    // PHASE 1: RAW DRAFT - Conversational, unpolished, clarity-focused
+    // PHASE 1: RAW DRAFT - Clarity-focused, no persuasion, just organization
     if (phase === "raw") {
       const pb = promptBoxData as PromptBoxData;
       
-      systemPrompt = `You are a friendly copywriter helping someone explain their product clearly. 
-You write like you're explaining something to a friend over coffee - honest, direct, helpful.
-NO hype. NO fake stats. NO testimonials. NO urgency tactics. Just pure clarity.`;
+      systemPrompt = `You are organizing someone's product description into a clear sales letter format.
+You do NOT add persuasion, hype, statistics, or testimonials.
+You simply take their input and make it easy to read.
+Write like you're explaining something to a friend - honest, direct, helpful.`;
 
-      prompt = `Write a first draft sales letter for "${title}". This is a "thinking draft" - not polished, not persuasive, just CLEAR.
+      prompt = `Organize this product information into a CLEAR, SIMPLE sales letter draft.
 
 PRODUCT DETAILS FROM USER:
 ${pb?.whatProductIs ? `• What it is: ${pb.whatProductIs}` : `• Product: ${title} - a digital toolkit in the ${niche} niche`}
@@ -70,65 +71,67 @@ ${pb?.bonusesIncluded ? `• What's included: ${pb.bonusesIncluded}` : `• Comp
 
 PRICE: $${price || 17}
 
-REQUIREMENTS FOR THIS RAW DRAFT:
-1. Write in a natural, conversational tone
-2. NO fake statistics or made-up numbers
-3. NO fake testimonials or case studies
-4. NO hype language or pressure tactics
-5. Focus entirely on CLARITY - help the reader understand what this is and why it matters
-6. Use simple language - no jargon
-7. Be honest about what the product is and isn't
+=== RULES FOR THIS RAW DRAFT ===
+1. NO hype, NO fake stats, NO testimonials
+2. NO urgency tactics or pressure
+3. Just organize this information clearly
+4. Use simple, conversational language
+5. Be honest about what the product is
 
-STRUCTURE (keep it simple):
-- Open with a relatable situation or problem
-- Explain what the product is clearly
-- List what's included (if provided)
+=== STRUCTURE (simple and clear) ===
+- Open with a relatable situation or problem (2-3 sentences)
+- Explain what the product is clearly (1 paragraph)
+- List what's included with brief descriptions
 - Explain the main benefit/transformation
-- Simple closing with price
+- Simple closing with price and call-to-action
 
 This should feel like: "Here's what this is and why it might help you."
 
-Format as clean HTML with basic styling. Keep paragraphs short.`;
+Format as clean HTML with <p>, <h2>, <ul>, <li> tags. Keep paragraphs short (2-3 sentences max).`;
 
-    // PHASE 2: POLISH - Apply the Proprietary Framework
+    // PHASE 2: POLISH - Apply framework WITHOUT re-interpreting the offer
     } else if (phase === "polish") {
-      systemPrompt = `You are a master direct-response copywriter who specializes in converting readers into buyers.
-You take raw, honest copy and transform it using proven persuasion frameworks while keeping authenticity.
-You never add fake testimonials or made-up statistics - you enhance structure and emotional resonance.`;
+      systemPrompt = `You are a direct-response copywriter applying a proven framework to an existing draft.
+You enhance structure and emotional resonance WITHOUT changing what the offer is.
+You NEVER add fake testimonials or made-up statistics.
+You work ONLY with the raw draft provided - do not re-interpret or change the core offer.`;
 
-      prompt = `Take this raw sales letter draft and REWRITE it using our Proprietary Salesletter Framework (AICPBSAWN).
+      prompt = `Take this EXACT raw draft and restructure it using our Proprietary Salesletter Framework.
 
-=== RAW DRAFT TO POLISH ===
+=== RAW DRAFT (preserve the offer EXACTLY as described) ===
 ${rawDraft}
 
-=== FRAMEWORK TO APPLY ===
-A = ATTENTION: Pattern-interrupt headline that stops the scroll. Make it specific to the offer.
-I = INTEREST: Hook them with a relatable story, surprising insight, or "aha moment" about their problem.
-C = CREDIBILITY: Establish why this solution works (without fake testimonials - use logic, specificity, or methodology).
-P = PROVE: Use specifics from the product content. Reference actual chapters, methods, or frameworks included.
-B = BENEFITS: Transform features into concrete outcomes. Make benefits specific and measurable where possible.
-S = SCARCITY: Add genuine reason to act now (limited launch price, bonus expiration, etc.)
-A = ACTION: Clear, compelling call-to-action with button-style formatting.
-W = WARN: What happens if they don't solve this problem? Paint the cost of inaction.
-N = NOW: Final urgency push and confident close.
+=== FRAMEWORK SECTIONS (apply IN THIS ORDER) ===
+1. PRE-HEADLINE: Pattern interrupt or curiosity trigger (1 line)
+2. HEADLINE: Specific benefit + transformation promise from the raw draft
+3. SUBHEADLINE: Expands on headline, adds credibility without fake claims
+4. RELATABLE STORY: Problem they recognize, told in their words (from raw draft's problem)
+5. THE REAL PROBLEM: Root cause most people miss - expand on raw draft's problem
+6. THE SHIFT: The "aha moment" or new approach this product offers
+7. INTRODUCE THE OFFER: What it is, positioned as the solution (from raw draft)
+8. WHAT'S INCLUDED: Feature → Benefit breakdown (use EXACT components from raw draft)
+9. HOW IT WORKS: Simple 3-step process
+10. WHO IT'S FOR / NOT FOR: Qualification section
+11. CALM CLOSE: Confident, non-pushy CTA with price ($${price || 17})
+
+=== CRITICAL RULES ===
+1. Keep the SAME offer, price, and components from the raw draft - DO NOT change them
+2. DO NOT invent fake testimonials or statistics
+3. Make the headline SPECIFIC to this exact product
+4. Add emotional resonance WITHOUT being fake or salesy
+5. Use the transformation language from the raw draft
+6. Format as professional HTML with:
+   - Clear section headings
+   - Styled bullet points for benefits
+   - A prominent "Get Instant Access" button section
+   - Visual hierarchy with subheadlines
 
 === ADDITIONAL CONTEXT ===
 Product: ${title}
-${subtitle ? `Subtitle: ${subtitle}` : ""}
 Niche: ${niche}
 Target Audience: ${(promptBoxData as PromptBoxData)?.whoItsFor || targetAudience || "digital entrepreneurs"}
-Price: $${price || 17}
-Components: ${activeComponents.join(", ")}
+Price: $${price || 17}`;
 
-=== CRITICAL RULES ===
-1. Keep the authentic voice from the raw draft
-2. DO NOT invent fake testimonials or statistics
-3. Make the headline SPECIFIC to this product, not generic
-4. Reference actual product components/chapters where possible
-5. Format as professional HTML with modern styling classes
-6. Add visual hierarchy with subheadlines, bullet points, and call-out boxes
-7. Include a styled "Buy Now" button section
-8. The final version should feel premium and conversion-optimized`;
 
     // LEGACY MODE - Original behavior for backwards compatibility
     } else {
@@ -212,7 +215,19 @@ CRITICAL INSTRUCTIONS:
     }
 
     const data = await response.json();
-    const salesLetter = data.choices?.[0]?.message?.content || "";
+    let salesLetter = data.choices?.[0]?.message?.content || "";
+    
+    // Sanitize AI output before returning
+    salesLetter = salesLetter
+      .replace(/[\u2018\u2019\u201A\u201B]/g, "'")
+      .replace(/[\u201C\u201D\u201E\u201F]/g, '"')
+      .replace(/[\u2013\u2014\u2015]/g, "-")
+      .replace(/[\u200B\u200C\u200D\uFEFF]/g, "")
+      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "")
+      .replace(/â€™/g, "'")
+      .replace(/â€œ/g, '"')
+      .replace(/â€/g, '"')
+      .replace(/â€"/g, "-");
 
     return new Response(JSON.stringify({ salesLetter, phase }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {

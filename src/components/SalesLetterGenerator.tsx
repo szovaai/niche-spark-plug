@@ -300,15 +300,15 @@ const SalesLetterGenerator = ({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h3 className="text-lg font-semibold">Sales Letter Draft — Version 1</h3>
+          <h3 className="text-lg font-semibold">Draft v1 (Raw)</h3>
           <Badge variant="secondary" className="bg-amber-500/10 text-amber-600 border-amber-500/20">
-            Thinking Draft
+            Clarity Draft - No Framework
           </Badge>
         </div>
       </div>
       
       <p className="text-sm text-muted-foreground">
-        This is your unpolished, conversational draft. Review it, then polish it with our Proprietary Framework.
+        This is your unpolished, honest draft. Review it, then polish with our Proprietary Framework to add conversion elements.
       </p>
       
       <div 
@@ -333,6 +333,15 @@ const SalesLetterGenerator = ({
         
         <Button 
           variant="outline" 
+          onClick={() => handleCopy(rawDraft)} 
+          className="gap-2"
+        >
+          <Copy className="w-4 h-4" />
+          Copy Draft
+        </Button>
+        
+        <Button 
+          variant="outline" 
           onClick={generateRawDraft} 
           disabled={isGenerating} 
           className="gap-2"
@@ -348,9 +357,9 @@ const SalesLetterGenerator = ({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h3 className="text-lg font-semibold">Sales Letter — Final Version</h3>
+          <h3 className="text-lg font-semibold">Final (Framework Applied)</h3>
           <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
-            Framework Applied
+            Conversion Optimized
           </Badge>
         </div>
       </div>

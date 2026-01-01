@@ -520,10 +520,26 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanation, just the JSON ob
       }
       
       try {
-        const cleanedText = contentText
+        // Clean and sanitize AI output before parsing
+        let cleanedText = contentText
           .replace(/```json\n?/g, '')
           .replace(/```\n?/g, '')
           .trim();
+        
+        // Sanitize common encoding issues from AI
+        cleanedText = cleanedText
+          .replace(/[\u2018\u2019\u201A\u201B]/g, "'")
+          .replace(/[\u201C\u201D\u201E\u201F]/g, '"')
+          .replace(/[\u2013\u2014\u2015]/g, "-")
+          .replace(/[\u200B\u200C\u200D\uFEFF]/g, "")
+          .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "")
+          .replace(/â€™/g, "'")
+          .replace(/â€œ/g, '"')
+          .replace(/â€/g, '"')
+          .replace(/â€"/g, "-")
+          .replace(/â€¢/g, "•")
+          .replace(/Ø=/g, "")
+          .replace(/[ÜÚÝþ]/g, "");
         
         content[component] = JSON.parse(cleanedText);
         console.log(`Successfully generated ${component}`);
