@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { getUserApiKey, getProviderConfig, type BYOKConfig } from "../_shared/byok.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -98,9 +99,15 @@ serve(async (req) => {
       writingStyle = "conversational" 
     } = await req.json();
     
+    // Check for BYOK first
+    const authHeader = req.headers.get('authorization');
+    const byokConfig = await getUserApiKey(authHeader, 'deepseek');
+    
+    // Fallback to environment variable if no BYOK
     const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
-    if (!DEEPSEEK_API_KEY) {
-      throw new Error("DEEPSEEK_API_KEY is not configured");
+    
+    if (!byokConfig && !DEEPSEEK_API_KEY) {
+      throw new Error("No API key configured. Please add your own key in Settings.");
     }
 
     // Get the appropriate style directive
@@ -124,7 +131,8 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Generating toolkit "${title}" with style: ${writingStyle}, components: ${componentsToGenerate.join(", ")}`);
+    const provider = byokConfig ? byokConfig.provider : 'deepseek';
+    console.log(`Generating toolkit "${title}" with style: ${writingStyle}, components: ${componentsToGenerate.join(", ")}, provider: ${provider}`);
 
     const content: Record<string, unknown> = {};
 
@@ -145,42 +153,98 @@ Your task: ${componentPrompt}
 
 IMPORTANT: Return ONLY valid JSON. No markdown, no explanation, just the JSON object.`;
 
-      const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "deepseek-chat",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: `Generate the ${component} content now.` }
-          ],
-          temperature: 0.7,
-        }),
-      });
+      const messages = [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: `Generate the ${component} content now.` }
+      ];
 
-      if (!response.ok) {
-        const status = response.status;
-        if (status === 429) {
-          return new Response(
-            JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
-            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
+      let contentText = "";
+
+      if (byokConfig) {
+        // Use BYOK
+        const providerConfig = getProviderConfig(byokConfig.provider);
+        
+        if (providerConfig.isAnthropic) {
+          const response = await fetch(providerConfig.endpoint, {
+            method: 'POST',
+            headers: {
+              'x-api-key': byokConfig.apiKey,
+              'anthropic-version': '2023-06-01',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              model: providerConfig.model,
+              max_tokens: 4000,
+              system: systemPrompt,
+              messages: [{ role: 'user', content: `Generate the ${component} content now.` }],
+            }),
+          });
+
+          if (!response.ok) {
+            console.error(`Anthropic API error for ${component}:`, response.status);
+            continue;
+          }
+
+          const data = await response.json();
+          contentText = data.content?.[0]?.text || "";
+        } else {
+          const response = await fetch(providerConfig.endpoint, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${byokConfig.apiKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: providerConfig.model,
+              messages,
+              temperature: 0.7,
+            }),
+          });
+
+          if (!response.ok) {
+            console.error(`${byokConfig.provider} API error for ${component}:`, response.status);
+            continue;
+          }
+
+          const data = await response.json();
+          contentText = data.choices?.[0]?.message?.content || "";
         }
-        if (status === 402) {
-          return new Response(
-            JSON.stringify({ error: "API credits exhausted. Please check your DeepSeek balance." }),
-            { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
+      } else {
+        // Use default DeepSeek
+        const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "deepseek-chat",
+            messages,
+            temperature: 0.7,
+          }),
+        });
+
+        if (!response.ok) {
+          const status = response.status;
+          if (status === 429) {
+            return new Response(
+              JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
+              { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+          if (status === 402) {
+            return new Response(
+              JSON.stringify({ error: "API credits exhausted. Please check your DeepSeek balance." }),
+              { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+          console.error(`DeepSeek API error for ${component}:`, status);
+          continue;
         }
-        console.error(`DeepSeek API error for ${component}:`, status);
-        continue;
+
+        const data = await response.json();
+        contentText = data.choices?.[0]?.message?.content || "";
       }
-
-      const data = await response.json();
-      const contentText = data.choices?.[0]?.message?.content || "";
       
       try {
         const cleanedText = contentText

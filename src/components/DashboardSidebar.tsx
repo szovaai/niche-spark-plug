@@ -7,7 +7,8 @@ import {
   LayoutDashboard,
   Plus,
   Search,
-  Rocket
+  Rocket,
+  Settings
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
@@ -37,6 +38,7 @@ const mainNavItems = [
 
 const secondaryNavItems = [
   { title: "Pricing", url: "/pricing", icon: CreditCard },
+  { title: "Settings", url: "/settings", icon: Settings },
 ];
 
 export function DashboardSidebar() {
