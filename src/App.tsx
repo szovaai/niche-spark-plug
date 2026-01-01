@@ -11,6 +11,7 @@ import CreateToolkit from "./pages/CreateToolkit";
 import ToolkitBuilder from "./pages/ToolkitBuilder";
 import MyToolkits from "./pages/MyToolkits";
 import Research from "./pages/Research";
+import Discover from "./pages/Discover";
 import Pricing from "./pages/Pricing";
 import Launch from "./pages/Launch";
 import Settings from "./pages/Settings";
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/toolkit/builder/:id" element={<ToolkitBuilder />} />
             <Route path="/my-toolkits" element={<MyToolkits />} />
             <Route path="/research" element={<Research />} />
+            <Route path="/discover" element={<Discover />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/launch/:id" element={<Launch />} />
             <Route path="/settings" element={<Settings />} />
