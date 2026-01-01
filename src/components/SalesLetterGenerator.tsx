@@ -7,13 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { ToolkitComponents, ToolkitContent, GuideSection, SalesLetterStyle } from "@/types/toolkit";
+import { ToolkitComponents, ToolkitContent, GuideSection } from "@/types/toolkit";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { generateSalesLetterHTML } from "@/lib/salesLetterExport";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
-import SalesLetterStyleSelector from "@/components/SalesLetterStyleSelector";
 
 interface SalesLetterGeneratorProps {
   title: string;
@@ -34,8 +33,7 @@ interface SalesLetterGeneratorProps {
   savedRawDraft?: string;
   savedPolishedLetter?: string;
   savedStep?: Phase;
-  savedStyle?: SalesLetterStyle;
-  onStateChange?: (state: { offerDetails: PromptBoxData; rawDraft: string; polishedLetter: string; step: Phase; style: SalesLetterStyle }) => void;
+  onStateChange?: (state: { offerDetails: PromptBoxData; rawDraft: string; polishedLetter: string; step: Phase }) => void;
 }
 
 interface PromptBoxData {
@@ -47,15 +45,6 @@ interface PromptBoxData {
 }
 
 type Phase = 'input' | 'raw' | 'polished';
-
-// Style name mapping for display
-const STYLE_NAMES: Record<SalesLetterStyle, string> = {
-  'neutral': 'Neutral / Balanced',
-  'direct-response': 'Classic Direct Response',
-  'story-selling': 'Story Selling',
-  'aggressive': 'Aggressive Authority',
-  'conversational': 'Conversational / Modern',
-};
 
 const SalesLetterGenerator = ({ 
   title, 
@@ -74,7 +63,6 @@ const SalesLetterGenerator = ({
   savedRawDraft,
   savedPolishedLetter,
   savedStep,
-  savedStyle,
   onStateChange,
 }: SalesLetterGeneratorProps) => {
   const [currentPhase, setCurrentPhase] = useState<Phase>(savedStep || (existingSalesLetter ? 'polished' : 'input'));
@@ -86,8 +74,6 @@ const SalesLetterGenerator = ({
   const [polishedLetter, setPolishedLetter] = useState(savedPolishedLetter || existingSalesLetter || "");
   const [copied, setCopied] = useState(false);
   const [promptBoxOpen, setPromptBoxOpen] = useState(true);
-  const [selectedStyle, setSelectedStyle] = useState<SalesLetterStyle>(savedStyle || 'neutral');
-  const [appliedStyle, setAppliedStyle] = useState<SalesLetterStyle | null>(savedStyle || null);
   
   const [promptBoxData, setPromptBoxData] = useState<PromptBoxData>(savedOfferDetails || {
     whatProductIs: "",
@@ -105,10 +91,9 @@ const SalesLetterGenerator = ({
         rawDraft,
         polishedLetter,
         step: currentPhase,
-        style: selectedStyle,
       });
     }
-  }, [promptBoxData, rawDraft, polishedLetter, currentPhase, selectedStyle, onStateChange]);
+  }, [promptBoxData, rawDraft, polishedLetter, currentPhase, onStateChange]);
 
   const updatePromptBox = (field: keyof PromptBoxData, value: string) => {
     setPromptBoxData(prev => ({ ...prev, [field]: value }));
@@ -182,7 +167,7 @@ const SalesLetterGenerator = ({
         setRawDraft(data.salesLetter);
         setCurrentPhase('raw');
         setPromptBoxOpen(false);
-        toast.success("Raw draft generated! Select a style and polish with our framework.");
+        toast.success("Raw draft generated! Now polish with the DigiStream Conversion Pattern.");
         return true;
       } else {
         throw new Error("No sales letter returned");
@@ -196,9 +181,8 @@ const SalesLetterGenerator = ({
     }
   };
 
-  const polishWithFramework = async (draftToPolish?: string, styleToApply?: SalesLetterStyle) => {
+  const polishWithDCP = async (draftToPolish?: string) => {
     setIsGenerating(true);
-    const styleForPolish = styleToApply || selectedStyle;
     
     try {
       const { data, error } = await supabase.functions.invoke("generate-sales-letter", {
@@ -213,7 +197,6 @@ const SalesLetterGenerator = ({
           authorName,
           promptBoxData,
           rawDraft: draftToPolish || rawDraft,
-          style: styleForPolish,
         },
       });
 
@@ -221,10 +204,9 @@ const SalesLetterGenerator = ({
 
       if (data?.salesLetter) {
         setPolishedLetter(data.salesLetter);
-        setAppliedStyle(styleForPolish);
         onSalesLetterGenerated(data.salesLetter);
         setCurrentPhase('polished');
-        toast.success(`Sales letter polished with ${STYLE_NAMES[styleForPolish]} style!`);
+        toast.success("Sales letter polished with DigiStream Conversion Pattern!");
         return true;
       } else {
         throw new Error("No sales letter returned");
@@ -238,7 +220,7 @@ const SalesLetterGenerator = ({
     }
   };
 
-  // One-Click Generate (Fill → Raw → Polish with neutral style)
+  // One-Click Generate (Fill → Raw → Polish with DCP)
   const oneClickGenerate = async () => {
     if (!title || !niche) {
       toast.error("Please ensure the toolkit has a title and niche defined.");
@@ -308,9 +290,9 @@ const SalesLetterGenerator = ({
 
       setRawDraft(rawData.salesLetter);
 
-      // Step 3: Polish with Framework (using neutral style by default)
+      // Step 3: Polish with DigiStream Conversion Pattern
       setOneClickStep(3);
-      toast.info("Step 3/3: Polishing with Proprietary Framework (Neutral style)...");
+      toast.info("Step 3/3: Applying DigiStream Conversion Pattern...");
       
       const { data: polishData, error: polishError } = await supabase.functions.invoke("generate-sales-letter", {
         body: {
@@ -324,7 +306,6 @@ const SalesLetterGenerator = ({
           authorName,
           promptBoxData: currentPromptData,
           rawDraft: rawData.salesLetter,
-          style: 'neutral', // One-click always uses neutral
         },
       });
 
@@ -332,12 +313,10 @@ const SalesLetterGenerator = ({
 
       if (polishData?.salesLetter) {
         setPolishedLetter(polishData.salesLetter);
-        setSelectedStyle('neutral');
-        setAppliedStyle('neutral');
         onSalesLetterGenerated(polishData.salesLetter);
         setCurrentPhase('polished');
         setPromptBoxOpen(false);
-        toast.success("Sales letter complete! You can re-polish with a different style if desired.");
+        toast.success("Sales letter complete using DigiStream Conversion Pattern!");
       } else {
         throw new Error("No polished letter returned");
       }
@@ -382,7 +361,6 @@ const SalesLetterGenerator = ({
     setCurrentPhase('input');
     setRawDraft("");
     setPolishedLetter("");
-    setAppliedStyle(null);
     setPromptBoxOpen(true);
     onSalesLetterGenerated("");
   };
@@ -415,7 +393,7 @@ const SalesLetterGenerator = ({
           : 'bg-muted/50 text-muted-foreground/50'
       }`}>
         <span className="w-5 h-5 rounded-full bg-background/20 flex items-center justify-center text-xs">3</span>
-        Polished
+        DCP Applied
       </div>
     </div>
   );
@@ -563,7 +541,7 @@ const SalesLetterGenerator = ({
       </div>
       
       <p className="text-sm text-muted-foreground">
-        This is your unpolished, honest draft. Select a persuasion style below, then polish with our Proprietary Framework.
+        This is your unpolished, honest draft. Click below to apply the DigiStream Conversion Pattern.
       </p>
       
       <div 
@@ -571,19 +549,26 @@ const SalesLetterGenerator = ({
         dangerouslySetInnerHTML={{ __html: rawDraft }}
       />
 
-      {/* Style Selector - appears in raw draft view */}
-      <div className="border rounded-lg p-4 bg-muted/20">
-        <SalesLetterStyleSelector
-          selectedStyle={selectedStyle}
-          onStyleChange={setSelectedStyle}
-          disabled={isGenerating}
-        />
+      {/* DCP Info Card */}
+      <div className="border rounded-lg p-4 bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
+        <div className="flex items-start gap-3">
+          <div className="p-2 bg-primary/10 rounded-lg shrink-0">
+            <Zap className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <h4 className="font-semibold text-sm">DigiStream Conversion Pattern™</h4>
+            <p className="text-xs text-muted-foreground mt-1">
+              A clarity-first sales letter framework engineered for real buyers — not hype. 
+              Follows the flow: Clarity → Belief → Momentum → Action.
+            </p>
+          </div>
+        </div>
       </div>
       
       <div className="flex flex-wrap justify-center gap-3">
         <Button 
           variant="hero" 
-          onClick={() => polishWithFramework()} 
+          onClick={() => polishWithDCP()} 
           disabled={isGenerating} 
           className="gap-2"
         >
@@ -592,7 +577,7 @@ const SalesLetterGenerator = ({
           ) : (
             <Sparkles className="w-4 h-4" />
           )}
-          Polish with {STYLE_NAMES[selectedStyle]} Style
+          Apply DigiStream Conversion Pattern
         </Button>
         
         <Button 
@@ -621,16 +606,15 @@ const SalesLetterGenerator = ({
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
-          <h3 className="text-lg font-semibold">Final (Framework Applied)</h3>
+          <h3 className="text-lg font-semibold">Final (DCP Applied)</h3>
           <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
             Conversion Optimized
           </Badge>
         </div>
-        {appliedStyle && (
-          <Badge variant="outline" className="text-xs">
-            Style: {STYLE_NAMES[appliedStyle]}
-          </Badge>
-        )}
+        <Badge variant="outline" className="text-xs gap-1">
+          <Zap className="w-3 h-3" />
+          DigiStream Conversion Pattern™
+        </Badge>
       </div>
       
       <Tabs defaultValue="preview" className="w-full">
@@ -673,7 +657,7 @@ const SalesLetterGenerator = ({
             </div>
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="font-medium text-sm">Polished</span>
+                <span className="font-medium text-sm">DCP Applied</span>
                 <Badge className="text-xs bg-emerald-500/10 text-emerald-600">After</Badge>
               </div>
               <div 
@@ -685,40 +669,23 @@ const SalesLetterGenerator = ({
         </TabsContent>
       </Tabs>
 
-      {/* Re-polish with different style */}
-      <Collapsible>
-        <CollapsibleTrigger asChild>
-          <Button variant="ghost" size="sm" className="w-full gap-2 text-muted-foreground">
+      {/* Re-polish option */}
+      <div className="flex justify-center">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => polishWithDCP()}
+          disabled={isGenerating}
+          className="gap-2 text-muted-foreground"
+        >
+          {isGenerating ? (
+            <RefreshCw className="w-4 h-4 animate-spin" />
+          ) : (
             <RefreshCw className="w-4 h-4" />
-            Re-polish with Different Style
-            <ChevronDown className="w-4 h-4" />
-          </Button>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="pt-4">
-          <div className="border rounded-lg p-4 bg-muted/20 space-y-4">
-            <SalesLetterStyleSelector
-              selectedStyle={selectedStyle}
-              onStyleChange={setSelectedStyle}
-              disabled={isGenerating}
-            />
-            <div className="flex justify-center">
-              <Button
-                variant="outline"
-                onClick={() => polishWithFramework()}
-                disabled={isGenerating || selectedStyle === appliedStyle}
-                className="gap-2"
-              >
-                {isGenerating ? (
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Sparkles className="w-4 h-4" />
-                )}
-                Apply {STYLE_NAMES[selectedStyle]} Style
-              </Button>
-            </div>
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
+          )}
+          Re-polish with DCP
+        </Button>
+      </div>
       
       <div className="flex flex-wrap justify-center gap-3">
         <Button 
@@ -755,9 +722,9 @@ const SalesLetterGenerator = ({
     <Card>
       <CardContent className="p-6 space-y-6">
         <div className="text-center mb-4">
-          <h2 className="text-2xl font-bold gradient-text">Proprietary Salesletter Framework</h2>
+          <h2 className="text-2xl font-bold gradient-text">DigiStream Conversion Pattern™</h2>
           <p className="text-muted-foreground mt-2">
-            Two-phase engine: Generate a raw draft, select a style, then polish with our conversion framework.
+            A clarity-first sales letter framework engineered for real buyers — not hype.
           </p>
         </div>
 
@@ -771,7 +738,7 @@ const SalesLetterGenerator = ({
               <Zap className="w-10 h-10 mx-auto text-primary mb-3" />
               <h3 className="font-semibold text-lg mb-2">Recommended: One-Click Generate</h3>
               <p className="text-sm text-muted-foreground mb-4 max-w-md mx-auto">
-                Automatically fills offer details, generates a raw draft, and polishes with our framework using the Neutral style.
+                Automatically fills offer details, generates a raw draft, and applies the DigiStream Conversion Pattern.
               </p>
               <Button 
                 variant="hero" 
@@ -785,7 +752,7 @@ const SalesLetterGenerator = ({
                     <Loader2 className="w-5 h-5 animate-spin" />
                     {oneClickStep === 1 && "Step 1/3: Filling details..."}
                     {oneClickStep === 2 && "Step 2/3: Generating draft..."}
-                    {oneClickStep === 3 && "Step 3/3: Polishing..."}
+                    {oneClickStep === 3 && "Step 3/3: Applying DCP..."}
                   </>
                 ) : (
                   <>
@@ -839,10 +806,10 @@ const SalesLetterGenerator = ({
           </div>
         )}
 
-        {/* Phase 2: Raw Draft + Style Selection */}
+        {/* Phase 2: Raw Draft */}
         {currentPhase === 'raw' && <RawDraftView />}
 
-        {/* Phase 3: Polished */}
+        {/* Phase 3: Polished with DCP */}
         {currentPhase === 'polished' && <PolishedView />}
       </CardContent>
     </Card>
