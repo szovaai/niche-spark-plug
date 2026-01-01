@@ -45,10 +45,10 @@ serve(async (req) => {
     const componentsIncluded = body.componentsIncluded;
     const additionalElements = body.additionalElements;
     
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const FAL_API_KEY = Deno.env.get("FAL_API_KEY");
     
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    if (!FAL_API_KEY) {
+      throw new Error("FAL_API_KEY is not configured");
     }
 
     console.log(`Generating ${style} cover for: ${title} (${mockup})`);
@@ -99,28 +99,24 @@ Requirements:
 - Subtle lighting and shadows for depth
 - Ready for immediate commercial use`;
 
-    // Use Lovable AI (Gemini) for image generation
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    // Use FAL AI (flux-pro) for high-quality image generation
+    const response = await fetch("https://fal.run/fal-ai/flux-pro/v1.1", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Key ${FAL_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image-preview",
-        messages: [
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        modalities: ["image", "text"]
+        prompt,
+        image_size: "landscape_16_9",
+        num_images: 1,
+        safety_tolerance: "2",
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Lovable AI error:", response.status, errorText);
+      console.error("FAL API error:", response.status, errorText);
       
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), {
@@ -129,20 +125,13 @@ Requirements:
         });
       }
       
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Payment required. Please add funds to continue." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      
-      throw new Error(`Image generation error: ${response.status}`);
+      throw new Error(`FAL API error: ${response.status}`);
     }
 
     const data = await response.json();
     
-    // Lovable AI returns images in message.images array
-    const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    // FAL returns images array with url property
+    const imageUrl = data.images?.[0]?.url;
 
     if (!imageUrl) {
       console.error("No image in response:", data);
