@@ -53,23 +53,39 @@ serve(async (req) => {
 
     console.log(`Generating ${style} cover for: ${title} (${mockup})`);
 
-    // Build style-specific descriptions
+    // Build style-specific descriptions with enhanced spacing notes
     const styleDescriptions: Record<string, string> = {
-      minimalist: "Clean lines, generous white space, subtle shadows, elegant simplicity, refined typography, modern minimalist aesthetic",
-      bold: "Vibrant colors, strong contrasts, dynamic angles, energetic composition, eye-catching design with powerful visual impact",
-      futuristic: "Tech-inspired gradients, geometric patterns, neon accents, modern SaaS aesthetic, sleek glass-morphism surfaces",
-      professional: "Corporate elegance, muted tones, sophisticated layout, business-focused, trustworthy premium appearance",
-      creative: "Artistic flair, unique textures, unexpected compositions, standout visual identity with creative edge",
+      minimalist: "Clean lines, generous whitespace (40%+ of frame), each element isolated with breathing room, subtle shadows, elegant simplicity, refined typography, modern minimalist aesthetic",
+      bold: "Vibrant colors, strong contrasts, dynamic angles, energetic composition, eye-catching design with powerful visual impact, clear separation between elements",
+      futuristic: "Tech-inspired gradients, geometric patterns, holographic edges, floating elements with subtle glow underneath each component, neon accents, modern SaaS aesthetic, sleek glass-morphism surfaces",
+      professional: "Corporate elegance, boardroom-ready presentation, components arranged like a premium unboxing experience, muted tones, sophisticated layout, business-focused, trustworthy premium appearance",
+      creative: "Artistic flair, unique textures, unexpected compositions, standout visual identity with creative edge, generous negative space between artistic elements",
+    };
+
+    // Component-specific visual descriptions for rich bundle mockups
+    const componentVisuals: Record<string, string> = {
+      "Core Guide": "thick hardcover book (200+ pages feel) with embossed title and gold/silver accents",
+      "Guide": "thick hardcover book (200+ pages feel) with embossed title and premium binding",
+      "Worksheets": "spiral-bound notebook, slightly fanned open, showing clean lined pages with accent color headers",
+      "Worksheet": "spiral-bound notebook with visible metal rings, slightly open showing clean pages",
+      "Checklists": "laminated cards fanned out like playing cards, visible checkboxes with check marks",
+      "Checklist": "laminated checklist card with visible checkbox graphics and checkmarks",
+      "Resource Lists": "manila folder with color-coded document tabs visible, papers peeking out",
+      "Resource List": "organized folder with visible document tabs and reference sheets",
+      "Templates": "printable sheets with placeholder boxes and professional grid layouts",
+      "Template": "clean template sheet with structured layout boxes and form fields",
+      "Bonuses": "sealed envelope or bonus badge/ribbon element suggesting extra value",
+      "Quiz": "interactive quiz cards with multiple choice bubbles visible",
     };
 
     // Build mockup-specific descriptions for digital product bundles
     const mockupDescriptions: Record<string, string> = {
-      "3d-book": "3D hardcover book mockup with realistic shadows and depth, slightly angled perspective showing cover and spine, premium binding details",
-      "laptop": "Digital product displayed on a premium MacBook Pro screen with modern minimalist workspace background, soft ambient lighting",
-      "floating-pages": "Floating paper pages with soft shadows, arranged in an artistic scattered pattern suggesting multiple resources and worksheets",
-      "phone-mockup": "Product displayed on a modern iPhone screen with clean gradient background, suggesting mobile-friendly digital access",
-      "tablet": "Premium iPad displaying the product cover with elegant accessories nearby, suggesting digital toolkit accessibility",
-      "bundle-stack": "Premium digital product bundle display: 3D arrangement showing multiple components - main guide as hardcover book, spiral-bound worksheets, checklist cards, and resource folders stacked together with realistic shadows, suggesting comprehensive value and multiple deliverables",
+      "3d-book": "3D hardcover book mockup with realistic shadows and depth, slightly angled perspective showing cover and spine, premium binding details, generous space around the book",
+      "laptop": "Digital product displayed on a premium MacBook Pro screen with modern minimalist workspace background, soft ambient lighting, clean desk with space around device",
+      "floating-pages": "Floating paper pages with soft individual shadows, arranged in an artistic scattered pattern with generous gaps between each page, suggesting multiple resources and worksheets",
+      "phone-mockup": "Product displayed on a modern iPhone screen with clean gradient background and ample negative space, suggesting mobile-friendly digital access",
+      "tablet": "Premium iPad displaying the product cover with elegant accessories nearby, suggesting digital toolkit accessibility, clean surface with breathing room",
+      "bundle-stack": "Premium digital product bundle hero display: Elegantly spaced 3D arrangement on a clean surface - main guide as thick hardcover book (center-left, prominent), spiral-bound worksheets with visible metal rings (center-right, slightly behind), laminated checklist cards fanned out artfully (front-left), resource folder with visible color-coded document tabs peeking out (front-right), and bonus template sheets scattered artfully (back). CRITICAL: Each element has generous breathing room (15-20% gaps) between components. Individual realistic drop shadows and ambient occlusion for each piece. Clean gradient background with soft studio lighting from top-left and subtle rim lighting for premium depth.",
     };
 
     // Generate bundle component descriptions for richer prompts
@@ -77,7 +93,13 @@ serve(async (req) => {
       ? componentsIncluded 
       : ["Core Guide", "Worksheets", "Checklists", "Resource Lists", "Templates"];
     
-    const componentsText = `Bundle includes: ${bundleComponents.join(", ")}`;
+    // Build detailed component descriptions
+    const detailedComponents = bundleComponents.map(comp => {
+      const key = Object.keys(componentVisuals).find(k => comp.toLowerCase().includes(k.toLowerCase()));
+      return key ? `${comp}: ${componentVisuals[key]}` : comp;
+    }).join("\n- ");
+
+    const componentsText = `Bundle includes:\n- ${detailedComponents}`;
 
     // Detect if this is a bundle/toolkit type product
     const isBundleProduct = mockup === "bundle-stack" || 
@@ -86,16 +108,34 @@ serve(async (req) => {
       title.toLowerCase().includes("system") ||
       title.toLowerCase().includes("blueprint");
 
-    // Build premium bundle-specific prompt
+    // Build premium bundle-specific prompt with enhanced spacing and detail
     const bundlePromptAddition = isBundleProduct ? `
-IMPORTANT BUNDLE VISUALIZATION:
-- Show multiple physical product representations: hardcover book for main guide, spiral notebooks for worksheets, laminated cards for checklists, folder with papers for resources
-- Arrange in an attractive 3D composition suggesting premium value
-- Each component should be visually distinct but color-coordinated
-- Add subtle icons or labels suggesting: "Guide", "Worksheets", "Checklists", "Resources"
-- Include visual elements like checkmarks, progress indicators, or step numbers
-- Style should evoke a premium SaaS dashboard or modern course platform aesthetic
-- Add subtle glows, reflections, and depth shadows for premium feel` : "";
+CRITICAL BUNDLE VISUALIZATION REQUIREMENTS:
+
+SPACING & ARRANGEMENT:
+- Leave GENEROUS negative space between each component (at least 15-20% gaps between items)
+- Fan out components in an elegant arc or diagonal arrangement, minimal overlapping
+- Use rule of thirds composition with main product at key intersection point
+- Components should BREATHE - not crowded or touching each other
+
+DETAILED COMPONENT RENDERING:
+- MAIN GUIDE: Thick 3D hardcover book (200+ pages feel) with embossed title, positioned center-left as hero element
+- WORKSHEETS: Spiral-bound notebook with visible metal binding rings, slightly open showing lined pages with subtle accent colors
+- CHECKLISTS: Laminated cards fanned out like a premium deck of cards, showing checkbox graphics with some checked
+- RESOURCE FOLDER: Modern folder with visible color-coded document tabs peeking out, suggesting organized materials
+- BONUS TEMPLATES: Loose printable sheets or cards scattered artfully in the scene, showing structured layouts
+
+LIGHTING & SHADOWS:
+- Each component casts its OWN individual realistic shadow for depth and separation
+- Soft directional studio lighting from top-left (45 degrees)
+- Subtle rim lighting on edges for premium dimensional feel
+- Ambient occlusion where components meet the surface
+
+SCALE & COMPOSITION:
+- Components should be LARGE and clearly distinguishable, filling the frame generously (80% fill)
+- Clean gradient or subtle textured surface background, not distracting
+- Premium unboxing experience aesthetic
+- Each item should be instantly recognizable as a distinct valuable component` : "";
 
     const prompt = `Create a premium, sales-ready digital product bundle hero image:
 
@@ -120,17 +160,18 @@ ${additionalElements ? `ADDITIONAL ELEMENTS: ${additionalElements}` : ""}
 
 CRITICAL REQUIREMENTS:
 - Ultra-professional, WarriorPlus/Gumroad bestseller quality
-- Clean, uncluttered composition with clear focal point
+- Clean, SPACIOUS composition with clear focal point and breathing room
 - Perfect for sales pages, marketing materials, and social media
 - Eye-catching hero image that converts browsers to buyers
-- 16:9 landscape aspect ratio, optimized for web display
+- 16:9 landscape aspect ratio, optimized for web display at 1920x1080
 - Premium digital product aesthetic with modern design sensibility
-- Subtle lighting, realistic shadows, and depth for professional feel
+- Individual realistic shadows for each component, ambient lighting with rim highlights
 - NO text overlays - clean product visualization only
-- Should look like a $297+ premium digital product
-- Ready for immediate commercial use on any marketplace`;
+- Should look like a $497+ premium digital product bundle
+- Ready for immediate commercial use on any marketplace
+- IMPORTANT: Generous spacing between all elements, no crowding`;
 
-    // Use FAL AI (flux-pro) for high-quality image generation
+    // Use FAL AI (flux-pro) for high-quality image generation with larger dimensions
     const response = await fetch("https://fal.run/fal-ai/flux-pro/v1.1", {
       method: "POST",
       headers: {
@@ -139,7 +180,10 @@ CRITICAL REQUIREMENTS:
       },
       body: JSON.stringify({
         prompt,
-        image_size: "landscape_16_9",
+        image_size: {
+          width: 1920,
+          height: 1080
+        },
         num_images: 1,
         safety_tolerance: "2",
       }),
