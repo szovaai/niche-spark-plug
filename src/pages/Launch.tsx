@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Rocket, PartyPopper } from "lucide-react";
+import { ArrowLeft, Rocket, PartyPopper, Package, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { LaunchHeader } from "@/components/launch/LaunchHeader";
 import { PlatformSelector } from "@/components/launch/PlatformSelector";
@@ -15,8 +17,145 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 
-const Launch = () => {
-  const { id } = useParams<{ id: string }>();
+// Hub view component - shows all toolkits
+const LaunchHub = () => {
+  const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+  const [toolkits, setToolkits] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    fetchToolkits();
+  }, [user, authLoading]);
+
+  const fetchToolkits = async () => {
+    const { data } = await supabase
+      .from("toolkits")
+      .select("id, title, niche, status, ecover_url, created_at")
+      .eq("user_id", user?.id)
+      .order("created_at", { ascending: false });
+
+    setToolkits(data || []);
+    setLoading(false);
+  };
+
+  if (authLoading || loading) {
+    return (
+      <DashboardLayout title="Launch Hub">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  const completedToolkits = toolkits.filter(t => t.status === "complete");
+  const draftToolkits = toolkits.filter(t => t.status === "draft");
+
+  return (
+    <DashboardLayout title="Launch Hub">
+      <div className="max-w-4xl mx-auto space-y-8 pb-12">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold flex items-center justify-center gap-3">
+            <Rocket className="w-8 h-8 text-primary" />
+            Launch Hub
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Select a toolkit to start your launch journey
+          </p>
+        </div>
+
+        {toolkits.length === 0 ? (
+          <Card className="p-12 text-center">
+            <Package className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-xl font-semibold mb-2">No Toolkits Yet</h3>
+            <p className="text-muted-foreground mb-6">
+              Create your first toolkit to start your launch journey.
+            </p>
+            <Button onClick={() => navigate("/create")}>
+              Create Toolkit
+            </Button>
+          </Card>
+        ) : (
+          <div className="space-y-6">
+            {completedToolkits.length > 0 && (
+              <div>
+                <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  <Badge variant="default" className="bg-green-500">Ready to Launch</Badge>
+                </h2>
+                <div className="grid gap-4">
+                  {completedToolkits.map((toolkit) => (
+                    <Card 
+                      key={toolkit.id} 
+                      className="p-4 cursor-pointer hover:border-primary/50 transition-colors"
+                      onClick={() => navigate(`/launch/${toolkit.id}`)}
+                    >
+                      <CardContent className="p-0 flex items-center gap-4">
+                        {toolkit.ecover_url ? (
+                          <img src={toolkit.ecover_url} alt="" className="w-16 h-20 object-cover rounded" />
+                        ) : (
+                          <div className="w-16 h-20 bg-muted rounded flex items-center justify-center">
+                            <Package className="w-6 h-6 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <h3 className="font-semibold">{toolkit.title}</h3>
+                          <p className="text-sm text-muted-foreground">{toolkit.niche}</p>
+                        </div>
+                        <Button variant="ghost" size="icon">
+                          <ArrowRight className="w-5 h-5" />
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {draftToolkits.length > 0 && (
+              <div>
+                <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  <Badge variant="secondary">In Progress</Badge>
+                </h2>
+                <div className="grid gap-4">
+                  {draftToolkits.map((toolkit) => (
+                    <Card 
+                      key={toolkit.id} 
+                      className="p-4 cursor-pointer hover:border-primary/50 transition-colors opacity-70"
+                      onClick={() => navigate(`/create?edit=${toolkit.id}`)}
+                    >
+                      <CardContent className="p-0 flex items-center gap-4">
+                        <div className="w-16 h-20 bg-muted rounded flex items-center justify-center">
+                          <Package className="w-6 h-6 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold">{toolkit.title || "Untitled Toolkit"}</h3>
+                          <p className="text-sm text-muted-foreground">{toolkit.niche || "No niche set"}</p>
+                          <p className="text-xs text-amber-500 mt-1">Complete this toolkit to launch</p>
+                        </div>
+                        <Button variant="outline" size="sm">
+                          Continue Building
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </DashboardLayout>
+  );
+};
+
+// Single toolkit launch view
+const LaunchToolkit = ({ id }: { id: string }) => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   
@@ -28,7 +167,6 @@ const Launch = () => {
   const [progressId, setProgressId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Wait for auth to fully resolve
     if (authLoading) return;
     
     if (!user) {
@@ -36,10 +174,8 @@ const Launch = () => {
       return;
     }
     
-    if (id) {
-      fetchToolkit();
-      fetchProgress();
-    }
+    fetchToolkit();
+    fetchProgress();
   }, [id, user, authLoading]);
 
   const fetchToolkit = async () => {
@@ -172,9 +308,9 @@ const Launch = () => {
   return (
     <DashboardLayout title="Launch Your Toolkit">
       <div className="max-w-4xl mx-auto space-y-8 pb-12">
-        <Button variant="ghost" onClick={() => navigate("/my-toolkits")} className="mb-4">
+        <Button variant="ghost" onClick={() => navigate("/launch")} className="mb-4">
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to My Toolkits
+          Back to Launch Hub
         </Button>
 
         <div className="text-center mb-8">
@@ -220,6 +356,17 @@ const Launch = () => {
       </div>
     </DashboardLayout>
   );
+};
+
+// Main component - routes between hub and single toolkit view
+const Launch = () => {
+  const { id } = useParams<{ id: string }>();
+  
+  if (!id) {
+    return <LaunchHub />;
+  }
+  
+  return <LaunchToolkit id={id} />;
 };
 
 export default Launch;
