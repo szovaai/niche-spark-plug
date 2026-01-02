@@ -7,21 +7,102 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Component visual definitions - each maps to exactly ONE visual object
+const COMPONENT_VISUALS: Record<string, { name: string; promptFragment: string }> = {
+  guide: {
+    name: "Main Guide",
+    promptFragment: "A premium 3D hardcover book with matte finish, the product title visible on spine and front cover, slight shadow beneath"
+  },
+  worksheet: {
+    name: "Worksheet Pack", 
+    promptFragment: "3-5 stacked worksheet pages with subtle grid lines, 'Worksheets' header label visible, optional clipboard backing with realistic depth"
+  },
+  checklist: {
+    name: "Checklist",
+    promptFragment: "Single clean checklist page with 5-7 visible checkmarks in a vertical list, 'Checklist' header at top, minimal text blocks"
+  },
+  resourceList: {
+    name: "Resource List",
+    promptFragment: "Card-style document with icon bullets representing tools and links, clean professional layout, 'Resources' header"
+  },
+  templates: {
+    name: "Templates",
+    promptFragment: "Layered swipe-file style sheets with 'Templates' header bars, visible depth effect between sheets, professional document styling"
+  },
+  quiz: {
+    name: "Quiz",
+    promptFragment: "Interactive quiz card showing question format with multiple choice indicators visible, clean modern design"
+  }
+};
+
+// Layout rules based on component count
+const LAYOUT_RULES: Record<string, { range: [number, number]; promptFragment: string }> = {
+  'hero-centered': {
+    range: [1, 1],
+    promptFragment: 'Single product centered on the dark gradient background, dramatic studio lighting from above, floating with soft shadow beneath, commanding presence'
+  },
+  'side-by-side': {
+    range: [2, 2],
+    promptFragment: 'Two products arranged side by side with slight angles toward each other, balanced composition, equal visual weight, 20% spacing between items'
+  },
+  'triangle': {
+    range: [3, 3],
+    promptFragment: 'Three products arranged in elegant triangle formation, main item (book) slightly elevated at center-top, supporting items at bottom-left and bottom-right, cohesive grouping with 15-20% spacing'
+  },
+  'fan-stack': {
+    range: [4, 5],
+    promptFragment: 'Products arranged in elegant fan spread, main book at center, other items fanning outward with slight overlap, 15-20% spacing between items, individual soft shadows for each item'
+  },
+  'arc': {
+    range: [6, 10],
+    promptFragment: 'All products arranged in sweeping arc formation across the image, main book at center-front, other items curving behind in an elegant arc, glowing accent connecting elements, balanced visual flow'
+  }
+};
+
+// Style presets
+const STYLE_PRESETS: Record<string, string> = {
+  'premium-dark': `BACKGROUND: Rich dark gradient background transitioning from charcoal (#1a1a2e) to near-black (#0a0a0f)
+LIGHTING: Professional soft studio lighting from top-left angle, each item casts its own individual realistic shadow
+ACCENT: Subtle glowing cyan/teal arc (#00d4ff at 30% opacity) connecting and unifying all elements
+FINISH: Premium, high-ticket digital product aesthetic conveying $297+ perceived value
+QUALITY: Ultra high detail, professional product photography style, clean and polished`,
+  
+  'minimal-light': `BACKGROUND: Clean white (#ffffff) to light gray (#f8fafc) gradient, minimalist
+LIGHTING: Even, diffused professional studio lighting from multiple angles
+ACCENT: Clean, crisp shadows only - no glow effects, subtle depth
+FINISH: Modern, minimal SaaS product aesthetic, clean and professional
+QUALITY: High detail, product catalog style photography, sharp and clean`,
+  
+  'warm-premium': `BACKGROUND: Deep charcoal (#1a1a1a) to rich black (#0a0a0a) gradient
+LIGHTING: Dramatic warm lighting from top, golden highlights on edges
+ACCENT: Warm gold (#d4a574) accent highlights and subtle glow connecting elements
+FINISH: Luxury, high-end premium product aesthetic, exclusive feel
+QUALITY: Ultra high detail, luxury product photography style`
+};
+
+function getLayoutPrompt(count: number): string {
+  for (const [, config] of Object.entries(LAYOUT_RULES)) {
+    if (count >= config.range[0] && count <= config.range[1]) {
+      return config.promptFragment;
+    }
+  }
+  return LAYOUT_RULES['fan-stack'].promptFragment;
+}
+
 interface EcoverRequest {
+  // Required
+  productTitle: string;
+  selectedComponents: string[];
+  
+  // Optional styling
+  stylePreset?: string;
+  depthMode?: 'minimal' | 'stacked';
+  
+  // Legacy support
   productName?: string;
-  productType?: string;
-  aesthetic?: string;
-  moodKeywords?: string[];
-  ecoverType?: string;
   toolkitTitle?: string;
-  subtitle?: string;
-  authorName?: string;
   componentsIncluded?: string[];
   coverStyle?: string;
-  mockupType?: string;
-  primaryColor?: string;
-  secondaryColor?: string;
-  additionalElements?: string;
   niche?: string;
 }
 
@@ -31,7 +112,6 @@ serve(async (req) => {
   }
 
   try {
-    // Validate authentication
     const { user, error: authError } = await validateAuth(req);
     if (authError || !user) {
       return unauthorizedResponse(authError || 'Authentication required', corsHeaders);
@@ -40,62 +120,90 @@ serve(async (req) => {
 
     const body = await req.json() as EcoverRequest;
     
-    const title = body.productName || body.toolkitTitle || "Digital Product";
-    const style = body.coverStyle || "professional";
-    const mockup = body.mockupType || body.ecoverType || "premium-bundle";
-    const primary = body.primaryColor || "#00d4ff";
-    const secondary = body.secondaryColor || "#1a1a2e";
-    const niche = body.niche || (body.moodKeywords?.join(", ") || "digital product");
-    const subtitle = body.subtitle || "";
-    const authorName = body.authorName || "";
-    const componentsIncluded = body.componentsIncluded || [];
+    // Handle both new and legacy request formats
+    const title = body.productTitle || body.productName || body.toolkitTitle || "Digital Product";
+    const selectedComponents = body.selectedComponents || body.componentsIncluded || [];
+    const stylePreset = body.stylePreset || 'premium-dark';
+    const depthMode = body.depthMode || 'stacked';
     
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    
     if (!OPENAI_API_KEY) {
       throw new Error("OPENAI_API_KEY is not configured");
     }
 
-    console.log(`Generating ${style} cover for: ${title} (${mockup}) using OpenAI GPT-Image-1`);
+    // CRITICAL: Filter to only valid, selected components
+    const validComponents = selectedComponents.filter(c => COMPONENT_VISUALS[c]);
+    
+    if (validComponents.length === 0) {
+      return new Response(JSON.stringify({ 
+        error: "No valid components selected. Please select at least one component." 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    // Build component list for the prompt
-    const componentsList = componentsIncluded.length > 0 
-      ? componentsIncluded.join(", ")
-      : "Guide, Worksheets, Checklists, Templates, Resources";
+    console.log(`Generating bundle eCover for: ${title}`);
+    console.log(`Selected components (${validComponents.length}): ${validComponents.join(', ')}`);
+    console.log(`Style: ${stylePreset}, Depth: ${depthMode}`);
 
-    // Build a clear, structured prompt for GPT-Image-1 which handles text well
-    const prompt = `Create a premium digital product bundle hero image for sales pages:
+    // Build component prompts - ONLY for selected components
+    const componentPrompts = validComponents.map((id, index) => {
+      const visual = COMPONENT_VISUALS[id];
+      return `${index + 1}. ${visual.name}: ${visual.promptFragment}`;
+    });
+
+    // Get layout based on component count
+    const layoutPrompt = getLayoutPrompt(validComponents.length);
+    
+    // Get style preset
+    const stylePrompt = STYLE_PRESETS[stylePreset] || STYLE_PRESETS['premium-dark'];
+    
+    // Depth mode
+    const depthPrompt = depthMode === 'minimal' 
+      ? 'Flat arrangement with minimal depth, clean and modern, items at similar visual plane'
+      : '3D depth with layered stacking, realistic perspective, items at varying depths creating visual hierarchy';
+
+    // Build the final prompt with strict rules
+    const prompt = `Create a premium digital product bundle hero image for sales pages.
 
 PRODUCT TITLE: "${title}"
-${subtitle ? `SUBTITLE: "${subtitle}"` : ""}
-${authorName ? `BY: ${authorName}` : ""}
 
-VISUAL COMPOSITION:
-- Premium 3D book mockup with the title "${title}" in bold, modern sans-serif typography on the cover
-- MacBook Pro displaying a sleek dashboard UI
-- iPad showing app interface
-- Scattered worksheets and documents
-- All arranged in an elegant arc on a dark gradient surface
+═══════════════════════════════════════════════════════════════
+CRITICAL RULES - MUST FOLLOW EXACTLY:
+═══════════════════════════════════════════════════════════════
+1. ONLY display the EXACT ${validComponents.length} component(s) listed below. NO additional items.
+2. NO placeholder items, filler visuals, laptops, tablets, phones, or dashboards.
+3. NO fake screens, random devices, or generic stock imagery.
+4. Each component maps to exactly ONE visual object as specified.
+5. NO text overlays except the product title on the book cover.
+6. The image must contain ONLY what is listed - nothing more.
+═══════════════════════════════════════════════════════════════
 
-STYLE:
-- Dark gradient background (${secondary} to darker)
-- Glowing ${primary} accent arc connecting elements
-- Soft studio lighting from top-left
-- Individual realistic shadows for each item
-- Premium, high-ticket aesthetic ($497+ value look)
+COMPONENTS TO DISPLAY (ONLY THESE ${validComponents.length} ITEMS):
+${componentPrompts.join('\n')}
 
-TYPOGRAPHY REQUIREMENTS:
-- Title "${title}" must be clearly legible on the book cover
-- Use bold, modern sans-serif font
-- Clean, professional text rendering
-- High contrast against the cover background
+LAYOUT ARRANGEMENT:
+${layoutPrompt}
 
-COMPONENTS SHOWN: ${componentsList}
+DEPTH STYLE:
+${depthPrompt}
 
-FORMAT: 1792x1024 landscape, sales-page hero quality
-AESTHETIC: ${style}, premium SaaS product launch style`;
+VISUAL STYLE:
+${stylePrompt}
 
-    console.log("Sending prompt to OpenAI GPT-Image-1...");
+FORMAT: 1536x1024 landscape, sales-page hero quality
+
+NEGATIVE PROMPT / DO NOT INCLUDE:
+- No laptops, tablets, phones, or screens
+- No generic dashboards or UI mockups
+- No stock photography elements
+- No cartoon or flat icon styles
+- No Canva-style graphics
+- No items not explicitly listed above
+- No additional "bonus" or "value" items`;
+
+    console.log("Sending component-aware prompt to OpenAI GPT-Image-1...");
 
     const response = await fetch("https://api.openai.com/v1/images/generations", {
       method: "POST",
@@ -130,18 +238,10 @@ AESTHETIC: ${style}, premium SaaS product launch style`;
         });
       }
       
-      if (response.status === 400) {
-        console.error("Bad request - prompt may have issues:", errorText);
-        throw new Error("Invalid request to image API");
-      }
-      
       throw new Error(`OpenAI API error: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log("OpenAI response received successfully");
-    
-    // GPT-Image-1 returns base64 by default in b64_json field
     const imageBase64 = data.data?.[0]?.b64_json;
 
     if (!imageBase64) {
@@ -151,12 +251,17 @@ AESTHETIC: ${style}, premium SaaS product launch style`;
 
     const imageUrl = `data:image/png;base64,${imageBase64}`;
 
-    console.log(`Successfully generated ${style} cover for "${title}" with GPT-Image-1`);
+    console.log(`Successfully generated bundle eCover with ${validComponents.length} components`);
 
     return new Response(JSON.stringify({ 
       imageUrl,
-      coverStyle: style,
-      mockupType: mockup,
+      componentsRendered: validComponents,
+      layout: validComponents.length <= 1 ? 'hero-centered' : 
+              validComponents.length === 2 ? 'side-by-side' :
+              validComponents.length === 3 ? 'triangle' :
+              validComponents.length <= 5 ? 'fan-stack' : 'arc',
+      stylePreset,
+      depthMode
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
