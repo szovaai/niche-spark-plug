@@ -20,19 +20,19 @@ serve(async (req) => {
     console.log(`Authenticated user: ${user.id}`);
 
     const { url } = await req.json();
-    const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
-    if (!DEEPSEEK_API_KEY) {
-      throw new Error("DEEPSEEK_API_KEY is not configured");
+    if (!LOVABLE_API_KEY) {
+      throw new Error("LOVABLE_API_KEY is not configured");
     }
 
     console.log("Analyzing competitor URL:", url);
 
     const prompt = `You are an expert digital product analyst and competitor researcher.
 
-Analyze this Etsy listing URL: ${url}
+Analyze this product listing URL: ${url}
 
-Based on typical Etsy digital product listings in this niche, provide a comprehensive competitor analysis. Create realistic data based on the URL structure and common patterns for similar products.
+Based on typical digital product listings in this niche, provide a comprehensive competitor analysis. Create realistic data based on the URL structure and common patterns for similar products.
 
 Provide analysis with:
 
@@ -57,7 +57,7 @@ Provide analysis with:
    - Improved description (150-200 words)
    - Suggested price range
    - 5 key differentiators
-   - 13 optimized Etsy tags
+   - 13 optimized tags
    - Recommended product type
    - Target audience
    - Style vibe
@@ -101,16 +101,16 @@ Return as JSON:
   "actionPlan": []
 }`;
 
-    const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
+    const response = await fetch("https://api.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "deepseek-chat",
+        model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are an expert Etsy product analyst. Return only valid JSON." },
+          { role: "system", content: "You are an expert digital product analyst. Return only valid JSON, no markdown formatting." },
           { role: "user", content: prompt },
         ],
       }),
@@ -118,8 +118,22 @@ Return as JSON:
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("DeepSeek API error:", response.status, errorText);
-      throw new Error(`DeepSeek API error: ${response.status}`);
+      console.error("Lovable AI API error:", response.status, errorText);
+      
+      if (response.status === 429) {
+        return new Response(
+          JSON.stringify({ error: "Rate limit reached. Please try again in a moment." }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ error: "AI credits exhausted. Please try again later." }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      
+      throw new Error(`AI API error: ${response.status}`);
     }
 
     const data = await response.json();
@@ -128,7 +142,9 @@ Return as JSON:
     // Parse JSON from response
     let analysis;
     try {
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      // Remove markdown code blocks if present
+      const cleanContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         analysis = JSON.parse(jsonMatch[0]);
       } else {
@@ -136,10 +152,11 @@ Return as JSON:
       }
     } catch (parseError) {
       console.error("JSON parse error:", parseError);
+      console.error("Raw content:", content);
       throw new Error("Failed to parse AI response");
     }
 
-    console.log("Competitor analysis completed");
+    console.log("Competitor analysis completed successfully");
 
     return new Response(JSON.stringify(analysis), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
