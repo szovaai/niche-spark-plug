@@ -8,6 +8,7 @@ import { PlatformSelector } from "@/components/launch/PlatformSelector";
 import { LaunchStepList } from "@/components/launch/LaunchStepList";
 import { QuickExport } from "@/components/launch/QuickExport";
 import { OutsourceSection } from "@/components/launch/OutsourceSection";
+import { FreeHostingSection } from "@/components/launch/FreeHostingSection";
 import { LaunchPlatform, LaunchChecklist, ToolkitLaunchData } from "@/types/launch";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -197,6 +198,9 @@ const Launch = () => {
             onStepToggle={handleStepToggle}
           />
         )}
+
+        {/* Free Hosting Section */}
+        <FreeHostingSection />
 
         {/* Outsource Section */}
         <OutsourceSection platform={selectedPlatform} />
