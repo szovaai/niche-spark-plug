@@ -65,3 +65,6 @@ verify_jwt = true
 
 [functions.generate-offer-details]
 verify_jwt = true
+
+[functions.generate-toolkit-title]
+verify_jwt = true
