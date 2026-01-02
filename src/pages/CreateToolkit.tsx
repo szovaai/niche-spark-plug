@@ -30,6 +30,7 @@ import ContentControlsBar from "@/components/toolkit/ContentControlsBar";
 import ComponentRow, { ComponentStatus } from "@/components/toolkit/ComponentRow";
 import ThesisFrameworkCard from "@/components/toolkit/ThesisFrameworkCard";
 import GuideSectionBuilder from "@/components/toolkit/GuideSectionBuilder";
+import ChapterOutlineBuilder, { CustomChapter, getDefaultChapters } from "@/components/toolkit/ChapterOutlineBuilder";
 import { ToolkitTemplate } from "@/data/toolkitTemplates";
 
 const steps = [
@@ -117,6 +118,11 @@ const CreateToolkit = () => {
     initialState?.guideSections || [...GUIDE_SECTION_TEMPLATES]
   );
   const [generatingSectionId, setGeneratingSectionId] = useState<string | null>(null);
+
+  // Chapter Outline Builder state
+  const [customChapters, setCustomChapters] = useState<CustomChapter[]>(
+    initialState?.customChapters || getDefaultChapters()
+  );
 
   // Component metadata
   const componentMeta: Record<string, { title: string; description: string; estimatedSize: string }> = {
@@ -231,9 +237,10 @@ const CreateToolkit = () => {
       writingStyle,
       thesisMode,
       lockFramework,
+      customChapters,
     };
     localStorage.setItem(WIZARD_STORAGE_KEY, JSON.stringify(progressData));
-  }, [currentStep, toolkitId, selectedTemplate, title, subtitle, niche, targetAudience, authorName, authorTagline, authorBio, logoUrl, ecoverUrl, components, content, salesLetter, emailSequence, upsell, guideSections, thesis, writingStyle, thesisMode, lockFramework]);
+  }, [currentStep, toolkitId, selectedTemplate, title, subtitle, niche, targetAudience, authorName, authorTagline, authorBio, logoUrl, ecoverUrl, components, content, salesLetter, emailSequence, upsell, guideSections, thesis, writingStyle, thesisMode, lockFramework, customChapters]);
 
   // Clear saved progress when toolkit is completed
   const clearSavedProgress = () => {
@@ -872,6 +879,16 @@ const CreateToolkit = () => {
                     onSimplify={() => handleImproveThesis('simplify')}
                     isImproving={isImprovingThesis}
                   />
+
+                  {/* Chapter Outline Builder - Customize structure before generating */}
+                  {components.guide && (
+                    <ChapterOutlineBuilder
+                      chapters={customChapters}
+                      onChaptersChange={setCustomChapters}
+                      niche={niche}
+                      targetAudience={targetAudience}
+                    />
+                  )}
 
                   {/* Controls Bar */}
                   <ContentControlsBar
