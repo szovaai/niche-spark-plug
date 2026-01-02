@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -124,6 +124,9 @@ const CreateToolkit = () => {
     initialState?.customChapters || getDefaultChapters()
   );
 
+  // Flag to prevent save during reset
+  const isResettingRef = useRef(false);
+
   // Component metadata
   const componentMeta: Record<string, { title: string; description: string; estimatedSize: string }> = {
     guide: { title: "Main Guide", description: "Core educational content with sections", estimatedSize: "Est. ~25 pages" },
@@ -214,6 +217,9 @@ const CreateToolkit = () => {
 
   // Save progress to localStorage whenever state changes
   useEffect(() => {
+    // Don't save if we're in the process of resetting
+    if (isResettingRef.current) return;
+    
     const progressData = {
       currentStep,
       toolkitId,
@@ -354,12 +360,31 @@ const CreateToolkit = () => {
   const handleTemplateSelect = (template: ToolkitTemplate) => {
     setSelectedTemplate(template.id);
     
+    // ALWAYS reset chapters, thesis, and guide sections for a clean slate
+    setCustomChapters(getDefaultChapters());
+    setThesis("");
+    setGuideSections([...GUIDE_SECTION_TEMPLATES]);
+    
     // Pre-populate fields from template (except for "blank")
     if (template.id !== "blank") {
       if (template.suggestedNiche) setNiche(template.suggestedNiche);
       if (template.suggestedTitle) setTitle(template.suggestedTitle);
       if (template.suggestedAudience) setTargetAudience(template.suggestedAudience);
       setComponents(template.components);
+    } else {
+      // For blank template, also reset form fields
+      setNiche("");
+      setTitle("");
+      setTargetAudience("");
+      setSubtitle("");
+      setComponents({
+        guide: true,
+        worksheet: false,
+        checklist: false,
+        resourceList: false,
+        templates: false,
+        quiz: false,
+      });
     }
   };
 
@@ -623,6 +648,7 @@ const CreateToolkit = () => {
                   variant="ghost"
                   size="sm"
                   onClick={() => {
+                    isResettingRef.current = true;
                     clearSavedProgress();
                     window.location.reload();
                   }}
