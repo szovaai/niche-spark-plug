@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { FREE_HOSTING_PLATFORMS, FreeHostingPlatform } from "@/data/freeHostingPlatforms";
+import { HostingPickerQuiz } from "./HostingPickerQuiz";
 import { toast } from "sonner";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -172,11 +173,14 @@ export const FreeHostingSection = () => {
 
         <CollapsibleContent>
           <CardContent className="pt-0 px-6 pb-6">
+            {/* Hosting Picker Quiz */}
+            <div className="mb-6">
+              <HostingPickerQuiz />
+            </div>
+
             <div className="mb-6 p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-primary/10 border border-blue-500/20">
               <p className="text-sm text-muted-foreground">
-                You've exported your sales letter as HTML. Now put it online so customers can see it! 
-                All these platforms are <span className="text-foreground font-medium">100% free to start</span> — 
-                pick one and follow the quick steps.
+                Or browse all platforms below — all are <span className="text-foreground font-medium">100% free to start</span>.
               </p>
             </div>
 
