@@ -12,10 +12,10 @@ serve(async (req) => {
 
   try {
     const { nicheName } = await req.json();
-    const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
-    if (!DEEPSEEK_API_KEY) {
-      throw new Error("DEEPSEEK_API_KEY is not configured");
+    if (!LOVABLE_API_KEY) {
+      throw new Error("LOVABLE_API_KEY is not configured");
     }
 
     console.log(`Finding gaps for niche: ${nicheName}`);
@@ -24,7 +24,7 @@ serve(async (req) => {
 
 HUMAN TONE: Write naturally, use contractions, vary sentence length, avoid corporate buzzwords.
 
-Return a JSON object with this EXACT structure:
+Return a JSON object with this EXACT structure (no markdown, just raw JSON):
 {
   "nicheName": "string",
   "marketOverview": {
@@ -89,17 +89,17 @@ Return a JSON object with this EXACT structure:
 
 Provide 3-5 items for each array. Be specific and actionable.`;
 
-    const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
+    const response = await fetch("https://api.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "deepseek-chat",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: `Analyze this niche for digital products and find opportunity gaps: "${nicheName}"\n\nThink about what products exist, what's missing, who's being ignored, and where the quick wins are.` }
+          { role: "user", content: `Analyze this niche for digital products and find opportunity gaps: "${nicheName}"\n\nThink about what products exist, what's missing, who's being ignored, and where the quick wins are. Return only valid JSON.` }
         ],
         temperature: 0.7,
       }),
@@ -107,21 +107,21 @@ Provide 3-5 items for each array. Be specific and actionable.`;
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("DeepSeek API error:", response.status, errorText);
+      console.error("Lovable AI API error:", response.status, errorText);
       
       if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limits exceeded, please try again later." }), {
+        return new Response(JSON.stringify({ error: "Rate limit reached. Please try again in a moment." }), {
           status: 429,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Payment required, please add funds." }), {
+        return new Response(JSON.stringify({ error: "AI credits exhausted. Please try again later." }), {
           status: 402,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      throw new Error("DeepSeek API error");
+      throw new Error(`AI API error: ${response.status}`);
     }
 
     const data = await response.json();
@@ -131,9 +131,11 @@ Provide 3-5 items for each array. Be specific and actionable.`;
       throw new Error("No content in response");
     }
 
-    // Parse JSON from response
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    // Parse JSON from response - handle markdown code blocks
+    const cleanContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
+      console.error("Could not parse JSON from response:", content);
       throw new Error("Could not parse JSON from response");
     }
 
