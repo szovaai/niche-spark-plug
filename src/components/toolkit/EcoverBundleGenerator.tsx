@@ -37,6 +37,11 @@ interface EcoverBundleGeneratorProps {
   content: ToolkitContent;
   onEcoverGenerated: (url: string) => void;
   existingEcover?: string | null;
+  // NEW: Branding data for AI-powered prompt generation
+  niche?: string;
+  targetAudience?: string;
+  thesis?: string;
+  writingStyle?: string;
 }
 
 /**
