@@ -50,15 +50,17 @@ interface ChapterOutlineBuilderProps {
   targetAudience: string;
 }
 
-const DEFAULT_CHAPTERS: CustomChapter[] = CHAPTER_ORDER.map((id, index) => ({
-  id,
-  number: index + 1,
-  title: CHAPTER_PROMPTS[id].title,
-  purpose: CHAPTER_PROMPTS[id].purpose,
-  description: CHAPTER_PROMPTS[id].description,
-  isCustom: false,
-  originalId: id,
-}));
+// Factory function to create fresh default chapters (avoid stale references)
+const createDefaultChapters = (): CustomChapter[] => 
+  CHAPTER_ORDER.map((id, index) => ({
+    id,
+    number: index + 1,
+    title: CHAPTER_PROMPTS[id].title,
+    purpose: CHAPTER_PROMPTS[id].purpose,
+    description: CHAPTER_PROMPTS[id].description,
+    isCustom: false,
+    originalId: id,
+  }));
 
 const ChapterOutlineBuilder = ({
   chapters,
@@ -138,7 +140,8 @@ const ChapterOutlineBuilder = ({
   };
 
   const handleResetToDefault = () => {
-    onChaptersChange(DEFAULT_CHAPTERS);
+    // Always create a fresh copy to ensure React detects the change
+    onChaptersChange(createDefaultChapters());
   };
 
   // Replace placeholders in title with actual niche/audience
@@ -462,8 +465,8 @@ const ChapterOutlineBuilder = ({
 
 export default ChapterOutlineBuilder;
 
-// Helper to get default chapters
-export const getDefaultChapters = (): CustomChapter[] => DEFAULT_CHAPTERS;
+// Helper to get default chapters - always returns a fresh copy
+export const getDefaultChapters = (): CustomChapter[] => createDefaultChapters();
 
 // Helper to convert custom chapters to chapter prompts for generation
 export const convertToChapterPrompts = (
