@@ -452,6 +452,7 @@ export type Database = {
           niche: string
           sales_letter: string | null
           sales_offer_details: Json | null
+          salesletter_html: string | null
           salesletter_polished: string | null
           salesletter_raw: string | null
           salesletter_step: string | null
@@ -479,6 +480,7 @@ export type Database = {
           niche: string
           sales_letter?: string | null
           sales_offer_details?: Json | null
+          salesletter_html?: string | null
           salesletter_polished?: string | null
           salesletter_raw?: string | null
           salesletter_step?: string | null
@@ -506,6 +508,7 @@ export type Database = {
           niche?: string
           sales_letter?: string | null
           sales_offer_details?: Json | null
+          salesletter_html?: string | null
           salesletter_polished?: string | null
           salesletter_raw?: string | null
           salesletter_step?: string | null

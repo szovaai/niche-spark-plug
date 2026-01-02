@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Mail, RefreshCw, Copy, Download, Check, Sparkles, ArrowRight, RotateCcw, Zap, Loader2 } from "lucide-react";
+import { Mail, RefreshCw, Copy, Download, Check, Sparkles, ArrowRight, RotateCcw, Zap, Loader2, Code, Eye, ExternalLink, FileText } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,10 +10,11 @@ import { Badge } from "@/components/ui/badge";
 import { ToolkitComponents, ToolkitContent, GuideSection } from "@/types/toolkit";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { generateSalesLetterHTML } from "@/lib/salesLetterExport";
+import { generateSalesLetterHTML, openLivePreview, downloadAsFile, PageTemplate } from "@/lib/salesLetterExport";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
 import { sanitizeHTML } from "@/lib/sanitize";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface SalesLetterGeneratorProps {
   title: string;
@@ -25,16 +26,21 @@ interface SalesLetterGeneratorProps {
   existingSalesLetter?: string;
   price?: number;
   authorName?: string;
-  // New props for auto-fill
   thesis?: string;
   guideSections?: GuideSection[];
   content?: ToolkitContent;
-  // Persisted state
   savedOfferDetails?: PromptBoxData;
   savedRawDraft?: string;
   savedPolishedLetter?: string;
   savedStep?: Phase;
-  onStateChange?: (state: { offerDetails: PromptBoxData; rawDraft: string; polishedLetter: string; step: Phase }) => void;
+  savedHtml?: string;
+  onStateChange?: (state: { 
+    offerDetails: PromptBoxData; 
+    rawDraft: string; 
+    polishedLetter: string; 
+    step: Phase;
+    html: string;
+  }) => void;
 }
 
 interface PromptBoxData {
@@ -46,6 +52,7 @@ interface PromptBoxData {
 }
 
 type Phase = 'input' | 'raw' | 'polished';
+type ViewMode = 'preview' | 'source';
 
 const SalesLetterGenerator = ({ 
   title, 
@@ -64,15 +71,19 @@ const SalesLetterGenerator = ({
   savedRawDraft,
   savedPolishedLetter,
   savedStep,
+  savedHtml,
   onStateChange,
 }: SalesLetterGeneratorProps) => {
   const [currentPhase, setCurrentPhase] = useState<Phase>(savedStep || (existingSalesLetter ? 'polished' : 'input'));
+  const [viewMode, setViewMode] = useState<ViewMode>('preview');
+  const [selectedTemplate, setSelectedTemplate] = useState<PageTemplate>('warriorplus');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isFillingFromToolkit, setIsFillingFromToolkit] = useState(false);
   const [isOneClickGenerating, setIsOneClickGenerating] = useState(false);
   const [oneClickStep, setOneClickStep] = useState<1 | 2 | 3 | null>(null);
   const [rawDraft, setRawDraft] = useState(savedRawDraft || "");
   const [polishedLetter, setPolishedLetter] = useState(savedPolishedLetter || existingSalesLetter || "");
+  const [htmlOutput, setHtmlOutput] = useState(savedHtml || "");
   const [copied, setCopied] = useState(false);
   const [promptBoxOpen, setPromptBoxOpen] = useState(true);
   
@@ -84,6 +95,22 @@ const SalesLetterGenerator = ({
     bonusesIncluded: "",
   });
 
+  // Generate HTML whenever polished letter or template changes
+  useEffect(() => {
+    if (polishedLetter) {
+      const html = generateSalesLetterHTML({
+        title,
+        subtitle,
+        salesLetter: polishedLetter,
+        niche,
+        targetAudience,
+        price,
+        template: selectedTemplate,
+      });
+      setHtmlOutput(html);
+    }
+  }, [polishedLetter, selectedTemplate, title, subtitle, niche, targetAudience, price]);
+
   // Persist state changes
   useEffect(() => {
     if (onStateChange) {
@@ -92,15 +119,15 @@ const SalesLetterGenerator = ({
         rawDraft,
         polishedLetter,
         step: currentPhase,
+        html: htmlOutput,
       });
     }
-  }, [promptBoxData, rawDraft, polishedLetter, currentPhase, onStateChange]);
+  }, [promptBoxData, rawDraft, polishedLetter, currentPhase, htmlOutput, onStateChange]);
 
   const updatePromptBox = (field: keyof PromptBoxData, value: string) => {
     setPromptBoxData(prev => ({ ...prev, [field]: value }));
   };
 
-  // Fill from Toolkit using AI
   const fillFromToolkit = async () => {
     if (!title || !niche) {
       toast.error("Please ensure the toolkit has a title and niche defined.");
@@ -221,7 +248,6 @@ const SalesLetterGenerator = ({
     }
   };
 
-  // One-Click Generate (Fill → Raw → Polish with DCP)
   const oneClickGenerate = async () => {
     if (!title || !niche) {
       toast.error("Please ensure the toolkit has a title and niche defined.");
@@ -231,7 +257,6 @@ const SalesLetterGenerator = ({
     setIsOneClickGenerating(true);
     
     try {
-      // Step 1: Fill from Toolkit (if empty)
       const hasOfferDetails = promptBoxData.whatProductIs || promptBoxData.mainProblem;
       let currentPromptData = promptBoxData;
       
@@ -265,7 +290,6 @@ const SalesLetterGenerator = ({
         }
       }
 
-      // Step 2: Generate Raw Draft
       setOneClickStep(2);
       toast.info("Step 2/3: Generating raw draft...");
       
@@ -291,7 +315,6 @@ const SalesLetterGenerator = ({
 
       setRawDraft(rawData.salesLetter);
 
-      // Step 3: Polish with DigiStream Conversion Pattern
       setOneClickStep(3);
       toast.info("Step 3/3: Applying DigiStream Conversion Pattern...");
       
@@ -337,32 +360,39 @@ const SalesLetterGenerator = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleDownloadHTML = (content: string, version: string) => {
-    const html = generateSalesLetterHTML({
-      title,
-      subtitle,
-      salesLetter: content,
-      niche,
-      targetAudience,
-    });
-    
-    const blob = new Blob([html], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${title.replace(/\s+/g, "-").toLowerCase()}-${version}-sales-page.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast.success(`${version} sales page HTML downloaded!`);
+  const handleDownloadHTML = () => {
+    const filename = `${title.replace(/\s+/g, "-").toLowerCase()}-sales-page.html`;
+    downloadAsFile(htmlOutput, filename, 'text/html');
+    toast.success("HTML file downloaded!");
+  };
+
+  const handleDownloadTXT = () => {
+    // Strip HTML tags for plain text
+    const plainText = polishedLetter
+      .replace(/<[^>]*>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/\n\s*\n/g, '\n\n')
+      .trim();
+    const filename = `${title.replace(/\s+/g, "-").toLowerCase()}-sales-letter.txt`;
+    downloadAsFile(plainText, filename, 'text/plain');
+    toast.success("Text file downloaded!");
+  };
+
+  const handleLivePreview = () => {
+    openLivePreview(htmlOutput);
+    toast.success("Opening live preview in new tab...");
   };
 
   const startOver = () => {
     setCurrentPhase('input');
     setRawDraft("");
     setPolishedLetter("");
+    setHtmlOutput("");
     setPromptBoxOpen(true);
+    setViewMode('preview');
     onSalesLetterGenerated("");
   };
 
@@ -399,7 +429,6 @@ const SalesLetterGenerator = ({
     </div>
   );
 
-  // Auto-fill bar component
   const AutoFillBar = () => (
     <div className="flex items-center justify-between p-4 bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 rounded-lg mb-4">
       <div className="flex items-center gap-3">
@@ -550,7 +579,6 @@ const SalesLetterGenerator = ({
         dangerouslySetInnerHTML={{ __html: sanitizeHTML(rawDraft) }}
       />
 
-      {/* DCP Info Card */}
       <div className="border rounded-lg p-4 bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
         <div className="flex items-start gap-3">
           <div className="p-2 bg-primary/10 rounded-lg shrink-0">
@@ -617,105 +645,207 @@ const SalesLetterGenerator = ({
           DigiStream Conversion Pattern™
         </Badge>
       </div>
+
+      {/* View Mode Toggle */}
+      <div className="flex items-center justify-between gap-4 p-3 bg-muted/30 rounded-lg">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium">View Mode:</span>
+          <div className="flex rounded-lg border bg-background p-1">
+            <Button
+              variant={viewMode === 'preview' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('preview')}
+              className="gap-2 h-8"
+            >
+              <Eye className="w-4 h-4" />
+              Preview
+            </Button>
+            <Button
+              variant={viewMode === 'source' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('source')}
+              className="gap-2 h-8"
+            >
+              <Code className="w-4 h-4" />
+              Source Code
+            </Button>
+          </div>
+        </div>
+
+        {viewMode === 'source' && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Template:</span>
+            <Select value={selectedTemplate} onValueChange={(v) => setSelectedTemplate(v as PageTemplate)}>
+              <SelectTrigger className="w-[180px] h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="warriorplus">WarriorPlus (Dark)</SelectItem>
+                <SelectItem value="saas">Clean SaaS (Light)</SelectItem>
+                <SelectItem value="simple">Simple Checkout</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+      </div>
       
-      <Tabs defaultValue="preview" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="preview">Preview</TabsTrigger>
-          <TabsTrigger value="source">Source Code</TabsTrigger>
-          <TabsTrigger value="compare" disabled={!rawDraft}>Compare</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="preview" className="mt-4">
-          <div 
-            className="prose prose-sm max-w-none dark:prose-invert border rounded-lg p-6 max-h-[400px] overflow-y-auto bg-background"
-            dangerouslySetInnerHTML={{ __html: sanitizeHTML(polishedLetter) }}
-          />
-        </TabsContent>
-        
-        <TabsContent value="source" className="mt-4">
-          <Textarea 
-            value={polishedLetter} 
-            onChange={(e) => {
-              setPolishedLetter(e.target.value);
-              onSalesLetterGenerated(e.target.value);
-            }} 
-            rows={15} 
-            className="font-mono text-sm" 
-          />
-        </TabsContent>
-        
-        <TabsContent value="compare" className="mt-4">
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="font-medium text-sm">Raw Draft</span>
-                <Badge variant="secondary" className="text-xs">Before</Badge>
-              </div>
+      {viewMode === 'preview' ? (
+        <>
+          <Tabs defaultValue="preview" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="preview">Formatted</TabsTrigger>
+              <TabsTrigger value="compare" disabled={!rawDraft}>Compare</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="preview" className="mt-4">
               <div 
-                className="prose prose-sm max-w-none dark:prose-invert border rounded-lg p-4 max-h-[300px] overflow-y-auto bg-muted/30 text-sm"
-                dangerouslySetInnerHTML={{ __html: sanitizeHTML(rawDraft) }}
-              />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="font-medium text-sm">DCP Applied</span>
-                <Badge className="text-xs bg-emerald-500/10 text-emerald-600">After</Badge>
-              </div>
-              <div 
-                className="prose prose-sm max-w-none dark:prose-invert border rounded-lg p-4 max-h-[300px] overflow-y-auto bg-background text-sm"
+                className="prose prose-sm max-w-none dark:prose-invert border rounded-lg p-6 max-h-[400px] overflow-y-auto bg-background"
                 dangerouslySetInnerHTML={{ __html: sanitizeHTML(polishedLetter) }}
               />
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+            </TabsContent>
+            
+            <TabsContent value="compare" className="mt-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="font-medium text-sm">Raw Draft</span>
+                    <Badge variant="secondary" className="text-xs">Before</Badge>
+                  </div>
+                  <div 
+                    className="prose prose-sm max-w-none dark:prose-invert border rounded-lg p-4 max-h-[300px] overflow-y-auto bg-muted/30 text-sm"
+                    dangerouslySetInnerHTML={{ __html: sanitizeHTML(rawDraft) }}
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="font-medium text-sm">DCP Applied</span>
+                    <Badge className="text-xs bg-emerald-500/10 text-emerald-600">After</Badge>
+                  </div>
+                  <div 
+                    className="prose prose-sm max-w-none dark:prose-invert border rounded-lg p-4 max-h-[300px] overflow-y-auto bg-background text-sm"
+                    dangerouslySetInnerHTML={{ __html: sanitizeHTML(polishedLetter) }}
+                  />
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
 
-      {/* Re-polish option */}
-      <div className="flex justify-center">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={() => polishWithDCP()}
-          disabled={isGenerating}
-          className="gap-2 text-muted-foreground"
-        >
-          {isGenerating ? (
-            <RefreshCw className="w-4 h-4 animate-spin" />
-          ) : (
-            <RefreshCw className="w-4 h-4" />
-          )}
-          Re-polish with DCP
-        </Button>
-      </div>
-      
-      <div className="flex flex-wrap justify-center gap-3">
-        <Button 
-          variant="outline" 
-          onClick={() => handleCopy(polishedLetter)} 
-          className="gap-2"
-        >
-          {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-          {copied ? "Copied!" : "Copy"}
-        </Button>
-        
-        <Button 
-          variant="outline" 
-          onClick={() => handleDownloadHTML(polishedLetter, "final")} 
-          className="gap-2"
-        >
-          <Download className="w-4 h-4" />
-          Download HTML
-        </Button>
-        
-        <Button 
-          variant="ghost" 
-          onClick={startOver} 
-          className="gap-2 text-muted-foreground"
-        >
-          <RotateCcw className="w-4 h-4" />
-          Start Over
-        </Button>
-      </div>
+          <div className="flex justify-center">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => polishWithDCP()}
+              disabled={isGenerating}
+              className="gap-2 text-muted-foreground"
+            >
+              {isGenerating ? (
+                <RefreshCw className="w-4 h-4 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4" />
+              )}
+              Re-polish with DCP
+            </Button>
+          </div>
+          
+          <div className="flex flex-wrap justify-center gap-3">
+            <Button 
+              variant="outline" 
+              onClick={() => handleCopy(polishedLetter)} 
+              className="gap-2"
+            >
+              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              {copied ? "Copied!" : "Copy"}
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              onClick={handleDownloadHTML} 
+              className="gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Download HTML
+            </Button>
+            
+            <Button 
+              variant="ghost" 
+              onClick={startOver} 
+              className="gap-2 text-muted-foreground"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Start Over
+            </Button>
+          </div>
+        </>
+      ) : (
+        /* Source Code View */
+        <div className="space-y-4">
+          <Textarea 
+            value={htmlOutput} 
+            onChange={(e) => setHtmlOutput(e.target.value)} 
+            rows={18} 
+            className="font-mono text-xs leading-relaxed" 
+          />
+
+          <div className="flex flex-wrap justify-center gap-3">
+            <Button 
+              variant="outline" 
+              onClick={() => handleCopy(htmlOutput)} 
+              className="gap-2"
+            >
+              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              Copy HTML
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              onClick={handleDownloadHTML} 
+              className="gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Download .html
+            </Button>
+
+            <Button 
+              variant="outline" 
+              onClick={handleDownloadTXT} 
+              className="gap-2"
+            >
+              <FileText className="w-4 h-4" />
+              Download .txt
+            </Button>
+
+            <Button 
+              variant="outline" 
+              onClick={handleLivePreview} 
+              className="gap-2"
+            >
+              <ExternalLink className="w-4 h-4" />
+              Live Preview
+            </Button>
+            
+            <Button 
+              variant="ghost" 
+              onClick={() => {
+                const html = generateSalesLetterHTML({
+                  title,
+                  subtitle,
+                  salesLetter: polishedLetter,
+                  niche,
+                  targetAudience,
+                  price,
+                  template: selectedTemplate,
+                });
+                setHtmlOutput(html);
+                toast.success("Reset to template!");
+              }} 
+              className="gap-2 text-muted-foreground"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Reset to Template
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -734,7 +864,6 @@ const SalesLetterGenerator = ({
         {/* Phase 1: Input */}
         {currentPhase === 'input' && (
           <div className="space-y-6">
-            {/* One-Click Generate Button */}
             <div className="text-center p-6 border-2 border-dashed border-primary/30 rounded-lg bg-primary/5">
               <Zap className="w-10 h-10 mx-auto text-primary mb-3" />
               <h3 className="font-semibold text-lg mb-2">Recommended: One-Click Generate</h3>

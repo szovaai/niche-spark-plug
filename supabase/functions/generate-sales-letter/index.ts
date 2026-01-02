@@ -98,6 +98,140 @@ repeatable system that works across all traffic types.
     - Trust the value to speak for itself
 `;
 
+// WarriorPlus-style HTML structure prompt
+const WARRIORPLUS_HTML_STRUCTURE = `
+=== OUTPUT FORMAT: WARRIORPLUS-STYLE HTML ===
+
+Generate the sales letter as CLEAN HTML that matches the WarriorPlus dark theme aesthetic.
+
+REQUIRED HTML STRUCTURE (use these exact class names and structure):
+
+1. HERO CARD:
+<div class="card" style="text-align:center;">
+  <h2>[Punchy headline - problem + solution in one line]</h2>
+  <p>[Subheadline expanding on headline]</p>
+</div>
+
+2. PROBLEM SECTION:
+<div class="card">
+  <h2 class="section-title">Here's the frustrating truth about [topic]</h2>
+  <p>[Relatable problem description - empathetic, not dramatic]</p>
+  <div class="callout">
+    <p><strong>[Key insight or reframe]</strong></p>
+  </div>
+</div>
+
+3. REAL PROBLEM SECTION:
+<div class="card">
+  <h2 class="section-title">The real problem: [root cause]</h2>
+  <p>[Explain structural issue]</p>
+  <ul>
+    <li><strong>[Signal 1]</strong> - description</li>
+    <li><strong>[Signal 2]</strong> - description</li>
+    <li><strong>[Signal 3]</strong> - description</li>
+  </ul>
+</div>
+
+4. THE SHIFT (Framework):
+<div class="card">
+  <h2 class="section-title">The Shift: [New mental model]</h2>
+  <p>[Explain the paradigm shift]</p>
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-marker">1</div>
+      <div class="timeline-content">
+        <div class="timeline-title">[Step 1 Name]</div>
+        <p class="muted">[Step 1 description]</p>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-marker">2</div>
+      <div class="timeline-content">
+        <div class="timeline-title">[Step 2 Name]</div>
+        <p class="muted">[Step 2 description]</p>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-marker">3</div>
+      <div class="timeline-content">
+        <div class="timeline-title">[Step 3 Name]</div>
+        <p class="muted">[Step 3 description]</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+5. WHAT'S INCLUDED (Grid):
+<div class="card">
+  <h2 class="section-title">What You'll Get Inside</h2>
+  <p class="muted">Everything is designed to be used immediately.</p>
+  <ul>
+    <li><strong>[Component 1]</strong> — [benefit]</li>
+    <li><strong>[Component 2]</strong> — [benefit]</li>
+    <li><strong>[Component 3]</strong> — [benefit]</li>
+  </ul>
+</div>
+
+6. USAGE PATH (Launch Plan):
+<div class="card">
+  <h2 class="section-title">How to Use It (Fast Implementation)</h2>
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-marker">1</div>
+      <div class="timeline-content">
+        <div class="timeline-title">Day 1</div>
+        <p class="muted">[Quick win action]</p>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-marker">2</div>
+      <div class="timeline-content">
+        <div class="timeline-title">Day 2</div>
+        <p class="muted">[Next step]</p>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-marker">3</div>
+      <div class="timeline-content">
+        <div class="timeline-title">Day 3</div>
+        <p class="muted">[Expected result]</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+7. FIT FILTER (Two Columns):
+<div class="card">
+  <h2 class="section-title">Who This Is For (and Who It's Not)</h2>
+  <div class="two-col">
+    <div class="fit-yes">
+      <h3>✓ This is for you if...</h3>
+      <ul>
+        <li>[Qualifier 1]</li>
+        <li>[Qualifier 2]</li>
+        <li>[Qualifier 3]</li>
+      </ul>
+    </div>
+    <div class="fit-no">
+      <h3>✗ This is NOT for you if...</h3>
+      <ul>
+        <li>[Disqualifier 1]</li>
+        <li>[Disqualifier 2]</li>
+        <li>[Disqualifier 3]</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+CRITICAL RULES FOR HTML OUTPUT:
+- Use ONLY the class names shown above (card, section-title, callout, timeline, timeline-item, timeline-marker, timeline-content, timeline-title, muted, two-col, fit-yes, fit-no)
+- DO NOT use numbered lists like "1. Step one 2. Step two" - use the timeline structure instead
+- Keep paragraphs short (2-3 sentences max)
+- Use <strong> for emphasis on key phrases
+- Use <ul><li> for bullet lists with the ✓ styling
+- The output should look like a REAL sales page, not a numbered document
+`;
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -170,22 +304,27 @@ This should feel like: "Here's what this is and why it might help you."
 
 Format as clean HTML with <p>, <h2>, <ul>, <li> tags. Keep paragraphs short (2-3 sentences max).`;
 
-    // PHASE 2: POLISH - Apply DigiStream Conversion Pattern WITHOUT re-interpreting the offer
+    // PHASE 2: POLISH - Apply DigiStream Conversion Pattern with WarriorPlus HTML structure
     } else if (phase === "polish") {
       systemPrompt = `You are a conversion-focused copywriter applying the DigiStream Conversion Pattern to an existing draft.
 
 You enhance structure and persuasion WITHOUT changing what the offer is.
 You NEVER add fake testimonials, made-up statistics, or invented claims.
 You work ONLY with the raw draft provided - do not re-interpret or change the core offer.
+You output clean, structured HTML that matches the WarriorPlus dark theme aesthetic.
 
-TONE: Calm confidence. Clarity over hype. Trust over urgency.`;
+TONE: Calm confidence. Clarity over hype. Trust over urgency.
+STYLE: Modern, professional, card-based sections with clear visual hierarchy.`;
 
       prompt = `Take this EXACT raw draft and restructure it using the DigiStream Conversion Pattern (DCP).
+Output as WarriorPlus-style HTML with proper card sections.
 
 === RAW DRAFT (preserve the offer EXACTLY as described) ===
 ${rawDraft}
 
 ${DCP_FRAMEWORK}
+
+${WARRIORPLUS_HTML_STRUCTURE}
 
 === CRITICAL RULES ===
 1. Keep the SAME offer, price, and components from the raw draft - DO NOT change them
@@ -193,12 +332,9 @@ ${DCP_FRAMEWORK}
 3. DO NOT use hype words like "breakthrough", "revolutionary", "secret", "amazing"
 4. Apply calm confidence throughout - not excitement or pressure
 5. Use the transformation language from the raw draft
-6. Format as professional HTML with:
-   - Clear section headings (h2, h3)
-   - Styled bullet points for benefits
-   - A prominent "Get Instant Access" button section
-   - Visual hierarchy with subheadlines
-   - Clean, readable paragraphs (2-3 sentences max)
+6. Format using the EXACT HTML structure shown above with card classes
+7. NEVER use numbered lists like "1. First 2. Second" - use timeline structure instead
+8. Make it look like a REAL WarriorPlus sales page, not a numbered outline
 
 === ADDITIONAL CONTEXT ===
 Product: ${title}
@@ -207,7 +343,9 @@ Target Audience: ${(promptBoxData as PromptBoxData)?.whoItsFor || targetAudience
 Price: $${price || 17}
 
 Remember: Conversion comes from Clarity → Belief → Momentum → Action. 
-NOT from hype, pressure, or fake scarcity.`;
+NOT from hype, pressure, or fake scarcity.
+
+OUTPUT ONLY THE HTML CONTENT (the cards and sections). Do not include <!DOCTYPE>, <html>, <head>, or <body> tags - just the content that goes inside the page wrapper.`;
 
 
     // LEGACY MODE - Original behavior for backwards compatibility
@@ -300,7 +438,10 @@ CRITICAL: Reference ACTUAL chapter content. Use SPECIFIC benefits, not generic m
       .replace(/â€™/g, "'")
       .replace(/â€œ/g, '"')
       .replace(/â€/g, '"')
-      .replace(/â€"/g, "-");
+      .replace(/â€"/g, "-")
+      // Remove markdown code blocks if present
+      .replace(/```html\n?/g, "")
+      .replace(/```\n?/g, "");
 
     return new Response(JSON.stringify({ salesLetter, phase }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {
