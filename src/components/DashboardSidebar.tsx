@@ -101,11 +101,15 @@ export function DashboardSidebar() {
                   >
                     <NavLink
                       to={item.url}
-                      className="flex items-center gap-3"
+                      className={
+                        isCollapsed
+                          ? "flex items-center justify-center"
+                          : "flex items-center gap-3"
+                      }
                       activeClassName="bg-sidebar-accent text-sidebar-accent-foreground"
                     >
                       <item.icon className="h-4 w-4 shrink-0" />
-                      <span className="truncate">{item.title}</span>
+                      {!isCollapsed && <span className="truncate">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -128,11 +132,15 @@ export function DashboardSidebar() {
                   >
                     <NavLink
                       to={item.url}
-                      className="flex items-center gap-3"
+                      className={
+                        isCollapsed
+                          ? "flex items-center justify-center"
+                          : "flex items-center gap-3"
+                      }
                       activeClassName="bg-sidebar-accent text-sidebar-accent-foreground"
                     >
                       <item.icon className="h-4 w-4 shrink-0" />
-                      <span className="truncate">{item.title}</span>
+                      {!isCollapsed && <span className="truncate">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
