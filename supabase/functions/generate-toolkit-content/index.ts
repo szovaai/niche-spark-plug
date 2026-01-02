@@ -7,7 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Style-specific directives
+// Style-specific directives for all 9 writing tones
 const STYLE_DIRECTIVES: Record<string, string> = {
   conversational: `
 WRITING STYLE - CONVERSATIONAL:
@@ -52,6 +52,66 @@ WRITING STYLE - STEP-BY-STEP:
 - Use bullet points and numbered lists liberally.
 - Include "Quick Reference" boxes for key takeaways.
 - Keep explanations concise - focus on what to do, not why (unless critical).
+`,
+  fun: `
+WRITING STYLE - FUN & PLAYFUL:
+- Keep it light! Use humor, wit, and playful language.
+- Emojis are encouraged 🎉 but don't overdo it (max 2-3 per section).
+- Include pop culture references when relevant.
+- Use exclamation points and enthusiasm!
+- Make learning feel like a game, not a chore.
+- Add "Fun Fact:" and "Did You Know?" callouts.
+- Keep paragraphs short and punchy.
+- Sound like that cool friend who makes everything exciting.
+- Use phrases like "Let's dive in!", "Here's the fun part:", "Plot twist!".
+`,
+  motivational: `
+WRITING STYLE - MOTIVATIONAL:
+- Open with powerful, inspiring statements.
+- Use "You CAN" and "You WILL" language consistently.
+- Include transformation stories and possibilities.
+- Build momentum with each paragraph - energy should increase.
+- Add "Believe this:" and "Here's your truth:" callouts.
+- Reference their potential and future success.
+- Close sections with empowering calls to action.
+- Sound like a supportive coach cheering them on.
+- Use phrases like "Imagine this...", "Picture yourself...", "You're closer than you think".
+`,
+  empowering: `
+WRITING STYLE - EMPOWERING:
+- Focus on building their confidence and capability.
+- Use "You already have what it takes" messaging.
+- Acknowledge their strengths before teaching new concepts.
+- Include "Permission granted:" statements.
+- Frame challenges as opportunities for growth.
+- Celebrate small wins throughout the content.
+- End with "You've got this" reinforcement.
+- Sound like a mentor who believes in them completely.
+- Use phrases like "Trust yourself", "You're ready", "Own this".
+`,
+  tactical: `
+WRITING STYLE - TACTICAL:
+- No fluff. Every sentence earns its place.
+- Lead with action verbs: Do. Build. Create. Execute. Deploy.
+- Use bullet points and numbered lists heavily.
+- Include specific metrics, timelines, and benchmarks.
+- Add "Mission:" and "Objective:" headers.
+- Keep emotional language minimal.
+- Focus on results, not feelings.
+- Sound like a military commander giving precise orders.
+- Use phrases like "Execute this:", "Your objective:", "Timeline: 48 hours".
+`,
+  coaching: `
+WRITING STYLE - COACHING:
+- Ask reflective questions throughout ("What would happen if...?").
+- Use "What if..." and "Consider..." prompts.
+- Include journaling exercises and pause points.
+- Frame content as discovery, not instruction.
+- Add "Reflection:" boxes between sections.
+- Encourage self-assessment and introspection.
+- Sound like a wise mentor guiding their journey.
+- Use phrases like "Take a moment to consider...", "Journal prompt:", "What comes up for you when...".
+- Validate their feelings before guiding action.
 `,
 };
 

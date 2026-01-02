@@ -1,4 +1,13 @@
-export type WritingStyle = 'conversational' | 'professional' | 'storytelling' | 'step-by-step';
+export type WritingStyle = 
+  | 'conversational'    // Warm, friendly, coffee-chat vibe
+  | 'professional'      // Authority, expertise, consultant tone
+  | 'storytelling'      // Narrative arc, before/after, hooks
+  | 'step-by-step'      // Action-first, numbered instructions
+  | 'fun'               // Playful, energetic, emojis allowed
+  | 'motivational'      // Inspiring, empowering, you-can-do-this
+  | 'empowering'        // Confidence-building, belief-shifting
+  | 'tactical'          // No-nonsense, straight-to-the-point, military precision
+  | 'coaching';         // Supportive, question-based, reflective
 
 export interface ToolkitComponents {
   guide: boolean;
