@@ -58,9 +58,9 @@ export function DashboardSidebar() {
           {!isCollapsed && (
             <NavLink to="/" className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <span className="text-sm font-bold text-primary-foreground">DS</span>
+                <span className="text-sm font-bold text-primary-foreground">DL</span>
               </div>
-              <span className="font-bold text-lg gradient-text">DigiStream</span>
+              <span className="font-bold text-lg gradient-text">DigiLaunchKit</span>
             </NavLink>
           )}
           <SidebarTrigger className="ml-auto">

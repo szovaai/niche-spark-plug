@@ -60,7 +60,7 @@ const Navbar = () => {
               <Zap className="w-5 h-5 text-primary-foreground" />
             </div>
             <span className="text-xl font-bold">
-              Digi<span className="gradient-text">Stream</span>
+              Digi<span className="gradient-text">LaunchKit</span>
             </span>
           </button>
           
@@ -111,7 +111,7 @@ const Navbar = () => {
                       <Zap className="w-4 h-4 text-primary-foreground" />
                     </div>
                     <span className="text-lg font-bold">
-                      Digi<span className="gradient-text">Stream</span>
+                      Digi<span className="gradient-text">LaunchKit</span>
                     </span>
                   </SheetTitle>
                 </SheetHeader>

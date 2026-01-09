@@ -45,12 +45,9 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="text-5xl md:text-7xl font-bold mb-6 leading-tight"
         >
-          <span className="text-foreground">Create </span>
-          <span className="gradient-text glow-text">Digital Toolkits</span>
-          <br />
-          <span className="text-foreground">You Can Sell — </span>
-          <span className="gradient-text glow-text">In Minutes</span>
-          <span className="text-foreground">, Not Weeks</span>
+          <span className="gradient-text glow-text">Build It.</span>
+          <span className="text-foreground"> Package It. </span>
+          <span className="gradient-text glow-text">Launch It.</span>
         </motion.h1>
         
         {/* Subheading */}
