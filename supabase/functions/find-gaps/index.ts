@@ -1,4 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
+import { generateCacheKey, getCachedResponse, setCachedResponse } from "../_shared/cache.ts";
+import { getUserTier, callTieredAI } from "../_shared/tieredAI.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,11 +14,36 @@ serve(async (req) => {
   }
 
   try {
-    const { nicheName } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    // Validate authentication
+    const { user, error: authError } = await validateAuth(req);
+    if (authError || !user) {
+      return unauthorizedResponse(authError || 'Authentication required', corsHeaders);
+    }
+    console.log(`Authenticated user: ${user.id}`);
 
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    const { nicheName } = await req.json();
+
+    if (!nicheName || nicheName.trim().length === 0) {
+      return new Response(JSON.stringify({ error: "Niche name is required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Get user tier for model selection
+    const userTier = await getUserTier(user.id);
+    console.log(`User tier: ${userTier}`);
+
+    // Generate cache key
+    const cacheKey = generateCacheKey('find-gaps', { nicheName: nicheName.toLowerCase().trim() });
+
+    // Check cache first
+    const cached = await getCachedResponse(cacheKey);
+    if (cached) {
+      console.log(`Returning cached gap analysis (model: ${cached.model_used})`);
+      return new Response(JSON.stringify(cached.response), {
+        headers: { ...corsHeaders, "Content-Type": "application/json", "X-Cache": "HIT" },
+      });
     }
 
     console.log(`Finding gaps for niche: ${nicheName}`);
@@ -89,47 +117,15 @@ Return a JSON object with this EXACT structure (no markdown, just raw JSON):
 
 Provide 3-5 items for each array. Be specific and actionable.`;
 
-    const response = await fetch("https://api.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: `Analyze this niche for digital products and find opportunity gaps: "${nicheName}"\n\nThink about what products exist, what's missing, who's being ignored, and where the quick wins are. Return only valid JSON.` }
-        ],
-        temperature: 0.7,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Lovable AI API error:", response.status, errorText);
-      
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit reached. Please try again in a moment." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please try again later." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      throw new Error(`AI API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
-
-    if (!content) {
-      throw new Error("No content in response");
-    }
+    // Use tiered AI - standard task for gap analysis
+    const { content, model } = await callTieredAI(
+      [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: `Analyze this niche for digital products and find opportunity gaps: "${nicheName}"\n\nThink about what products exist, what's missing, who's being ignored, and where the quick wins are. Return only valid JSON.` }
+      ],
+      userTier,
+      'standard'
+    );
 
     // Parse JSON from response - handle markdown code blocks
     const cleanContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
@@ -142,8 +138,19 @@ Provide 3-5 items for each array. Be specific and actionable.`;
     const gapAnalysis = JSON.parse(jsonMatch[0]);
     console.log("Gap analysis complete for:", nicheName);
 
+    // Cache the response for 24 hours
+    await setCachedResponse(
+      cacheKey,
+      'find-gaps',
+      nicheName,
+      gapAnalysis,
+      userTier,
+      model,
+      24
+    );
+
     return new Response(JSON.stringify(gapAnalysis), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, "Content-Type": "application/json", "X-Cache": "MISS" },
     });
 
   } catch (error) {
