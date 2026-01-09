@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_cache: {
+        Row: {
+          cache_key: string
+          created_at: string
+          expires_at: string
+          function_name: string
+          hit_count: number
+          id: string
+          input_hash: string
+          model_used: string
+          response: Json
+          user_tier: string
+        }
+        Insert: {
+          cache_key: string
+          created_at?: string
+          expires_at?: string
+          function_name: string
+          hit_count?: number
+          id?: string
+          input_hash: string
+          model_used: string
+          response: Json
+          user_tier?: string
+        }
+        Update: {
+          cache_key?: string
+          created_at?: string
+          expires_at?: string
+          function_name?: string
+          hit_count?: number
+          id?: string
+          input_hash?: string
+          model_used?: string
+          response?: Json
+          user_tier?: string
+        }
+        Relationships: []
+      }
       community_wins: {
         Row: {
           created_at: string
@@ -310,6 +349,36 @@ export type Database = {
           suggested_price_min?: number | null
           tags?: string[] | null
           title?: string
+        }
+        Relationships: []
+      }
+      pregenerated_niches: {
+        Row: {
+          created_at: string
+          id: string
+          niche_category: string
+          niche_name: string
+          popularity_score: number
+          recommendation_data: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          niche_category: string
+          niche_name: string
+          popularity_score?: number
+          recommendation_data: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          niche_category?: string
+          niche_name?: string
+          popularity_score?: number
+          recommendation_data?: Json
+          updated_at?: string
         }
         Relationships: []
       }
@@ -873,6 +942,7 @@ export type Database = {
         }
         Returns: number
       }
+      clean_expired_cache: { Args: never; Returns: number }
       get_niche_blueprint_count: {
         Args: { p_niche_id: string }
         Returns: number

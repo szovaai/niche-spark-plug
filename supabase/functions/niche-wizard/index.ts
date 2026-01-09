@@ -1,5 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
+import { generateCacheKey, getCachedResponse, setCachedResponse } from "../_shared/cache.ts";
+import { getUserTier, callTieredAI } from "../_shared/tieredAI.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -34,10 +36,21 @@ serve(async (req) => {
     console.log(`Authenticated user: ${user.id}`);
 
     const input = await req.json();
-    const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
 
-    if (!DEEPSEEK_API_KEY) {
-      throw new Error("DEEPSEEK_API_KEY is not configured");
+    // Get user tier for model selection
+    const userTier = await getUserTier(user.id);
+    console.log(`User tier: ${userTier}`);
+
+    // Generate cache key based on input
+    const cacheKey = generateCacheKey('niche-wizard', input);
+
+    // Check cache first
+    const cached = await getCachedResponse(cacheKey);
+    if (cached) {
+      console.log(`Returning cached niche recommendations (model: ${cached.model_used})`);
+      return new Response(JSON.stringify(cached.response), {
+        headers: { ...corsHeaders, "Content-Type": "application/json", "X-Cache": "HIT" },
+      });
     }
 
     console.log("Niche wizard input:", input);
@@ -92,47 +105,15 @@ EXPERIENCE: ${input.experience}
 
 Match them with the best niches and explain why each is a good fit.`;
 
-    const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "deepseek-chat",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
-        ],
-        temperature: 0.7,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("DeepSeek API error:", response.status, errorText);
-      
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limits exceeded, please try again later." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Payment required, please add funds." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      throw new Error("DeepSeek API error");
-    }
-
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
-
-    if (!content) {
-      throw new Error("No content in response");
-    }
+    // Use tiered AI - simple task for niche matching
+    const { content, model } = await callTieredAI(
+      [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt }
+      ],
+      userTier,
+      'simple' // Niche matching is a simpler task
+    );
 
     // Parse JSON from response
     const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -143,8 +124,19 @@ Match them with the best niches and explain why each is a good fit.`;
     const result = JSON.parse(jsonMatch[0]);
     console.log("Niche wizard complete, found", result.topRecommendations?.length, "recommendations");
 
+    // Cache the response for 48 hours (niche recommendations don't change often)
+    await setCachedResponse(
+      cacheKey,
+      'niche-wizard',
+      JSON.stringify(input),
+      result,
+      userTier,
+      model,
+      48 // Cache for 48 hours
+    );
+
     return new Response(JSON.stringify(result), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, "Content-Type": "application/json", "X-Cache": "MISS" },
     });
 
   } catch (error) {

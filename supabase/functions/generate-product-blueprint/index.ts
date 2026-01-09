@@ -1,5 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
+import { generateCacheKey, getCachedResponse, setCachedResponse } from "../_shared/cache.ts";
+import { getUserTier, callTieredAI } from "../_shared/tieredAI.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -66,10 +68,24 @@ serve(async (req) => {
     console.log(`Authenticated user: ${user.id}`);
 
     const { nicheName, nicheCategory, demandTier, competitionTier, productType, personalization, plrContent } = await req.json();
-    const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
-    
-    if (!DEEPSEEK_API_KEY) {
-      throw new Error("DEEPSEEK_API_KEY is not configured");
+
+    // Get user tier for model selection
+    const userTier = await getUserTier(user.id);
+    console.log(`User tier: ${userTier}`);
+
+    // Generate cache key based on input
+    const cacheInput = { nicheName, nicheCategory, productType, personalization, plrContent: plrContent?.kitTitle };
+    const cacheKey = generateCacheKey('generate-product-blueprint', cacheInput);
+
+    // Check cache first (only for non-PLR content since PLR transformations should be unique)
+    if (!plrContent) {
+      const cached = await getCachedResponse(cacheKey);
+      if (cached) {
+        console.log(`Returning cached blueprint (model: ${cached.model_used})`);
+        return new Response(JSON.stringify(cached.response), {
+          headers: { ...corsHeaders, "Content-Type": "application/json", "X-Cache": "HIT" },
+        });
+      }
     }
 
     console.log(`Generating personalized ${productType} blueprint for niche: ${nicheName}`);
@@ -239,41 +255,15 @@ Requirements:
 6. Make EVERY piece of content specific to this niche + audience combo - NO generic filler
 7. Price within the ${personalization?.priceTier || "Value ($8-15)"} range`;
 
-    const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "deepseek-chat",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI usage limit reached. Please upgrade your plan." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      throw new Error("AI gateway error");
-    }
-
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
+    // Use tiered AI - complex task for blueprints
+    const { content, model } = await callTieredAI(
+      [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      userTier,
+      'complex' // Blueprints are complex tasks
+    );
 
     // Parse the JSON from the AI response
     let blueprintData;
@@ -290,8 +280,21 @@ Requirements:
 
     console.log(`Successfully generated personalized blueprint for ${productType}: ${blueprintData.productName}`);
 
+    // Cache the response (skip for PLR content)
+    if (!plrContent) {
+      await setCachedResponse(
+        cacheKey,
+        'generate-product-blueprint',
+        JSON.stringify(cacheInput),
+        blueprintData,
+        userTier,
+        model,
+        24 // Cache for 24 hours
+      );
+    }
+
     return new Response(JSON.stringify(blueprintData), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, "Content-Type": "application/json", "X-Cache": "MISS" },
     });
   } catch (error) {
     console.error("generate-product-blueprint error:", error);
