@@ -4,7 +4,7 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
-/* DigiStream Design System - Solana Ocean Glass Blue Theme */
+/* DigiLaunchKit Design System - Solana Ocean Glass Blue Theme */
 
 @layer base {
   :root {
@@ -45,7 +45,7 @@
 
     --radius: 0.75rem;
 
-    /* Custom DigiStream Tokens - Ocean Glass */
+    /* Custom DigiLaunchKit Tokens - Ocean Glass */
     --glow-primary: 210 100% 55%;
     --glow-accent: 320 85% 60%;
     --gradient-start: 210 100% 55%;
