@@ -119,6 +119,108 @@ export type Database = {
         }
         Relationships: []
       }
+      empire_projects: {
+        Row: {
+          created_at: string
+          current_step: number
+          id: string
+          name: string
+          status: string
+          step1_final_niche: string | null
+          step1_niche_analysis: Json | null
+          step1_niches_input: Json | null
+          step2_brand_options: Json | null
+          step2_logo_prompts: Json | null
+          step2_selected_brand: string | null
+          step2_social_bios: Json | null
+          step2_warming_checklist: Json | null
+          step3_manual_text: string | null
+          step3_price_range: string | null
+          step3_product_brief: Json | null
+          step3_selected_product: string | null
+          step3_sheet_schema: Json | null
+          step4_delivery_instructions: string | null
+          step4_domain_ideas: Json | null
+          step4_listing_copy: Json | null
+          step4_visual_prompts: Json | null
+          step5_content_calendar: Json | null
+          step5_content_patterns: Json | null
+          step5_scripts: Json | null
+          step5_viral_ideas: Json | null
+          step6_ad_angles: Json | null
+          step6_engagement_checklist: Json | null
+          step6_schedule_plan: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_step?: number
+          id?: string
+          name?: string
+          status?: string
+          step1_final_niche?: string | null
+          step1_niche_analysis?: Json | null
+          step1_niches_input?: Json | null
+          step2_brand_options?: Json | null
+          step2_logo_prompts?: Json | null
+          step2_selected_brand?: string | null
+          step2_social_bios?: Json | null
+          step2_warming_checklist?: Json | null
+          step3_manual_text?: string | null
+          step3_price_range?: string | null
+          step3_product_brief?: Json | null
+          step3_selected_product?: string | null
+          step3_sheet_schema?: Json | null
+          step4_delivery_instructions?: string | null
+          step4_domain_ideas?: Json | null
+          step4_listing_copy?: Json | null
+          step4_visual_prompts?: Json | null
+          step5_content_calendar?: Json | null
+          step5_content_patterns?: Json | null
+          step5_scripts?: Json | null
+          step5_viral_ideas?: Json | null
+          step6_ad_angles?: Json | null
+          step6_engagement_checklist?: Json | null
+          step6_schedule_plan?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_step?: number
+          id?: string
+          name?: string
+          status?: string
+          step1_final_niche?: string | null
+          step1_niche_analysis?: Json | null
+          step1_niches_input?: Json | null
+          step2_brand_options?: Json | null
+          step2_logo_prompts?: Json | null
+          step2_selected_brand?: string | null
+          step2_social_bios?: Json | null
+          step2_warming_checklist?: Json | null
+          step3_manual_text?: string | null
+          step3_price_range?: string | null
+          step3_product_brief?: Json | null
+          step3_selected_product?: string | null
+          step3_sheet_schema?: Json | null
+          step4_delivery_instructions?: string | null
+          step4_domain_ideas?: Json | null
+          step4_listing_copy?: Json | null
+          step4_visual_prompts?: Json | null
+          step5_content_calendar?: Json | null
+          step5_content_patterns?: Json | null
+          step5_scripts?: Json | null
+          step5_viral_ideas?: Json | null
+          step6_ad_angles?: Json | null
+          step6_engagement_checklist?: Json | null
+          step6_schedule_plan?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       launch_packs: {
         Row: {
           category: string

@@ -68,3 +68,21 @@ verify_jwt = true
 
 [functions.generate-toolkit-title]
 verify_jwt = true
+
+[functions.empire-analyze-niches]
+verify_jwt = false
+
+[functions.empire-generate-brand]
+verify_jwt = false
+
+[functions.empire-generate-social]
+verify_jwt = false
+
+[functions.empire-generate-product]
+verify_jwt = false
+
+[functions.empire-generate-gumroad]
+verify_jwt = false
+
+[functions.empire-generate-content]
+verify_jwt = false
