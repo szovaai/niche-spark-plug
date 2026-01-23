@@ -15,6 +15,7 @@ import Discover from "./pages/Discover";
 import Pricing from "./pages/Pricing";
 import Launch from "./pages/Launch";
 import Settings from "./pages/Settings";
+import EmpireMode from "./pages/EmpireMode";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,8 @@ const App = () => (
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/launch" element={<Launch />} />
             <Route path="/launch/:id" element={<Launch />} />
+            <Route path="/empire" element={<EmpireMode />} />
+            <Route path="/empire/:id" element={<EmpireMode />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

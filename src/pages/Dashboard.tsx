@@ -3,11 +3,12 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { 
   Package, DollarSign, Flame, Plus, ArrowRight, Clock, 
-  Download, Sparkles, TrendingUp, Zap
+  Download, Sparkles, TrendingUp, Zap, Crown
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import RevenueGoalWidget from "@/components/RevenueGoalWidget";
 import { useAuth } from "@/hooks/useAuth";
@@ -139,6 +140,44 @@ const Dashboard = () => {
             </div>
           </motion.div>
         )}
+
+        {/* Empire Mode CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <Card className="relative overflow-hidden border-primary/30 bg-gradient-to-br from-primary/10 via-accent/5 to-transparent">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/20 to-transparent rounded-bl-full" />
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-primary to-accent shrink-0">
+                    <Crown className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-bold text-lg">AI Digital Product Empire</h3>
+                      <Badge variant="secondary" className="bg-primary/20 text-primary">NEW</Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground max-w-md">
+                      6-step blueprint to build a complete faceless AI brand — from niche to Gumroad to viral content. 
+                      Everything you need in one guided flow.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => navigate("/empire")}
+                  className="gap-2 shrink-0"
+                >
+                  <Crown className="w-4 h-4" />
+                  Start Empire Mode
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

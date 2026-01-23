@@ -8,12 +8,14 @@ import {
   Plus,
   Search,
   Rocket,
-  Settings
+  Settings,
+  Crown
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   Sidebar,
   SidebarContent,
@@ -31,9 +33,10 @@ import {
 
 const mainNavItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Empire Mode", url: "/empire", icon: Crown, badge: "NEW" },
   { title: "Research", url: "/research", icon: Search },
   { title: "My Toolkits", url: "/my-toolkits", icon: Package },
-  { title: "Launch", url: "/launch", icon: Rocket, badge: "🚀" },
+  { title: "Launch", url: "/launch", icon: Rocket },
 ];
 
 const secondaryNavItems = [
@@ -109,7 +112,14 @@ export function DashboardSidebar() {
                       activeClassName="bg-sidebar-accent text-sidebar-accent-foreground"
                     >
                       <item.icon className="h-4 w-4 shrink-0" />
-                      {!isCollapsed && <span className="truncate">{item.title}</span>}
+                      {!isCollapsed && (
+                        <span className="truncate flex-1">{item.title}</span>
+                      )}
+                      {!isCollapsed && item.badge && (
+                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 bg-primary/20 text-primary">
+                          {item.badge}
+                        </Badge>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
