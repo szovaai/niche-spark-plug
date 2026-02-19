@@ -86,3 +86,6 @@ verify_jwt = false
 
 [functions.empire-generate-content]
 verify_jwt = false
+
+[functions.generate-micro-product]
+verify_jwt = false

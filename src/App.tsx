@@ -16,6 +16,7 @@ import Pricing from "./pages/Pricing";
 import Launch from "./pages/Launch";
 import Settings from "./pages/Settings";
 import EmpireMode from "./pages/EmpireMode";
+import MicroFactory from "./pages/MicroFactory";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="/launch/:id" element={<Launch />} />
             <Route path="/empire" element={<EmpireMode />} />
             <Route path="/empire/:id" element={<EmpireMode />} />
+            <Route path="/micro-factory" element={<MicroFactory />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

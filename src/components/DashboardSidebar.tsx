@@ -9,7 +9,8 @@ import {
   Search,
   Rocket,
   Settings,
-  Crown
+  Crown,
+  Zap
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
@@ -34,6 +35,7 @@ import {
 const mainNavItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Empire Mode", url: "/empire", icon: Crown, badge: "NEW" },
+  { title: "Micro Factory", url: "/micro-factory", icon: Zap, badge: "NEW" },
   { title: "Research", url: "/research", icon: Search },
   { title: "My Toolkits", url: "/my-toolkits", icon: Package },
   { title: "Launch", url: "/launch", icon: Rocket },

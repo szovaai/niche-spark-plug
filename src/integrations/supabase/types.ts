@@ -319,6 +319,54 @@ export type Database = {
           },
         ]
       }
+      micro_products: {
+        Row: {
+          config: Json
+          created_at: string
+          generated_content: Json | null
+          id: string
+          niche_topic: string
+          problem_statement: string
+          product_subtitle: string | null
+          product_title: string | null
+          product_type: string
+          status: string
+          target_audience: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          generated_content?: Json | null
+          id?: string
+          niche_topic: string
+          problem_statement: string
+          product_subtitle?: string | null
+          product_title?: string | null
+          product_type: string
+          status?: string
+          target_audience: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          generated_content?: Json | null
+          id?: string
+          niche_topic?: string
+          problem_statement?: string
+          product_subtitle?: string | null
+          product_title?: string | null
+          product_type?: string
+          status?: string
+          target_audience?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       niche_blueprint_usage: {
         Row: {
           blueprint_hash: string
