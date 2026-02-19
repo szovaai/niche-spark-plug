@@ -179,6 +179,40 @@ const Dashboard = () => {
           </Card>
         </motion.div>
 
+        {/* Micro Factory CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+        >
+          <Card className="relative overflow-hidden border-accent/30 bg-gradient-to-br from-accent/10 via-primary/5 to-transparent">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-accent to-primary shrink-0">
+                    <Zap className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">Micro Product Factory</h3>
+                    <p className="text-sm text-muted-foreground max-w-md">
+                      Create a complete micro product in minutes — e-books, checklists, challenges, and more with AI-generated content and marketing assets.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => navigate("/micro-factory")}
+                  variant="outline"
+                  className="gap-2 shrink-0"
+                >
+                  <Zap className="w-4 h-4" />
+                  Open Factory
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {loading ? (
