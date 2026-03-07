@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sparkles, Rocket, Loader2 } from "lucide-react";
+import { Sparkles, Rocket, Loader2, Brain, ArrowRight } from "lucide-react";
 import { PRODUCT_TYPES, Step1Product } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -89,6 +91,8 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
   const hasMechanismSelected = result?.uniqueMechanism?.includes(" — ");
   const hasAngleSelected = !!result?.selectedAngle;
 
+  const nav = useNavigate();
+
   return (
     <div className="space-y-6">
       <div>
@@ -96,6 +100,34 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
         <p className="text-muted-foreground">Define your niche and product type to get started.</p>
       </div>
 
+      <Tabs defaultValue="manual" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="manual">Manual Entry</TabsTrigger>
+          <TabsTrigger value="agent" className="gap-1.5">
+            <Brain className="w-3.5 h-3.5" /> AI Research Agent
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="agent">
+          <Card className="border-accent/30 bg-gradient-to-br from-accent/5 to-primary/5">
+            <CardContent className="p-6 text-center space-y-4">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-accent to-primary inline-flex">
+                <Brain className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-lg font-semibold">Not sure what to launch?</h3>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                Talk to the AI Research Agent. It'll help you discover a profitable product idea using pain point analysis, demand research, competitor gaps, or your existing assets.
+              </p>
+              <Button onClick={() => nav("/research-agent")} variant="hero" className="gap-2">
+                <Brain className="w-4 h-4" />
+                Open Research Agent
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="manual">
       <div className="grid md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <label className="text-sm font-medium">Niche *</label>
