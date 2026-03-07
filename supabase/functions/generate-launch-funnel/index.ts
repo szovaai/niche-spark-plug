@@ -133,20 +133,28 @@ CRITICAL:
 
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("Failed to parse AI response");
+    
+    // Sanitize control characters inside JSON string values
+    const sanitized = jsonMatch[0].replace(/[\x00-\x1F\x7F]/g, (ch) => {
+      if (ch === '\n') return '\\n';
+      if (ch === '\r') return '\\r';
+      if (ch === '\t') return '\\t';
+      return '';
+    });
+    
     let result;
     try {
-      result = JSON.parse(jsonMatch[0]);
+      result = JSON.parse(sanitized);
     } catch (parseErr) {
       console.error("JSON parse error, attempting cleanup");
-      const raw = jsonMatch[0];
       let depth = 0;
       let lastValid = -1;
-      for (let i = 0; i < raw.length; i++) {
-        if (raw[i] === '{') depth++;
-        else if (raw[i] === '}') { depth--; if (depth === 0) { lastValid = i; break; } }
+      for (let i = 0; i < sanitized.length; i++) {
+        if (sanitized[i] === '{') depth++;
+        else if (sanitized[i] === '}') { depth--; if (depth === 0) { lastValid = i; break; } }
       }
       if (lastValid > 0) {
-        result = JSON.parse(raw.slice(0, lastValid + 1));
+        result = JSON.parse(sanitized.slice(0, lastValid + 1));
       } else {
         throw parseErr;
       }
