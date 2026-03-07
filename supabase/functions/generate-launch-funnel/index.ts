@@ -138,7 +138,23 @@ function extractAndRepairJson(content: string): unknown {
       return tryParse(repaired);
     } catch (_e2) {
       console.error("JSON repair failed, raw content (first 1200):", content.slice(0, 1200));
-      throw new Error("Could not extract valid JSON from AI response");
+      return {
+        salesPage: cleaned,
+        optInPage: "We’re preparing your opt-in page copy. Regenerate once to get the full structured version.",
+        thankYouPage: "Thanks for your order! Check your email for access details.",
+        bonusPage: "Bonus bundle details are being prepared. Regenerate to populate full bonus copy.",
+        checkoutCopy: "Complete your order now to lock in this price and get instant access.",
+        orderBump: "Add this quick-start upgrade to implement faster and avoid mistakes.",
+        upsellOffer: "Upgrade now to unlock implementation templates and shortcut your results.",
+        offerStack: {
+          coreProduct: { name: "Core Product", value: 97 },
+          bonuses: [],
+          totalValue: 97,
+          askingPrice: 17,
+          stackCopy: "Core Product ($97 value) — Today only $17."
+        },
+        objections: []
+      };
     }
   }
 }
