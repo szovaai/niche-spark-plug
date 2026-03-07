@@ -134,13 +134,8 @@ CRITICAL:
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("Failed to parse AI response");
     
-    // Sanitize control characters inside JSON string values
-    const sanitized = jsonMatch[0].replace(/[\x00-\x1F\x7F]/g, (ch) => {
-      if (ch === '\n') return '\\n';
-      if (ch === '\r') return '\\r';
-      if (ch === '\t') return '\\t';
-      return '';
-    });
+    // Sanitize control characters that break JSON parsing, but preserve structural whitespace
+    const sanitized = jsonMatch[0].replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
     
     let result;
     try {
