@@ -326,46 +326,46 @@ Format as clean HTML with <p>, <h2>, <ul>, <li> tags. Keep paragraphs short (2-3
 
     // PHASE 2: POLISH - Apply DigiStream Conversion Pattern with WarriorPlus HTML structure
     } else if (phase === "polish") {
-      systemPrompt = `You are a conversion-focused copywriter applying the DigiStream Conversion Pattern to an existing draft.
+      systemPrompt = `You are a world-class direct-response copywriter in the Dan Kennedy tradition.
 
 You enhance structure and persuasion WITHOUT changing what the offer is.
 You NEVER add fake testimonials, made-up statistics, or invented claims.
 You work ONLY with the raw draft provided - do not re-interpret or change the core offer.
-You output clean, structured HTML that matches the WarriorPlus dark theme aesthetic.
+You output clean, structured HTML that matches the Kennedy direct-response letter aesthetic — cream background, serif fonts, red accents, personal letter tone.
 
-TONE: Calm confidence. Clarity over hype. Trust over urgency.
-STYLE: Modern, professional, card-based sections with clear visual hierarchy.`;
+TONE: Authoritative, conversational, direct — like a letter from a trusted advisor. Not salesy, not corporate.
+STYLE: Long-form letter format with pull-quotes, fascination bullets, testimonial blocks, comparison tables, bonus stacks, and a clear order box.`;
 
-      prompt = `Take this EXACT raw draft and restructure it using the DigiStream Conversion Pattern (DCP).
-Output as WarriorPlus-style HTML with proper card sections.
+      prompt = `Take this EXACT raw draft and restructure it as a Dan Kennedy-style direct-response sales letter.
 
 === RAW DRAFT (preserve the offer EXACTLY as described) ===
 ${rawDraft}
 
 ${DCP_FRAMEWORK}
 
-${WARRIORPLUS_HTML_STRUCTURE}
+${KENNEDY_HTML_STRUCTURE}
 
 === CRITICAL RULES ===
 1. Keep the SAME offer, price, and components from the raw draft - DO NOT change them
-2. DO NOT invent fake testimonials or statistics
+2. DO NOT invent fake testimonials or statistics — generate placeholder testimonials clearly marked as examples
 3. DO NOT use hype words like "breakthrough", "revolutionary", "secret", "amazing"
-4. Apply calm confidence throughout - not excitement or pressure
+4. Write in FIRST PERSON — "I", "me", "my" — like a personal letter
 5. Use the transformation language from the raw draft
-6. Format using the EXACT HTML structure shown above with card classes
-7. NEVER use numbered lists like "1. First 2. Second" - use timeline structure instead
-8. Make it look like a REAL WarriorPlus sales page, not a numbered outline
+6. Format using the EXACT HTML structure shown above with Kennedy classes
+7. Include ALL required sections: urgency-bar, letter-header, headline-box, salutation, body-copy with pull-quotes, fascinations, check-lists, testimonial blocks, comparison table, who-this-is-for, bonus stack, order-box, guarantee, FAQ, PS section
+8. Make it read like a REAL direct-response sales letter — conversational, persuasive, personal
 
 === ADDITIONAL CONTEXT ===
 Product: ${title}
 Niche: ${niche}
 Target Audience: ${(promptBoxData as PromptBoxData)?.whoItsFor || targetAudience || "digital entrepreneurs"}
 Price: $${price || 17}
+Author: ${authorName || "The Creator"}
 
 Remember: Conversion comes from Clarity → Belief → Momentum → Action. 
 NOT from hype, pressure, or fake scarcity.
 
-OUTPUT ONLY THE HTML CONTENT (the cards and sections). Do not include <!DOCTYPE>, <html>, <head>, or <body> tags - just the content that goes inside the page wrapper.`;
+OUTPUT ONLY THE HTML CONTENT starting from the urgency-bar div. Do not include <!DOCTYPE>, <html>, <head>, or <body> tags — just the content that goes inside the page-wrapper.`;
 
 
     // LEGACY MODE - Original behavior for backwards compatibility
