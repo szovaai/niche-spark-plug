@@ -76,7 +76,7 @@ const SalesLetterGenerator = ({
 }: SalesLetterGeneratorProps) => {
   const [currentPhase, setCurrentPhase] = useState<Phase>(savedStep || (existingSalesLetter ? 'polished' : 'input'));
   const [viewMode, setViewMode] = useState<ViewMode>('preview');
-  const [selectedTemplate, setSelectedTemplate] = useState<PageTemplate>('warriorplus');
+  const [selectedTemplate, setSelectedTemplate] = useState<PageTemplate>('kennedy');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isFillingFromToolkit, setIsFillingFromToolkit] = useState(false);
   const [isOneClickGenerating, setIsOneClickGenerating] = useState(false);
@@ -680,9 +680,7 @@ const SalesLetterGenerator = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="warriorplus">WarriorPlus (Dark)</SelectItem>
-                <SelectItem value="saas">Clean SaaS (Light)</SelectItem>
-                <SelectItem value="simple">Simple Checkout</SelectItem>
+                <SelectItem value="kennedy">Kennedy Letter (Classic)</SelectItem>
               </SelectContent>
             </Select>
           </div>
