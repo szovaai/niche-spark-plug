@@ -4,62 +4,141 @@ import { getCachedResponse, setCachedResponse } from "../_shared/cache.ts";
 import { validateInput, validationErrorResponse } from "../_shared/validate.ts";
 import { SALES_PAGE_SYSTEM, OTO_UPSELL_SYSTEM } from "../_shared/copyPrompts.ts";
 
+function sanitizeJsonStringContent(input: string): string {
+  let result = "";
+  let inString = false;
+  let escape = false;
+
+  for (const char of input) {
+    if (escape) {
+      result += char;
+      escape = false;
+      continue;
+    }
+
+    if (char === "\\") {
+      result += char;
+      escape = true;
+      continue;
+    }
+
+    if (char === '"') {
+      inString = !inString;
+      result += char;
+      continue;
+    }
+
+    // If model emits literal control characters inside string values,
+    // convert them to JSON-safe escape sequences.
+    if (inString) {
+      if (char === "\n") {
+        result += "\\n";
+        continue;
+      }
+      if (char === "\r") {
+        result += "\\r";
+        continue;
+      }
+      if (char === "\t") {
+        result += "\\t";
+        continue;
+      }
+    }
+
+    result += char;
+  }
+
+  return result;
+}
+
+function findBalancedJsonEnd(input: string, startIndex: number): number {
+  let braces = 0;
+  let brackets = 0;
+  let inString = false;
+  let escape = false;
+
+  for (let i = startIndex; i < input.length; i++) {
+    const char = input[i];
+
+    if (escape) {
+      escape = false;
+      continue;
+    }
+
+    if (char === "\\") {
+      escape = true;
+      continue;
+    }
+
+    if (char === '"') {
+      inString = !inString;
+      continue;
+    }
+
+    if (inString) continue;
+
+    if (char === "{") braces++;
+    else if (char === "}") braces--;
+    else if (char === "[") brackets++;
+    else if (char === "]") brackets--;
+
+    if (braces === 0 && brackets === 0 && i > startIndex) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
 function extractAndRepairJson(content: string): unknown {
-  // Remove markdown code blocks
   let cleaned = content
     .replace(/```json\s*/gi, "")
     .replace(/```\s*/g, "")
     .trim();
 
-  // Find JSON boundaries
   const jsonStart = cleaned.search(/[\{\[]/);
   if (jsonStart === -1) throw new Error("No JSON found in response");
 
-  const opener = cleaned[jsonStart];
-  const closer = opener === '{' ? '}' : ']';
+  const balancedEnd = findBalancedJsonEnd(cleaned, jsonStart);
+  cleaned = balancedEnd === -1
+    ? cleaned.slice(jsonStart)
+    : cleaned.slice(jsonStart, balancedEnd + 1);
 
-  // Find last matching closer
-  const jsonEnd = cleaned.lastIndexOf(closer);
-  if (jsonEnd === -1) throw new Error("No closing bracket found");
+  const tryParse = (value: string) => JSON.parse(value);
 
-  cleaned = cleaned.substring(jsonStart, jsonEnd + 1);
-
-  // Try direct parse first
   try {
-    return JSON.parse(cleaned);
-  } catch (_e) {
-    // Repair: strip control chars, fix trailing commas
-    cleaned = cleaned
-      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
-      .replace(/,\s*}/g, '}')
-      .replace(/,\s*]/g, ']');
+    return tryParse(cleaned);
+  } catch (_e1) {
+    let repaired = sanitizeJsonStringContent(cleaned)
+      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "")
+      .replace(/,\s*}/g, "}")
+      .replace(/,\s*]/g, "]");
+
+    // If truncated while still inside a string, close the dangling quote.
+    const quoteCount = (repaired.match(/(?<!\\)"/g) || []).length;
+    if (quoteCount % 2 !== 0) repaired += '"';
+
+    // Balance unclosed objects/arrays (string-aware).
+    let braces = 0, brackets = 0, inString = false, escape = false;
+    for (const char of repaired) {
+      if (escape) { escape = false; continue; }
+      if (char === "\\") { escape = true; continue; }
+      if (char === '"') { inString = !inString; continue; }
+      if (inString) continue;
+      if (char === "{") braces++;
+      else if (char === "}") braces--;
+      else if (char === "[") brackets++;
+      else if (char === "]") brackets--;
+    }
+
+    while (brackets > 0) { repaired += "]"; brackets--; }
+    while (braces > 0) { repaired += "}"; braces--; }
 
     try {
-      return JSON.parse(cleaned);
+      return tryParse(repaired);
     } catch (_e2) {
-      // Count unbalanced braces/brackets (string-aware)
-      let braces = 0, brackets = 0, inString = false, escape = false;
-      for (const char of cleaned) {
-        if (escape) { escape = false; continue; }
-        if (char === '\\') { escape = true; continue; }
-        if (char === '"') { inString = !inString; continue; }
-        if (inString) continue;
-        if (char === '{') braces++;
-        else if (char === '}') braces--;
-        else if (char === '[') brackets++;
-        else if (char === ']') brackets--;
-      }
-
-      let repaired = cleaned;
-      while (brackets > 0) { repaired += ']'; brackets--; }
-      while (braces > 0) { repaired += '}'; braces--; }
-
-      try {
-        return JSON.parse(repaired);
-      } catch (finalErr) {
-        console.error("JSON repair failed, raw content (first 500):", content.slice(0, 500));
-        throw new Error("Could not extract valid JSON from AI response");
-      }
+      console.error("JSON repair failed, raw content (first 1200):", content.slice(0, 1200));
+      throw new Error("Could not extract valid JSON from AI response");
     }
   }
 }
