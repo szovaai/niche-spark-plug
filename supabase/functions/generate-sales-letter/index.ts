@@ -243,21 +243,22 @@ serve(async (req) => {
     }
     console.log(`Authenticated user: ${user.id}`);
 
-    const { 
-      phase = "legacy", // "raw", "polish", or "legacy" for backwards compatibility
-      title, 
-      subtitle, 
-      niche, 
-      targetAudience, 
-      components, 
-      price, 
-      authorName, 
-      keyBenefits, 
-      uniqueMechanism,
-      contentSummary,
-      promptBoxData,
-      rawDraft,
-    } = await req.json();
+    const body = await req.json();
+    
+    // Validate core inputs
+    const phase = typeof body.phase === 'string' && ['raw', 'polish', 'legacy'].includes(body.phase) ? body.phase : 'legacy';
+    const title = typeof body.title === 'string' ? body.title.slice(0, 300) : '';
+    const subtitle = typeof body.subtitle === 'string' ? body.subtitle.slice(0, 300) : '';
+    const niche = typeof body.niche === 'string' ? body.niche.slice(0, 200) : '';
+    const targetAudience = typeof body.targetAudience === 'string' ? body.targetAudience.slice(0, 500) : '';
+    const components = typeof body.components === 'object' && body.components ? body.components : {};
+    const price = typeof body.price === 'number' ? Math.min(Math.max(body.price, 0), 10000) : undefined;
+    const authorName = typeof body.authorName === 'string' ? body.authorName.slice(0, 200) : '';
+    const keyBenefits = Array.isArray(body.keyBenefits) ? body.keyBenefits.slice(0, 20) : undefined;
+    const uniqueMechanism = typeof body.uniqueMechanism === 'string' ? body.uniqueMechanism.slice(0, 500) : '';
+    const contentSummary = typeof body.contentSummary === 'object' ? body.contentSummary : undefined;
+    const promptBoxData = typeof body.promptBoxData === 'object' ? body.promptBoxData : undefined;
+    const rawDraft = typeof body.rawDraft === 'string' ? body.rawDraft.slice(0, 50000) : '';
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -446,6 +447,6 @@ CRITICAL: Reference ACTUAL chapter content. Use SPECIFIC benefits, not generic m
     return new Response(JSON.stringify({ salesLetter, phase }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {
     console.error("Error:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ error: "Unable to generate sales letter. Please try again." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });

@@ -1,6 +1,7 @@
-import { corsHeaders } from "../_shared/auth.ts";
+import { corsHeaders, validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
 import { callTieredAI, getUserTier } from "../_shared/tieredAI.ts";
 import { getCachedResponse, setCachedResponse } from "../_shared/cache.ts";
+import { validateInput, validationErrorResponse } from "../_shared/validate.ts";
 
 const HUMAN_TONE = `Write like a real person — use contractions, vary sentence length, add personality. Sound confident but not salesy. Avoid corporate buzzwords.`;
 
@@ -8,17 +9,24 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { productBrief, productContent, funnelCopy, userId } = await req.json();
+    const { user, error: authError } = await validateAuth(req);
+    if (authError || !user) return unauthorizedResponse(authError || 'Authentication required', corsHeaders);
 
-    if (!productBrief) {
-      return new Response(JSON.stringify({ error: "Missing product brief" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
+    const body = await req.json();
+    const { valid, error: valError, data } = validateInput(body, [
+      { field: 'productBrief', type: 'object', required: true, maxLength: 10000 },
+      { field: 'productContent', type: 'object', maxLength: 50000 },
+      { field: 'funnelCopy', type: 'object', maxLength: 50000 },
+    ]);
+    if (!valid) return validationErrorResponse(valError!, corsHeaders);
 
-    const cacheKey = `launch-marketing-${productBrief.title?.slice(0, 50)}`;
+    const { productBrief, productContent, funnelCopy } = data;
+
+    const cacheKey = `launch-marketing-${(productBrief as any).title?.slice(0, 50)}`;
     const cached = await getCachedResponse(cacheKey, "generate-launch-marketing");
     if (cached) return new Response(JSON.stringify(cached), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-    const userTier = userId ? await getUserTier(userId) : "free";
+    const userTier = await getUserTier(user.id);
 
     const selectedAngle = productBrief.selectedAngle || "";
     const angleInstruction = selectedAngle ? `\nIMPORTANT: Use the "${selectedAngle}" campaign angle as the primary messaging theme. All content should reinforce this angle consistently.` : "";
@@ -79,6 +87,6 @@ Generate exactly 5 ad variations — each with a DIFFERENT hook angle (curiosity
     return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {
     console.error("Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ error: "Unable to generate marketing assets. Please try again." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });

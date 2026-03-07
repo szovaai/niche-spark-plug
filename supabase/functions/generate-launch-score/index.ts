@@ -1,20 +1,31 @@
-import { corsHeaders } from "../_shared/auth.ts";
+import { corsHeaders, validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
 import { callTieredAI, getUserTier } from "../_shared/tieredAI.ts";
+import { validateInput, validationErrorResponse } from "../_shared/validate.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { niche, targetAudience, productType, topic, productConcept, campaignAngles, userId } = await req.json();
+    const { user, error: authError } = await validateAuth(req);
+    if (authError || !user) return unauthorizedResponse(authError || 'Authentication required', corsHeaders);
 
-    if (!niche || !productType) {
-      return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
+    const body = await req.json();
+    const { valid, error: valError, data } = validateInput(body, [
+      { field: 'niche', type: 'string', required: true, maxLength: 200 },
+      { field: 'targetAudience', type: 'string', maxLength: 500 },
+      { field: 'productType', type: 'string', required: true, maxLength: 100 },
+      { field: 'topic', type: 'string', maxLength: 500 },
+      { field: 'productConcept', type: 'string', maxLength: 2000 },
+      { field: 'campaignAngles', type: 'array', maxItems: 10 },
+    ]);
+    if (!valid) return validationErrorResponse(valError!, corsHeaders);
 
-    const userTier = userId ? await getUserTier(userId) : "free";
+    const { niche, targetAudience, productType, topic, productConcept, campaignAngles } = data;
 
-    const anglesSection = campaignAngles?.length
-      ? `\nCampaign Angles to score: ${JSON.stringify(campaignAngles.map((a: any) => a.name))}`
+    const userTier = await getUserTier(user.id);
+
+    const anglesSection = (campaignAngles as any[])?.length
+      ? `\nCampaign Angles to score: ${JSON.stringify((campaignAngles as any[]).map((a: any) => a.name))}`
       : "";
 
     const prompt = `You are a digital product market analyst. Analyze this product idea and score it.
@@ -63,6 +74,6 @@ suggestions should be specific, actionable improvements — not generic advice.`
     return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {
     console.error("Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ error: "Unable to generate launch score. Please try again." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });

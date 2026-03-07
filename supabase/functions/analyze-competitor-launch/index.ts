@@ -1,19 +1,26 @@
-import { corsHeaders } from "../_shared/auth.ts";
+import { corsHeaders, validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
 import { callTieredAI, getUserTier } from "../_shared/tieredAI.ts";
+import { validateInput, validationErrorResponse } from "../_shared/validate.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { scrapedContent, url, userId } = await req.json();
+    const { user, error: authError } = await validateAuth(req);
+    if (authError || !user) return unauthorizedResponse(authError || 'Authentication required', corsHeaders);
 
-    if (!scrapedContent) {
-      return new Response(JSON.stringify({ error: "Missing scraped content" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
+    const body = await req.json();
+    const { valid, error: valError, data } = validateInput(body, [
+      { field: 'scrapedContent', type: 'string', required: true, maxLength: 50000 },
+      { field: 'url', type: 'string', maxLength: 2000 },
+    ]);
+    if (!valid) return validationErrorResponse(valError!, corsHeaders);
 
-    const userTier = userId ? await getUserTier(userId) : "free";
+    const { scrapedContent, url } = data;
 
-    const truncated = scrapedContent.slice(0, 8000);
+    const userTier = await getUserTier(user.id);
+
+    const truncated = (scrapedContent as string).slice(0, 8000);
 
     const prompt = `You are an expert at analyzing digital product launches and sales funnels. Analyze this product page and reverse-engineer the launch strategy.
 
@@ -55,6 +62,6 @@ Analyze the offer and return ONLY valid JSON:
     return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {
     console.error("Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ error: "Unable to analyze competitor. Please try again." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });

@@ -1,4 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
+import { validateInput, validationErrorResponse } from "../_shared/validate.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,7 +13,18 @@ serve(async (req) => {
   }
 
   try {
-    const { content, contentType, nicheContext } = await req.json();
+    const { user, error: authError } = await validateAuth(req);
+    if (authError || !user) return unauthorizedResponse(authError || 'Authentication required', corsHeaders);
+
+    const body = await req.json();
+    const { valid, error: valError, data } = validateInput(body, [
+      { field: 'content', type: 'string', required: true, maxLength: 50000 },
+      { field: 'contentType', type: 'string', required: true, maxLength: 100 },
+      { field: 'nicheContext', type: 'string', maxLength: 500 },
+    ]);
+    if (!valid) return validationErrorResponse(valError!, corsHeaders);
+
+    const { content, contentType, nicheContext } = data as Record<string, string>;
 
     if (!content || content.trim().length < 50) {
       return new Response(
@@ -22,7 +35,7 @@ serve(async (req) => {
 
     const DEEPSEEK_API_KEY = Deno.env.get('DEEPSEEK_API_KEY');
     if (!DEEPSEEK_API_KEY) {
-      throw new Error('DEEPSEEK_API_KEY is not configured');
+      throw new Error('Server configuration error');
     }
 
     const systemPrompt = `You are an expert content analyst specializing in digital product uniqueness assessment. Your job is to analyze content and determine how unique and differentiated it is compared to typical market patterns.
@@ -68,7 +81,7 @@ ${content}
 
 Provide a comprehensive uniqueness analysis with actionable insights for improving differentiation.`;
 
-    console.log('Analyzing content uniqueness...');
+    console.log('Analyzing uniqueness for user:', user.id);
 
     const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
       method: 'POST',
@@ -86,8 +99,7 @@ Provide a comprehensive uniqueness analysis with actionable insights for improvi
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('DeepSeek API error:', response.status, errorText);
+      console.error('AI API error:', response.status);
       
       if (response.status === 429) {
         return new Response(
@@ -101,17 +113,16 @@ Provide a comprehensive uniqueness analysis with actionable insights for improvi
           { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      throw new Error(`DeepSeek API error: ${response.status}`);
+      throw new Error('Unable to analyze content. Please try again.');
     }
 
-    const data = await response.json();
-    const aiResponse = data.choices?.[0]?.message?.content;
+    const data2 = await response.json();
+    const aiResponse = data2.choices?.[0]?.message?.content;
 
     if (!aiResponse) {
       throw new Error('No response from AI');
     }
 
-    // Parse JSON from response
     let result;
     try {
       const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
@@ -122,10 +133,8 @@ Provide a comprehensive uniqueness analysis with actionable insights for improvi
       }
     } catch (parseError) {
       console.error('JSON parse error:', parseError);
-      throw new Error('Failed to parse AI response');
+      throw new Error('Failed to parse analysis results');
     }
-
-    console.log('Uniqueness analysis complete. Score:', result.uniquenessScore);
 
     return new Response(
       JSON.stringify(result),
@@ -134,9 +143,8 @@ Provide a comprehensive uniqueness analysis with actionable insights for improvi
 
   } catch (error: unknown) {
     console.error('Error in analyze-uniqueness:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Failed to analyze content';
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: 'Unable to analyze content. Please try again.' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
