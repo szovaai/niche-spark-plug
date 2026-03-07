@@ -104,9 +104,7 @@ Return ONLY valid JSON with the same structure as the original funnel:
         { role: "user", content: optimizePrompt },
       ], userTier, "standard");
 
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error("Failed to parse AI response");
-      const result = JSON.parse(jsonMatch[0]);
+      const result = extractAndRepairJson(content);
 
       return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
