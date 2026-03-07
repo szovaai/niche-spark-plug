@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { callTieredAI, getUserTier } from "../_shared/tieredAI.ts";
 import { generateCacheKey, getCachedResponse, setCachedResponse } from "../_shared/cache.ts";
+import { validateInput, validationErrorResponse } from "../_shared/validate.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -110,14 +111,16 @@ serve(async (req) => {
       });
     }
 
-    const { productType, nicheTopic, targetAudience, problemStatement, config } = await req.json();
-
-    if (!productType || !nicheTopic || !targetAudience || !problemStatement) {
-      return new Response(JSON.stringify({ error: "Missing required fields" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const body = await req.json();
+    const { valid, error: valError, data } = validateInput(body, [
+      { field: 'productType', type: 'string', required: true, maxLength: 100 },
+      { field: 'nicheTopic', type: 'string', required: true, maxLength: 500 },
+      { field: 'targetAudience', type: 'string', required: true, maxLength: 500 },
+      { field: 'problemStatement', type: 'string', required: true, maxLength: 1000 },
+      { field: 'config', type: 'object', maxLength: 2000 },
+    ]);
+    if (!valid) return validationErrorResponse(valError!, corsHeaders);
+    const { productType, nicheTopic, targetAudience, problemStatement, config } = data;
 
     // Check cache
     const cacheInput = { productType, nicheTopic, targetAudience, problemStatement, config };
@@ -167,9 +170,12 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("Error:", error);
-    const message = error instanceof Error ? error.message : "Unknown error";
-    const status = message.includes("Rate limits") ? 429 : message.includes("Payment required") ? 402 : 500;
-    return new Response(JSON.stringify({ error: message }), {
+    const msg = error instanceof Error ? error.message : "";
+    const status = msg.includes("Rate limits") ? 429 : msg.includes("Payment required") ? 402 : 500;
+    const clientMsg = status === 429 ? "Rate limit reached. Please try again in a moment." 
+      : status === 402 ? "AI credits exhausted. Please try again later." 
+      : "Unable to generate product. Please try again.";
+    return new Response(JSON.stringify({ error: clientMsg }), {
       status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

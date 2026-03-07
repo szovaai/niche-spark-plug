@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
+import { validateInput, validationErrorResponse } from "../_shared/validate.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,7 +20,12 @@ serve(async (req) => {
     }
     console.log(`Authenticated user: ${user.id}`);
 
-    const { url } = await req.json();
+    const body = await req.json();
+    const { valid, error: valError, data } = validateInput(body, [
+      { field: 'url', type: 'string', required: true, maxLength: 2000 },
+    ]);
+    if (!valid) return validationErrorResponse(valError!, corsHeaders);
+    const { url } = data;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (!LOVABLE_API_KEY) {
@@ -164,7 +170,7 @@ Return as JSON:
   } catch (error) {
     console.error("Error in analyze-competitor:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      JSON.stringify({ error: "Unable to analyze competitor. Please try again." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

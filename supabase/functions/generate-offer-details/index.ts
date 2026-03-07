@@ -183,7 +183,7 @@ Return ONLY valid JSON, no markdown or explanation.`;
   } catch (error) {
     console.error("Error generating offer details:", error);
     return new Response(JSON.stringify({ 
-      error: error instanceof Error ? error.message : "Failed to generate offer details" 
+      error: "Unable to generate offer details. Please try again." 
     }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
