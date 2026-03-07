@@ -82,6 +82,32 @@ const Dashboard = () => {
           </p>
         </motion.div>
 
+        {/* Research Agent CTA */}
+        <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.08 }}>
+          <Card className="relative overflow-hidden border-accent/30 bg-gradient-to-br from-accent/10 via-primary/5 to-transparent">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-accent to-primary shrink-0">
+                    <Sparkles className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">Find a Profitable Topic First</h3>
+                    <p className="text-sm text-muted-foreground max-w-md">
+                      Talk to the AI Research Agent and discover what to launch before building your funnel.
+                    </p>
+                  </div>
+                </div>
+                <Button onClick={() => navigate("/research-agent")} variant="outline" className="gap-2 shrink-0 border-accent/40 hover:bg-accent/10">
+                  <Sparkles className="w-4 h-4" />
+                  Start Research Chat
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
         {/* Quick Launch CTA */}
         <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}>
           <Card className="relative overflow-hidden border-primary/30 bg-gradient-to-br from-primary/10 via-accent/5 to-transparent">
