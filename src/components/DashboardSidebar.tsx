@@ -5,12 +5,13 @@ import {
   LogOut,
   ChevronLeft,
   LayoutDashboard,
-  Plus,
-  Search,
   Rocket,
   Settings,
-  Crown,
-  Zap
+  Wand2,
+  ShoppingBag,
+  BarChart3,
+  ClipboardList,
+  LayoutTemplate,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
@@ -34,11 +35,11 @@ import {
 
 const mainNavItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Empire Mode", url: "/empire", icon: Crown, badge: "NEW" },
-  { title: "Micro Factory", url: "/micro-factory", icon: Zap, badge: "NEW" },
-  { title: "Research", url: "/research", icon: Search },
-  { title: "My Toolkits", url: "/my-toolkits", icon: Package },
-  { title: "Launch", url: "/launch", icon: Rocket },
+  { title: "Products", url: "/products", icon: ShoppingBag },
+  { title: "Funnels", url: "/funnels", icon: BarChart3 },
+  { title: "Marketing Assets", url: "/assets", icon: Package },
+  { title: "Launch Checklist", url: "/checklist", icon: ClipboardList },
+  { title: "Templates", url: "/templates", icon: LayoutTemplate },
 ];
 
 const secondaryNavItems = [
@@ -65,7 +66,7 @@ export function DashboardSidebar() {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
                 <span className="text-sm font-bold text-primary-foreground">DL</span>
               </div>
-              <span className="font-bold text-lg gradient-text">DigiLaunchKit</span>
+              <span className="font-bold text-lg gradient-text">DigiLaunchKit AI</span>
             </NavLink>
           )}
           <SidebarTrigger className="ml-auto">
@@ -75,18 +76,18 @@ export function DashboardSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {/* Create Toolkit CTA */}
+        {/* AI Launch Wizard CTA */}
         <SidebarGroup>
           <SidebarGroupContent>
             <div className={`px-2 ${isCollapsed ? 'px-1' : ''}`}>
               <Button
-                onClick={() => navigate("/create")}
+                onClick={() => navigate("/wizard")}
                 variant="hero"
                 size={isCollapsed ? "icon" : "default"}
                 className={`w-full gap-2 ${isCollapsed ? 'justify-center' : ''}`}
               >
-                <Plus className="h-4 w-4 shrink-0" />
-                {!isCollapsed && <span>Create Toolkit</span>}
+                <Wand2 className="h-4 w-4 shrink-0" />
+                {!isCollapsed && <span>New Launch</span>}
               </Button>
             </div>
           </SidebarGroupContent>
@@ -116,11 +117,6 @@ export function DashboardSidebar() {
                       <item.icon className="h-4 w-4 shrink-0" />
                       {!isCollapsed && (
                         <span className="truncate flex-1">{item.title}</span>
-                      )}
-                      {!isCollapsed && item.badge && (
-                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 bg-primary/20 text-primary">
-                          {item.badge}
-                        </Badge>
                       )}
                     </NavLink>
                   </SidebarMenuButton>

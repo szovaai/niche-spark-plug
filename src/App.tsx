@@ -17,6 +17,12 @@ import Launch from "./pages/Launch";
 import Settings from "./pages/Settings";
 import EmpireMode from "./pages/EmpireMode";
 import MicroFactory from "./pages/MicroFactory";
+import LaunchWizard from "./pages/LaunchWizard";
+import Products from "./pages/Products";
+import Funnels from "./pages/Funnels";
+import MarketingAssets from "./pages/MarketingAssets";
+import LaunchChecklist from "./pages/LaunchChecklist";
+import Templates from "./pages/Templates";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +38,12 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/wizard" element={<LaunchWizard />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/funnels" element={<Funnels />} />
+            <Route path="/assets" element={<MarketingAssets />} />
+            <Route path="/checklist" element={<LaunchChecklist />} />
+            <Route path="/templates" element={<Templates />} />
             <Route path="/create" element={<CreateToolkit />} />
             <Route path="/toolkit/:id" element={<CreateToolkit />} />
             <Route path="/toolkit/builder" element={<ToolkitBuilder />} />
