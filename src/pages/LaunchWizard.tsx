@@ -224,11 +224,12 @@ const LaunchWizard = () => {
           )}
           <motion.div key={currentStep} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.2 }}>
             {currentStep === 1 && (
-              <WizardStep1
+               <WizardStep1
                 niche={niche} setNiche={setNiche}
                 targetAudience={targetAudience} setTargetAudience={setTargetAudience}
                 productType={productType} setProductType={setProductType}
                 topic={topic} setTopic={setTopic}
+                price={price} setPrice={setPrice}
                 result={step1Result} setResult={setStep1Result}
                 onNext={() => setCurrentStep(2)}
                 onGenerateAll={generateAll}
