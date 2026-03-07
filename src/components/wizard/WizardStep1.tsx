@@ -75,6 +75,7 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
           niche, targetAudience, productType, topic,
           productConcept: productData.concept,
           campaignAngles: productData.campaignAngles,
+          price,
           userId,
         },
       });
