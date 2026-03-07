@@ -25,7 +25,8 @@ serve(async (req) => {
     const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
 
     if (!DEEPSEEK_API_KEY) {
-      throw new Error("DEEPSEEK_API_KEY not configured");
+      console.error("DEEPSEEK_API_KEY not configured");
+      throw new Error("Server configuration error");
     }
 
     const systemPrompt = `You are a viral social media marketing expert specializing in digital product launches.
@@ -64,9 +65,9 @@ Generate TikTok scripts, Instagram content, Pinterest pins, launch emails, promo
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("DeepSeek API error:", response.status, errorText);
-      if (response.status === 429) return new Response(JSON.stringify({ error: "Rate limit exceeded." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      throw new Error(`DeepSeek API error: ${response.status}`);
+      console.error("AI API error:", response.status, errorText);
+      if (response.status === 429) return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      throw new Error("AI generation failed");
     }
 
     const data = await response.json();
