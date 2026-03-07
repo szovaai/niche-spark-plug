@@ -8,6 +8,7 @@ import { Step1Product, Step2Content } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import AssetDownloadButtons from "@/components/AssetDownloadButtons";
+import ProofStackBuilder from "./ProofStackBuilder";
 
 interface Props {
   productBrief: Step1Product | null;
@@ -166,6 +167,8 @@ export default function WizardStep2({ productBrief, productType, result, setResu
               <p className="text-sm text-muted-foreground whitespace-pre-wrap">{result.description}</p>
             </CardContent>
           </Card>
+
+          {result.proofStack && <ProofStackBuilder proofStack={result.proofStack} />}
 
           <Button onClick={onNext} className="gap-2">Continue to Funnel Builder</Button>
         </div>

@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
 
     const mechanismInstruction = productBrief.uniqueMechanism ? `\nUNIQUE MECHANISM: "${productBrief.uniqueMechanism}" — reference this named framework in headlines, benefits, and CTAs.` : "";
 
-    const prompt = `Generate complete funnel copy for this digital product.
+    const prompt = `Generate complete funnel copy AND objection handling for this digital product.
 
 PRODUCT: ${productBrief.title} — ${productBrief.subtitle}
 CONCEPT: ${productBrief.concept}
@@ -67,7 +67,15 @@ Return ONLY valid JSON:
     "totalValue": ${Math.round(price * 27)},
     "askingPrice": ${price},
     "stackCopy": "Formatted value stack copy showing each item with its value, total crossed out, and today's price of $${price}."
-  }
+  },
+  "objections": [
+    {
+      "objection": "Common buyer objection phrased as they would say it",
+      "reframe": "Reframe that turns this objection into a reason TO buy — specific, not generic",
+      "proof": "Specific evidence, stat, or logical argument that counters this objection",
+      "followUpQuestion": "Question that moves them toward the sale after addressing the objection"
+    }
+  ]
 }
 
 CRITICAL:
@@ -75,7 +83,9 @@ CRITICAL:
 - The guarantee must be named and bold (e.g. "The 30-Day 'Use It Or Lose Nothing' Guarantee")
 - Every CTA must include the product name
 - The upsell page must feel like momentum, not a hard sell
-- No generic phrases — every benefit must be specific and measurable`;
+- No generic phrases — every benefit must be specific and measurable
+- Generate exactly 8 objections covering: price concern, skepticism about results, "I've tried before", time concern, trust concern, "not for me", technical ability, and delayed action
+- Each objection reframe must be specific to THIS product, not generic sales advice`;
 
     const { content, model } = await callTieredAI([
       { role: "system", content: SALES_PAGE_SYSTEM },

@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import RenderedCopy from "@/components/RenderedCopy";
 import { sanitizeHTML } from "@/lib/sanitize";
 import { markdownToHTML } from "@/lib/copyUtils";
+import ObjectionKiller from "./ObjectionKiller";
 
 interface Props {
   productBrief: Step1Product | null;
@@ -204,6 +205,10 @@ export default function WizardStep3({ productBrief, productContent, result, setR
               </TabsContent>
             )}
           </Tabs>
+          {result.objections && result.objections.length > 0 && (
+            <ObjectionKiller objections={result.objections} />
+          )}
+
           <Button onClick={onNext} className="gap-2">Continue to Marketing Assets</Button>
         </div>
       )}
