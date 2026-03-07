@@ -1,78 +1,163 @@
 
 
-# Micro Product Factory
+# DigiLaunchKit AI — Refactor Plan
 
-A new standalone page at `/micro-factory` that lets users quickly create small, focused digital products (micro-offers) through a simple 4-step wizard -- no niche research required.
+## What This Changes
 
-## How It Works (User Flow)
+This is a major restructuring that repositions the app from a collection of separate tools (Empire Mode, Micro Factory, Toolkit Builder, Research, Launch) into a unified **AI Launch Engine** with one primary flow: the **AI Launch Wizard**.
 
-1. **Pick a Product Type** -- Choose from categories like E-book, Checklist, Habit Tracker, Challenge, Worksheet, or Swipe File
-2. **Define Your Niche and Audience** -- Enter the topic, target audience, and the problem the product solves
-3. **Customize Components** -- Configure product-specific details (e.g., number of chapters for an e-book, number of days for a challenge, sections for a checklist)
-4. **Generate Everything** -- AI creates the full product content plus marketing assets (product description, sales copy, email sequence teaser, social media post) in one click
+## Current State vs. Target State
 
-## Where It Lives
+**Current navigation:** Dashboard, Empire Mode, Micro Factory, Research, My Toolkits, Launch
 
-- New sidebar item: "Micro Factory" with a Zap icon, placed between "Empire Mode" and "Research"
-- New Dashboard CTA card alongside the existing Empire Mode card
-- New route: `/micro-factory`
-- Saved products stored in a new `micro_products` database table
+**New navigation:** Dashboard, AI Launch Wizard, Products, Funnels, Marketing Assets, Launch Checklist, Templates, Settings
 
-## Product Types Available
+## Implementation Strategy
 
-| Type | Configurable Components |
-|------|------------------------|
-| E-book / Mini Guide | Number of chapters (3-10), writing tone |
-| Checklist | Number of items (10-50), category grouping toggle |
-| Habit Tracker | Duration (7/14/21/30 days), habits per day (3-10) |
-| Challenge | Number of days (3/5/7/14/21/30), daily task format |
-| Worksheet | Number of sections (3-8), exercise style |
-| Swipe File / Template Pack | Number of templates (5-20), format type |
-
-## What AI Generates
-
-For every product type, the output includes:
-
-- **Product Content** -- The actual structured content (chapters, checklist items, daily tasks, etc.)
-- **Product Title and Subtitle** -- Optimized for sales
-- **Product Description** -- Ready for Gumroad/Etsy listing
-- **3 Social Media Posts** -- Short promotional captions
-- **Email Pitch** -- A short sales email for the product
+Rather than deleting existing features, we **reorganize and consolidate** them into the new structure. The existing edge functions, database tables, and AI logic stay — we rewire the frontend and add new generation steps.
 
 ---
 
-## Technical Details
+## Phase 1: Database — New `launch_projects` Table
 
-### Database
+Create a central `launch_projects` table that ties all generated assets together under one project:
 
-New table: `micro_products`
-- `id`, `user_id`, `product_type`, `niche_topic`, `target_audience`, `problem_statement`
-- `config` (JSONB) -- stores component choices (num chapters, days, etc.)
-- `generated_content` (JSONB) -- AI output (product content + marketing)
-- `product_title`, `product_subtitle`
-- `status` (draft / complete)
-- `created_at`, `updated_at`
-- RLS: user can only CRUD their own rows
+```
+launch_projects
+├── id, user_id, name, status
+├── niche, target_audience, product_type, topic
+├── step1_product (JSONB) — title, subtitle, concept, pain points, unique mechanism
+├── step2_product_content (JSONB) — outline, chapters, bonuses, description
+├── step3_funnel (JSONB) — sales page, opt-in, thank you, bonus page, checkout copy
+├── step4_marketing (JSONB) — emails, social posts, pins, blog, video script
+├── step5_checklist (JSONB) — auto-generated launch steps with status
+├── current_step (1-5)
+├── created_at, updated_at
+```
 
-### Edge Function
+RLS: users can only CRUD their own rows. Existing tables (toolkits, empire_projects, micro_products) remain untouched for backward compatibility.
 
-One new edge function: `generate-micro-product`
-- Accepts: product type, niche topic, audience, problem, config
-- Uses `tieredAI` (standard complexity) and `cache` utilities
-- Returns structured JSON with product content + marketing assets
-- Prompt is tailored per product type (e.g., checklist prompt vs. challenge prompt)
+## Phase 2: Edge Functions (5 New)
 
-### Frontend Components
+1. **`generate-launch-product`** — Takes niche/audience/type/topic, returns product title, subtitle, concept, unique mechanism, pain points
+2. **`generate-launch-content`** — Takes product brief, returns outline, chapter breakdown, bonus ideas, product description
+3. **`generate-launch-funnel`** — Takes product brief + content summary, returns sales page copy, opt-in page, thank you page, bonus page, checkout copy (5 sections)
+4. **`generate-launch-marketing`** — Takes product + funnel context, returns email sequence (5 emails), 10 social posts, 5 Pinterest pins, 1 blog article, 1 video script
+5. **`generate-launch-checklist`** — Takes project state, returns personalized launch roadmap steps
 
-- `src/pages/MicroFactory.tsx` -- Main wizard page with 4 steps
-- `src/components/micro-factory/StepSelectType.tsx` -- Product type cards grid
-- `src/components/micro-factory/StepDefineNiche.tsx` -- Niche/audience/problem form
-- `src/components/micro-factory/StepCustomize.tsx` -- Dynamic component config based on selected type
-- `src/components/micro-factory/StepResults.tsx` -- Generated content display with copy buttons and tabs (Content / Marketing / Social)
+All use existing `tieredAI.ts` and `cache.ts`. Each function receives outputs from prior steps to maintain continuity (product title flows into sales page, etc.).
 
-### Navigation Changes
+## Phase 3: Frontend — AI Launch Wizard
 
-- Add "Micro Factory" to `mainNavItems` in `DashboardSidebar.tsx`
-- Add route `/micro-factory` in `App.tsx`
-- Add CTA card on Dashboard between the Empire Mode card and the stats grid
+New page: `src/pages/LaunchWizard.tsx` at route `/wizard`
+
+**Layout:** Left stepper (5 steps) + right content area (same pattern as Empire Mode)
+
+### Step 1 — Niche + Product Setup
+- Inputs: Niche, Target Audience, Product Type (dropdown: Ebook, Course, Templates, Checklist, Planner), Topic
+- Button: "Generate Product Concept"
+- Output: Product title, subtitle, concept, unique mechanism, target pain points (editable cards)
+
+### Step 2 — Product Generator
+- Shows product brief from Step 1
+- Button: "Generate Full Product"
+- Output: Outline, chapter breakdown (accordion), bonus ideas, product description
+- Export buttons: PDF / Markdown / Text
+
+### Step 3 — Funnel Builder
+- Button: "Generate Funnel Copy"
+- Output: 5 tabbed sections — Sales Page, Opt-in Page, Thank You Page, Bonus Page, Checkout Copy
+- Each section is an editable text block with copy button
+
+### Step 4 — Marketing Asset Generator
+- Button: "Generate All Marketing Assets"
+- Output: Tabbed view — Emails (5), Social Posts (10), Pinterest Pins (5), Blog Article (1), Video Script (1)
+- Each asset has copy-to-clipboard
+
+### Step 5 — Launch Checklist
+- Auto-generated from project state
+- Interactive checklist with checkboxes
+- Steps like: Finalize product, Upload sales page, Load email sequence, Publish opt-in, Announce launch
+
+**"Generate Entire Launch System" button** on Step 1 — runs all 5 generation steps sequentially and populates the entire project.
+
+## Phase 4: New Section Pages
+
+### Products Page (`/products`)
+- Lists all `launch_projects` with product data
+- Columns: Name, Niche, Type, Date, Status, Actions (edit/regenerate/export)
+
+### Funnels Page (`/funnels`)
+- Lists funnel assets from all projects
+- Tabs: Sales Pages, Opt-in Pages, Bonus Pages, Checkout Pages
+- Copy and export actions
+
+### Marketing Assets Page (`/assets`)
+- Central library pulling from all projects
+- Tabs: Email Sequences, Social Posts, Pinterest Pins, Blog Articles, Video Scripts
+
+### Templates Page (`/templates`)
+- Pre-built niche templates (Affiliate Marketing, AI Tools, Fitness, Productivity, Side Hustles)
+- Clicking a template pre-fills the wizard with niche/audience/type
+
+## Phase 5: Navigation Refactor
+
+**New sidebar items:**
+```
+Dashboard          /dashboard
+AI Launch Wizard   /wizard        (primary CTA, highlighted)
+Products           /products
+Funnels            /funnels
+Marketing Assets   /assets
+Launch Checklist   /checklist
+Templates          /templates
+Settings           /settings
+```
+
+**Preserved routes** (accessible but removed from main nav):
+- `/empire` — Empire Mode still works
+- `/micro-factory` — Micro Factory still works
+- `/research` — Research still works
+- `/my-toolkits` — Toolkits still accessible
+- `/launch` — Old launch hub still accessible
+
+The sidebar CTA button changes from "Create Toolkit" to "New Launch" → navigates to `/wizard`.
+
+## Phase 6: Dashboard Refactor
+
+Replace current dashboard with launch-focused view:
+- **Launch Progress Tracker** — visual progress bar showing Product → Sales Page → Emails → Assets → Ready
+- **Active Launch Projects** — list of in-progress projects
+- **Recent Generated Assets** — last 5 generated items across all projects
+- **Quick Launch Button** — "Start New Launch" CTA
+- Keep stats grid (adapted: Products Created, Funnels Built, Assets Generated, Streak)
+
+## Phase 7: Branding Update
+
+- App title: "DigiLaunchKit AI" (update index.html, Navbar, Sidebar)
+- Tagline: "Create, Launch, and Start Selling Your Own Digital Product in Under 60 Minutes Using AI"
+- Hero section updated with new messaging
+
+---
+
+## Files Created/Modified Summary
+
+**New files (~20):**
+- 1 migration file
+- 5 edge functions
+- 1 types file (`src/types/launchWizard.ts`)
+- 5 wizard step components (`src/components/wizard/`)
+- 4 section pages (Products, Funnels, Assets, Templates)
+- 1 main wizard page
+- 1 launch checklist page
+
+**Modified files (~5):**
+- `DashboardSidebar.tsx` — new nav items
+- `Dashboard.tsx` — launch-focused redesign
+- `App.tsx` — new routes
+- `index.html` — branding
+- `Navbar.tsx` / `HeroSection.tsx` — branding
+
+**Preserved (no changes):**
+- All existing edge functions, database tables, Empire Mode, Micro Factory, Research, Toolkit Builder
 
