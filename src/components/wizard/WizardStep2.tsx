@@ -3,12 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Sparkles, Loader2, Copy, Check, RefreshCw } from "lucide-react";
-import { Step1Product, Step2Content } from "@/types/launchWizard";
+import { Sparkles, Loader2, Copy, Check, RefreshCw, Target, BookOpen, Lightbulb, ListOrdered, CheckCircle, AlertTriangle, Pencil, Key } from "lucide-react";
+import { Step1Product, Step2Content, ChapterItem } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import AssetDownloadButtons from "@/components/AssetDownloadButtons";
 import ProofStackBuilder from "./ProofStackBuilder";
+import ContentQualityReport from "./ContentQualityReport";
 
 interface Props {
   productBrief: Step1Product | null;
@@ -19,9 +20,99 @@ interface Props {
   userId?: string;
 }
 
+function StructuredChapter({ chapter, index, copied, onCopy }: { chapter: ChapterItem; index: number; copied: string | null; onCopy: (text: string, label: string) => void }) {
+  const isStructured = !!(chapter.moduleGoal || chapter.hook || chapter.actionPlan?.length);
+
+  if (!isStructured) {
+    return (
+      <div className="space-y-2">
+        <p className="text-sm text-muted-foreground">{chapter.summary}</p>
+        <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
+          {chapter.keyPoints?.map((kp, j) => <li key={j}>{kp}</li>)}
+        </ul>
+      </div>
+    );
+  }
+
+  const sections = [
+    { icon: Target, label: "Module Goal", content: chapter.moduleGoal },
+    { icon: BookOpen, label: "Hook", content: chapter.hook },
+    { icon: Lightbulb, label: "Core Concept", content: chapter.coreConcept },
+    { icon: CheckCircle, label: "Real Example", content: chapter.realExample },
+    { icon: Pencil, label: "Action Step", content: chapter.actionStep },
+  ].filter(s => s.content);
+
+  return (
+    <div className="space-y-3">
+      <p className="text-sm text-muted-foreground">{chapter.summary}</p>
+
+      {sections.map((section, i) => (
+        <div key={i} className="flex gap-2">
+          <section.icon className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-0.5">{section.label}</p>
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{section.content}</p>
+          </div>
+          <Button variant="ghost" size="sm" className="shrink-0 h-6 w-6 p-0" onClick={() => onCopy(section.content!, `${index}-${section.label}`)}>
+            {copied === `${index}-${section.label}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+          </Button>
+        </div>
+      ))}
+
+      {chapter.actionPlan && chapter.actionPlan.length > 0 && (
+        <div className="flex gap-2">
+          <ListOrdered className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Action Plan</p>
+            <div className="space-y-2">
+              {chapter.actionPlan.map((step, j) => (
+                <div key={j} className="p-2 rounded bg-secondary/30 text-sm">
+                  <p className="font-medium">{step.step}: {step.action}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{step.why}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {chapter.commonMistakes && chapter.commonMistakes.length > 0 && (
+        <div className="flex gap-2">
+          <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-0.5">Common Mistakes</p>
+            <ul className="list-disc list-inside text-sm text-muted-foreground space-y-0.5">
+              {chapter.commonMistakes.map((m, j) => <li key={j}>{m}</li>)}
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {chapter.moduleSummary && chapter.moduleSummary.length > 0 && (
+        <div className="flex gap-2">
+          <Key className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-0.5">Key Takeaways</p>
+            <ul className="list-disc list-inside text-sm text-muted-foreground space-y-0.5">
+              {chapter.moduleSummary.map((s, j) => <li key={j}>{s}</li>)}
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {chapter.keyPoints?.length > 0 && !chapter.actionPlan?.length && (
+        <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
+          {chapter.keyPoints.map((kp, j) => <li key={j}>{kp}</li>)}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 export default function WizardStep2({ productBrief, productType, result, setResult, onNext, userId }: Props) {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+  const [expandingIndex, setExpandingIndex] = useState<number | null>(null);
 
   const generate = async () => {
     if (!productBrief) return;
@@ -37,6 +128,34 @@ export default function WizardStep2({ productBrief, productType, result, setResu
       toast.error(e.message || "Failed to generate");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const expandChapter = async (index: number) => {
+    if (!result || !productBrief) return;
+    setExpandingIndex(index);
+    try {
+      const chapter = result.chapters[index];
+      const { data, error } = await supabase.functions.invoke("generate-launch-content", {
+        body: {
+          productBrief,
+          productType,
+          expandChapter: true,
+          chapterToExpand: chapter,
+          chapterIndex: index,
+        },
+      });
+      if (error) throw error;
+      if (data?.expandedChapter) {
+        const updatedChapters = [...result.chapters];
+        updatedChapters[index] = data.expandedChapter;
+        setResult({ ...result, chapters: updatedChapters });
+        toast.success(`Chapter ${index + 1} expanded with examples and walkthroughs!`);
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Failed to expand chapter");
+    } finally {
+      setExpandingIndex(null);
     }
   };
 
@@ -84,6 +203,13 @@ export default function WizardStep2({ productBrief, productType, result, setResu
             </Button>
           </div>
 
+          {/* Content Quality Report */}
+          <ContentQualityReport
+            content={result}
+            onExpandChapter={expandChapter}
+            expandingIndex={expandingIndex}
+          />
+
           <Card>
             <CardContent className="p-6 space-y-4">
               <div className="flex items-center justify-between flex-wrap gap-2">
@@ -118,13 +244,14 @@ export default function WizardStep2({ productBrief, productType, result, setResu
                       Chapter {i + 1}: {ch.title}
                     </AccordionTrigger>
                     <AccordionContent className="space-y-2">
-                      <p className="text-sm text-muted-foreground">{ch.summary}</p>
-                      <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-                        {ch.keyPoints?.map((kp, j) => <li key={j}>{kp}</li>)}
-                      </ul>
+                      <StructuredChapter chapter={ch} index={i} copied={copied} onCopy={copyText} />
                       <div className="flex items-center gap-2 pt-2">
                         <Button variant="ghost" size="sm" onClick={() => copyText(`${ch.title}\n\n${ch.summary}\n\n${ch.keyPoints?.join("\n")}`, `ch-${i}`)} className="gap-1 text-xs">
-                          {copied === `ch-${i}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />} Copy
+                          {copied === `ch-${i}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />} Copy All
+                        </Button>
+                        <Button variant="outline" size="sm" className="gap-1 text-xs" disabled={expandingIndex === i} onClick={() => expandChapter(i)}>
+                          {expandingIndex === i ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                          Expand
                         </Button>
                       </div>
                     </AccordionContent>

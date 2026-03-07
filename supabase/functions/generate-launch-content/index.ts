@@ -12,6 +12,61 @@ Deno.serve(async (req) => {
     if (authError || !user) return unauthorizedResponse(authError || 'Authentication required', corsHeaders);
 
     const body = await req.json();
+
+    // Handle chapter expansion mode
+    if (body.expandChapter) {
+      const { chapterToExpand, chapterIndex, productBrief } = body;
+      const userTier = await getUserTier(user.id);
+
+      const expandPrompt = `You are expanding a chapter of a digital product to make it more specific, actionable, and example-rich.
+
+Original Chapter: "${chapterToExpand.title}"
+Summary: ${chapterToExpand.summary}
+Key Points: ${chapterToExpand.keyPoints?.join(", ") || "none"}
+Product: ${productBrief?.title || "Unknown"}
+Unique Mechanism: ${productBrief?.uniqueMechanism || ""}
+
+EXPAND this chapter by adding:
+1. A real-world example with specific details (names, numbers, timeframes)
+2. Step-by-step implementation walkthrough (3-5 concrete steps)
+3. A troubleshooting section ("If X happens, do Y") with 2-3 scenarios
+4. Common mistakes to avoid (2-3)
+5. An immediate action step the reader can do in the next 10 minutes
+
+Return ONLY valid JSON:
+{
+  "expandedChapter": {
+    "title": "Keep original or improve with specific outcome",
+    "summary": "Enhanced 2-3 paragraph summary with specific details",
+    "keyPoints": ["specific point 1", "specific point 2", "specific point 3"],
+    "moduleGoal": "One sentence: what the reader will be able to DO after this chapter",
+    "hook": "2-3 paragraph opening that grabs attention with a relatable scenario",
+    "coreConcept": "The core idea explained simply with an analogy",
+    "actionPlan": [
+      { "step": "Step 1", "action": "Specific action to take", "why": "Why this matters" },
+      { "step": "Step 2", "action": "Specific action to take", "why": "Why this matters" },
+      { "step": "Step 3", "action": "Specific action to take", "why": "Why this matters" }
+    ],
+    "realExample": "A detailed real-world example with specific numbers, names, and outcomes",
+    "commonMistakes": ["Mistake 1 with explanation", "Mistake 2 with explanation"],
+    "actionStep": "One specific thing they can do RIGHT NOW in the next 10 minutes",
+    "moduleSummary": ["Key takeaway 1", "Key takeaway 2", "Key takeaway 3"]
+  }
+}`;
+
+      const { content } = await callTieredAI([
+        { role: "system", content: MASTER_SYSTEM_PROMPT },
+        { role: "user", content: expandPrompt },
+      ], userTier, "standard");
+
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error("Failed to parse AI response");
+      const result = JSON.parse(jsonMatch[0]);
+
+      return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // Normal generation mode
     const { valid, error: valError, data } = validateInput(body, [
       { field: 'productBrief', type: 'object', required: true, maxLength: 10000 },
       { field: 'productType', type: 'string', maxLength: 100 },
@@ -42,49 +97,64 @@ Pain Points: ${productBrief.painPoints?.join(", ") || ""}
 
 Return ONLY valid JSON:
 {
-  "outline": "2-3 paragraph overview — open with the reader's problem, introduce the mechanism, then outline the transformation path. Write conversationally — like you're explaining this to a friend over coffee.",
+  "outline": "2-3 paragraph overview — open with the reader's problem, introduce the mechanism, then outline the transformation path. Write conversationally.",
   "chapters": [
-    { "title": "Action-oriented chapter title with specific outcome", "summary": "2-3 sentences: what they'll learn and the result they'll get. Be specific — not 'learn marketing' but 'set up your first $7 tripwire that converts cold traffic'", "keyPoints": ["specific actionable point 1", "point 2", "point 3"] }
+    {
+      "title": "Action-oriented chapter title with specific outcome",
+      "summary": "2-3 sentences: what they'll learn and the result they'll get",
+      "keyPoints": ["specific actionable point 1", "point 2", "point 3"],
+      "moduleGoal": "One sentence: what the reader will be able to DO after this chapter",
+      "hook": "2-3 paragraph opening that grabs attention with a relatable scenario or surprising fact",
+      "coreConcept": "The core idea explained simply — use an analogy if possible",
+      "actionPlan": [
+        { "step": "Step 1", "action": "Specific concrete action", "why": "Why this matters for results" },
+        { "step": "Step 2", "action": "Specific concrete action", "why": "Why this matters for results" },
+        { "step": "Step 3", "action": "Specific concrete action", "why": "Why this matters for results" }
+      ],
+      "realExample": "A detailed real-world example with specific numbers, names, and outcomes — not generic",
+      "commonMistakes": ["Common mistake 1 with why it fails", "Common mistake 2 with why it fails"],
+      "actionStep": "One specific thing they can do RIGHT NOW in the next 10 minutes",
+      "moduleSummary": ["Key takeaway 1", "Key takeaway 2", "Key takeaway 3"]
+    }
   ],
   "bonuses": ["Bonus 1: [Name] — specific description of what it is and the result it produces", "Bonus 2: ...", "Bonus 3: ..."],
-  "description": "A compelling 150-word product description — lead with pain, introduce mechanism, promise specific result. Write like a human, not a brochure.",
+  "description": "A compelling 150-word product description — lead with pain, introduce mechanism, promise specific result.",
   "proofStack": {
     "testimonialTemplates": [
       {
-        "name": "[TESTIMONIAL 1 — Replace with real customer]",
-        "before": "What life/work was like BEFORE using the product — specific frustration in buyer's language",
-        "product": "What they did with the product — specific action they took",
-        "result": "The specific measurable result they achieved — numbers, timeframes",
-        "lifeNow": "How their situation is different now — emotional + practical change"
+        "name": "[TESTIMONIAL 1]",
+        "before": "What life/work was like BEFORE — specific frustration",
+        "product": "What they did with the product — specific action",
+        "result": "Specific measurable result — numbers, timeframes",
+        "lifeNow": "How their situation is different now"
       }
     ],
     "beforeAfterTable": [
       { "before": "Specific pain state in buyer's own words", "after": "Specific transformed state with measurable difference" }
     ],
-    "credibilityBuilder": "2-3 paragraphs of honest credibility copy for someone who may not have testimonials yet. Use frameworks like: 'I spent X months researching...', 'After interviewing X people...', 'I tested every method I could find and distilled it down to...' — builds trust without fake claims.",
-    "earningsDisclaimer": "FTC-compliant earnings/results disclaimer customized to this product type. Include: results not typical, individual results vary, no guarantee of specific outcomes. Professional but not scary.",
+    "credibilityBuilder": "2-3 paragraphs of honest credibility copy for someone who may not have testimonials yet.",
+    "earningsDisclaimer": "FTC-compliant earnings/results disclaimer customized to this product type.",
     "quickWinsList": [
-      "Specific tangible outcome #1 the buyer gets (e.g., 'Get 3 ready-to-send email sequences you can deploy TODAY')",
+      "Specific tangible outcome #1",
       "Specific tangible outcome #2",
       "Specific tangible outcome #3",
       "Specific tangible outcome #4",
-      "Specific tangible outcome #5",
-      "Specific tangible outcome #6",
-      "Specific tangible outcome #7"
+      "Specific tangible outcome #5"
     ]
   }
 }
 
 RULES:
 - Generate 6-8 chapters, each building on the previous one
-- Every chapter title must promise a specific outcome (not just a topic name)
-- Bonuses must be named products with clear value, not vague "extra resources"
+- Every chapter MUST include moduleGoal, hook, coreConcept, actionPlan (3-5 steps), realExample, commonMistakes (2-3), actionStep, and moduleSummary (3 bullets)
+- Each actionPlan step must have a specific, concrete action — not "learn about X" but "open [tool], click [button], paste [template]"
+- Each realExample must include specific numbers, timeframes, or names — not "a student got results" but "Sarah K. used this template and generated $847 in her first 14 days"
+- Bonuses must be named products with clear value
 - Reference the unique mechanism "${productBrief.uniqueMechanism}" throughout
-- The description must read like sales copy, not a table of contents
-- Write in a warm, direct, conversational tone — like a knowledgeable friend who's already done this
-- Generate exactly 5 testimonial templates covering: skeptic-turned-believer, beginner success, unexpected benefit, best result story, quick win story
-- Generate 5-7 before/after rows showing real transformations in buyer's language
-- Quick wins must be SPECIFIC and TANGIBLE — not "learn mindset" but "Get a done-for-you checklist you can use in the next 10 minutes"`;
+- Write in a warm, direct, conversational tone
+- Generate exactly 5 testimonial templates
+- Generate 5-7 before/after rows
+- Quick wins must be SPECIFIC and TANGIBLE`;
 
     const { content, model } = await callTieredAI([
       { role: "system", content: MASTER_SYSTEM_PROMPT },

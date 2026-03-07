@@ -12,6 +12,45 @@ Deno.serve(async (req) => {
     if (authError || !user) return unauthorizedResponse(authError || 'Authentication required', corsHeaders);
 
     const body = await req.json();
+
+    // Handle optimization mode
+    if (body.optimizationMode && body.existingSalesPage) {
+      const userTier = await getUserTier(user.id);
+      const optimizePrompt = `You are optimizing an existing sales page for higher conversions. 
+
+EXISTING SALES PAGE:
+${body.existingSalesPage.slice(0, 8000)}
+
+MISSING CONVERSION ELEMENTS:
+${body.missingElements}
+
+INSTRUCTIONS:
+- Keep ALL existing copy intact
+- ADD the missing elements naturally into the sales page
+- Maintain the same tone, voice, and style
+- Return the COMPLETE sales page with additions woven in
+
+Return ONLY valid JSON with the same structure as the original funnel:
+{
+  "salesPage": "The complete optimized sales page copy with missing elements added",
+  "optInPage": "Keep existing or generate if missing",
+  "thankYouPage": "Keep existing or generate if missing",
+  "bonusPage": "Keep existing or generate if missing",
+  "checkoutCopy": "Keep existing or generate if missing"
+}`;
+
+      const { content } = await callTieredAI([
+        { role: "system", content: SALES_PAGE_SYSTEM },
+        { role: "user", content: optimizePrompt },
+      ], userTier, "standard");
+
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error("Failed to parse AI response");
+      const result = JSON.parse(jsonMatch[0]);
+
+      return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     const { valid, error: valError, data } = validateInput(body, [
       { field: 'productBrief', type: 'object', required: true, maxLength: 10000 },
       { field: 'productContent', type: 'object', maxLength: 50000 },

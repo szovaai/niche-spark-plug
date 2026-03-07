@@ -135,10 +135,24 @@ export interface Step2Content {
   proofStack?: ProofStack;
 }
 
+export interface ActionPlanStep {
+  step: string;
+  action: string;
+  why: string;
+}
+
 export interface ChapterItem {
   title: string;
   summary: string;
   keyPoints: string[];
+  moduleGoal?: string;
+  hook?: string;
+  coreConcept?: string;
+  actionPlan?: ActionPlanStep[];
+  realExample?: string;
+  commonMistakes?: string[];
+  actionStep?: string;
+  moduleSummary?: string[];
 }
 
 export interface Step3Funnel {

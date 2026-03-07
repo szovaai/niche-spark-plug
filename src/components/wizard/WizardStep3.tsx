@@ -12,6 +12,7 @@ import RenderedCopy from "@/components/RenderedCopy";
 import { sanitizeHTML } from "@/lib/sanitize";
 import { markdownToHTML } from "@/lib/copyUtils";
 import ObjectionKiller from "./ObjectionKiller";
+import SalesPageAudit from "./SalesPageAudit";
 
 interface Props {
   productBrief: Step1Product | null;
@@ -207,6 +208,16 @@ export default function WizardStep3({ productBrief, productContent, result, setR
           </Tabs>
           {result.objections && result.objections.length > 0 && (
             <ObjectionKiller objections={result.objections} />
+          )}
+
+          {result.salesPage && typeof result.salesPage === "string" && (
+            <SalesPageAudit
+              salesPageCopy={result.salesPage}
+              productBrief={productBrief}
+              productContent={productContent}
+              onOptimized={setResult}
+              price={price}
+            />
           )}
 
           <Button onClick={onNext} className="gap-2">Continue to Marketing Assets</Button>
