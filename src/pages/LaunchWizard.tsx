@@ -32,6 +32,7 @@ const LaunchWizard = () => {
   const [targetAudience, setTargetAudience] = useState(searchParams.get("audience") || "");
   const [productType, setProductType] = useState("");
   const [topic, setTopic] = useState(searchParams.get("topic") || "");
+  const [price, setPrice] = useState(17);
   const [step1Result, setStep1Result] = useState<Step1Product | null>(null);
 
   // Step 2-5 state
