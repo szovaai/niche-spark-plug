@@ -817,17 +817,20 @@ export const generateWorksheetPDF = (
       doc.text(`${field}:`, PDF_STYLES.margins.left + 10, y + 1);
       y += 10;
       
-      // Writing area
+      // Writing area with dotted fill lines
       doc.setDrawColor(...PDF_STYLES.textLight);
       doc.setFillColor(255, 255, 255);
-      doc.roundedRect(PDF_STYLES.margins.left, y, contentWidth, 30, 2, 2, "FD");
+      doc.roundedRect(PDF_STYLES.margins.left, y, contentWidth, 35, 2, 2, "FD");
       
-      doc.setDrawColor(230, 230, 235);
-      for (let i = 1; i <= 3; i++) {
+      // Dotted response lines
+      doc.setDrawColor(200, 205, 215);
+      doc.setLineDashPattern([2, 2], 0);
+      for (let i = 1; i <= 4; i++) {
         doc.line(PDF_STYLES.margins.left + 5, y + (i * 7), pageWidth - PDF_STYLES.margins.right - 5, y + (i * 7));
       }
+      doc.setLineDashPattern([], 0);
       
-      y += 38;
+      y += 43;
     });
     
     addFooter(doc, authorName);
