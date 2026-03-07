@@ -247,22 +247,24 @@ const LaunchWizard = () => {
               />
             )}
             {currentStep === 3 && (
-              <WizardStep3
+               <WizardStep3
                 productBrief={step1Result}
                 productContent={step2Result}
                 result={step3Result} setResult={setStep3Result}
                 onNext={() => setCurrentStep(4)}
                 userId={user?.id}
+                price={price}
               />
             )}
             {currentStep === 4 && (
-              <WizardStep4
+               <WizardStep4
                 productBrief={step1Result}
                 productContent={step2Result}
                 funnelCopy={step3Result}
                 result={step4Result} setResult={setStep4Result}
                 onNext={() => setCurrentStep(5)}
                 userId={user?.id}
+                price={price}
               />
             )}
             {currentStep === 5 && (
