@@ -7,10 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { encryptApiKey, decryptApiKey } from "@/lib/cryptoUtils";
+import BrandKitTab from "@/components/settings/BrandKitTab";
 
 type ApiProvider = "deepseek" | "openai" | "anthropic";
 
@@ -209,127 +211,141 @@ const Settings = () => {
           </div>
         </motion.div>
 
-        {/* BYOK Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <Card className="border-border/50">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Key className="w-5 h-5 text-primary" />
-                <CardTitle>Bring Your Own Key (BYOK)</CardTitle>
-              </div>
-              <CardDescription>
-                Use your own API keys for AI-powered features. Your keys are stored securely and never shared.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Info Alert */}
-              <div className="flex items-start gap-3 p-4 rounded-lg bg-primary/5 border border-primary/20">
-                <AlertCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                <div className="text-sm">
-                  <p className="font-medium text-foreground">How BYOK works</p>
-                  <p className="text-muted-foreground mt-1">
-                    When you add your own API key, it will be used instead of the app's default key for AI features. 
-                    This gives you more control and potentially higher rate limits.
-                  </p>
-                </div>
-              </div>
+        {/* Tabs */}
+        <Tabs defaultValue="api-keys">
+          <TabsList>
+            <TabsTrigger value="api-keys">API Keys</TabsTrigger>
+            <TabsTrigger value="brand-kit">Brand Kit</TabsTrigger>
+          </TabsList>
 
-              {/* API Key Forms */}
-              <div className="space-y-4">
-                {API_PROVIDERS.map((provider) => (
-                  <div
-                    key={provider.id}
-                    className="p-4 rounded-lg border border-border/50 bg-card/50 space-y-3"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{provider.name}</span>
-                          {apiKeys[provider.id] && (
-                            <Badge variant="secondary" className="bg-green-500/10 text-green-500 border-green-500/20">
-                              <CheckCircle className="w-3 h-3 mr-1" />
-                              Configured
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-0.5">
-                          {provider.description}
-                        </p>
-                      </div>
-                      <a
-                        href={provider.docsUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-primary hover:underline"
-                      >
-                        Get API Key →
-                      </a>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <div className="relative flex-1">
-                        <Input
-                          type={showKeys[provider.id] ? "text" : "password"}
-                          placeholder={provider.placeholder}
-                          value={showKeys[provider.id] ? apiKeys[provider.id] : maskKey(apiKeys[provider.id])}
-                          onChange={(e) => {
-                            if (showKeys[provider.id]) {
-                              setApiKeys(prev => ({ ...prev, [provider.id]: e.target.value }));
-                            }
-                          }}
-                          onFocus={() => {
-                            if (!showKeys[provider.id]) {
-                              setShowKeys(prev => ({ ...prev, [provider.id]: true }));
-                            }
-                          }}
-                          className="pr-10 font-mono text-sm"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => toggleShowKey(provider.id)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                        >
-                          {showKeys[provider.id] ? (
-                            <EyeOff className="w-4 h-4" />
-                          ) : (
-                            <Eye className="w-4 h-4" />
-                          )}
-                        </button>
-                      </div>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={() => saveApiKey(provider.id)}
-                        disabled={saving === provider.id || !apiKeys[provider.id]}
-                      >
-                        {saving === provider.id ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <Save className="w-4 h-4" />
-                        )}
-                      </Button>
-                      {apiKeys[provider.id] && (
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          onClick={() => deleteApiKey(provider.id)}
-                          disabled={saving === provider.id}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      )}
+          <TabsContent value="api-keys" className="mt-4">
+            {/* BYOK Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <Card className="border-border/50">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Key className="w-5 h-5 text-primary" />
+                    <CardTitle>Bring Your Own Key (BYOK)</CardTitle>
+                  </div>
+                  <CardDescription>
+                    Use your own API keys for AI-powered features. Your keys are stored securely and never shared.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Info Alert */}
+                  <div className="flex items-start gap-3 p-4 rounded-lg bg-primary/5 border border-primary/20">
+                    <AlertCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                    <div className="text-sm">
+                      <p className="font-medium text-foreground">How BYOK works</p>
+                      <p className="text-muted-foreground mt-1">
+                        When you add your own API key, it will be used instead of the app's default key for AI features. 
+                        This gives you more control and potentially higher rate limits.
+                      </p>
                     </div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+
+                  {/* API Key Forms */}
+                  <div className="space-y-4">
+                    {API_PROVIDERS.map((provider) => (
+                      <div
+                        key={provider.id}
+                        className="p-4 rounded-lg border border-border/50 bg-card/50 space-y-3"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">{provider.name}</span>
+                              {apiKeys[provider.id] && (
+                                <Badge variant="secondary" className="bg-green-500/10 text-green-500 border-green-500/20">
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  Configured
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-sm text-muted-foreground mt-0.5">
+                              {provider.description}
+                            </p>
+                          </div>
+                          <a
+                            href={provider.docsUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-primary hover:underline"
+                          >
+                            Get API Key →
+                          </a>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <div className="relative flex-1">
+                            <Input
+                              type={showKeys[provider.id] ? "text" : "password"}
+                              placeholder={provider.placeholder}
+                              value={showKeys[provider.id] ? apiKeys[provider.id] : maskKey(apiKeys[provider.id])}
+                              onChange={(e) => {
+                                if (showKeys[provider.id]) {
+                                  setApiKeys(prev => ({ ...prev, [provider.id]: e.target.value }));
+                                }
+                              }}
+                              onFocus={() => {
+                                if (!showKeys[provider.id]) {
+                                  setShowKeys(prev => ({ ...prev, [provider.id]: true }));
+                                }
+                              }}
+                              className="pr-10 font-mono text-sm"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => toggleShowKey(provider.id)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                            >
+                              {showKeys[provider.id] ? (
+                                <EyeOff className="w-4 h-4" />
+                              ) : (
+                                <Eye className="w-4 h-4" />
+                              )}
+                            </button>
+                          </div>
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() => saveApiKey(provider.id)}
+                            disabled={saving === provider.id || !apiKeys[provider.id]}
+                          >
+                            {saving === provider.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Save className="w-4 h-4" />
+                            )}
+                          </Button>
+                          {apiKeys[provider.id] && (
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={() => deleteApiKey(provider.id)}
+                              disabled={saving === provider.id}
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </TabsContent>
+
+          <TabsContent value="brand-kit" className="mt-4">
+            {user && <BrandKitTab userId={user.id} />}
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   );

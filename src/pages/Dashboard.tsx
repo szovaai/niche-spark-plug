@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { 
   Wand2, Flame, ArrowRight, Clock, 
   Sparkles, TrendingUp, Package, BarChart3, CheckCircle2, Circle,
-  Rocket
+  Rocket, Copy
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,11 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { toast } from "sonner";
 import RevenueProjector from "@/components/wizard/RevenueProjector";
 import LaunchDNACard from "@/components/wizard/LaunchDNACard";
+import ProductScorecard from "@/components/wizard/ProductScorecard";
+import PreLaunchAudit from "@/components/wizard/PreLaunchAudit";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -51,6 +54,21 @@ const Dashboard = () => {
   };
 
   const displayName = user?.email?.split("@")[0] || "Creator";
+
+  const cloneProject = async (project: any) => {
+    if (!user) return;
+    const { id, created_at, updated_at, ...rest } = project;
+    const { data, error } = await supabase.from("launch_projects").insert({
+      ...rest,
+      user_id: user.id,
+      name: `${project.name} (Copy)`,
+      status: "in_progress",
+      current_step: 1,
+    }).select().single();
+    if (error) { toast.error("Clone failed"); return; }
+    toast.success("Project cloned!");
+    navigate(`/wizard/${data.id}`);
+  };
 
   // Get latest project's checklist for progress tracker
   const latestProject = projects[0];
@@ -207,14 +225,17 @@ const Dashboard = () => {
               ) : (
                 <div className="space-y-2">
                   {projects.map(p => (
-                    <div key={p.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-secondary/50 transition-colors cursor-pointer" onClick={() => navigate("/products")}>
-                      <div className="p-2 rounded-lg bg-primary/10">
+                    <div key={p.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-secondary/50 transition-colors">
+                      <div className="p-2 rounded-lg bg-primary/10 cursor-pointer" onClick={() => navigate(`/wizard/${p.id}`)}>
                         <Package className="w-4 h-4 text-primary" />
                       </div>
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1 min-w-0 cursor-pointer" onClick={() => navigate(`/wizard/${p.id}`)}>
                         <p className="text-sm font-medium truncate">{p.name}</p>
                         <p className="text-xs text-muted-foreground">{p.niche} · Step {p.current_step}/5</p>
                       </div>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={(e) => { e.stopPropagation(); cloneProject(p); }} title="Clone project">
+                        <Copy className="w-3.5 h-3.5" />
+                      </Button>
                       <Badge variant={p.status === "complete" ? "default" : "secondary"} className="text-xs">{p.status}</Badge>
                     </div>
                   ))}
@@ -223,6 +244,20 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         </motion.div>
+
+        {/* Scorecard + Audit + Revenue */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {latestProject && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
+              <ProductScorecard project={latestProject} />
+            </motion.div>
+          )}
+          {latestProject && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 }}>
+              <PreLaunchAudit project={latestProject} />
+            </motion.div>
+          )}
+        </div>
 
         {/* Revenue Projector */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
