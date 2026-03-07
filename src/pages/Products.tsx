@@ -65,7 +65,7 @@ const Products = () => {
         ) : (
           <div className="space-y-3">
             {projects.map(p => (
-              <Card key={p.id} className="hover:border-primary/30 transition-colors">
+              <Card key={p.id} className="hover:border-primary/30 transition-colors cursor-pointer" onClick={() => navigate(`/wizard/${p.id}`)}>
                 <CardContent className="p-4 flex items-center gap-4">
                   <div className="p-2 rounded-lg bg-primary/10 shrink-0">
                     <Package className="w-5 h-5 text-primary" />
@@ -75,7 +75,7 @@ const Products = () => {
                     <p className="text-xs text-muted-foreground">{p.niche} · {p.product_type} · {format(new Date(p.created_at), "MMM d, yyyy")}</p>
                   </div>
                   <Badge variant={p.status === "complete" ? "default" : "secondary"}>{p.status}</Badge>
-                  <Button variant="ghost" size="icon" onClick={() => deleteProject(p.id)}>
+                  <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); deleteProject(p.id); }}>
                     <Trash2 className="w-4 h-4 text-muted-foreground" />
                   </Button>
                 </CardContent>

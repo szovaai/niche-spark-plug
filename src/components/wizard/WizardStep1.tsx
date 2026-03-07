@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sparkles, Rocket, Loader2, Pencil } from "lucide-react";
+import { Sparkles, Rocket, Loader2 } from "lucide-react";
 import { PRODUCT_TYPES, Step1Product } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import CampaignAngleSelector from "./CampaignAngleSelector";
 
 interface Props {
   niche: string;
@@ -47,6 +47,11 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
     } finally {
       setLoading(false);
     }
+  };
+
+  const selectAngle = (name: string) => {
+    if (!result) return;
+    setResult({ ...result, selectedAngle: name });
   };
 
   return (
@@ -94,34 +99,45 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
       </div>
 
       {result && (
-        <Card className="border-primary/30 bg-primary/5">
-          <CardContent className="p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-bold">{result.title}</h3>
-              <Badge variant="secondary">Generated</Badge>
-            </div>
-            <p className="text-muted-foreground italic">{result.subtitle}</p>
-            <div>
-              <h4 className="font-semibold text-sm mb-1">Concept</h4>
-              <p className="text-sm text-muted-foreground">{result.concept}</p>
-            </div>
-            <div>
-              <h4 className="font-semibold text-sm mb-1">Unique Mechanism</h4>
-              <p className="text-sm text-muted-foreground">{result.uniqueMechanism}</p>
-            </div>
-            <div>
-              <h4 className="font-semibold text-sm mb-2">Pain Points</h4>
-              <div className="flex flex-wrap gap-2">
-                {result.painPoints?.map((p, i) => (
-                  <Badge key={i} variant="outline" className="text-xs">{p}</Badge>
-                ))}
+        <div className="space-y-4">
+          <Card className="border-primary/30 bg-primary/5">
+            <CardContent className="p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold">{result.title}</h3>
+                <Badge variant="secondary">Generated</Badge>
               </div>
-            </div>
-            <Button onClick={onNext} className="gap-2 mt-2">
-              Continue to Product Content
-            </Button>
-          </CardContent>
-        </Card>
+              <p className="text-muted-foreground italic">{result.subtitle}</p>
+              <div>
+                <h4 className="font-semibold text-sm mb-1">Concept</h4>
+                <p className="text-sm text-muted-foreground">{result.concept}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm mb-1">Unique Mechanism</h4>
+                <p className="text-sm text-muted-foreground">{result.uniqueMechanism}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm mb-2">Pain Points</h4>
+                <div className="flex flex-wrap gap-2">
+                  {result.painPoints?.map((p, i) => (
+                    <Badge key={i} variant="outline" className="text-xs">{p}</Badge>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {result.campaignAngles && result.campaignAngles.length > 0 && (
+            <CampaignAngleSelector
+              angles={result.campaignAngles}
+              selectedAngle={result.selectedAngle || ""}
+              onSelect={selectAngle}
+            />
+          )}
+
+          <Button onClick={onNext} className="gap-2 mt-2">
+            Continue to Product Content
+          </Button>
+        </div>
       )}
     </div>
   );
