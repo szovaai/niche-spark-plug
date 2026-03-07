@@ -319,6 +319,63 @@ export type Database = {
           },
         ]
       }
+      launch_projects: {
+        Row: {
+          created_at: string
+          current_step: number
+          id: string
+          name: string
+          niche: string | null
+          product_type: string | null
+          status: string
+          step1_product: Json | null
+          step2_product_content: Json | null
+          step3_funnel: Json | null
+          step4_marketing: Json | null
+          step5_checklist: Json | null
+          target_audience: string | null
+          topic: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_step?: number
+          id?: string
+          name?: string
+          niche?: string | null
+          product_type?: string | null
+          status?: string
+          step1_product?: Json | null
+          step2_product_content?: Json | null
+          step3_funnel?: Json | null
+          step4_marketing?: Json | null
+          step5_checklist?: Json | null
+          target_audience?: string | null
+          topic?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_step?: number
+          id?: string
+          name?: string
+          niche?: string | null
+          product_type?: string | null
+          status?: string
+          step1_product?: Json | null
+          step2_product_content?: Json | null
+          step3_funnel?: Json | null
+          step4_marketing?: Json | null
+          step5_checklist?: Json | null
+          target_audience?: string | null
+          topic?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       micro_products: {
         Row: {
           config: Json

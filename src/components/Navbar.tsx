@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Zap, Star, LogOut, User, Package, Crown, DollarSign, Boxes, Map, Menu, X, Search, Video } from "lucide-react";
+import { motion } from "framer-motion";
+import { Zap, Star, LogOut, User, Crown, Menu, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -25,26 +25,10 @@ const Navbar = () => {
     navigate("/");
   };
 
-  const isActive = (path: string) => location.pathname === path;
-
   const handleNavigate = (path: string) => {
     navigate(path);
     setMobileMenuOpen(false);
   };
-
-  const navItems = [
-    { path: "/discover", label: "Discover", icon: Search, showAlways: true },
-    { path: "/ugc-vault", label: "UGC Vault", icon: Video, showAlways: true },
-    { path: "/my-products", label: "My Products", icon: Boxes, requiresAuth: true },
-    { path: "/money-map", label: "Money Map", icon: Map, requiresAuth: true },
-    { path: "/launch-packs", label: "Launch Packs", icon: Package, showAlways: true, proBadge: !isPro },
-    { path: "/pricing", label: "Pricing", icon: DollarSign, showAlways: true },
-    { path: "/saved", label: "Saved", icon: Star, requiresAuth: true },
-  ];
-
-  const filteredNavItems = navItems.filter(item => 
-    item.showAlways || (item.requiresAuth && user)
-  );
 
   return (
     <motion.nav
@@ -61,13 +45,9 @@ const Navbar = () => {
             </div>
             <span className="text-xl font-bold">
               Digi<span className="gradient-text">LaunchKit</span>
+              <span className="text-xs text-muted-foreground ml-1">AI</span>
             </span>
           </button>
-          
-          {/* Desktop Nav links - minimal for landing page */}
-          <div className="hidden md:flex items-center gap-6">
-            {/* Nav links removed for cleaner landing page */}
-          </div>
           
           {/* Auth Section + Mobile Menu */}
           <div className="flex items-center gap-2">
@@ -81,23 +61,27 @@ const Navbar = () => {
                       Pro
                     </span>
                   )}
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <User className="w-4 h-4" />
-                    <span className="max-w-[100px] truncate">{user.email}</span>
-                  </div>
-                  <Button variant="outline" size="sm" onClick={handleSignOut}>
+                  <Button variant="outline" size="sm" onClick={() => navigate("/dashboard")}>
+                    Dashboard
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={handleSignOut}>
                     <LogOut className="w-4 h-4" />
-                    Sign Out
                   </Button>
                 </>
               ) : (
-                <Button variant="glow" size="sm" onClick={() => navigate("/auth")}>
-                  Get Started
-                </Button>
+                <>
+                  <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>
+                    Sign In
+                  </Button>
+                  <Button variant="glow" size="sm" onClick={() => navigate("/wizard")}>
+                    <Wand2 className="w-4 h-4 mr-1" />
+                    Get Started
+                  </Button>
+                </>
               )}
             </div>
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Menu */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild className="md:hidden">
                 <Button variant="ghost" size="icon" className="h-9 w-9">
@@ -110,70 +94,33 @@ const Navbar = () => {
                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
                       <Zap className="w-4 h-4 text-primary-foreground" />
                     </div>
-                    <span className="text-lg font-bold">
-                      Digi<span className="gradient-text">LaunchKit</span>
-                    </span>
+                    <span className="text-lg font-bold">DigiLaunchKit AI</span>
                   </SheetTitle>
                 </SheetHeader>
 
-                {/* User Info */}
-                {user && (
-                  <div className="mb-6 p-3 rounded-xl bg-secondary/50 border border-border">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                        <User className="w-5 h-5 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{user.email}</p>
-                        {isPro && (
-                          <span className="inline-flex items-center gap-1 text-xs text-accent">
-                            <Crown className="w-3 h-3" />
-                            Pro Member
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Mobile Nav Links */}
                 <nav className="space-y-1">
-                  {filteredNavItems.map((item) => (
-                    <button
-                      key={item.path}
-                      onClick={() => handleNavigate(item.path)}
-                      className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-colors ${
-                        isActive(item.path) 
-                          ? "bg-primary/10 text-primary font-medium" 
-                          : "text-foreground hover:bg-secondary"
-                      }`}
-                    >
-                      <item.icon className="w-5 h-5" />
-                      <span className="flex-1">{item.label}</span>
-                      {item.proBadge && (
-                        <Crown className="w-4 h-4 text-accent" />
-                      )}
-                    </button>
-                  ))}
+                  <button onClick={() => handleNavigate("/wizard")} className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left bg-primary/10 text-primary font-medium">
+                    <Wand2 className="w-5 h-5" />
+                    <span>AI Launch Wizard</span>
+                  </button>
+                  <button onClick={() => handleNavigate("/dashboard")} className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left hover:bg-secondary">
+                    <span>Dashboard</span>
+                  </button>
+                  <button onClick={() => handleNavigate("/templates")} className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left hover:bg-secondary">
+                    <span>Templates</span>
+                  </button>
+                  <button onClick={() => handleNavigate("/pricing")} className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left hover:bg-secondary">
+                    <span>Pricing</span>
+                  </button>
                 </nav>
 
-                {/* Mobile Auth Actions */}
                 <div className="mt-6 pt-6 border-t border-border space-y-3">
                   {user ? (
-                    <Button 
-                      variant="outline" 
-                      className="w-full justify-start gap-2"
-                      onClick={handleSignOut}
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Sign Out
+                    <Button variant="outline" className="w-full justify-start gap-2" onClick={handleSignOut}>
+                      <LogOut className="w-4 h-4" /> Sign Out
                     </Button>
                   ) : (
-                    <Button 
-                      variant="hero" 
-                      className="w-full"
-                      onClick={() => handleNavigate("/auth")}
-                    >
+                    <Button variant="hero" className="w-full" onClick={() => handleNavigate("/auth")}>
                       Get Started
                     </Button>
                   )}
