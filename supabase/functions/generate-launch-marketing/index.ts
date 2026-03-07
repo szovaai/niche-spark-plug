@@ -17,10 +17,11 @@ Deno.serve(async (req) => {
       { field: 'productContent', type: 'object', maxLength: 50000 },
       { field: 'funnelCopy', type: 'object', maxLength: 50000 },
       { field: 'price', type: 'number', maxLength: 100 },
+      { field: 'buyerAvatar', type: 'object', maxLength: 10000 },
     ]);
     if (!valid) return validationErrorResponse(valError!, corsHeaders);
 
-    const { productBrief, productContent, funnelCopy } = data;
+    const { productBrief, productContent, funnelCopy, buyerAvatar } = data;
     const price = data.price || 17;
 
     const cacheKey = `launch-marketing-${(productBrief as any).title?.slice(0, 50)}-${price}`;
@@ -31,6 +32,10 @@ Deno.serve(async (req) => {
 
     const selectedAngle = productBrief.selectedAngle || "";
     const angleInstruction = selectedAngle ? `\nCAMPAIGN ANGLE: "${selectedAngle}" — weave this angle into all content.` : "";
+    const avatarContext = buyerAvatar
+      ? `\nBUYER AVATAR: ${(buyerAvatar as any).personaName} — ${(buyerAvatar as any).occupation}. Pain: ${(buyerAvatar as any).painPoints?.join(", ")}. Language: ${(buyerAvatar as any).languageTheyUse?.join(", ")}. Fear: ${(buyerAvatar as any).biggestFear}`
+      : '';
+
     const mechanismInstruction = productBrief.uniqueMechanism ? `\nMECHANISM: Reference "${productBrief.uniqueMechanism}" in ad copy, email subject lines, and social posts.` : "";
 
     const prompt = `Generate a complete marketing asset kit for this digital product launch.
@@ -41,7 +46,7 @@ UNIQUE MECHANISM: ${productBrief.uniqueMechanism}
 PAIN POINTS: ${productBrief.painPoints?.join(", ")}
 DESCRIPTION: ${productContent?.description || ""}
 FRONT-END PRICE: $${price}
-COMMISSION: 50-75%${angleInstruction}${mechanismInstruction}
+COMMISSION: 50-75%${angleInstruction}${mechanismInstruction}${avatarContext}
 
 Return ONLY valid JSON:
 {

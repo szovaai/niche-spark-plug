@@ -15,10 +15,11 @@ Deno.serve(async (req) => {
     const { valid, error: valError, data } = validateInput(body, [
       { field: 'productBrief', type: 'object', required: true, maxLength: 10000 },
       { field: 'productType', type: 'string', maxLength: 100 },
+      { field: 'buyerAvatar', type: 'object', maxLength: 10000 },
     ]);
     if (!valid) return validationErrorResponse(valError!, corsHeaders);
 
-    const { productBrief, productType } = data;
+    const { productBrief, productType, buyerAvatar } = data;
 
     const cacheKey = `launch-content-${JSON.stringify(productBrief).slice(0, 100)}`;
     const cached = await getCachedResponse(cacheKey);
@@ -26,7 +27,11 @@ Deno.serve(async (req) => {
 
     const userTier = await getUserTier(user.id);
 
-    const prompt = `Generate a complete product outline for a digital product.
+    const avatarContext = buyerAvatar
+      ? `\nBUYER AVATAR — Write for this specific person:\nName: ${(buyerAvatar as any).personaName}\nFrustration: ${(buyerAvatar as any).dailyFrustration}\nDesires: ${(buyerAvatar as any).desires?.join(", ")}\nPain Points: ${(buyerAvatar as any).painPoints?.join(", ")}\nLanguage: ${(buyerAvatar as any).languageTheyUse?.join(", ")}`
+      : '';
+
+    const prompt = `Generate a complete product outline for a digital product.${avatarContext}
 
 Product: ${productBrief.title}
 Subtitle: ${productBrief.subtitle}
