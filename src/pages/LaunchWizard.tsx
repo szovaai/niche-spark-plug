@@ -227,10 +227,14 @@ const LaunchWizard = () => {
       if (existingProjectId) {
         const { error } = await supabase.from("launch_projects").update(projectData).eq("id", existingProjectId);
         if (error) throw error;
-        toast.success("Project updated!");
+        toast.success("Project saved!");
       } else {
-        const { error } = await supabase.from("launch_projects").insert({ ...projectData, user_id: user.id });
+        const { data, error } = await supabase.from("launch_projects")
+          .insert({ ...projectData, user_id: user.id })
+          .select("id")
+          .single();
         if (error) throw error;
+        if (data) setExistingProjectId(data.id);
         toast.success("Project saved!");
       }
       navigate("/products");
