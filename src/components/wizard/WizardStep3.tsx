@@ -3,11 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Sparkles, Loader2, Copy, Check, ShoppingCart, ArrowUpCircle, DollarSign } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Sparkles, Loader2, Copy, Check, ShoppingCart, ArrowUpCircle, DollarSign, Eye, RefreshCw } from "lucide-react";
 import { Step1Product, Step2Content, Step3Funnel } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import RenderedCopy from "@/components/RenderedCopy";
+import { sanitizeHTML } from "@/lib/sanitize";
+import { markdownToHTML } from "@/lib/copyUtils";
 
 interface Props {
   productBrief: Step1Product | null;
@@ -32,6 +35,7 @@ const FUNNEL_TABS = [
 export default function WizardStep3({ productBrief, productContent, result, setResult, onNext, userId, price }: Props) {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+  const [previewContent, setPreviewContent] = useState<{ title: string; html: string } | null>(null);
 
   const generate = async () => {
     if (!productBrief) return;
@@ -53,7 +57,13 @@ export default function WizardStep3({ productBrief, productContent, result, setR
   const copyText = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
     setCopied(label);
+    toast.success("Copied to clipboard!");
     setTimeout(() => setCopied(null), 2000);
+  };
+
+  const openPreview = (title: string, content: string) => {
+    const html = sanitizeHTML(markdownToHTML(content));
+    setPreviewContent({ title, html });
   };
 
   if (!productBrief) {
@@ -76,6 +86,13 @@ export default function WizardStep3({ productBrief, productContent, result, setR
 
       {result && (
         <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={generate} disabled={loading} className="gap-1">
+              {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+              Regenerate All
+            </Button>
+          </div>
+
           <Tabs defaultValue="salesPage">
             <TabsList className="w-full flex-wrap h-auto gap-1">
               {FUNNEL_TABS.map(tab => {
@@ -105,12 +122,17 @@ export default function WizardStep3({ productBrief, productContent, result, setR
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between mb-4">
                         <h3 className="font-bold">{tab.label}</h3>
-                        <Button variant="ghost" size="sm" onClick={() => copyText(content, tab.key)} className="gap-1">
-                          {copied === tab.key ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                          Copy
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="sm" onClick={() => openPreview(tab.label, content)} className="gap-1">
+                            <Eye className="w-3 h-3" /> Preview
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => copyText(content, tab.key)} className="gap-1">
+                            {copied === tab.key ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                            Copy Full Page
+                          </Button>
+                        </div>
                       </div>
-                      <div className="max-h-[500px] overflow-y-auto">
+                      <div className="max-h-[80vh] overflow-y-auto pr-2">
                         <RenderedCopy
                           content={content}
                           mechanismName={productBrief?.uniqueMechanism}
@@ -172,7 +194,7 @@ export default function WizardStep3({ productBrief, productContent, result, setR
                             Copy
                           </Button>
                         </div>
-                        <div className="p-3 rounded-lg bg-secondary/50 max-h-[300px] overflow-y-auto">
+                        <div className="p-3 rounded-lg bg-secondary/50 max-h-[80vh] overflow-y-auto">
                           <RenderedCopy content={result.offerStack.stackCopy} />
                         </div>
                       </div>
@@ -185,6 +207,19 @@ export default function WizardStep3({ productBrief, productContent, result, setR
           <Button onClick={onNext} className="gap-2">Continue to Marketing Assets</Button>
         </div>
       )}
+
+      {/* Full Page Preview Modal */}
+      <Dialog open={!!previewContent} onOpenChange={() => setPreviewContent(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{previewContent?.title} — Full Preview</DialogTitle>
+          </DialogHeader>
+          <div
+            className="prose prose-sm prose-invert max-w-none text-foreground [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:text-xl [&_h2]:font-bold [&_h3]:text-lg [&_h3]:font-semibold [&_strong]:text-foreground [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:my-1 [&_hr]:border-border [&_p]:my-2"
+            dangerouslySetInnerHTML={{ __html: previewContent?.html || "" }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

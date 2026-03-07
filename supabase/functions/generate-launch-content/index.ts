@@ -37,12 +37,12 @@ Pain Points: ${productBrief.painPoints?.join(", ") || ""}
 
 Return ONLY valid JSON:
 {
-  "outline": "2-3 paragraph overview — open with the reader's problem, introduce the mechanism, then outline the transformation path",
+  "outline": "2-3 paragraph overview — open with the reader's problem, introduce the mechanism, then outline the transformation path. Write conversationally — like you're explaining this to a friend over coffee.",
   "chapters": [
-    { "title": "Action-oriented chapter title with specific outcome", "summary": "2-3 sentences: what they'll learn and the result they'll get", "keyPoints": ["specific actionable point 1", "point 2", "point 3"] }
+    { "title": "Action-oriented chapter title with specific outcome", "summary": "2-3 sentences: what they'll learn and the result they'll get. Be specific — not 'learn marketing' but 'set up your first $7 tripwire that converts cold traffic'", "keyPoints": ["specific actionable point 1", "point 2", "point 3"] }
   ],
   "bonuses": ["Bonus 1: [Name] — specific description of what it is and the result it produces", "Bonus 2: ...", "Bonus 3: ..."],
-  "description": "A compelling 150-word product description — lead with pain, introduce mechanism, promise specific result"
+  "description": "A compelling 150-word product description — lead with pain, introduce mechanism, promise specific result. Write like a human, not a brochure."
 }
 
 RULES:
@@ -50,7 +50,8 @@ RULES:
 - Every chapter title must promise a specific outcome (not just a topic name)
 - Bonuses must be named products with clear value, not vague "extra resources"
 - Reference the unique mechanism "${productBrief.uniqueMechanism}" throughout
-- The description must read like sales copy, not a table of contents`;
+- The description must read like sales copy, not a table of contents
+- Write in a warm, direct, conversational tone — like a knowledgeable friend who's already done this`;
 
     const { content, model } = await callTieredAI([
       { role: "system", content: MASTER_SYSTEM_PROMPT },
