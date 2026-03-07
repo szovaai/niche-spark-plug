@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { encryptApiKey, decryptApiKey } from "@/lib/cryptoUtils";
 
 type ApiProvider = "deepseek" | "openai" | "anthropic";
 
@@ -83,10 +84,15 @@ const Settings = () => {
 
       if (data?.api_keys && typeof data.api_keys === 'object') {
         const keys = data.api_keys as Record<string, string>;
+        // Decrypt keys for display
+        const decrypted: Record<string, string> = {};
+        for (const provider of ['deepseek', 'openai', 'anthropic'] as ApiProvider[]) {
+          decrypted[provider] = keys[provider] ? await decryptApiKey(keys[provider], user.id) : "";
+        }
         setApiKeys({
-          deepseek: keys.deepseek || "",
-          openai: keys.openai || "",
-          anthropic: keys.anthropic || "",
+          deepseek: decrypted.deepseek || "",
+          openai: decrypted.openai || "",
+          anthropic: decrypted.anthropic || "",
         });
       }
     } catch (error) {
@@ -109,9 +115,11 @@ const Settings = () => {
         .single();
 
       const currentKeys = (current?.api_keys as Record<string, string>) || {};
+      // Encrypt the key before storing
+      const encryptedKey = await encryptApiKey(apiKeys[provider], user.id);
       const updatedKeys = {
         ...currentKeys,
-        [provider]: apiKeys[provider],
+        [provider]: encryptedKey,
       };
 
       const { error } = await supabase

@@ -7,6 +7,50 @@ export interface BYOKConfig {
   apiKey: string;
 }
 
+const SALT = new TextEncoder().encode("digilaunchkit-byok-v1");
+const ITERATIONS = 100000;
+
+async function deriveKey(userId: string): Promise<CryptoKey> {
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(userId),
+    "PBKDF2",
+    false,
+    ["deriveKey"]
+  );
+  return crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt: SALT, iterations: ITERATIONS, hash: "SHA-256" },
+    keyMaterial,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["decrypt"]
+  );
+}
+
+function base64ToArrayBuffer(base64: string): ArrayBuffer {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes.buffer;
+}
+
+async function decryptApiKey(stored: string, userId: string): Promise<string> {
+  if (!stored) return "";
+  if (!stored.startsWith("enc:")) return stored; // legacy plaintext
+  const parts = stored.split(":");
+  if (parts.length !== 3) return "";
+  try {
+    const key = await deriveKey(userId);
+    const iv = new Uint8Array(base64ToArrayBuffer(parts[1]));
+    const ciphertext = base64ToArrayBuffer(parts[2]);
+    const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
+    return new TextDecoder().decode(decrypted);
+  } catch {
+    console.error("Failed to decrypt API key");
+    return "";
+  }
+}
+
 /**
  * Fetches user's BYOK API key from their profile.
  * Returns null if no key is configured, falling back to environment variable.
@@ -45,7 +89,10 @@ export async function getUserApiKey(
     
     for (const provider of providers) {
       if (apiKeys[provider]) {
-        return { provider, apiKey: apiKeys[provider] };
+        const decrypted = await decryptApiKey(apiKeys[provider], user.id);
+        if (decrypted) {
+          return { provider, apiKey: decrypted };
+        }
       }
     }
 

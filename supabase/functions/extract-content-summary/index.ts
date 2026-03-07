@@ -199,7 +199,7 @@ Return ONLY valid JSON, no additional text.`;
   } catch (error) {
     console.error("Error extracting content summary:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Failed to extract content summary" }),
+      JSON.stringify({ error: "Unable to extract content summary. Please try again." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

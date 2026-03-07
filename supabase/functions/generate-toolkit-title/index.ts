@@ -133,7 +133,7 @@ Return ONLY valid JSON in this exact format:
   } catch (error) {
     console.error("Error in generate-toolkit-title:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      JSON.stringify({ error: "Unable to generate title. Please try again." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
