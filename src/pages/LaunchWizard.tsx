@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -42,10 +42,62 @@ const LaunchWizard = () => {
   const [step4Result, setStep4Result] = useState<Step4Marketing | null>(null);
   const [step5Result, setStep5Result] = useState<Step5Checklist | null>(null);
 
+  const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isSavingRef = useRef(false);
+
   // Load existing project if projectId provided
   useEffect(() => {
     if (projectId && user) loadProject(projectId);
   }, [projectId, user]);
+
+  // Autosave whenever any step result changes
+  const autosave = useCallback(async () => {
+    if (!user || isSavingRef.current) return;
+    // Need at least step 1 data to save
+    if (!step1Result && !niche.trim()) return;
+
+    isSavingRef.current = true;
+    try {
+      const projectData = {
+        name: step1Result?.title || "My Launch Project",
+        niche: niche || null,
+        target_audience: targetAudience || null,
+        product_type: productType || null,
+        topic: topic || null,
+        step1_product: step1Result as any,
+        step2_product_content: step2Result as any,
+        step3_funnel: step3Result as any,
+        step4_marketing: step4Result as any,
+        step5_checklist: step5Result as any,
+        current_step: currentStep,
+        status: step5Result ? "complete" : "in_progress",
+      };
+
+      if (existingProjectId) {
+        await supabase.from("launch_projects").update(projectData).eq("id", existingProjectId);
+      } else {
+        const { data, error } = await supabase.from("launch_projects")
+          .insert({ ...projectData, user_id: user.id })
+          .select("id")
+          .single();
+        if (!error && data) {
+          setExistingProjectId(data.id);
+        }
+      }
+    } catch {
+      // Silent fail for autosave
+    } finally {
+      isSavingRef.current = false;
+    }
+  }, [user, niche, targetAudience, productType, topic, step1Result, step2Result, step3Result, step4Result, step5Result, currentStep, existingProjectId]);
+
+  // Debounced autosave trigger on step result changes
+  useEffect(() => {
+    if (!user || (!step1Result && !niche.trim())) return;
+    if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+    autosaveTimerRef.current = setTimeout(() => { autosave(); }, 2000);
+    return () => { if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current); };
+  }, [step1Result, step2Result, step3Result, step4Result, step5Result, currentStep, autosave]);
 
   const loadProject = async (id: string) => {
     const { data, error } = await supabase
@@ -175,10 +227,14 @@ const LaunchWizard = () => {
       if (existingProjectId) {
         const { error } = await supabase.from("launch_projects").update(projectData).eq("id", existingProjectId);
         if (error) throw error;
-        toast.success("Project updated!");
+        toast.success("Project saved!");
       } else {
-        const { error } = await supabase.from("launch_projects").insert({ ...projectData, user_id: user.id });
+        const { data, error } = await supabase.from("launch_projects")
+          .insert({ ...projectData, user_id: user.id })
+          .select("id")
+          .single();
         if (error) throw error;
+        if (data) setExistingProjectId(data.id);
         toast.success("Project saved!");
       }
       navigate("/products");
