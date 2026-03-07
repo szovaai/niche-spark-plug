@@ -1,0 +1,1 @@
+ALTER TABLE public.launch_projects ADD COLUMN buyer_avatar jsonb DEFAULT NULL;

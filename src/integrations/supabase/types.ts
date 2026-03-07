@@ -321,6 +321,7 @@ export type Database = {
       }
       launch_projects: {
         Row: {
+          buyer_avatar: Json | null
           created_at: string
           current_step: number
           id: string
@@ -339,6 +340,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          buyer_avatar?: Json | null
           created_at?: string
           current_step?: number
           id?: string
@@ -357,6 +359,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          buyer_avatar?: Json | null
           created_at?: string
           current_step?: number
           id?: string
