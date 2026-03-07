@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Package, ArrowRight, Trash2 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
@@ -74,7 +75,13 @@ const Products = () => {
                     <p className="font-medium truncate">{p.name}</p>
                     <p className="text-xs text-muted-foreground">{p.niche} · {p.product_type} · {format(new Date(p.created_at), "MMM d, yyyy")}</p>
                   </div>
-                  <Badge variant={p.status === "complete" ? "default" : "secondary"}>{p.status}</Badge>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <div className="w-20">
+                      <Progress value={[p.step1_product, p.step2_product_content, p.step3_funnel, p.step4_marketing, p.step5_checklist].filter(Boolean).length * 20} className="h-2" />
+                      <p className="text-[10px] text-muted-foreground text-center mt-0.5">{[p.step1_product, p.step2_product_content, p.step3_funnel, p.step4_marketing, p.step5_checklist].filter(Boolean).length * 20}%</p>
+                    </div>
+                    <Badge variant={p.status === "complete" ? "default" : "secondary"}>{p.status}</Badge>
+                  </div>
                   <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); deleteProject(p.id); }}>
                     <Trash2 className="w-4 h-4 text-muted-foreground" />
                   </Button>

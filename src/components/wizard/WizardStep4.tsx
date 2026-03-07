@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Loader2, Copy, Check, Mail, MessageSquare, Image, FileText, Video, Megaphone } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { Step1Product, Step2Content, Step3Funnel, Step4Marketing } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -95,6 +96,12 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
 
             <TabsContent value="ads">
               <div className="space-y-3">
+                {productBrief?.selectedAngle && (
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/5 border border-primary/20">
+                    <Sparkles className="w-4 h-4 text-primary shrink-0" />
+                    <p className="text-sm font-medium">Campaign Angle: <span className="text-primary">{productBrief.selectedAngle}</span></p>
+                  </div>
+                )}
                 {result.adCopy?.map((ad, i) => (
                   <Card key={i}>
                     <CardContent className="p-4 space-y-3">

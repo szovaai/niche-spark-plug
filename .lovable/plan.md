@@ -1,41 +1,53 @@
 
 
-# Refinements to Existing Implementation
+# DigiLaunchKit AI — Refactor Plan
 
-All 7 major features from the previous plan are already built and working. The user's refined spec calls out 4 specific polish items that aren't yet implemented. Here's what needs to change:
+## What This Changes
 
-## 1. Make Campaign Angle Mandatory Before Continuing
+This is a major restructuring that repositions the app from a collection of separate tools (Empire Mode, Micro Factory, Toolkit Builder, Research, Launch) into a unified **AI Launch Engine** with one primary flow: the **AI Launch Wizard**.
 
-Currently Step 1 shows a "Continue to Product Content" button even if no angle is selected. Gate this so the user must pick an angle first.
+## Current State vs. Target State
 
-**File:** `src/components/wizard/WizardStep1.tsx`
-- Disable or hide the "Continue" button until `result.selectedAngle` is set
-- Add a small helper text like "Select a campaign angle above to continue"
+**Current navigation:** Dashboard, Empire Mode, Micro Factory, Research, My Toolkits, Launch
 
-## 2. Show Selected Angle Label in Step 4 Ads
+**New navigation:** Dashboard, AI Launch Wizard, Products, Funnels, Marketing Assets, Launch Checklist, Templates, Settings
 
-Each ad card already shows `ad.hookAngle` as a badge. Add an additional visual indicator showing the project's selected campaign angle at the top of the Ads tab to reinforce the "AI Brain" consistency effect.
+## Implementation Status: ✅ COMPLETE
 
-**File:** `src/components/wizard/WizardStep4.tsx`
-- At the top of the Ads tab content, render a small banner: "Campaign Angle: {selectedAngle}" using the `productBrief.selectedAngle` value
+### Phase 1: Database ✅
+- Created `launch_projects` table with JSONB fields for each wizard step
+- RLS policies: users can only CRUD their own rows
+- Auto-updated `updated_at` trigger
 
-## 3. Completion Percentage on Products Page
+### Phase 2: Edge Functions ✅
+- `generate-launch-product` — product concept from niche/audience/type/topic
+- `generate-launch-content` — outline, chapters, bonuses, description
+- `generate-launch-funnel` — sales page, opt-in, thank you, bonus, checkout copy
+- `generate-launch-marketing` — 5 emails, 10 social posts, 5 pins, blog, video script
+- `generate-launch-checklist` — personalized launch roadmap
 
-Currently the Products page shows a status badge ("in_progress" / "complete"). Add a completion percentage based on which steps have data.
+### Phase 3: AI Launch Wizard ✅
+- 5-step wizard at `/wizard` with left stepper + right content
+- "Generate Entire Launch System" button runs all 5 steps sequentially
+- All outputs saved to `launch_projects` table
 
-**File:** `src/pages/Products.tsx`
-- Calculate percentage from the 5 step fields (step1-5): each non-null step = 20%
-- Show a small progress indicator or percentage text next to the status badge
+### Phase 4: Section Pages ✅
+- `/products` — list/delete launch projects
+- `/funnels` — tabbed funnel copy library
+- `/assets` — marketing asset library (emails, posts, pins, blog, video)
+- `/checklist` — interactive launch checklists with toggle
+- `/templates` — 5 pre-built niche templates
 
-## 4. Rename Button to "Build My Launch System"
+### Phase 5: Navigation ✅
+- New sidebar: Dashboard, Products, Funnels, Marketing Assets, Launch Checklist, Templates
+- CTA button: "New Launch" → `/wizard`
+- Legacy routes preserved: `/empire`, `/micro-factory`, `/research`, `/my-toolkits`, `/launch`
 
-**File:** `src/components/wizard/WizardStep1.tsx`
-- Change "Generate Entire Launch System" text to "Build My Launch System"
+### Phase 6: Dashboard ✅
+- Launch-focused: progress tracker, active projects, adapted stats
+- "Start New Launch" CTA
 
-**File:** `src/components/wizard/GenerateAllModal.tsx`
-- Change modal title from "Building Your Launch System" to "Building Your Launch System" (already correct, no change needed)
-
----
-
-These are all small, surgical edits across 3 files with no database or edge function changes required.
-
+### Phase 7: Branding ✅
+- Title: "DigiLaunchKit AI"
+- Hero: "Launch Your Digital Product in 60 Minutes"
+- Updated Navbar, HeroSection, index.html
