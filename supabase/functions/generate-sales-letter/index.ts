@@ -422,8 +422,8 @@ CRITICAL: Reference ACTUAL chapter content. Use SPECIFIC benefits, not generic m
         });
       }
       const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      throw new Error(`AI gateway error: ${response.status}`);
+      console.error("AI API error:", response.status, errorText);
+      throw new Error("AI generation failed");
     }
 
     const data = await response.json();
