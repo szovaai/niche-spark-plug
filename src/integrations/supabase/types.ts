@@ -595,6 +595,7 @@ export type Database = {
       profiles: {
         Row: {
           api_keys: Json | null
+          brand_kit: Json | null
           created_at: string | null
           display_name: string | null
           email: string | null
@@ -615,6 +616,7 @@ export type Database = {
         }
         Insert: {
           api_keys?: Json | null
+          brand_kit?: Json | null
           created_at?: string | null
           display_name?: string | null
           email?: string | null
@@ -635,6 +637,7 @@ export type Database = {
         }
         Update: {
           api_keys?: Json | null
+          brand_kit?: Json | null
           created_at?: string | null
           display_name?: string | null
           email?: string | null
