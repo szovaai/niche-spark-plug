@@ -226,7 +226,7 @@ FRONT-END PRICE: $${price}${angleInstruction}${mechanismInstruction}${avatarCont
 
 Return ONLY valid JSON:
 {
-  "salesPage": "Complete long-form sales page following the Dan Kennedy structure: pre-headline → main headline (specific result + timeframe) → subheadline → pain agitation → 'what nobody tells you' → product intro with mechanism → feature-to-benefit breakdown → what's included → named guarantee → price justification (anchor against $${price * 20}+ alternatives before revealing $${price}) → urgency close → two kinds of people → FAQ (5 questions). Minimum 800 words.",
+  "salesPage": "Complete long-form sales page following the Dan Kennedy structure: pre-headline → main headline (specific result + timeframe) → subheadline → pain agitation → 'what nobody tells you' → product intro with mechanism → feature-to-benefit breakdown → what's included → named guarantee → price justification (anchor against $${price * 20}+ alternatives before revealing $${price}) → urgency close → two kinds of people → FAQ (5 questions). Target 350-500 words.",
   "optInPage": "Opt-in page: headline with specific result, 3 bullet benefits with numbers, CTA: 'Yes — Send Me The Free [Lead Magnet Name]'. Lead magnet angle tied to product.",
   "thankYouPage": "Thank you page: confirm purchase, specific next step to take RIGHT NOW, surprise bonus mention.",
   "bonusPage": "Bonus page: 3 exclusive bonuses with names, specific descriptions, and individual perceived values.",
@@ -255,13 +255,15 @@ Return ONLY valid JSON:
 }
 
 CRITICAL:
+- Output STRICT JSON ONLY (no markdown fences, no commentary)
+- Escape all newlines inside strings as \\n and escape all quotes inside strings
 - The sales page MUST justify the $${price} price by anchoring against expensive alternatives BEFORE revealing the price
 - The guarantee must be named and bold (e.g. "The 30-Day 'Use It Or Lose Nothing' Guarantee")
 - Every CTA must include the product name
 - The upsell page must feel like momentum, not a hard sell
 - No generic phrases — every benefit must be specific and measurable
-- Generate exactly 8 objections covering: price concern, skepticism about results, "I've tried before", time concern, trust concern, "not for me", technical ability, and delayed action
-- Each objection reframe must be specific to THIS product, not generic sales advice`;
+- Generate exactly 5 objections covering: price concern, skepticism about results, "I've tried before", time concern, and delayed action
+- Keep total output concise so all keys are fully completed in one response`;
 
     const { content, model } = await callTieredAI([
       { role: "system", content: SALES_PAGE_SYSTEM },
