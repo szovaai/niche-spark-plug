@@ -483,12 +483,92 @@ const generateChapterOpenerPage = (
   return y + 20;
 };
 
+// Generate Author Bio Last Page
+const generateAuthorBioPage = (doc: jsPDF, authorName: string, authorBio?: string) => {
+  doc.addPage();
+
+  // Left sidebar accent
+  doc.setFillColor(...PDF_STYLES.primaryColor);
+  doc.rect(0, 0, 5, pageHeight, "F");
+
+  let y = PDF_STYLES.margins.top + 20;
+
+  // Section title
+  doc.setFontSize(PDF_STYLES.fontSize.heading);
+  doc.setTextColor(...PDF_STYLES.primaryColor);
+  doc.setFont("helvetica", "bold");
+  doc.text("About the Author", PDF_STYLES.margins.left, y);
+  y += 5;
+
+  doc.setDrawColor(...PDF_STYLES.primaryColor);
+  doc.setLineWidth(1.5);
+  doc.line(PDF_STYLES.margins.left, y, PDF_STYLES.margins.left + 50, y);
+  y += 15;
+
+  // Author name
+  doc.setFontSize(PDF_STYLES.fontSize.subheading + 2);
+  doc.setTextColor(...PDF_STYLES.textColor);
+  doc.setFont("helvetica", "bold");
+  doc.text(authorName, PDF_STYLES.margins.left, y);
+  y += 12;
+
+  // Author bio
+  if (authorBio) {
+    doc.setFontSize(PDF_STYLES.fontSize.body);
+    doc.setTextColor(...PDF_STYLES.textMuted);
+    doc.setFont("helvetica", "normal");
+    const bioLines = wrapText(doc, authorBio, contentWidth);
+    bioLines.forEach(line => {
+      doc.text(line, PDF_STYLES.margins.left, y);
+      y += PDF_STYLES.lineHeight;
+    });
+  }
+
+  y += 20;
+
+  // Resources & Next Steps
+  doc.setFontSize(PDF_STYLES.fontSize.heading);
+  doc.setTextColor(...PDF_STYLES.primaryColor);
+  doc.setFont("helvetica", "bold");
+  doc.text("Resources & Next Steps", PDF_STYLES.margins.left, y);
+  y += 12;
+
+  doc.setFontSize(PDF_STYLES.fontSize.body);
+  doc.setTextColor(...PDF_STYLES.textColor);
+  doc.setFont("helvetica", "normal");
+  doc.text("Thank you for reading! Here are your recommended next steps:", PDF_STYLES.margins.left, y);
+  y += 12;
+
+  const nextSteps = [
+    "Complete the included worksheets and action checklists",
+    "Join the community to share your progress and wins",
+    "Visit our website for bonus resources and premium content",
+    "Share this guide with someone who needs it",
+  ];
+
+  nextSteps.forEach((step, i) => {
+    doc.setFillColor(...PDF_STYLES.primaryColor);
+    doc.circle(PDF_STYLES.margins.left + 4, y - 1.5, 3, "F");
+    doc.setFontSize(PDF_STYLES.fontSize.tiny);
+    doc.setTextColor(255, 255, 255);
+    doc.text(`${i + 1}`, PDF_STYLES.margins.left + 4, y - 0.5, { align: "center" });
+
+    doc.setFontSize(PDF_STYLES.fontSize.body);
+    doc.setTextColor(...PDF_STYLES.textColor);
+    doc.text(step, PDF_STYLES.margins.left + 12, y);
+    y += 10;
+  });
+
+  addFooter(doc, authorName);
+};
+
 // Generate Guide PDF with story-driven chapter structure
 export const generateGuidePDF = (
   content: ToolkitContent["guide"],
   title: string,
   subtitle?: string,
-  authorName?: string
+  authorName?: string,
+  authorBio?: string
 ): jsPDF => {
   const doc = new jsPDF();
   
@@ -657,6 +737,11 @@ export const generateGuidePDF = (
     addFooter(doc, authorName);
     addPageNumber(doc, pageNum);
   });
+  
+  // Author bio last page
+  if (authorName) {
+    generateAuthorBioPage(doc, authorName, authorBio);
+  }
   
   return doc;
 };
