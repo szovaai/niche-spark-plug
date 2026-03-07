@@ -18,10 +18,11 @@ Deno.serve(async (req) => {
       { field: 'productType', type: 'string', required: true, maxLength: 100 },
       { field: 'topic', type: 'string', required: true, maxLength: 500 },
       { field: 'lockedMechanism', type: 'string', maxLength: 500 },
+      { field: 'buyerAvatar', type: 'object', maxLength: 10000 },
     ]);
     if (!valid) return validationErrorResponse(valError!, corsHeaders);
 
-    const { niche, targetAudience, productType, topic, lockedMechanism } = data;
+    const { niche, targetAudience, productType, topic, lockedMechanism, buyerAvatar } = data;
 
     const cacheKey = `launch-product-${niche}-${productType}-${topic}`;
     const cached = await getCachedResponse(cacheKey);
@@ -30,7 +31,21 @@ Deno.serve(async (req) => {
     const userTier = await getUserTier(user.id);
 
     const mechanismInstruction = lockedMechanism
-      ? `\n\nCRITICAL: The user has already approved this exact mechanism name from prior research: "${lockedMechanism}". You MUST use this EXACT name as the "uniqueMechanism" value. Do NOT rename, rephrase, or generate alternatives. The mechanisms array should still contain 3 options but the first one MUST use this exact name.`
+      ? `\n\nCRITICAL: The user has already approved this exact mechanism name from prior research: "${lockedMechanism}". You MUST use this EXACT name as the "uniqueMechanism" value. Do NOT rename, rephrase, or generate alternatives. The mechanisms array should still contain 8 options but the first one MUST use this exact name.`
+      : '';
+
+    const avatarContext = buyerAvatar
+      ? `\n\nBUYER AVATAR — Write everything for this person:
+Name: ${(buyerAvatar as any).personaName}
+Occupation: ${(buyerAvatar as any).occupation}
+Daily Frustration: ${(buyerAvatar as any).dailyFrustration}
+What They've Tried: ${(buyerAvatar as any).triedBefore}
+Secret Dream: ${(buyerAvatar as any).secretDream}
+Biggest Fear: ${(buyerAvatar as any).biggestFear}
+Words They Use: ${(buyerAvatar as any).languageTheyUse?.join(", ")}
+Pain Points: ${(buyerAvatar as any).painPoints?.join(", ")}
+Desires: ${(buyerAvatar as any).desires?.join(", ")}
+Instant Buy Sentence: ${(buyerAvatar as any).instantBuySentence}`
       : '';
 
     const prompt = `Create a compelling product concept for a digital product launch.
@@ -38,7 +53,7 @@ Deno.serve(async (req) => {
 Niche: ${niche}
 Target Audience: ${targetAudience || "General audience"}
 Product Type: ${productType}
-Topic: ${topic}
+Topic: ${topic}${avatarContext}
 
 Return ONLY valid JSON:
 {
@@ -48,9 +63,14 @@ Return ONLY valid JSON:
   "uniqueMechanism": "A named, proprietary-sounding framework (e.g. 'The 24-Hour Service Velocity Framework')",
   "painPoints": ["specific pain 1 with emotional detail", "pain 2", "pain 3", "pain 4", "pain 5"],
   "mechanisms": [
-    { "name": "The [Adjective] [Noun] [Method/Protocol/System/Framework]", "tagline": "Specific result + timeframe in one sentence", "description": "2 sentences: how it works and why it's different from everything else" },
-    { "name": "...", "tagline": "...", "description": "..." },
-    { "name": "...", "tagline": "...", "description": "..." }
+    { "name": "The [Number] [Result] Blueprint", "tagline": "Specific result + timeframe", "description": "2 sentences: how it works and why it's different", "formula": "Number", "whyItWorks": "Numbers create concreteness — the brain trusts specificity over vague promises" },
+    { "name": "The [Timeframe] [Outcome] Formula", "tagline": "...", "description": "...", "formula": "Timeframe", "whyItWorks": "Time constraints create urgency and imply speed — the #1 buying trigger" },
+    { "name": "[ACRONYM] Method", "tagline": "...", "description": "...", "formula": "Acronym", "whyItWorks": "Acronyms feel teachable and proprietary — like you invented something real" },
+    { "name": "The [Analogy] Method", "tagline": "...", "description": "...", "formula": "Metaphor", "whyItWorks": "Metaphors make complex ideas feel simple and familiar" },
+    { "name": "The [Niche Expert]'s [Secret/Code/Protocol]", "tagline": "...", "description": "...", "formula": "Insider", "whyItWorks": "Insider language creates exclusivity — people want what others don't have" },
+    { "name": "From [Pain State] to [Dream State] System", "tagline": "...", "description": "...", "formula": "Transformation", "whyItWorks": "Before/after framing activates the brain's desire for change" },
+    { "name": "The [Counterintuitive Statement] Protocol", "tagline": "...", "description": "...", "formula": "Contrarian", "whyItWorks": "Challenging beliefs creates curiosity — they HAVE to find out why" },
+    { "name": "The Simple [Result] System", "tagline": "...", "description": "...", "formula": "Simple", "whyItWorks": "Simplicity sells — overwhelmed buyers want the easiest path possible" }
   ],
   "campaignAngles": [
     { "name": "Speed", "hook": "A scroll-stopping hook with a specific timeframe or number", "description": "2 sentences on why this angle resonates" },
@@ -60,10 +80,12 @@ Return ONLY valid JSON:
 }
 
 CRITICAL RULES:
-- Every mechanism name must sound proprietary and branded (e.g. "The Rapid Launch Protocol", "The AI Funnel Sprint")
+- Generate EXACTLY 8 mechanisms, one per formula type (Number, Timeframe, Acronym, Metaphor, Insider, Transformation, Contrarian, Simple)
+- Every mechanism name must sound proprietary and branded
+- Each "whyItWorks" must explain the psychological principle behind that naming formula (1 sentence)
 - Every hook must contain a number, timeframe, or specific result — NEVER vague promises
 - Pain points must be emotionally specific — describe the exact frustration, not a generic problem
-- Campaign angles should trigger completely different emotions (speed, fear of missing out, simplicity)${mechanismInstruction}`;
+- Campaign angles should trigger completely different emotions${mechanismInstruction}`;
 
     const { content, model } = await callTieredAI([
       { role: "system", content: MASTER_SYSTEM_PROMPT },
