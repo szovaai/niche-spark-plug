@@ -4,62 +4,157 @@ import { getCachedResponse, setCachedResponse } from "../_shared/cache.ts";
 import { validateInput, validationErrorResponse } from "../_shared/validate.ts";
 import { SALES_PAGE_SYSTEM, OTO_UPSELL_SYSTEM } from "../_shared/copyPrompts.ts";
 
+function sanitizeJsonStringContent(input: string): string {
+  let result = "";
+  let inString = false;
+  let escape = false;
+
+  for (const char of input) {
+    if (escape) {
+      result += char;
+      escape = false;
+      continue;
+    }
+
+    if (char === "\\") {
+      result += char;
+      escape = true;
+      continue;
+    }
+
+    if (char === '"') {
+      inString = !inString;
+      result += char;
+      continue;
+    }
+
+    // If model emits literal control characters inside string values,
+    // convert them to JSON-safe escape sequences.
+    if (inString) {
+      if (char === "\n") {
+        result += "\\n";
+        continue;
+      }
+      if (char === "\r") {
+        result += "\\r";
+        continue;
+      }
+      if (char === "\t") {
+        result += "\\t";
+        continue;
+      }
+    }
+
+    result += char;
+  }
+
+  return result;
+}
+
+function findBalancedJsonEnd(input: string, startIndex: number): number {
+  let braces = 0;
+  let brackets = 0;
+  let inString = false;
+  let escape = false;
+
+  for (let i = startIndex; i < input.length; i++) {
+    const char = input[i];
+
+    if (escape) {
+      escape = false;
+      continue;
+    }
+
+    if (char === "\\") {
+      escape = true;
+      continue;
+    }
+
+    if (char === '"') {
+      inString = !inString;
+      continue;
+    }
+
+    if (inString) continue;
+
+    if (char === "{") braces++;
+    else if (char === "}") braces--;
+    else if (char === "[") brackets++;
+    else if (char === "]") brackets--;
+
+    if (braces === 0 && brackets === 0 && i > startIndex) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
 function extractAndRepairJson(content: string): unknown {
-  // Remove markdown code blocks
   let cleaned = content
     .replace(/```json\s*/gi, "")
     .replace(/```\s*/g, "")
     .trim();
 
-  // Find JSON boundaries
   const jsonStart = cleaned.search(/[\{\[]/);
   if (jsonStart === -1) throw new Error("No JSON found in response");
 
-  const opener = cleaned[jsonStart];
-  const closer = opener === '{' ? '}' : ']';
+  const balancedEnd = findBalancedJsonEnd(cleaned, jsonStart);
+  cleaned = balancedEnd === -1
+    ? cleaned.slice(jsonStart)
+    : cleaned.slice(jsonStart, balancedEnd + 1);
 
-  // Find last matching closer
-  const jsonEnd = cleaned.lastIndexOf(closer);
-  if (jsonEnd === -1) throw new Error("No closing bracket found");
+  const tryParse = (value: string) => JSON.parse(value);
 
-  cleaned = cleaned.substring(jsonStart, jsonEnd + 1);
-
-  // Try direct parse first
   try {
-    return JSON.parse(cleaned);
-  } catch (_e) {
-    // Repair: strip control chars, fix trailing commas
-    cleaned = cleaned
-      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
-      .replace(/,\s*}/g, '}')
-      .replace(/,\s*]/g, ']');
+    return tryParse(cleaned);
+  } catch (_e1) {
+    let repaired = sanitizeJsonStringContent(cleaned)
+      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "")
+      .replace(/,\s*}/g, "}")
+      .replace(/,\s*]/g, "]");
+
+    // If truncated while still inside a string, close the dangling quote.
+    const quoteCount = (repaired.match(/(?<!\\)"/g) || []).length;
+    if (quoteCount % 2 !== 0) repaired += '"';
+
+    // Balance unclosed objects/arrays (string-aware).
+    let braces = 0, brackets = 0, inString = false, escape = false;
+    for (const char of repaired) {
+      if (escape) { escape = false; continue; }
+      if (char === "\\") { escape = true; continue; }
+      if (char === '"') { inString = !inString; continue; }
+      if (inString) continue;
+      if (char === "{") braces++;
+      else if (char === "}") braces--;
+      else if (char === "[") brackets++;
+      else if (char === "]") brackets--;
+    }
+
+    while (brackets > 0) { repaired += "]"; brackets--; }
+    while (braces > 0) { repaired += "}"; braces--; }
 
     try {
-      return JSON.parse(cleaned);
+      return tryParse(repaired);
     } catch (_e2) {
-      // Count unbalanced braces/brackets (string-aware)
-      let braces = 0, brackets = 0, inString = false, escape = false;
-      for (const char of cleaned) {
-        if (escape) { escape = false; continue; }
-        if (char === '\\') { escape = true; continue; }
-        if (char === '"') { inString = !inString; continue; }
-        if (inString) continue;
-        if (char === '{') braces++;
-        else if (char === '}') braces--;
-        else if (char === '[') brackets++;
-        else if (char === ']') brackets--;
-      }
-
-      let repaired = cleaned;
-      while (brackets > 0) { repaired += ']'; brackets--; }
-      while (braces > 0) { repaired += '}'; braces--; }
-
-      try {
-        return JSON.parse(repaired);
-      } catch (finalErr) {
-        console.error("JSON repair failed, raw content (first 500):", content.slice(0, 500));
-        throw new Error("Could not extract valid JSON from AI response");
-      }
+      console.error("JSON repair failed, raw content (first 1200):", content.slice(0, 1200));
+      return {
+        salesPage: cleaned,
+        optInPage: "We’re preparing your opt-in page copy. Regenerate once to get the full structured version.",
+        thankYouPage: "Thanks for your order! Check your email for access details.",
+        bonusPage: "Bonus bundle details are being prepared. Regenerate to populate full bonus copy.",
+        checkoutCopy: "Complete your order now to lock in this price and get instant access.",
+        orderBump: "Add this quick-start upgrade to implement faster and avoid mistakes.",
+        upsellOffer: "Upgrade now to unlock implementation templates and shortcut your results.",
+        offerStack: {
+          coreProduct: { name: "Core Product", value: 97 },
+          bonuses: [],
+          totalValue: 97,
+          askingPrice: 17,
+          stackCopy: "Core Product ($97 value) — Today only $17."
+        },
+        objections: []
+      };
     }
   }
 }
@@ -147,7 +242,7 @@ FRONT-END PRICE: $${price}${angleInstruction}${mechanismInstruction}${avatarCont
 
 Return ONLY valid JSON:
 {
-  "salesPage": "Complete long-form sales page following the Dan Kennedy structure: pre-headline → main headline (specific result + timeframe) → subheadline → pain agitation → 'what nobody tells you' → product intro with mechanism → feature-to-benefit breakdown → what's included → named guarantee → price justification (anchor against $${price * 20}+ alternatives before revealing $${price}) → urgency close → two kinds of people → FAQ (5 questions). Minimum 800 words.",
+  "salesPage": "Complete long-form sales page following the Dan Kennedy structure: pre-headline → main headline (specific result + timeframe) → subheadline → pain agitation → 'what nobody tells you' → product intro with mechanism → feature-to-benefit breakdown → what's included → named guarantee → price justification (anchor against $${price * 20}+ alternatives before revealing $${price}) → urgency close → two kinds of people → FAQ (5 questions). Target 350-500 words.",
   "optInPage": "Opt-in page: headline with specific result, 3 bullet benefits with numbers, CTA: 'Yes — Send Me The Free [Lead Magnet Name]'. Lead magnet angle tied to product.",
   "thankYouPage": "Thank you page: confirm purchase, specific next step to take RIGHT NOW, surprise bonus mention.",
   "bonusPage": "Bonus page: 3 exclusive bonuses with names, specific descriptions, and individual perceived values.",
@@ -176,13 +271,15 @@ Return ONLY valid JSON:
 }
 
 CRITICAL:
+- Output STRICT JSON ONLY (no markdown fences, no commentary)
+- Escape all newlines inside strings as \\n and escape all quotes inside strings
 - The sales page MUST justify the $${price} price by anchoring against expensive alternatives BEFORE revealing the price
 - The guarantee must be named and bold (e.g. "The 30-Day 'Use It Or Lose Nothing' Guarantee")
 - Every CTA must include the product name
 - The upsell page must feel like momentum, not a hard sell
 - No generic phrases — every benefit must be specific and measurable
-- Generate exactly 8 objections covering: price concern, skepticism about results, "I've tried before", time concern, trust concern, "not for me", technical ability, and delayed action
-- Each objection reframe must be specific to THIS product, not generic sales advice`;
+- Generate exactly 5 objections covering: price concern, skepticism about results, "I've tried before", time concern, and delayed action
+- Keep total output concise so all keys are fully completed in one response`;
 
     const { content, model } = await callTieredAI([
       { role: "system", content: SALES_PAGE_SYSTEM },
