@@ -110,7 +110,7 @@ export default function DownloadChecklistModal({ open, onOpenChange, items, onCo
           <div className="py-6 space-y-4">
             <div className="flex items-center justify-center">
               {done ? (
-                <CheckCircle2 className="w-12 h-12 text-green-500 animate-in zoom-in" />
+                <CheckCircle2 className="w-12 h-12 text-primary animate-in zoom-in" />
               ) : (
                 <Loader2 className="w-10 h-10 text-primary animate-spin" />
               )}
