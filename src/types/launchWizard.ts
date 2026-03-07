@@ -11,6 +11,14 @@ export interface AdVariation {
   hookAngle: string;
 }
 
+export interface PricingPsychology {
+  tiers: { name: string; price: number; reasoning: string; recommended?: boolean }[];
+  paymentPlanSuggestion: string;
+  anchoringCopy: string;
+  scarcityCopy: string;
+  riskReversalCopy: string;
+}
+
 export interface LaunchScore {
   demand: number;
   competition: number;
@@ -25,6 +33,7 @@ export interface LaunchScore {
   suggestedPivots?: string[];
   estimatedPriceCeiling?: number;
   affiliateCommissionSweet?: string;
+  pricingPsychology?: PricingPsychology;
 }
 
 export interface Mechanism {
@@ -64,12 +73,27 @@ export interface OfferStack {
   stackCopy: string;
 }
 
+export interface Objection {
+  objection: string;
+  reframe: string;
+  proof: string;
+  followUpQuestion: string;
+}
+
 export interface AffiliateKit {
   headline: string;
   emailSwipes: { subject: string; body: string }[];
   promoAngles: string[];
   bonusPageHeadline: string;
   jvPageCopy: string;
+}
+
+export interface ProofStack {
+  testimonialTemplates: { name: string; before: string; product: string; result: string; lifeNow: string }[];
+  beforeAfterTable: { before: string; after: string }[];
+  credibilityBuilder: string;
+  earningsDisclaimer: string;
+  quickWinsList: string[];
 }
 
 export interface LaunchProject {
@@ -108,6 +132,7 @@ export interface Step2Content {
   chapters: ChapterItem[];
   bonuses: string[];
   description: string;
+  proofStack?: ProofStack;
 }
 
 export interface ChapterItem {
@@ -125,6 +150,7 @@ export interface Step3Funnel {
   orderBump?: string;
   upsellOffer?: string;
   offerStack?: OfferStack;
+  objections?: Objection[];
 }
 
 export interface Step4Marketing {

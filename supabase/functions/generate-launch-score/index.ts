@@ -17,23 +17,26 @@ Deno.serve(async (req) => {
       { field: 'topic', type: 'string', maxLength: 500 },
       { field: 'productConcept', type: 'string', maxLength: 2000 },
       { field: 'campaignAngles', type: 'array', maxItems: 10 },
+      { field: 'price', type: 'number', maxLength: 100 },
     ]);
     if (!valid) return validationErrorResponse(valError!, corsHeaders);
 
-    const { niche, targetAudience, productType, topic, productConcept, campaignAngles } = data;
+    const { niche, targetAudience, productType, topic, productConcept, campaignAngles, price } = data;
+    const fePrice = price || 17;
     const userTier = await getUserTier(user.id);
 
     const anglesSection = (campaignAngles as any[])?.length
       ? `\nCampaign Angles to score: ${JSON.stringify((campaignAngles as any[]).map((a: any) => a.name))}`
       : "";
 
-    const prompt = `You are a digital product market analyst. Analyze this product idea and score it.
+    const prompt = `You are a digital product market analyst AND pricing strategist. Analyze this product idea, score it, and provide pricing psychology.
 
 Niche: ${niche}
 Target Audience: ${targetAudience || "General"}
 Product Type: ${productType}
 Topic: ${topic}
-Product Concept: ${productConcept || "Not yet generated"}${anglesSection}
+Product Concept: ${productConcept || "Not yet generated"}
+Current Price Point: $${fePrice}${anglesSection}
 
 Score each dimension from 0-10 with honest assessment:
 - demand: How much does this audience actively search for and buy solutions to this problem?
@@ -64,6 +67,17 @@ Return ONLY valid JSON:
   ],
   "estimatedPriceCeiling": 47,
   "affiliateCommissionSweet": "50% on $17 FE ($8.50 per sale)",
+  "pricingPsychology": {
+    "tiers": [
+      { "name": "Budget Entry", "price": 7, "reasoning": "Why this price point works for this niche — impulse buy psychology", "recommended": false },
+      { "name": "Value Sweet Spot", "price": 17, "reasoning": "Why this is the optimal price — perceived value vs cost balance", "recommended": true },
+      { "name": "Premium Position", "price": 47, "reasoning": "Why premium can work — what extra value justifies this", "recommended": false }
+    ],
+    "paymentPlanSuggestion": "Offer 3x $13 payments for orders over $27 — increases conversions 20-30% on cold traffic",
+    "anchoringCopy": "Drop-in copy that anchors the price against expensive alternatives (e.g., 'A single coaching session costs $200+. This entire system is yours for just $17.')",
+    "scarcityCopy": "Urgency/scarcity copy snippet (e.g., 'This introductory price ends when we hit 500 copies. After that, it goes to $37.')",
+    "riskReversalCopy": "Named guarantee copy (e.g., 'The 30-Day No-Questions-Asked Guarantee: Try every strategy. If you don't see results, email us for a full refund.')"
+  },
   "angleScores": [
     { "angle": "AngleName", "predictedConversion": "High", "reasoning": "Why this angle works or doesn't" }
   ]
@@ -76,7 +90,10 @@ SCORING RULES:
 - "estimatedPriceCeiling" is the maximum front-end price this niche can support (typically $7-$97).
 - "affiliateCommissionSweet" describes the ideal commission structure for this product.
 - angleScores should have an entry for each campaign angle provided. predictedConversion must be "High", "Medium", or "Low".
-- suggestions should be specific, actionable improvements — not generic advice.`;
+- suggestions should be specific, actionable improvements — not generic advice.
+- pricingPsychology tiers must have exactly 3 options with realistic niche-specific pricing.
+- anchoringCopy must compare against a real expensive alternative in this niche.
+- riskReversalCopy must include a named guarantee (not just "money-back guarantee").`;
 
     const { content, model } = await callTieredAI([{ role: "user", content: prompt }], userTier, "standard");
 

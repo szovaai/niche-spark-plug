@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
       ? `\nBUYER AVATAR — Write for this specific person:\nName: ${(buyerAvatar as any).personaName}\nFrustration: ${(buyerAvatar as any).dailyFrustration}\nDesires: ${(buyerAvatar as any).desires?.join(", ")}\nPain Points: ${(buyerAvatar as any).painPoints?.join(", ")}\nLanguage: ${(buyerAvatar as any).languageTheyUse?.join(", ")}`
       : '';
 
-    const prompt = `Generate a complete product outline for a digital product.${avatarContext}
+    const prompt = `Generate a complete product outline AND a proof/credibility stack for a digital product.${avatarContext}
 
 Product: ${productBrief.title}
 Subtitle: ${productBrief.subtitle}
@@ -47,7 +47,32 @@ Return ONLY valid JSON:
     { "title": "Action-oriented chapter title with specific outcome", "summary": "2-3 sentences: what they'll learn and the result they'll get. Be specific — not 'learn marketing' but 'set up your first $7 tripwire that converts cold traffic'", "keyPoints": ["specific actionable point 1", "point 2", "point 3"] }
   ],
   "bonuses": ["Bonus 1: [Name] — specific description of what it is and the result it produces", "Bonus 2: ...", "Bonus 3: ..."],
-  "description": "A compelling 150-word product description — lead with pain, introduce mechanism, promise specific result. Write like a human, not a brochure."
+  "description": "A compelling 150-word product description — lead with pain, introduce mechanism, promise specific result. Write like a human, not a brochure.",
+  "proofStack": {
+    "testimonialTemplates": [
+      {
+        "name": "[TESTIMONIAL 1 — Replace with real customer]",
+        "before": "What life/work was like BEFORE using the product — specific frustration in buyer's language",
+        "product": "What they did with the product — specific action they took",
+        "result": "The specific measurable result they achieved — numbers, timeframes",
+        "lifeNow": "How their situation is different now — emotional + practical change"
+      }
+    ],
+    "beforeAfterTable": [
+      { "before": "Specific pain state in buyer's own words", "after": "Specific transformed state with measurable difference" }
+    ],
+    "credibilityBuilder": "2-3 paragraphs of honest credibility copy for someone who may not have testimonials yet. Use frameworks like: 'I spent X months researching...', 'After interviewing X people...', 'I tested every method I could find and distilled it down to...' — builds trust without fake claims.",
+    "earningsDisclaimer": "FTC-compliant earnings/results disclaimer customized to this product type. Include: results not typical, individual results vary, no guarantee of specific outcomes. Professional but not scary.",
+    "quickWinsList": [
+      "Specific tangible outcome #1 the buyer gets (e.g., 'Get 3 ready-to-send email sequences you can deploy TODAY')",
+      "Specific tangible outcome #2",
+      "Specific tangible outcome #3",
+      "Specific tangible outcome #4",
+      "Specific tangible outcome #5",
+      "Specific tangible outcome #6",
+      "Specific tangible outcome #7"
+    ]
+  }
 }
 
 RULES:
@@ -56,7 +81,10 @@ RULES:
 - Bonuses must be named products with clear value, not vague "extra resources"
 - Reference the unique mechanism "${productBrief.uniqueMechanism}" throughout
 - The description must read like sales copy, not a table of contents
-- Write in a warm, direct, conversational tone — like a knowledgeable friend who's already done this`;
+- Write in a warm, direct, conversational tone — like a knowledgeable friend who's already done this
+- Generate exactly 5 testimonial templates covering: skeptic-turned-believer, beginner success, unexpected benefit, best result story, quick win story
+- Generate 5-7 before/after rows showing real transformations in buyer's language
+- Quick wins must be SPECIFIC and TANGIBLE — not "learn mindset" but "Get a done-for-you checklist you can use in the next 10 minutes"`;
 
     const { content, model } = await callTieredAI([
       { role: "system", content: MASTER_SYSTEM_PROMPT },
