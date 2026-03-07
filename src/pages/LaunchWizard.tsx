@@ -108,7 +108,7 @@ const LaunchWizard = () => {
       // Step 3
       setGenModalStep(3);
       const { data: s3, error: e3 } = await supabase.functions.invoke("generate-launch-funnel", {
-        body: { productBrief: s1, productContent: s2, userId: user?.id },
+        body: { productBrief: s1, productContent: s2, price, userId: user?.id },
       });
       if (e3) throw e3;
       setStep3Result(s3);
@@ -118,7 +118,7 @@ const LaunchWizard = () => {
       // Step 4
       setGenModalStep(4);
       const { data: s4, error: e4 } = await supabase.functions.invoke("generate-launch-marketing", {
-        body: { productBrief: s1, productContent: s2, funnelCopy: s3, userId: user?.id },
+        body: { productBrief: s1, productContent: s2, funnelCopy: s3, price, userId: user?.id },
       });
       if (e4) throw e4;
       setStep4Result(s4);
