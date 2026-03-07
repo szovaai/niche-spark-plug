@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Sparkles, Loader2, Copy, Check, Mail, MessageSquare, Image, FileText, Video } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Sparkles, Loader2, Copy, Check, Mail, MessageSquare, Image, FileText, Video, Megaphone } from "lucide-react";
 import { Step1Product, Step2Content, Step3Funnel, Step4Marketing } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -52,7 +53,7 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold mb-1">Marketing Asset Generator</h2>
-        <p className="text-muted-foreground">Create all your promotional content in one click.</p>
+        <p className="text-muted-foreground">Create all your promotional content including ad copy.</p>
       </div>
 
       {!result && (
@@ -67,6 +68,7 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
           <Tabs defaultValue="emails">
             <TabsList className="w-full flex-wrap h-auto gap-1">
               <TabsTrigger value="emails" className="gap-1 text-xs"><Mail className="w-3 h-3" /> Emails</TabsTrigger>
+              <TabsTrigger value="ads" className="gap-1 text-xs"><Megaphone className="w-3 h-3" /> Ads</TabsTrigger>
               <TabsTrigger value="posts" className="gap-1 text-xs"><MessageSquare className="w-3 h-3" /> Posts</TabsTrigger>
               <TabsTrigger value="pins" className="gap-1 text-xs"><Image className="w-3 h-3" /> Pins</TabsTrigger>
               <TabsTrigger value="blog" className="gap-1 text-xs"><FileText className="w-3 h-3" /> Blog</TabsTrigger>
@@ -88,6 +90,45 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
                     </CardContent>
                   </Card>
                 ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="ads">
+              <div className="space-y-3">
+                {result.adCopy?.map((ad, i) => (
+                  <Card key={i}>
+                    <CardContent className="p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-semibold text-sm">Ad {i + 1}</h4>
+                          <Badge variant="outline" className="text-xs">{ad.hookAngle}</Badge>
+                        </div>
+                        <Button variant="ghost" size="sm" onClick={() => copyText(`Headline: ${ad.headline}\n\n${ad.primaryText}\n\nCTA: ${ad.cta}`, `ad-${i}`)} className="gap-1">
+                          {copied === `ad-${i}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                        </Button>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="p-2 rounded bg-primary/5">
+                          <p className="text-sm font-bold">{ad.headline}</p>
+                        </div>
+                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">{ad.primaryText}</p>
+                        <Badge variant="secondary">{ad.cta}</Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+                {result.targetingKeywords && result.targetingKeywords.length > 0 && (
+                  <Card>
+                    <CardContent className="p-4">
+                      <h4 className="font-semibold text-sm mb-2">Suggested Targeting Keywords</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {result.targetingKeywords.map((kw, i) => (
+                          <Badge key={i} variant="outline" className="text-xs">{kw}</Badge>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
             </TabsContent>
 

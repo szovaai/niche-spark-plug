@@ -35,8 +35,15 @@ Return ONLY valid JSON:
   "subtitle": "Compelling subtitle",
   "concept": "2-3 sentence product concept explaining what this is and why it matters",
   "uniqueMechanism": "The unique angle or method that makes this different from competitors",
-  "painPoints": ["pain point 1", "pain point 2", "pain point 3", "pain point 4", "pain point 5"]
-}`;
+  "painPoints": ["pain point 1", "pain point 2", "pain point 3", "pain point 4", "pain point 5"],
+  "campaignAngles": [
+    { "name": "Speed", "hook": "A short punchy hook for this angle", "description": "2 sentences explaining why this angle resonates with the audience" },
+    { "name": "Simplicity", "hook": "A short punchy hook for this angle", "description": "2 sentences explaining why this angle resonates with the audience" },
+    { "name": "Results", "hook": "A short punchy hook for this angle", "description": "2 sentences explaining why this angle resonates with the audience" }
+  ]
+}
+
+The campaignAngles should be 3 distinctly different sales angles for marketing this product. Each angle should suggest a completely different emotional trigger (e.g., speed vs. authority vs. fear-of-missing-out). The hook should be a single compelling sentence usable as an ad headline.`;
 
     const { content, model } = await callTieredAI([{ role: "user", content: prompt }], userTier, "standard");
 

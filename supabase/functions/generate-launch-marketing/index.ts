@@ -20,6 +20,9 @@ Deno.serve(async (req) => {
 
     const userTier = userId ? await getUserTier(userId) : "free";
 
+    const selectedAngle = productBrief.selectedAngle || "";
+    const angleInstruction = selectedAngle ? `\nIMPORTANT: Use the "${selectedAngle}" campaign angle as the primary messaging theme. All content should reinforce this angle consistently.` : "";
+
     const prompt = `${HUMAN_TONE}
 
 You are a digital marketing expert. Generate a complete marketing asset kit for this product launch.
@@ -28,7 +31,7 @@ Product: ${productBrief.title} — ${productBrief.subtitle}
 Concept: ${productBrief.concept}
 Unique Mechanism: ${productBrief.uniqueMechanism}
 Pain Points: ${productBrief.painPoints?.join(", ")}
-Description: ${productContent?.description || ""}
+Description: ${productContent?.description || ""}${angleInstruction}
 
 Return ONLY valid JSON:
 {
@@ -38,11 +41,20 @@ Return ONLY valid JSON:
   "socialPosts": ["Post 1 text with hashtags", "Post 2 text", "...up to 10 posts"],
   "pinterestPins": ["Pin description 1 with keywords", "Pin 2", "Pin 3", "Pin 4", "Pin 5"],
   "blogArticle": "A complete 600-word blog article that provides value related to the product topic and naturally leads to the product as a solution. Use markdown formatting with headers.",
-  "videoScript": "A 2-minute YouTube video script with: Hook (10s), Problem (20s), Solution intro (15s), Product walkthrough (45s), CTA (15s), Outro (15s). Include speaker directions in brackets."
+  "videoScript": "A 2-minute YouTube video script with: Hook (10s), Problem (20s), Solution intro (15s), Product walkthrough (45s), CTA (15s), Outro (15s). Include speaker directions in brackets.",
+  "adCopy": [
+    { "headline": "Ad headline under 40 chars", "primaryText": "Facebook/Instagram ad primary text 125 words max. Hook, problem, solution, CTA.", "cta": "CTA button text", "hookAngle": "Name of the angle used" },
+    { "headline": "...", "primaryText": "...", "cta": "...", "hookAngle": "..." },
+    { "headline": "...", "primaryText": "...", "cta": "...", "hookAngle": "..." },
+    { "headline": "...", "primaryText": "...", "cta": "...", "hookAngle": "..." },
+    { "headline": "...", "primaryText": "...", "cta": "...", "hookAngle": "..." }
+  ],
+  "targetingKeywords": ["keyword 1", "keyword 2", "keyword 3", "keyword 4", "keyword 5", "keyword 6", "keyword 7", "keyword 8"]
 }
 
 Generate exactly 5 emails (pre-launch teaser, launch announcement, value-add, objection handler, last chance).
-Generate exactly 10 social posts (mix of educational, promotional, and engagement).`;
+Generate exactly 10 social posts (mix of educational, promotional, and engagement).
+Generate exactly 5 ad variations — each with a DIFFERENT hook angle (curiosity, fear, social proof, urgency, aspiration).`;
 
     const { content, model } = await callTieredAI([{ role: "user", content: prompt }], userTier, "complex");
 

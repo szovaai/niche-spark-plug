@@ -14,6 +14,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import RevenueProjector from "@/components/wizard/RevenueProjector";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -184,6 +185,11 @@ const Dashboard = () => {
               )}
             </CardContent>
           </Card>
+        </motion.div>
+
+        {/* Revenue Projector */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+          <RevenueProjector />
         </motion.div>
 
         {/* Pro Tip */}

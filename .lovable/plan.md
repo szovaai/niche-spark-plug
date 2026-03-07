@@ -1,119 +1,53 @@
 
 
-# Build It Better Than Saisify — Enhancement Plan
+# DigiLaunchKit AI — Refactor Plan
 
-## What Saisify Does (and Where It Falls Short)
+## What This Changes
 
-Saisify is a $27 tool with 4 specialized AI agents: Demand Finder, Product Architect, Content Wizard, and Copy Wizard. It generates a product + sales page + ad copy in 30 minutes and provides a 1-click sales page template. Their key selling points: trained on "$16M in sales intelligence," revenue calculator, scaling calculator, and a launch community.
+This is a major restructuring that repositions the app from a collection of separate tools (Empire Mode, Micro Factory, Toolkit Builder, Research, Launch) into a unified **AI Launch Engine** with one primary flow: the **AI Launch Wizard**.
 
-**Where Saisify falls short** (and where DigiLaunchKit already wins or can win):
-- No project management or persistence -- just a prompt wrapper
-- No asset library or content vault
-- No launch checklist or timeline
-- No cohesive "AI Brain" that keeps messaging consistent across assets
-- No campaign angles or A/B variations
-- No ad copy generation (they mention it but it's basic)
+## Current State vs. Target State
 
-**DigiLaunchKit already has** most of the core pipeline (5-step wizard, asset library, funnel copy, marketing assets, checklist). The upgrades below focus on the features that make DigiLaunchKit decisively better.
+**Current navigation:** Dashboard, Empire Mode, Micro Factory, Research, My Toolkits, Launch
 
----
+**New navigation:** Dashboard, AI Launch Wizard, Products, Funnels, Marketing Assets, Launch Checklist, Templates, Settings
 
-## Enhancements to Build
+## Implementation Status: ✅ COMPLETE
 
-### 1. Add "Campaign Angles" to Step 1 (Product Setup)
+### Phase 1: Database ✅
+- Created `launch_projects` table with JSONB fields for each wizard step
+- RLS policies: users can only CRUD their own rows
+- Auto-updated `updated_at` trigger
 
-After the product concept is generated, add a new section that generates 3 distinct sales angles (e.g., speed, automation, beginner-friendly). User picks the winning angle, and it gets passed into all subsequent steps (funnel, emails, posts) for messaging consistency.
+### Phase 2: Edge Functions ✅
+- `generate-launch-product` — product concept from niche/audience/type/topic
+- `generate-launch-content` — outline, chapters, bonuses, description
+- `generate-launch-funnel` — sales page, opt-in, thank you, bonus, checkout copy
+- `generate-launch-marketing` — 5 emails, 10 social posts, 5 pins, blog, video script
+- `generate-launch-checklist` — personalized launch roadmap
 
-**Changes:**
-- Update `Step1Product` type to include `campaignAngles: CampaignAngle[]` and `selectedAngle: string`
-- Update `generate-launch-product` edge function to also return 3 campaign angles
-- Update `WizardStep1.tsx` to show angle cards with a "Use This Angle" selector
-- Pass `selectedAngle` into Steps 3, 4 prompts so funnel/marketing copy stays consistent
+### Phase 3: AI Launch Wizard ✅
+- 5-step wizard at `/wizard` with left stepper + right content
+- "Generate Entire Launch System" button runs all 5 steps sequentially
+- All outputs saved to `launch_projects` table
 
-### 2. Add "Ad Copy Generator" to Step 4 (Marketing Assets)
+### Phase 4: Section Pages ✅
+- `/products` — list/delete launch projects
+- `/funnels` — tabbed funnel copy library
+- `/assets` — marketing asset library (emails, posts, pins, blog, video)
+- `/checklist` — interactive launch checklists with toggle
+- `/templates` — 5 pre-built niche templates
 
-Saisify's headline feature is ad copy. Add a dedicated "Ads" tab to Step 4 that generates:
-- 5 Facebook/Instagram ad variations (headline, primary text, CTA)
-- 3 ad hook angles
-- Suggested targeting keywords
+### Phase 5: Navigation ✅
+- New sidebar: Dashboard, Products, Funnels, Marketing Assets, Launch Checklist, Templates
+- CTA button: "New Launch" → `/wizard`
+- Legacy routes preserved: `/empire`, `/micro-factory`, `/research`, `/my-toolkits`, `/launch`
 
-**Changes:**
-- Update `Step4Marketing` type to include `adCopy: AdVariation[]`
-- Update `generate-launch-marketing` edge function prompt to also generate ad copy
-- Add "Ads" tab to `WizardStep4.tsx` with copy buttons per ad variation
+### Phase 6: Dashboard ✅
+- Launch-focused: progress tracker, active projects, adapted stats
+- "Start New Launch" CTA
 
-### 3. Add "Revenue Calculator" Widget to Dashboard
-
-Simple interactive widget (like Saisify's) showing projected revenue based on price and sales/day. This is a powerful psychological tool.
-
-**Changes:**
-- Create `RevenueProjector` component with a slider (1-20 sales/day) and price input
-- Shows daily/monthly/yearly revenue projections
-- Add to Dashboard below the stats grid
-
-### 4. Add "Generate Entire Launch" Progress Modal
-
-Currently the "Generate Entire Launch System" button just shows toast messages. Replace with a proper full-screen progress modal showing each step completing in real-time with animations.
-
-**Changes:**
-- Create `GenerateAllModal` component with 5 animated step indicators
-- Shows: current step name, spinner, checkmark on completion, estimated time
-- Replaces the inline toasts during `generateAll()`
-
-### 5. Add "Order Bump & Upsell Generator" to Step 3 (Funnel)
-
-Saisify doesn't have this. Generate order bump copy and upsell offer copy alongside the funnel.
-
-**Changes:**
-- Update `Step3Funnel` type to include `orderBump: string` and `upsellOffer: string`
-- Update `generate-launch-funnel` prompt to also generate order bump + upsell copy
-- Add "Order Bump" and "Upsell" tabs to `WizardStep3.tsx`
-
-### 6. Add "Launch Timeline" to Step 5
-
-Replace the generic checklist with a day-by-day launch timeline (Day 1: finalize product, Day 2: set up sales page, etc.).
-
-**Changes:**
-- Update `ChecklistStep` type to include `day: number`
-- Update `generate-launch-checklist` prompt to organize steps by day
-- Update `WizardStep5.tsx` to render as a timeline grouped by day instead of a flat list
-
-### 7. Resume/Edit Existing Projects from Products Page
-
-Currently projects are view-only in the Products list. Add ability to click a project and reopen the wizard with all data pre-loaded.
-
-**Changes:**
-- Add route `/wizard/:projectId` that loads existing project data
-- Update `LaunchWizard.tsx` to accept a `projectId` param and pre-fill all state from the database
-- Update Products page to link each project to `/wizard/${p.id}`
-
----
-
-## Implementation Order
-
-1. **Types + Edge Functions** -- Update types and all 5 edge function prompts (campaign angles, ad copy, order bump/upsell, day-based timeline)
-2. **Wizard UI Enhancements** -- Campaign angle selector in Step 1, new tabs in Steps 3-4, timeline view in Step 5, progress modal for Generate All
-3. **Dashboard Revenue Calculator** -- New standalone widget
-4. **Project Resume** -- Route param support + data loading in wizard
-
-## Files Modified
-
-- `src/types/launchWizard.ts` -- Add CampaignAngle, AdVariation types; extend existing types
-- `supabase/functions/generate-launch-product/index.ts` -- Add campaign angles to prompt
-- `supabase/functions/generate-launch-funnel/index.ts` -- Add order bump + upsell to prompt
-- `supabase/functions/generate-launch-marketing/index.ts` -- Add ad copy to prompt
-- `supabase/functions/generate-launch-checklist/index.ts` -- Add day-based timeline structure
-- `src/components/wizard/WizardStep1.tsx` -- Campaign angle selector UI
-- `src/components/wizard/WizardStep3.tsx` -- Order Bump + Upsell tabs
-- `src/components/wizard/WizardStep4.tsx` -- Ads tab
-- `src/components/wizard/WizardStep5.tsx` -- Day-based timeline view
-- `src/pages/LaunchWizard.tsx` -- Progress modal, project resume support, route param
-- `src/pages/Products.tsx` -- Link to `/wizard/:id` for resume
-- `src/pages/Dashboard.tsx` -- Revenue calculator widget
-- `src/App.tsx` -- Add `/wizard/:projectId` route
-- New: `src/components/wizard/GenerateAllModal.tsx`
-- New: `src/components/wizard/RevenueProjector.tsx`
-- New: `src/components/wizard/CampaignAngleSelector.tsx`
-
-No database schema changes needed -- existing JSONB fields accommodate the expanded data structures.
-
+### Phase 7: Branding ✅
+- Title: "DigiLaunchKit AI"
+- Hero: "Launch Your Digital Product in 60 Minutes"
+- Updated Navbar, HeroSection, index.html

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Sparkles, Loader2, CheckCircle2, Circle } from "lucide-react";
-import { Step1Product, Step5Checklist, ChecklistStep } from "@/types/launchWizard";
+import { Badge } from "@/components/ui/badge";
+import { Sparkles, Loader2, CheckCircle2, Circle, Calendar } from "lucide-react";
+import { Step1Product, Step5Checklist } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -29,7 +29,7 @@ export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMa
       });
       if (error) throw error;
       setResult(data);
-      toast.success("Launch checklist generated!");
+      toast.success("Launch timeline generated!");
     } catch (e: any) {
       toast.error(e.message || "Failed to generate");
     } finally {
@@ -49,17 +49,28 @@ export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMa
   const completedCount = result?.steps?.filter(s => s.completed).length || 0;
   const totalCount = result?.steps?.length || 0;
 
+  // Group steps by day
+  const stepsByDay: Record<number, typeof result.steps> = {};
+  if (result?.steps) {
+    result.steps.forEach(step => {
+      const day = step.day || 1;
+      if (!stepsByDay[day]) stepsByDay[day] = [];
+      stepsByDay[day].push(step);
+    });
+  }
+  const days = Object.keys(stepsByDay).map(Number).sort((a, b) => a - b);
+
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold mb-1">Launch Checklist</h2>
-        <p className="text-muted-foreground">Your personalized roadmap to launch.</p>
+        <h2 className="text-2xl font-bold mb-1">Launch Timeline</h2>
+        <p className="text-muted-foreground">Your personalized 7-day launch roadmap.</p>
       </div>
 
       {!result && (
         <Button onClick={generate} disabled={loading} className="gap-2">
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-          Generate Launch Checklist
+          Generate Launch Timeline
         </Button>
       )}
 
@@ -80,27 +91,40 @@ export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMa
             </CardContent>
           </Card>
 
-          <div className="space-y-2">
-            {result.steps?.map((step, i) => (
-              <Card key={step.id} className={`transition-colors ${step.completed ? "bg-primary/5 border-primary/20" : ""}`}>
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <button onClick={() => toggleStep(step.id)} className="mt-0.5 shrink-0">
-                      {step.completed ? (
-                        <CheckCircle2 className="w-5 h-5 text-primary" />
-                      ) : (
-                        <Circle className="w-5 h-5 text-muted-foreground" />
-                      )}
-                    </button>
-                    <div>
-                      <p className={`text-sm font-medium ${step.completed ? "line-through text-muted-foreground" : ""}`}>
-                        Step {i + 1}: {step.title}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{step.description}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+          <div className="space-y-6">
+            {days.map(day => (
+              <div key={day} className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-primary" />
+                  <h3 className="font-semibold text-sm">Day {day}</h3>
+                  <Badge variant="outline" className="text-xs">
+                    {stepsByDay[day].filter(s => s.completed).length}/{stepsByDay[day].length}
+                  </Badge>
+                </div>
+                <div className="space-y-2 ml-6 border-l-2 border-border pl-4">
+                  {stepsByDay[day].map((step) => (
+                    <Card key={step.id} className={`transition-colors ${step.completed ? "bg-primary/5 border-primary/20" : ""}`}>
+                      <CardContent className="p-3">
+                        <div className="flex items-start gap-3">
+                          <button onClick={() => toggleStep(step.id)} className="mt-0.5 shrink-0">
+                            {step.completed ? (
+                              <CheckCircle2 className="w-5 h-5 text-primary" />
+                            ) : (
+                              <Circle className="w-5 h-5 text-muted-foreground" />
+                            )}
+                          </button>
+                          <div>
+                            <p className={`text-sm font-medium ${step.completed ? "line-through text-muted-foreground" : ""}`}>
+                              {step.title}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{step.description}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
 

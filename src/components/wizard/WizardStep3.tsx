@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Sparkles, Loader2, Copy, Check } from "lucide-react";
+import { Sparkles, Loader2, Copy, Check, ShoppingCart, ArrowUpCircle } from "lucide-react";
 import { Step1Product, Step2Content, Step3Funnel } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -22,6 +22,8 @@ const FUNNEL_TABS = [
   { key: "thankYouPage", label: "Thank You" },
   { key: "bonusPage", label: "Bonus Page" },
   { key: "checkoutCopy", label: "Checkout" },
+  { key: "orderBump", label: "Order Bump", icon: ShoppingCart },
+  { key: "upsellOffer", label: "Upsell", icon: ArrowUpCircle },
 ] as const;
 
 export default function WizardStep3({ productBrief, productContent, result, setResult, onNext, userId }: Props) {
@@ -59,7 +61,7 @@ export default function WizardStep3({ productBrief, productContent, result, setR
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold mb-1">Funnel Builder</h2>
-        <p className="text-muted-foreground">Generate complete sales funnel copy for your product.</p>
+        <p className="text-muted-foreground">Generate complete sales funnel copy including order bump & upsell.</p>
       </div>
 
       {!result && (
@@ -73,28 +75,39 @@ export default function WizardStep3({ productBrief, productContent, result, setR
         <div className="space-y-4">
           <Tabs defaultValue="salesPage">
             <TabsList className="w-full flex-wrap h-auto gap-1">
-              {FUNNEL_TABS.map(tab => (
-                <TabsTrigger key={tab.key} value={tab.key} className="text-xs">{tab.label}</TabsTrigger>
-              ))}
+              {FUNNEL_TABS.map(tab => {
+                const content = result[tab.key as keyof Step3Funnel];
+                if (!content) return null;
+                return (
+                  <TabsTrigger key={tab.key} value={tab.key} className="text-xs gap-1">
+                    {'icon' in tab && tab.icon && <tab.icon className="w-3 h-3" />}
+                    {tab.label}
+                  </TabsTrigger>
+                );
+              })}
             </TabsList>
-            {FUNNEL_TABS.map(tab => (
-              <TabsContent key={tab.key} value={tab.key}>
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-bold">{tab.label}</h3>
-                      <Button variant="ghost" size="sm" onClick={() => copyText(result[tab.key], tab.key)} className="gap-1">
-                        {copied === tab.key ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                        Copy
-                      </Button>
-                    </div>
-                    <div className="text-sm text-muted-foreground whitespace-pre-wrap max-h-[500px] overflow-y-auto">
-                      {result[tab.key]}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            ))}
+            {FUNNEL_TABS.map(tab => {
+              const content = result[tab.key as keyof Step3Funnel];
+              if (!content) return null;
+              return (
+                <TabsContent key={tab.key} value={tab.key}>
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-bold">{tab.label}</h3>
+                        <Button variant="ghost" size="sm" onClick={() => copyText(content, tab.key)} className="gap-1">
+                          {copied === tab.key ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                          Copy
+                        </Button>
+                      </div>
+                      <div className="text-sm text-muted-foreground whitespace-pre-wrap max-h-[500px] overflow-y-auto">
+                        {content}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              );
+            })}
           </Tabs>
           <Button onClick={onNext} className="gap-2">Continue to Marketing Assets</Button>
         </div>
