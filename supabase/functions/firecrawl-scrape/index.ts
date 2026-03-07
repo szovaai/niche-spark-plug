@@ -1,3 +1,6 @@
+import { validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
+import { validateInput, validationErrorResponse } from "../_shared/validate.ts";
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
@@ -9,14 +12,17 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { url, options } = await req.json();
+    const { user, error: authError } = await validateAuth(req);
+    if (authError || !user) return unauthorizedResponse(authError || 'Authentication required', corsHeaders);
 
-    if (!url) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'URL is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    const body = await req.json();
+    const { valid, error: valError, data } = validateInput(body, [
+      { field: 'url', type: 'string', required: true, maxLength: 2000 },
+      { field: 'options', type: 'object', maxLength: 1000 },
+    ]);
+    if (!valid) return validationErrorResponse(valError!, corsHeaders);
+
+    const { url, options } = data;
 
     const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
     if (!apiKey) {
@@ -26,7 +32,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    let formattedUrl = url.trim();
+    let formattedUrl = (url as string).trim();
     if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
       formattedUrl = `https://${formattedUrl}`;
     }
@@ -39,25 +45,24 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         url: formattedUrl,
-        formats: options?.formats || ['markdown'],
-        onlyMainContent: options?.onlyMainContent ?? true,
+        formats: (options as any)?.formats || ['markdown'],
+        onlyMainContent: (options as any)?.onlyMainContent ?? true,
       }),
     });
 
-    const data = await response.json();
+    const responseData = await response.json();
 
     if (!response.ok) {
       return new Response(
-        JSON.stringify({ success: false, error: data.error || `Request failed with status ${response.status}` }),
+        JSON.stringify({ success: false, error: responseData.error || `Request failed` }),
         { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    return new Response(JSON.stringify(data), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify(responseData), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Failed to scrape';
     return new Response(
-      JSON.stringify({ success: false, error: errorMessage }),
+      JSON.stringify({ success: false, error: 'Unable to scrape page. Please try again.' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

@@ -1,6 +1,7 @@
-import { corsHeaders } from "../_shared/auth.ts";
+import { corsHeaders, validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
 import { callTieredAI, getUserTier } from "../_shared/tieredAI.ts";
 import { getCachedResponse, setCachedResponse } from "../_shared/cache.ts";
+import { validateInput, validationErrorResponse } from "../_shared/validate.ts";
 
 const HUMAN_TONE = `Write like a real person — use contractions, vary sentence length, add personality. Sound confident but not salesy. Avoid corporate buzzwords.`;
 
@@ -8,17 +9,23 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { productBrief, productType, userId } = await req.json();
+    const { user, error: authError } = await validateAuth(req);
+    if (authError || !user) return unauthorizedResponse(authError || 'Authentication required', corsHeaders);
 
-    if (!productBrief) {
-      return new Response(JSON.stringify({ error: "Missing product brief" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
+    const body = await req.json();
+    const { valid, error: valError, data } = validateInput(body, [
+      { field: 'productBrief', type: 'object', required: true, maxLength: 10000 },
+      { field: 'productType', type: 'string', maxLength: 100 },
+    ]);
+    if (!valid) return validationErrorResponse(valError!, corsHeaders);
+
+    const { productBrief, productType } = data;
 
     const cacheKey = `launch-content-${JSON.stringify(productBrief).slice(0, 100)}`;
     const cached = await getCachedResponse(cacheKey, "generate-launch-content");
     if (cached) return new Response(JSON.stringify(cached), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-    const userTier = userId ? await getUserTier(userId) : "free";
+    const userTier = await getUserTier(user.id);
 
     const prompt = `${HUMAN_TONE}
 
@@ -53,6 +60,6 @@ Generate 6-8 chapters. Each chapter should be actionable and build on the previo
     return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {
     console.error("Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ error: "Unable to generate content. Please try again." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });

@@ -1,17 +1,30 @@
-import { corsHeaders } from "../_shared/auth.ts";
+import { corsHeaders, validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
 import { callTieredAI, getUserTier } from "../_shared/tieredAI.ts";
+import { validateInput, validationErrorResponse } from "../_shared/validate.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { productBrief, hasContent, hasFunnel, hasMarketing, userId } = await req.json();
+    const { user, error: authError } = await validateAuth(req);
+    if (authError || !user) return unauthorizedResponse(authError || 'Authentication required', corsHeaders);
 
-    const userTier = userId ? await getUserTier(userId) : "free";
+    const body = await req.json();
+    const { valid, error: valError, data } = validateInput(body, [
+      { field: 'productBrief', type: 'object', maxLength: 10000 },
+      { field: 'hasContent', type: 'boolean' },
+      { field: 'hasFunnel', type: 'boolean' },
+      { field: 'hasMarketing', type: 'boolean' },
+    ]);
+    if (!valid) return validationErrorResponse(valError!, corsHeaders);
+
+    const { productBrief, hasContent, hasFunnel, hasMarketing } = data;
+
+    const userTier = await getUserTier(user.id);
 
     const prompt = `You are a launch strategist. Generate a personalized day-by-day launch timeline for a digital product.
 
-Product: ${productBrief?.title || "Digital Product"}
+Product: ${(productBrief as any)?.title || "Digital Product"}
 Has product content: ${hasContent ? "Yes" : "No"}
 Has funnel copy: ${hasFunnel ? "Yes" : "No"}
 Has marketing assets: ${hasMarketing ? "Yes" : "No"}
@@ -44,6 +57,6 @@ Each day should have 1-3 steps. Assign the "day" field (1-7) to each step.`;
     return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {
     console.error("Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ error: "Unable to generate checklist. Please try again." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });
