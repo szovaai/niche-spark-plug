@@ -7,6 +7,7 @@ import { Sparkles, Loader2, Copy, Check, Mail, MessageSquare, Image, FileText, V
 import { Step1Product, Step2Content, Step3Funnel, Step4Marketing } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import RenderedCopy from "@/components/RenderedCopy";
 
 interface Props {
   productBrief: Step1Product | null;
@@ -16,9 +17,10 @@ interface Props {
   setResult: (v: Step4Marketing | null) => void;
   onNext: () => void;
   userId?: string;
+  price?: number;
 }
 
-export default function WizardStep4({ productBrief, productContent, funnelCopy, result, setResult, onNext, userId }: Props) {
+export default function WizardStep4({ productBrief, productContent, funnelCopy, result, setResult, onNext, userId, price }: Props) {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
 
@@ -27,7 +29,7 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-launch-marketing", {
-        body: { productBrief, productContent, funnelCopy, userId },
+        body: { productBrief, productContent, funnelCopy, price: price || 17, userId },
       });
       if (error) throw error;
       setResult(data);
@@ -89,7 +91,7 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
                           {copied === `email-${i}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                         </Button>
                       </div>
-                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">{email.body}</p>
+                      <RenderedCopy content={email.body} showScore={i === 0} mechanismName={productBrief?.uniqueMechanism} />
                     </CardContent>
                   </Card>
                 ))}
@@ -120,7 +122,7 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
                         <div className="p-2 rounded bg-primary/5">
                           <p className="text-sm font-bold">{ad.headline}</p>
                         </div>
-                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">{ad.primaryText}</p>
+                        <RenderedCopy content={ad.primaryText} />
                         <Badge variant="secondary">{ad.cta}</Badge>
                       </div>
                     </CardContent>
@@ -147,7 +149,7 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
                   <Card key={i}>
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between gap-2">
-                        <p className="text-sm text-muted-foreground">{post}</p>
+                        <RenderedCopy content={post} className="text-sm" />
                         <Button variant="ghost" size="icon" className="shrink-0" onClick={() => copyText(post, `post-${i}`)}>
                           {copied === `post-${i}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                         </Button>
@@ -164,7 +166,7 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
                   <Card key={i}>
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between gap-2">
-                        <p className="text-sm text-muted-foreground">{pin}</p>
+                        <RenderedCopy content={pin} className="text-sm" />
                         <Button variant="ghost" size="icon" className="shrink-0" onClick={() => copyText(pin, `pin-${i}`)}>
                           {copied === `pin-${i}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                         </Button>
@@ -185,8 +187,8 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
                       Copy
                     </Button>
                   </div>
-                  <div className="text-sm text-muted-foreground whitespace-pre-wrap max-h-[500px] overflow-y-auto">
-                    {result.blogArticle}
+                  <div className="max-h-[500px] overflow-y-auto">
+                    <RenderedCopy content={result.blogArticle} />
                   </div>
                 </CardContent>
               </Card>
@@ -202,8 +204,8 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
                       Copy
                     </Button>
                   </div>
-                  <div className="text-sm text-muted-foreground whitespace-pre-wrap max-h-[500px] overflow-y-auto">
-                    {result.videoScript}
+                  <div className="max-h-[500px] overflow-y-auto">
+                    <RenderedCopy content={result.videoScript} />
                   </div>
                 </CardContent>
               </Card>
@@ -213,7 +215,6 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
             {result.affiliateKit && (
               <TabsContent value="affiliate">
                 <div className="space-y-4">
-                  {/* JV Headline */}
                   <Card className="border-accent/30">
                     <CardContent className="p-5">
                       <div className="flex items-center justify-between mb-2">
@@ -226,7 +227,6 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
                     </CardContent>
                   </Card>
 
-                  {/* Affiliate Email Swipes */}
                   <h4 className="font-semibold text-sm flex items-center gap-2"><Mail className="w-4 h-4" /> Affiliate Email Swipes</h4>
                   {result.affiliateKit.emailSwipes?.map((swipe, i) => (
                     <Card key={i}>
@@ -237,12 +237,11 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
                             {copied === `swipe-${i}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                           </Button>
                         </div>
-                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">{swipe.body}</p>
+                        <RenderedCopy content={swipe.body} showScore={i === 0} />
                       </CardContent>
                     </Card>
                   ))}
 
-                  {/* Promo Angles */}
                   <Card>
                     <CardContent className="p-4">
                       <h4 className="font-semibold text-sm mb-2">Promo Angles for Affiliates</h4>
@@ -254,7 +253,6 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
                     </CardContent>
                   </Card>
 
-                  {/* Bonus Page Headline */}
                   <Card>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-2">
@@ -267,7 +265,6 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
                     </CardContent>
                   </Card>
 
-                  {/* JV Page Copy */}
                   <Card>
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between mb-4">
@@ -277,8 +274,8 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
                           Copy
                         </Button>
                       </div>
-                      <div className="text-sm text-muted-foreground whitespace-pre-wrap max-h-[500px] overflow-y-auto">
-                        {result.affiliateKit.jvPageCopy}
+                      <div className="max-h-[500px] overflow-y-auto">
+                        <RenderedCopy content={result.affiliateKit.jvPageCopy} showScore />
                       </div>
                     </CardContent>
                   </Card>

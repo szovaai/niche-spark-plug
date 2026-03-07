@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sparkles, Rocket, Loader2, Brain, ArrowRight } from "lucide-react";
+import { Sparkles, Rocket, Loader2, Brain, ArrowRight, DollarSign } from "lucide-react";
 import { PRODUCT_TYPES, Step1Product } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -23,6 +23,8 @@ interface Props {
   setProductType: (v: string) => void;
   topic: string;
   setTopic: (v: string) => void;
+  price: number;
+  setPrice: (v: number) => void;
   result: Step1Product | null;
   setResult: (v: Step1Product | null) => void;
   onNext: () => void;
@@ -31,7 +33,7 @@ interface Props {
   userId?: string;
 }
 
-export default function WizardStep1({ niche, setNiche, targetAudience, setTargetAudience, productType, setProductType, topic, setTopic, result, setResult, onNext, onGenerateAll, generatingAll, userId }: Props) {
+export default function WizardStep1({ niche, setNiche, targetAudience, setTargetAudience, productType, setProductType, topic, setTopic, price, setPrice, result, setResult, onNext, onGenerateAll, generatingAll, userId }: Props) {
   const [loading, setLoading] = useState(false);
   const [scoreLoading, setScoreLoading] = useState(false);
 
@@ -47,8 +49,6 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
       if (error) throw error;
       setResult(data);
       toast.success("Product concept generated!");
-
-      // Auto-trigger launch score
       generateScore(data);
     } catch (e: any) {
       toast.error(e.message || "Failed to generate");
@@ -87,10 +87,8 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
     setResult({ ...result, selectedAngle: name });
   };
 
-  // Determine which sections to show based on selection state
   const hasMechanismSelected = result?.uniqueMechanism?.includes(" — ");
   const hasAngleSelected = !!result?.selectedAngle;
-
   const nav = useNavigate();
 
   return (
@@ -152,6 +150,20 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
           <label className="text-sm font-medium">Topic *</label>
           <Input placeholder="e.g. AI traffic generation" value={topic} onChange={e => setTopic(e.target.value)} />
         </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium flex items-center gap-1.5">
+            <DollarSign className="w-3.5 h-3.5" /> Front-End Price
+          </label>
+          <Input
+            type="number"
+            min={1}
+            max={997}
+            placeholder="17"
+            value={price || ""}
+            onChange={e => setPrice(Number(e.target.value) || 17)}
+          />
+          <p className="text-xs text-muted-foreground">This price will be used in all generated sales copy, offer stacks, and affiliate kits.</p>
+        </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
@@ -167,7 +179,6 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
 
       {result && (
         <div className="space-y-5">
-          {/* Product concept card */}
           <Card className="border-primary/30 bg-primary/5">
             <CardContent className="p-6 space-y-4">
               <div className="flex items-center justify-between">
@@ -194,7 +205,6 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
             </CardContent>
           </Card>
 
-          {/* Launch Score */}
           {scoreLoading && (
             <div className="flex items-center gap-2 p-4 rounded-lg bg-primary/5 border border-primary/20">
               <Loader2 className="w-4 h-4 animate-spin text-primary" />
@@ -203,7 +213,6 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
           )}
           {result.launchScore && <LaunchScoreCard score={result.launchScore} />}
 
-          {/* Mechanism Selector */}
           {result.mechanisms && result.mechanisms.length > 0 && (
             <MechanismSelector
               mechanisms={result.mechanisms}
@@ -212,7 +221,6 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
             />
           )}
 
-          {/* Campaign Angles - shown after mechanism selected (or if no mechanisms available) */}
           {(hasMechanismSelected || !result.mechanisms?.length) && result.campaignAngles && result.campaignAngles.length > 0 && (
             <CampaignAngleSelector
               angles={result.campaignAngles}
@@ -222,7 +230,6 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
             />
           )}
 
-          {/* Continue button */}
           {hasAngleSelected ? (
             <Button onClick={onNext} className="gap-2 mt-2">
               Continue to Product Content
