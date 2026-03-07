@@ -21,6 +21,8 @@ Deno.serve(async (req) => {
     const userTier = userId ? await getUserTier(userId) : "free";
 
     const chapterTitles = productContent?.chapters?.map((c: any) => c.title).join(", ") || "N/A";
+    const selectedAngle = productBrief.selectedAngle || "";
+    const angleInstruction = selectedAngle ? `\nIMPORTANT: Use the "${selectedAngle}" campaign angle as the primary messaging theme across all copy. Every section should reinforce this angle.` : "";
 
     const prompt = `${HUMAN_TONE}
 
@@ -31,7 +33,7 @@ Concept: ${productBrief.concept}
 Unique Mechanism: ${productBrief.uniqueMechanism}
 Pain Points: ${productBrief.painPoints?.join(", ")}
 Chapters: ${chapterTitles}
-Description: ${productContent?.description || ""}
+Description: ${productContent?.description || ""}${angleInstruction}
 
 Return ONLY valid JSON:
 {
@@ -39,10 +41,12 @@ Return ONLY valid JSON:
   "optInPage": "Opt-in page copy with headline, 3 bullet benefits, and CTA. Include a free lead magnet angle.",
   "thankYouPage": "Thank you page copy confirming their purchase/opt-in with next steps and a surprise bonus mention.",
   "bonusPage": "Bonus page copy highlighting 3 exclusive bonuses they get with their purchase.",
-  "checkoutCopy": "Checkout page copy with order summary, urgency element, and trust badges text."
+  "checkoutCopy": "Checkout page copy with order summary, urgency element, and trust badges text.",
+  "orderBump": "Order bump copy for the checkout page — a complementary low-price add-on offer ($7-$17). Include: product name, 2-3 sentence description of what it is, why they need it NOW, and a compelling reason to add it. Format as a short persuasive block.",
+  "upsellOffer": "One-time upsell offer copy shown after purchase. Include: upsell product name, what it includes, the transformation it provides, original price vs special price, urgency element, and CTA. Format as a full upsell page with headline, body, and CTA."
 }
 
-Make each section comprehensive — at least 300 words for salesPage, 100+ for others.`;
+Make each section comprehensive — at least 300 words for salesPage, 150+ for upsellOffer and orderBump, 100+ for others.`;
 
     const { content, model } = await callTieredAI([{ role: "user", content: prompt }], userTier, "complex");
 

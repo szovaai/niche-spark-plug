@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
 
     const userTier = userId ? await getUserTier(userId) : "free";
 
-    const prompt = `You are a launch strategist. Generate a personalized launch checklist for a digital product.
+    const prompt = `You are a launch strategist. Generate a personalized day-by-day launch timeline for a digital product.
 
 Product: ${productBrief?.title || "Digital Product"}
 Has product content: ${hasContent ? "Yes" : "No"}
@@ -19,13 +19,21 @@ Has marketing assets: ${hasMarketing ? "Yes" : "No"}
 Return ONLY valid JSON:
 {
   "steps": [
-    { "id": "step-1", "title": "Step title", "description": "Brief actionable description", "completed": false }
+    { "id": "step-1", "title": "Step title", "description": "Brief actionable description", "completed": false, "day": 1 }
   ]
 }
 
-Generate 8-12 launch steps in logical order. Steps should include things like: finalize product, set up sales page, configure payment, load email sequence, create opt-in page, test purchase flow, soft launch to warm audience, announce launch, share on social, follow up with buyers, gather testimonials, iterate based on feedback.
+Generate 10-14 launch steps organized into a 7-day launch timeline. Group steps by day:
+- Day 1: Finalize product, set up delivery
+- Day 2: Build sales page, configure payment
+- Day 3: Set up email sequence, create opt-in page
+- Day 4: Test purchase flow, prepare social media
+- Day 5: Soft launch to warm audience, gather early feedback
+- Day 6: Official launch, announce everywhere
+- Day 7: Follow up with buyers, gather testimonials, iterate
 
-Mark steps as completed=true if the user already has that asset generated (e.g. if hasContent is true, mark "finalize product" as completed).`;
+Mark steps as completed=true if the user already has that asset generated (e.g. if hasContent is true, mark product-related steps as completed).
+Each day should have 1-3 steps. Assign the "day" field (1-7) to each step.`;
 
     const { content } = await callTieredAI([{ role: "user", content: prompt }], userTier, "simple");
 

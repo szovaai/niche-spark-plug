@@ -1,3 +1,16 @@
+export interface CampaignAngle {
+  name: string;
+  hook: string;
+  description: string;
+}
+
+export interface AdVariation {
+  headline: string;
+  primaryText: string;
+  cta: string;
+  hookAngle: string;
+}
+
 export interface LaunchProject {
   id: string;
   user_id: string;
@@ -23,6 +36,8 @@ export interface Step1Product {
   concept: string;
   uniqueMechanism: string;
   painPoints: string[];
+  campaignAngles?: CampaignAngle[];
+  selectedAngle?: string;
 }
 
 export interface Step2Content {
@@ -44,6 +59,8 @@ export interface Step3Funnel {
   thankYouPage: string;
   bonusPage: string;
   checkoutCopy: string;
+  orderBump?: string;
+  upsellOffer?: string;
 }
 
 export interface Step4Marketing {
@@ -52,6 +69,8 @@ export interface Step4Marketing {
   pinterestPins: string[];
   blogArticle: string;
   videoScript: string;
+  adCopy?: AdVariation[];
+  targetingKeywords?: string[];
 }
 
 export interface EmailItem {
@@ -68,6 +87,7 @@ export interface ChecklistStep {
   title: string;
   description: string;
   completed: boolean;
+  day?: number;
 }
 
 export const PRODUCT_TYPES = [
