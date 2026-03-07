@@ -98,138 +98,157 @@ repeatable system that works across all traffic types.
     - Trust the value to speak for itself
 `;
 
-// WarriorPlus-style HTML structure prompt
-const WARRIORPLUS_HTML_STRUCTURE = `
-=== OUTPUT FORMAT: WARRIORPLUS-STYLE HTML ===
+// Kennedy Direct-Response Letter HTML structure prompt
+const KENNEDY_HTML_STRUCTURE = `
+=== OUTPUT FORMAT: KENNEDY-STYLE DIRECT RESPONSE LETTER HTML ===
 
-Generate the sales letter as CLEAN HTML that matches the WarriorPlus dark theme aesthetic.
+Generate the sales letter as CLEAN HTML that matches the Dan Kennedy direct-response letter aesthetic.
+This is a cream-colored, serif-font, letter-style sales page — NOT a modern dark theme.
 
 REQUIRED HTML STRUCTURE (use these exact class names and structure):
 
-1. HERO CARD:
-<div class="card" style="text-align:center;">
-  <h2>[Punchy headline - problem + solution in one line]</h2>
-  <p>[Subheadline expanding on headline]</p>
+1. URGENCY BAR:
+<div class="urgency-bar">
+  [Short urgency message — e.g. "⚠ Founding Member Pricing Expires When This Page Closes"]
 </div>
 
-2. PROBLEM SECTION:
-<div class="card">
-  <h2 class="section-title">Here's the frustrating truth about [topic]</h2>
-  <p>[Relatable problem description - empathetic, not dramatic]</p>
-  <div class="callout">
-    <p><strong>[Key insight or reframe]</strong></p>
+2. LETTER HEADER:
+<div class="letter-header">
+  <p class="from-desk">An Urgent Letter To:</p>
+  <p class="sender">[Describe the target audience in one compelling sentence]</p>
+</div>
+
+3. HEADLINE BOX:
+<div class="headline-box">
+  <span class="pre-headline">[Warning or pattern interrupt — uppercase, typewriter style]</span>
+  <h1>"[Main headline with <span class="red">key benefit highlighted in red</span>]"</h1>
+  <p class="deck">[Subheadline — italic, indented with red left border]</p>
+</div>
+
+4. SALUTATION:
+<div class="salutation">
+  <p class="date-line">[Current date]</p>
+  <p>Dear Fellow [Audience],</p>
+</div>
+
+5. BODY COPY (main persuasion):
+<div class="body-copy">
+  <p>[Opening hook — conversational, direct]</p>
+  <p>[Problem identification — empathetic, specific]</p>
+  
+  <div class="pull-quote">
+    "[Quotable insight or reframe]"
   </div>
-</div>
 
-3. REAL PROBLEM SECTION:
-<div class="card">
-  <h2 class="section-title">The real problem: [root cause]</h2>
-  <p>[Explain structural issue]</p>
-  <ul>
-    <li><strong>[Signal 1]</strong> - description</li>
-    <li><strong>[Signal 2]</strong> - description</li>
-    <li><strong>[Signal 3]</strong> - description</li>
+  <p>[Continue building the case...]</p>
+
+  <hr class="section-break">
+
+  <h2>[Section headlines in uppercase red — Kennedy style]</h2>
+
+  <p>[Use <strong>, <em>, <u>, <span class="red-text">, and <span class="caps"> for emphasis]</p>
+
+  <div class="box red-border">
+    <span class="box-headline">[Callout box title]</span>
+    <p>[Important information in a bordered box]</p>
+  </div>
+
+  6. FASCINATION BULLETS (for features/benefits that create curiosity):
+  <ul class="fascinations">
+    <li><strong>[Bold lead]</strong> — [explanation that builds desire]</li>
   </ul>
-</div>
 
-4. THE SHIFT (Framework):
-<div class="card">
-  <h2 class="section-title">The Shift: [New mental model]</h2>
-  <p>[Explain the paradigm shift]</p>
-  <div class="timeline">
-    <div class="timeline-item">
-      <div class="timeline-marker">1</div>
-      <div class="timeline-content">
-        <div class="timeline-title">[Step 1 Name]</div>
-        <p class="muted">[Step 1 description]</p>
-      </div>
-    </div>
-    <div class="timeline-item">
-      <div class="timeline-marker">2</div>
-      <div class="timeline-content">
-        <div class="timeline-title">[Step 2 Name]</div>
-        <p class="muted">[Step 2 description]</p>
-      </div>
-    </div>
-    <div class="timeline-item">
-      <div class="timeline-marker">3</div>
-      <div class="timeline-content">
-        <div class="timeline-title">[Step 3 Name]</div>
-        <p class="muted">[Step 3 description]</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-5. WHAT'S INCLUDED (Grid):
-<div class="card">
-  <h2 class="section-title">What You'll Get Inside</h2>
-  <p class="muted">Everything is designed to be used immediately.</p>
-  <ul>
-    <li><strong>[Component 1]</strong> — [benefit]</li>
-    <li><strong>[Component 2]</strong> — [benefit]</li>
-    <li><strong>[Component 3]</strong> — [benefit]</li>
+  7. CHECKLIST (for what's included):
+  <ul class="check-list">
+    <li>[Item with clear benefit]</li>
   </ul>
-</div>
 
-6. USAGE PATH (Launch Plan):
-<div class="card">
-  <h2 class="section-title">How to Use It (Fast Implementation)</h2>
-  <div class="timeline">
-    <div class="timeline-item">
-      <div class="timeline-marker">1</div>
-      <div class="timeline-content">
-        <div class="timeline-title">Day 1</div>
-        <p class="muted">[Quick win action]</p>
-      </div>
-    </div>
-    <div class="timeline-item">
-      <div class="timeline-marker">2</div>
-      <div class="timeline-content">
-        <div class="timeline-title">Day 2</div>
-        <p class="muted">[Next step]</p>
-      </div>
-    </div>
-    <div class="timeline-item">
-      <div class="timeline-marker">3</div>
-      <div class="timeline-content">
-        <div class="timeline-title">Day 3</div>
-        <p class="muted">[Expected result]</p>
-      </div>
-    </div>
+  8. TESTIMONIALS:
+  <div class="testimonial-block">
+    <p class="quote-text">"[Detailed, specific testimonial quote]"</p>
+    <p class="attribution"><strong>[Name]</strong> — [Title/Location]</p>
   </div>
-</div>
 
-7. FIT FILTER (Two Columns):
-<div class="card">
-  <h2 class="section-title">Who This Is For (and Who It's Not)</h2>
+  9. COMPARISON TABLE:
+  <div class="box">
+    <span class="box-headline">[Table title]</span>
+    <table class="feature-table">
+      <thead><tr><th>Feature</th><th>Without</th><th class="highlight-col">With [Product]</th></tr></thead>
+      <tbody>
+        <tr><td>[Feature]</td><td>[Cost]</td><td class="highlight-col"><span class="yes">✓ Included</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  10. WHO THIS IS FOR / NOT FOR:
   <div class="two-col">
-    <div class="fit-yes">
-      <h3>✓ This is for you if...</h3>
-      <ul>
-        <li>[Qualifier 1]</li>
-        <li>[Qualifier 2]</li>
-        <li>[Qualifier 3]</li>
-      </ul>
+    <div class="col-box green-top">
+      <h4>This Is For You If:</h4>
+      <ul><li>[Qualifier]</li></ul>
     </div>
-    <div class="fit-no">
-      <h3>✗ This is NOT for you if...</h3>
-      <ul>
-        <li>[Disqualifier 1]</li>
-        <li>[Disqualifier 2]</li>
-        <li>[Disqualifier 3]</li>
-      </ul>
+    <div class="col-box red-top">
+      <h4>Stop Reading If:</h4>
+      <ul><li>[Disqualifier]</li></ul>
     </div>
   </div>
-</div>
+
+  11. BONUS STACK:
+  <div class="bonus-row">
+    <div class="bonus-num">[Number]</div>
+    <div class="bonus-content">
+      <strong>[Bonus name]</strong>
+      <p>[Bonus description]</p>
+    </div>
+    <div class="bonus-value">Value: $[amount]</div>
+  </div>
+
+  12. ORDER BOX:
+  <div class="order-box">
+    <p class="product-label">[Product name — uppercase label]</p>
+    <p class="was-price">Regular Price: $[higher price]</p>
+    <p class="now-price">$[actual price]</p>
+    <p class="price-context">[One-time payment. No monthly fees. Instant access.]</p>
+    <a href="#" class="cta-btn">[CTA text]<br><span style="font-size: 12px;">[Sub-CTA text]</span></a>
+    <p class="cta-sub-text">🔒 256-bit SSL encryption · Processed securely · Instant delivery</p>
+  </div>
+
+  13. GUARANTEE:
+  <div class="guarantee-section">
+    <div class="guarantee-seal">🛡️</div>
+    <div class="guarantee-content">
+      <h3>[Guarantee name]</h3>
+      <p>[Guarantee details — generous, confident]</p>
+    </div>
+  </div>
+
+  14. FAQ:
+  <div class="faq-item">
+    <h4>[Question in italic serif]</h4>
+    <p>[Answer — direct, helpful]</p>
+  </div>
+
+  15. FINAL CLOSE + PS:
+  <div class="pull-quote">[Final motivating statement]</div>
+
+  <p class="signature">[Author name — large italic serif]</p>
+  <p class="signature-name">[Title — uppercase monospace]</p>
+
+  <div class="ps-section">
+    <p><strong>P.S.</strong> — [Summary for skimmers with link to order]</p>
+    <p><strong>P.P.S.</strong> — [Urgency/scarcity reason]</p>
+  </div>
+
+</div><!-- end body-copy -->
 
 CRITICAL RULES FOR HTML OUTPUT:
-- Use ONLY the class names shown above (card, section-title, callout, timeline, timeline-item, timeline-marker, timeline-content, timeline-title, muted, two-col, fit-yes, fit-no)
-- DO NOT use numbered lists like "1. Step one 2. Step two" - use the timeline structure instead
+- Use ONLY the class names shown above (urgency-bar, letter-header, from-desk, sender, headline-box, pre-headline, deck, salutation, date-line, body-copy, pull-quote, box, red-border, box-headline, fascinations, check-list, testimonial-block, quote-text, attribution, feature-table, highlight-col, yes, no, two-col, col-box, green-top, red-top, bonus-row, bonus-num, bonus-content, bonus-value, order-box, product-label, was-price, now-price, price-context, cta-btn, cta-sub-text, guarantee-section, guarantee-seal, guarantee-content, faq-item, ps-section, signature, signature-name, section-break, red-text, caps, divider)
+- Write in a CONVERSATIONAL, DIRECT, PERSONAL tone — like a letter from a trusted advisor
+- Use long-form body copy — paragraphs, not cards
 - Keep paragraphs short (2-3 sentences max)
-- Use <strong> for emphasis on key phrases
-- Use <ul><li> for bullet lists with the ✓ styling
-- The output should look like a REAL sales page, not a numbered document
+- Use <strong> for emphasis, <em> for italics, <u> for underlines with red color
+- The output should read like a REAL direct-response sales letter, NOT a modern landing page
+- Include at least one pull-quote, one testimonial block, one fascination list, one checklist, and the order box
+- DO NOT include <!DOCTYPE>, <html>, <head>, or <body> tags — just the content starting from urgency-bar
 `;
 
 serve(async (req) => {
