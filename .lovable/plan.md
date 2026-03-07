@@ -1,101 +1,53 @@
 
 
-# Digital Product Asset Factory — Implementation Plan
+# DigiLaunchKit AI — Refactor Plan
 
-This is a major upgrade to the Launch Wizard (Step 2) that transforms it from "outline generator" into a "complete sellable asset stack" factory. The request covers ~12 asset types, each requiring dedicated generation logic. Due to scope, this will be split into two implementation passes.
+## What This Changes
 
----
+This is a major restructuring that repositions the app from a collection of separate tools (Empire Mode, Micro Factory, Toolkit Builder, Research, Launch) into a unified **AI Launch Engine** with one primary flow: the **AI Launch Wizard**.
 
-## Architecture Decision
+## Current State vs. Target State
 
-Rather than cramming everything into WizardStep2, we add a **new Step 2.5 — "Product Asset Factory"** that appears after Step 2 content generation. This keeps the existing flow intact while adding the full asset ecosystem.
+**Current navigation:** Dashboard, Empire Mode, Micro Factory, Research, My Toolkits, Launch
 
-**Approach:** Add a new `launch_projects` JSONB column `step2_assets` to store all generated assets. Add a new component `AssetFactory.tsx` that renders as a sub-section within Step 2 (below the existing chapters/outline). Each asset type gets a toggle + generate button + display card.
+**New navigation:** Dashboard, AI Launch Wizard, Products, Funnels, Marketing Assets, Launch Checklist, Templates, Settings
 
----
+## Implementation Status: ✅ COMPLETE
 
-## Pass 1: Core Asset Generators (This Implementation)
+### Phase 1: Database ✅
+- Created `launch_projects` table with JSONB fields for each wizard step
+- RLS policies: users can only CRUD their own rows
+- Auto-updated `updated_at` trigger
 
-### 1. Database Migration
-- Add `step2_assets jsonb` column to `launch_projects` table (stores all generated asset content)
+### Phase 2: Edge Functions ✅
+- `generate-launch-product` — product concept from niche/audience/type/topic
+- `generate-launch-content` — outline, chapters, bonuses, description
+- `generate-launch-funnel` — sales page, opt-in, thank you, bonus, checkout copy
+- `generate-launch-marketing` — 5 emails, 10 social posts, 5 pins, blog, video script
+- `generate-launch-checklist` — personalized launch roadmap
 
-### 2. New Edge Function: `generate-product-assets`
-- Single edge function that accepts an `assetType` parameter
-- Supported types: `workbook`, `cheatsheet`, `toolkit`, `templates`, `promptPack`, `bonusGuides`, `caseStudies`
-- Uses existing `MASTER_SYSTEM_PROMPT` + asset-specific prompts
-- Each asset type has a dedicated prompt template that references the product brief, chapters, and mechanism
-- Returns structured JSON per asset type (e.g., workbook returns array of worksheets with questions)
+### Phase 3: AI Launch Wizard ✅
+- 5-step wizard at `/wizard` with left stepper + right content
+- "Generate Entire Launch System" button runs all 5 steps sequentially
+- All outputs saved to `launch_projects` table
 
-### 3. New Component: `src/components/wizard/AssetFactory.tsx`
-- Toggle panel with checkboxes for each asset type
-- "Generate All Selected" button + individual generate buttons
-- Progress indicator showing which assets are being generated
-- Each completed asset renders in a collapsible card with copy/download buttons
-- Uses existing `AssetDownloadButtons` for PDF/TXT export
+### Phase 4: Section Pages ✅
+- `/products` — list/delete launch projects
+- `/funnels` — tabbed funnel copy library
+- `/assets` — marketing asset library (emails, posts, pins, blog, video)
+- `/checklist` — interactive launch checklists with toggle
+- `/templates` — 5 pre-built niche templates
 
-### 4. Asset Type Outputs
+### Phase 5: Navigation ✅
+- New sidebar: Dashboard, Products, Funnels, Marketing Assets, Launch Checklist, Templates
+- CTA button: "New Launch" → `/wizard`
+- Legacy routes preserved: `/empire`, `/micro-factory`, `/research`, `/my-toolkits`, `/launch`
 
-| Asset | What Gets Generated |
-|-------|-------------------|
-| **Workbook** | 1 worksheet per chapter: title, intro, 5-8 questions, reflection prompts |
-| **Cheat Sheets** | 3-5 quick-reference sheets: step-by-step frameworks, key formulas |
-| **Toolkit** | Scripts, outreach templates, checklists (5-8 items) |
-| **Templates** | 5 reusable templates (proposals, emails, onboarding, offers) |
-| **Prompt Pack** | 15-20 AI prompts organized by use case |
-| **Bonus Guides** | 3-5 named bonus products with 500-word content each |
-| **Case Studies** | 3 fictional case studies with before/after/method/results |
+### Phase 6: Dashboard ✅
+- Launch-focused: progress tracker, active projects, adapted stats
+- "Start New Launch" CTA
 
-### 5. Integrate into WizardStep2
-- After existing chapters/bonuses/description cards, add the AssetFactory component
-- Pass `productBrief`, `step2Result` (chapters), and `productType` as context
-- Auto-save generated assets to `step2_assets` column via autosave
-
-### 6. Product Multiplier Card
-- Small card at bottom of AssetFactory showing "Your Product Can Become:"
-- Lists: Ebook, Video Course Outline, Workshop, Membership, Upsell Product, Coaching Offer
-- Each is a one-click generate that calls the edge function with `assetType: 'multiplier'`
-- Returns a brief pitch + outline for each format
-
-### 7. Export: "Download Full Product Bundle"
-- New button in Step 2 that bundles ALL generated assets into a ZIP
-- Uses existing `JSZip` library
-- Folder structure: `/Core-Product/`, `/Workbooks/`, `/Cheat-Sheets/`, `/Toolkit/`, `/Templates/`, `/Prompts/`, `/Bonuses/`
-
----
-
-## Pass 2: Launch Assets & Resell Kit (Follow-up)
-
-These are partially covered by existing Steps 3-4 but will be enhanced:
-- **Affiliate Promo Kit** — already in Step 4, will add review video script + ad headlines
-- **Sales Page Generator** — already in Step 3, will add Kennedy-style template
-- **Resell Rights Generator** — new: license terms, affiliate rules, graphics prompts
-- **Product Quality Score** — already built as `ProductScorecard.tsx`, will integrate into Asset Factory
-
----
-
-## Files to Create
-- `src/components/wizard/AssetFactory.tsx` — main toggle panel + asset cards
-- `src/components/wizard/AssetCard.tsx` — individual asset display with copy/download
-- `src/components/wizard/ProductMultiplier.tsx` — multiplier suggestions card
-- `supabase/functions/generate-product-assets/index.ts` — unified asset generation edge function
-
-## Files to Modify
-- `src/components/wizard/WizardStep2.tsx` — add AssetFactory below existing content
-- `src/pages/LaunchWizard.tsx` — pass step2Assets state, include in autosave
-- `src/types/launchWizard.ts` — add asset type interfaces
-- `supabase/config.toml` — register new edge function
-- `src/integrations/supabase/types.ts` — will auto-update after migration
-
-## Database Migration
-```sql
-ALTER TABLE public.launch_projects ADD COLUMN step2_assets jsonb DEFAULT '{}';
-```
-
-## Implementation Priority
-1. Migration + types
-2. Edge function with workbook + cheatsheet + toolkit prompts
-3. AssetFactory UI with toggles + generation
-4. Product Multiplier card
-5. ZIP bundle export
-6. Remaining asset types (templates, prompts, bonuses, case studies)
-
+### Phase 7: Branding ✅
+- Title: "DigiLaunchKit AI"
+- Hero: "Launch Your Digital Product in 60 Minutes"
+- Updated Navbar, HeroSection, index.html

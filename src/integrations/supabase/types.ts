@@ -330,6 +330,7 @@ export type Database = {
           product_type: string | null
           status: string
           step1_product: Json | null
+          step2_assets: Json | null
           step2_product_content: Json | null
           step3_funnel: Json | null
           step4_marketing: Json | null
@@ -349,6 +350,7 @@ export type Database = {
           product_type?: string | null
           status?: string
           step1_product?: Json | null
+          step2_assets?: Json | null
           step2_product_content?: Json | null
           step3_funnel?: Json | null
           step4_marketing?: Json | null
@@ -368,6 +370,7 @@ export type Database = {
           product_type?: string | null
           status?: string
           step1_product?: Json | null
+          step2_assets?: Json | null
           step2_product_content?: Json | null
           step3_funnel?: Json | null
           step4_marketing?: Json | null

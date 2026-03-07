@@ -116,3 +116,6 @@ verify_jwt = false
 
 [functions.research-agent]
 verify_jwt = false
+
+[functions.generate-product-assets]
+verify_jwt = false

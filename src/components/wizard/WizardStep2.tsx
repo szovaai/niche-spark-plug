@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import AssetDownloadButtons from "@/components/AssetDownloadButtons";
 import ProofStackBuilder from "./ProofStackBuilder";
 import ContentQualityReport from "./ContentQualityReport";
+import AssetFactory from "./AssetFactory";
+import type { ProductAssets } from "@/types/productAssets";
 
 interface Props {
   productBrief: Step1Product | null;
@@ -18,6 +20,8 @@ interface Props {
   setResult: (v: Step2Content | null) => void;
   onNext: () => void;
   userId?: string;
+  assets?: ProductAssets;
+  setAssets?: (a: ProductAssets) => void;
 }
 
 function StructuredChapter({ chapter, index, copied, onCopy }: { chapter: ChapterItem; index: number; copied: string | null; onCopy: (text: string, label: string) => void }) {
@@ -109,7 +113,7 @@ function StructuredChapter({ chapter, index, copied, onCopy }: { chapter: Chapte
   );
 }
 
-export default function WizardStep2({ productBrief, productType, result, setResult, onNext, userId }: Props) {
+export default function WizardStep2({ productBrief, productType, result, setResult, onNext, userId, assets, setAssets }: Props) {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
   const [expandingIndex, setExpandingIndex] = useState<number | null>(null);
@@ -296,6 +300,17 @@ export default function WizardStep2({ productBrief, productType, result, setResu
           </Card>
 
           {result.proofStack && <ProofStackBuilder proofStack={result.proofStack} />}
+
+          {/* Digital Product Asset Factory */}
+          {productBrief && assets !== undefined && setAssets && (
+            <AssetFactory
+              productBrief={productBrief}
+              productContent={result}
+              productType={productType}
+              assets={assets}
+              setAssets={setAssets}
+            />
+          )}
 
           <Button onClick={onNext} className="gap-2">Continue to Funnel Builder</Button>
         </div>
