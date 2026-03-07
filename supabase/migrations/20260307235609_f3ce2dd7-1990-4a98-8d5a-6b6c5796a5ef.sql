@@ -1,0 +1,1 @@
+ALTER TABLE public.launch_projects ADD COLUMN step2_assets jsonb DEFAULT '{}'::jsonb;
