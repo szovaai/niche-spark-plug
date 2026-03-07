@@ -680,9 +680,7 @@ const SalesLetterGenerator = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="warriorplus">WarriorPlus (Dark)</SelectItem>
-                <SelectItem value="saas">Clean SaaS (Light)</SelectItem>
-                <SelectItem value="simple">Simple Checkout</SelectItem>
+                <SelectItem value="kennedy">Kennedy Letter (Classic)</SelectItem>
               </SelectContent>
             </Select>
           </div>
