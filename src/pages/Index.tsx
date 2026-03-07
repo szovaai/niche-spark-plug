@@ -3,9 +3,9 @@ import HeroSection from "@/components/HeroSection";
 import Navbar from "@/components/Navbar";
 import { motion } from "framer-motion";
 import { 
-  Sparkles, ArrowRight, Check, Package, FileText, 
-  Image, Download, Palette, Mail, BookOpen, ListChecks,
-  Wand2, LayoutTemplate, Zap
+  Sparkles, ArrowRight, Check, 
+  Wand2, Zap, Target, DollarSign, Users, Search, Brain,
+  Package, Mail, Megaphone, FileText, ClipboardList, BarChart3
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,60 +17,59 @@ const Index = () => {
 
   const features = [
     { 
-      icon: LayoutTemplate, 
-      title: "7+ Ready Templates", 
-      description: "Start with coaching, marketing, health, productivity, finance, or creative business templates." 
+      icon: Target, 
+      title: "Launch Score Advisor", 
+      description: "AI analyzes your idea before you build — scoring demand, competition, monetization, and offer strength." 
     },
     { 
-      icon: Wand2, 
-      title: "AI Content Generation", 
-      description: "Generate complete guides, worksheets, checklists, quizzes, and templates with one click." 
+      icon: Zap, 
+      title: "Unique Mechanism Generator", 
+      description: "Generate 3 proprietary frameworks like 'The Rapid Launch Protocol' that make your product feel one-of-a-kind." 
     },
     { 
-      icon: Image, 
-      title: "E-Cover Creator", 
-      description: "Create professional product covers that make your toolkit look premium and sellable." 
+      icon: DollarSign, 
+      title: "Offer Stack Builder", 
+      description: "Auto-generate a WarriorPlus-style value stack with core product, 3 bonuses, perceived values, and irresistible pricing." 
     },
     { 
-      icon: Mail, 
-      title: "Sales Letter Builder", 
-      description: "AI-written sales copy with ready-to-use HTML pages for any marketplace." 
+      icon: Users, 
+      title: "Affiliate Kit Generator", 
+      description: "Create JV page copy, affiliate email swipes, promo angles, and bonus page headlines — no other AI tool does this." 
     },
     { 
-      icon: FileText, 
-      title: "PDF Generation", 
-      description: "Every component exports as a beautifully formatted, branded PDF document." 
+      icon: Search, 
+      title: "Steal This Launch", 
+      description: "Paste any competitor's URL and the AI reverse-engineers their offer, angles, and funnel — then builds your counter-launch." 
     },
     { 
-      icon: Download, 
-      title: "One-Click ZIP Download", 
-      description: "Download your complete toolkit package with all assets, ready to sell." 
+      icon: Brain, 
+      title: "Launch DNA Memory", 
+      description: "The AI remembers your product, angle, mechanism, and audience — ensuring every asset tells the same story." 
     },
   ];
 
-  const components = [
-    { icon: BookOpen, name: "Main Guide/Ebook", description: "Core content piece" },
-    { icon: FileText, name: "Worksheet", description: "Interactive exercises" },
-    { icon: ListChecks, name: "Checklist", description: "Step-by-step action items" },
-    { icon: Palette, name: "Resource List", description: "Curated tools and links" },
-    { icon: FileText, name: "Templates", description: "Copy-paste swipe files" },
-    { icon: Sparkles, name: "Quiz/Assessment", description: "Self-evaluation tool" },
+  const whatGetsGenerated = [
+    { icon: Package, name: "Product Concept", description: "Title, subtitle, mechanism" },
+    { icon: FileText, name: "Product Content", description: "Full outline & chapters" },
+    { icon: BarChart3, name: "Sales Funnel", description: "Sales page, upsell, order bump" },
+    { icon: Mail, name: "Email Sequence", description: "5 launch emails" },
+    { icon: Megaphone, name: "Ad Copy & Social", description: "5 ads, 10 posts, pins" },
+    { icon: ClipboardList, name: "Launch Checklist", description: "Day-by-day timeline" },
   ];
 
   const howItWorks = [
-    { step: "1", title: "Choose Template", description: "Pick from 7 proven toolkit templates or start from scratch" },
-    { step: "2", title: "Define Your Niche", description: "Enter your topic, title, and target audience" },
-    { step: "3", title: "Select Components", description: "Choose which elements to include in your toolkit" },
-    { step: "4", title: "Generate Content", description: "AI creates all your content in seconds" },
-    { step: "5", title: "Add Marketing Assets", description: "Create e-covers and sales letters automatically" },
-    { step: "6", title: "Download & Sell", description: "Get your complete ZIP package ready to launch" },
+    { step: "1", title: "Define Your Niche", description: "Enter your niche, audience, and topic — AI scores it instantly" },
+    { step: "2", title: "Choose Your Mechanism", description: "Pick from 3 AI-generated proprietary frameworks" },
+    { step: "3", title: "Generate Everything", description: "One click builds product, funnel, emails, ads, and affiliate kit" },
+    { step: "4", title: "Review & Customize", description: "Edit, copy, and export every asset from one dashboard" },
+    { step: "5", title: "Launch & Sell", description: "Follow the checklist and go live in under 60 minutes" },
   ];
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <HeroSection onGetStarted={() => navigate("/discover")} />
+      <HeroSection onGetStarted={() => navigate("/wizard")} />
       
       {/* How It Works */}
       <section className="py-20 px-4 bg-secondary/20">
@@ -83,15 +82,15 @@ const Index = () => {
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-4">
               <Zap className="w-4 h-4 text-primary" />
-              <span className="text-sm gradient-text font-medium">Simple Process</span>
+              <span className="text-sm gradient-text font-medium">5-Step Launch Engine</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Go from idea to sellable toolkit in just 6 simple steps
+              Go from idea to complete launch system in 5 guided steps
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {howItWorks.map((item, index) => (
               <motion.div
                 key={index}
@@ -101,16 +100,12 @@ const Index = () => {
                 transition={{ delay: index * 0.1 }}
               >
                 <Card className="h-full border-border/50 hover:border-primary/30 transition-colors">
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-                        <span className="text-lg font-bold gradient-text">{item.step}</span>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold mb-1">{item.title}</h3>
-                        <p className="text-sm text-muted-foreground">{item.description}</p>
-                      </div>
+                  <CardContent className="p-5">
+                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mb-3">
+                      <span className="text-lg font-bold gradient-text">{item.step}</span>
                     </div>
+                    <h3 className="font-semibold mb-1 text-sm">{item.title}</h3>
+                    <p className="text-xs text-muted-foreground">{item.description}</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -118,16 +113,16 @@ const Index = () => {
           </div>
 
           <div className="text-center mt-12">
-            <Button variant="hero" size="lg" onClick={() => navigate("/create-toolkit")}>
-              <Package className="w-5 h-5" />
-              Start Creating Now
+            <Button variant="hero" size="lg" onClick={() => navigate("/wizard")}>
+              <Wand2 className="w-5 h-5" />
+              Start AI Launch Wizard
               <ArrowRight className="w-5 h-5" />
             </Button>
           </div>
         </div>
       </section>
 
-      {/* Features Grid */}
+      {/* Features Grid — Category-of-One Differentiators */}
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <motion.div
@@ -138,11 +133,11 @@ const Index = () => {
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-4">
               <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-sm gradient-text font-medium">Powerful Features</span>
+              <span className="text-sm gradient-text font-medium">Category-of-One Features</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Everything You Need</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">What No Other Tool Does</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              All the tools to create, package, and sell professional digital toolkits
+              Six AI-powered features that turn DigiLaunchKit from a generator into a launch strategist
             </p>
           </motion.div>
 
@@ -170,7 +165,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Components Showcase */}
+      {/* What Gets Generated */}
       <section className="py-20 px-4 bg-secondary/20">
         <div className="max-w-6xl mx-auto">
           <motion.div
@@ -181,16 +176,16 @@ const Index = () => {
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-4">
               <Package className="w-4 h-4 text-primary" />
-              <span className="text-sm gradient-text font-medium">Toolkit Components</span>
+              <span className="text-sm gradient-text font-medium">Complete Launch Package</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">What You Can Create</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">What Gets Generated</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Mix and match these components to build the perfect toolkit for any niche
+              Every asset you need to launch and sell — created in one session
             </p>
           </motion.div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {components.map((component, index) => (
+            {whatGetsGenerated.map((item, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -199,9 +194,9 @@ const Index = () => {
                 transition={{ delay: index * 0.05 }}
                 className="p-4 rounded-xl bg-card border border-border/50 text-center hover:border-primary/50 transition-colors"
               >
-                <component.icon className="w-8 h-8 text-primary mx-auto mb-2" />
-                <p className="font-medium text-sm">{component.name}</p>
-                <p className="text-xs text-muted-foreground mt-1">{component.description}</p>
+                <item.icon className="w-8 h-8 text-primary mx-auto mb-2" />
+                <p className="font-medium text-sm">{item.name}</p>
+                <p className="text-xs text-muted-foreground mt-1">{item.description}</p>
               </motion.div>
             ))}
           </div>
@@ -221,16 +216,16 @@ const Index = () => {
             
             <div className="relative z-10">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Ready to Create Your First Toolkit?
+                Ready to Launch Your Digital Product?
               </h2>
               <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-                Join creators who are building and selling digital products with AI-powered toolkit creation.
+                Join creators using the AI Launch Operating System to build and sell digital products in under 60 minutes.
               </p>
               
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Button variant="hero" size="lg" onClick={() => navigate("/create-toolkit")}>
-                  <Package className="w-5 h-5" />
-                  Create Your Toolkit
+                <Button variant="hero" size="lg" onClick={() => navigate("/wizard")}>
+                  <Wand2 className="w-5 h-5" />
+                  Start Your Launch
                   <ArrowRight className="w-5 h-5" />
                 </Button>
                 {!user && (
@@ -242,16 +237,16 @@ const Index = () => {
               
               <div className="flex items-center justify-center gap-6 mt-8 text-sm">
                 <div className="flex items-center gap-1.5">
-                  <Check className="w-4 h-4 text-green-500" />
+                  <Check className="w-4 h-4 text-primary" />
                   <span className="text-muted-foreground">Free to start</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <Check className="w-4 h-4 text-green-500" />
-                  <span className="text-muted-foreground">No credit card required</span>
+                  <Check className="w-4 h-4 text-primary" />
+                  <span className="text-muted-foreground">No credit card</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <Check className="w-4 h-4 text-green-500" />
-                  <span className="text-muted-foreground">Instant download</span>
+                  <Check className="w-4 h-4 text-primary" />
+                  <span className="text-muted-foreground">30+ assets generated</span>
                 </div>
               </div>
             </div>
@@ -264,20 +259,20 @@ const Index = () => {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <span className="font-bold flex items-center gap-2">
             <Zap className="w-5 h-5 text-primary" />
-            DigiStream Toolkit Creator
+            DigiLaunchKit AI
           </span>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <button onClick={() => navigate("/discover")} className="hover:text-foreground transition-colors">
-              Explore Niches
+            <button onClick={() => navigate("/wizard")} className="hover:text-foreground transition-colors">
+              Launch Wizard
             </button>
-            <button onClick={() => navigate("/my-toolkits")} className="hover:text-foreground transition-colors">
-              My Toolkits
+            <button onClick={() => navigate("/steal")} className="hover:text-foreground transition-colors">
+              Steal a Launch
             </button>
             <button onClick={() => navigate("/pricing")} className="hover:text-foreground transition-colors">
               Pricing
             </button>
           </div>
-          <p className="text-sm text-muted-foreground">© 2024 DigiStream</p>
+          <p className="text-sm text-muted-foreground">© 2024 DigiLaunchKit AI</p>
         </div>
       </footer>
     </div>
