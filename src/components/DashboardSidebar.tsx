@@ -12,6 +12,7 @@ import {
   BarChart3,
   ClipboardList,
   LayoutTemplate,
+  Search,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
@@ -39,6 +40,7 @@ const mainNavItems = [
   { title: "Funnels", url: "/funnels", icon: BarChart3 },
   { title: "Marketing Assets", url: "/assets", icon: Package },
   { title: "Launch Checklist", url: "/checklist", icon: ClipboardList },
+  { title: "Steal This Launch", url: "/steal", icon: Search },
   { title: "Templates", url: "/templates", icon: LayoutTemplate },
 ];
 

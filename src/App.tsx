@@ -23,6 +23,7 @@ import Funnels from "./pages/Funnels";
 import MarketingAssets from "./pages/MarketingAssets";
 import LaunchChecklist from "./pages/LaunchChecklist";
 import Templates from "./pages/Templates";
+import StealThisLaunch from "./pages/StealThisLaunch";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/funnels" element={<Funnels />} />
             <Route path="/assets" element={<MarketingAssets />} />
             <Route path="/checklist" element={<LaunchChecklist />} />
+            <Route path="/steal" element={<StealThisLaunch />} />
             <Route path="/templates" element={<Templates />} />
             <Route path="/create" element={<CreateToolkit />} />
             <Route path="/toolkit/:id" element={<CreateToolkit />} />
