@@ -89,3 +89,18 @@ verify_jwt = false
 
 [functions.generate-micro-product]
 verify_jwt = false
+
+[functions.generate-launch-product]
+verify_jwt = false
+
+[functions.generate-launch-content]
+verify_jwt = false
+
+[functions.generate-launch-funnel]
+verify_jwt = false
+
+[functions.generate-launch-marketing]
+verify_jwt = false
+
+[functions.generate-launch-checklist]
+verify_jwt = false
