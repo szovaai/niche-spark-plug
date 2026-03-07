@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Loader2, Copy, Check, Mail, MessageSquare, Image, FileText, Video, Megaphone, Users } from "lucide-react";
+import { Sparkles, Loader2, Copy, Check, Mail, MessageSquare, Image, FileText, Video, Megaphone, Users, RefreshCw } from "lucide-react";
 import { Step1Product, Step2Content, Step3Funnel, Step4Marketing } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import RenderedCopy from "@/components/RenderedCopy";
+import AssetDownloadButtons from "@/components/AssetDownloadButtons";
 
 interface Props {
   productBrief: Step1Product | null;
@@ -44,6 +45,7 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
   const copyText = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
     setCopied(label);
+    toast.success("Copied!");
     setTimeout(() => setCopied(null), 2000);
   };
 
@@ -67,6 +69,13 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
 
       {result && (
         <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={generate} disabled={loading} className="gap-1">
+              {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+              Regenerate All
+            </Button>
+          </div>
+
           <Tabs defaultValue="emails">
             <TabsList className="w-full flex-wrap h-auto gap-1">
               <TabsTrigger value="emails" className="gap-1 text-xs"><Mail className="w-3 h-3" /> Emails</TabsTrigger>
@@ -85,11 +94,14 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
                 {result.emails?.map((email, i) => (
                   <Card key={i}>
                     <CardContent className="p-4 space-y-2">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between flex-wrap gap-2">
                         <h4 className="font-semibold text-sm">Email {i + 1}: {email.subject}</h4>
-                        <Button variant="ghost" size="sm" onClick={() => copyText(`Subject: ${email.subject}\n\n${email.body}`, `email-${i}`)} className="gap-1">
-                          {copied === `email-${i}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <AssetDownloadButtons content={`Subject: ${email.subject}\n\n${email.body}`} title={`Email ${i + 1} - ${email.subject}`} />
+                          <Button variant="ghost" size="sm" onClick={() => copyText(`Subject: ${email.subject}\n\n${email.body}`, `email-${i}`)} className="gap-1">
+                            {copied === `email-${i}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                          </Button>
+                        </div>
                       </div>
                       <RenderedCopy content={email.body} showScore={i === 0} mechanismName={productBrief?.uniqueMechanism} />
                     </CardContent>
@@ -109,14 +121,17 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
                 {result.adCopy?.map((ad, i) => (
                   <Card key={i}>
                     <CardContent className="p-4 space-y-3">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between flex-wrap gap-2">
                         <div className="flex items-center gap-2">
                           <h4 className="font-semibold text-sm">Ad {i + 1}</h4>
                           <Badge variant="outline" className="text-xs">{ad.hookAngle}</Badge>
                         </div>
-                        <Button variant="ghost" size="sm" onClick={() => copyText(`Headline: ${ad.headline}\n\n${ad.primaryText}\n\nCTA: ${ad.cta}`, `ad-${i}`)} className="gap-1">
-                          {copied === `ad-${i}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <AssetDownloadButtons content={`Headline: ${ad.headline}\n\n${ad.primaryText}\n\nCTA: ${ad.cta}`} title={`Ad ${i + 1} - ${ad.hookAngle}`} />
+                          <Button variant="ghost" size="sm" onClick={() => copyText(`Headline: ${ad.headline}\n\n${ad.primaryText}\n\nCTA: ${ad.cta}`, `ad-${i}`)} className="gap-1">
+                            {copied === `ad-${i}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                          </Button>
+                        </div>
                       </div>
                       <div className="space-y-2">
                         <div className="p-2 rounded bg-primary/5">
@@ -149,10 +164,13 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
                   <Card key={i}>
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between gap-2">
-                        <RenderedCopy content={post} className="text-sm" />
-                        <Button variant="ghost" size="icon" className="shrink-0" onClick={() => copyText(post, `post-${i}`)}>
-                          {copied === `post-${i}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                        </Button>
+                        <RenderedCopy content={post} className="text-sm flex-1" />
+                        <div className="flex flex-col items-end gap-1 shrink-0">
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => copyText(post, `post-${i}`)}>
+                            {copied === `post-${i}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                          </Button>
+                          <span className="text-[10px] text-muted-foreground">{post.length} chars</span>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -180,14 +198,17 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
             <TabsContent value="blog">
               <Card>
                 <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
                     <h3 className="font-bold">Blog Article</h3>
-                    <Button variant="ghost" size="sm" onClick={() => copyText(result.blogArticle, "blog")} className="gap-1">
-                      {copied === "blog" ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                      Copy
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <AssetDownloadButtons content={result.blogArticle} title={`${productBrief.title} - Blog Article`} />
+                      <Button variant="ghost" size="sm" onClick={() => copyText(result.blogArticle, "blog")} className="gap-1">
+                        {copied === "blog" ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                        Copy
+                      </Button>
+                    </div>
                   </div>
-                  <div className="max-h-[500px] overflow-y-auto">
+                  <div className="max-h-[80vh] overflow-y-auto pr-2">
                     <RenderedCopy content={result.blogArticle} />
                   </div>
                 </CardContent>
@@ -197,14 +218,17 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
             <TabsContent value="video">
               <Card>
                 <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
                     <h3 className="font-bold">Video Script</h3>
-                    <Button variant="ghost" size="sm" onClick={() => copyText(result.videoScript, "video")} className="gap-1">
-                      {copied === "video" ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                      Copy
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <AssetDownloadButtons content={result.videoScript} title={`${productBrief.title} - Video Script`} />
+                      <Button variant="ghost" size="sm" onClick={() => copyText(result.videoScript, "video")} className="gap-1">
+                        {copied === "video" ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                        Copy
+                      </Button>
+                    </div>
                   </div>
-                  <div className="max-h-[500px] overflow-y-auto">
+                  <div className="max-h-[80vh] overflow-y-auto pr-2">
                     <RenderedCopy content={result.videoScript} />
                   </div>
                 </CardContent>
@@ -267,14 +291,17 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
 
                   <Card>
                     <CardContent className="p-6">
-                      <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
                         <h3 className="font-bold">JV Recruitment Page Copy</h3>
-                        <Button variant="ghost" size="sm" onClick={() => copyText(result.affiliateKit!.jvPageCopy, "jv-copy")} className="gap-1">
-                          {copied === "jv-copy" ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                          Copy
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <AssetDownloadButtons content={result.affiliateKit.jvPageCopy} title={`${productBrief.title} - JV Page`} />
+                          <Button variant="ghost" size="sm" onClick={() => copyText(result.affiliateKit!.jvPageCopy, "jv-copy")} className="gap-1">
+                            {copied === "jv-copy" ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                            Copy
+                          </Button>
+                        </div>
                       </div>
-                      <div className="max-h-[500px] overflow-y-auto">
+                      <div className="max-h-[80vh] overflow-y-auto pr-2">
                         <RenderedCopy content={result.affiliateKit.jvPageCopy} showScore />
                       </div>
                     </CardContent>
