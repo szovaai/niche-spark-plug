@@ -236,6 +236,8 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
           )}
         </div>
       )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
