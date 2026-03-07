@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { WIZARD_STEPS } from "@/types/launchWizard";
@@ -10,6 +10,7 @@ import WizardStep3 from "@/components/wizard/WizardStep3";
 import WizardStep4 from "@/components/wizard/WizardStep4";
 import WizardStep5 from "@/components/wizard/WizardStep5";
 import GenerateAllModal from "@/components/wizard/GenerateAllModal";
+import LaunchDNACard from "@/components/wizard/LaunchDNACard";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -19,17 +20,18 @@ const LaunchWizard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { projectId } = useParams();
+  const [searchParams] = useSearchParams();
   const [currentStep, setCurrentStep] = useState(1);
   const [generatingAll, setGeneratingAll] = useState(false);
   const [genModalStep, setGenModalStep] = useState(0);
   const [genModalCompleted, setGenModalCompleted] = useState<number[]>([]);
   const [existingProjectId, setExistingProjectId] = useState<string | null>(null);
 
-  // Step 1 state
-  const [niche, setNiche] = useState("");
-  const [targetAudience, setTargetAudience] = useState("");
+  // Step 1 state — pre-fill from URL params (from Steal This Launch)
+  const [niche, setNiche] = useState(searchParams.get("niche") || "");
+  const [targetAudience, setTargetAudience] = useState(searchParams.get("audience") || "");
   const [productType, setProductType] = useState("");
-  const [topic, setTopic] = useState("");
+  const [topic, setTopic] = useState(searchParams.get("topic") || "");
   const [step1Result, setStep1Result] = useState<Step1Product | null>(null);
 
   // Step 2-5 state
@@ -214,7 +216,11 @@ const LaunchWizard = () => {
         </div>
 
         {/* Right content */}
-        <div className="flex-1 p-6 max-w-4xl">
+        <div className="flex-1 p-6 max-w-4xl space-y-4">
+          {/* Launch DNA Banner for steps 2-5 */}
+          {currentStep > 1 && step1Result && (
+            <LaunchDNACard product={step1Result} targetAudience={targetAudience} compact />
+          )}
           <motion.div key={currentStep} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.2 }}>
             {currentStep === 1 && (
               <WizardStep1
