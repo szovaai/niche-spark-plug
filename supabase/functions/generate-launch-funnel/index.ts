@@ -4,6 +4,66 @@ import { getCachedResponse, setCachedResponse } from "../_shared/cache.ts";
 import { validateInput, validationErrorResponse } from "../_shared/validate.ts";
 import { SALES_PAGE_SYSTEM, OTO_UPSELL_SYSTEM } from "../_shared/copyPrompts.ts";
 
+function extractAndRepairJson(content: string): unknown {
+  // Remove markdown code blocks
+  let cleaned = content
+    .replace(/```json\s*/gi, "")
+    .replace(/```\s*/g, "")
+    .trim();
+
+  // Find JSON boundaries
+  const jsonStart = cleaned.search(/[\{\[]/);
+  if (jsonStart === -1) throw new Error("No JSON found in response");
+
+  const opener = cleaned[jsonStart];
+  const closer = opener === '{' ? '}' : ']';
+
+  // Find last matching closer
+  const jsonEnd = cleaned.lastIndexOf(closer);
+  if (jsonEnd === -1) throw new Error("No closing bracket found");
+
+  cleaned = cleaned.substring(jsonStart, jsonEnd + 1);
+
+  // Try direct parse first
+  try {
+    return JSON.parse(cleaned);
+  } catch (_e) {
+    // Repair: strip control chars, fix trailing commas
+    cleaned = cleaned
+      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+      .replace(/,\s*}/g, '}')
+      .replace(/,\s*]/g, ']');
+
+    try {
+      return JSON.parse(cleaned);
+    } catch (_e2) {
+      // Count unbalanced braces/brackets (string-aware)
+      let braces = 0, brackets = 0, inString = false, escape = false;
+      for (const char of cleaned) {
+        if (escape) { escape = false; continue; }
+        if (char === '\\') { escape = true; continue; }
+        if (char === '"') { inString = !inString; continue; }
+        if (inString) continue;
+        if (char === '{') braces++;
+        else if (char === '}') braces--;
+        else if (char === '[') brackets++;
+        else if (char === ']') brackets--;
+      }
+
+      let repaired = cleaned;
+      while (brackets > 0) { repaired += ']'; brackets--; }
+      while (braces > 0) { repaired += '}'; braces--; }
+
+      try {
+        return JSON.parse(repaired);
+      } catch (finalErr) {
+        console.error("JSON repair failed, raw content (first 500):", content.slice(0, 500));
+        throw new Error("Could not extract valid JSON from AI response");
+      }
+    }
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -44,9 +104,7 @@ Return ONLY valid JSON with the same structure as the original funnel:
         { role: "user", content: optimizePrompt },
       ], userTier, "standard");
 
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error("Failed to parse AI response");
-      const result = JSON.parse(jsonMatch[0]);
+      const result = extractAndRepairJson(content);
 
       return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
@@ -131,29 +189,7 @@ CRITICAL:
       { role: "user", content: prompt },
     ], userTier, "complex");
 
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("Failed to parse AI response");
-    
-    // Sanitize control characters that break JSON parsing, but preserve structural whitespace
-    const sanitized = jsonMatch[0].replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
-    
-    let result;
-    try {
-      result = JSON.parse(sanitized);
-    } catch (parseErr) {
-      console.error("JSON parse error, attempting cleanup");
-      let depth = 0;
-      let lastValid = -1;
-      for (let i = 0; i < sanitized.length; i++) {
-        if (sanitized[i] === '{') depth++;
-        else if (sanitized[i] === '}') { depth--; if (depth === 0) { lastValid = i; break; } }
-      }
-      if (lastValid > 0) {
-        result = JSON.parse(sanitized.slice(0, lastValid + 1));
-      } else {
-        throw parseErr;
-      }
-    }
+    const result = extractAndRepairJson(content);
 
     await setCachedResponse(cacheKey, "generate-launch-funnel", cacheKey, result, userTier, model);
 
