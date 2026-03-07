@@ -131,29 +131,7 @@ CRITICAL:
       { role: "user", content: prompt },
     ], userTier, "complex");
 
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("Failed to parse AI response");
-    
-    // Sanitize control characters that break JSON parsing, but preserve structural whitespace
-    const sanitized = jsonMatch[0].replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
-    
-    let result;
-    try {
-      result = JSON.parse(sanitized);
-    } catch (parseErr) {
-      console.error("JSON parse error, attempting cleanup");
-      let depth = 0;
-      let lastValid = -1;
-      for (let i = 0; i < sanitized.length; i++) {
-        if (sanitized[i] === '{') depth++;
-        else if (sanitized[i] === '}') { depth--; if (depth === 0) { lastValid = i; break; } }
-      }
-      if (lastValid > 0) {
-        result = JSON.parse(sanitized.slice(0, lastValid + 1));
-      } else {
-        throw parseErr;
-      }
-    }
+    const result = extractAndRepairJson(content);
 
     await setCachedResponse(cacheKey, "generate-launch-funnel", cacheKey, result, userTier, model);
 
