@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
     const { niche, targetAudience, productType, topic } = data;
 
     const cacheKey = `launch-product-${niche}-${productType}-${topic}`;
-    const cached = await getCachedResponse(cacheKey, "generate-launch-product");
+    const cached = await getCachedResponse(cacheKey);
     if (cached) return new Response(JSON.stringify(cached), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
     const userTier = await getUserTier(user.id);
@@ -70,7 +70,7 @@ The campaignAngles should be 3 distinctly different sales angles for marketing t
     if (!jsonMatch) throw new Error("Failed to parse AI response");
     const result = JSON.parse(jsonMatch[0]);
 
-    await setCachedResponse(cacheKey, "generate-launch-product", result, userTier, model);
+    await setCachedResponse(cacheKey, "generate-launch-product", cacheKey, result, userTier, model);
 
     return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {

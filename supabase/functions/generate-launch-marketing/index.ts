@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
     const { productBrief, productContent, funnelCopy } = data;
 
     const cacheKey = `launch-marketing-${(productBrief as any).title?.slice(0, 50)}`;
-    const cached = await getCachedResponse(cacheKey, "generate-launch-marketing");
+    const cached = await getCachedResponse(cacheKey);
     if (cached) return new Response(JSON.stringify(cached), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
     const userTier = await getUserTier(user.id);
@@ -82,7 +82,7 @@ Generate exactly 5 ad variations — each with a DIFFERENT hook angle (curiosity
     if (!jsonMatch) throw new Error("Failed to parse AI response");
     const result = JSON.parse(jsonMatch[0]);
 
-    await setCachedResponse(cacheKey, "generate-launch-marketing", result, userTier, model);
+    await setCachedResponse(cacheKey, "generate-launch-marketing", cacheKey, result, userTier, model);
 
     return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {

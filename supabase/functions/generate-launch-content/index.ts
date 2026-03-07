@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
     const { productBrief, productType } = data;
 
     const cacheKey = `launch-content-${JSON.stringify(productBrief).slice(0, 100)}`;
-    const cached = await getCachedResponse(cacheKey, "generate-launch-content");
+    const cached = await getCachedResponse(cacheKey);
     if (cached) return new Response(JSON.stringify(cached), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
     const userTier = await getUserTier(user.id);
@@ -55,7 +55,7 @@ Generate 6-8 chapters. Each chapter should be actionable and build on the previo
     if (!jsonMatch) throw new Error("Failed to parse AI response");
     const result = JSON.parse(jsonMatch[0]);
 
-    await setCachedResponse(cacheKey, "generate-launch-content", result, userTier, model);
+    await setCachedResponse(cacheKey, "generate-launch-content", cacheKey, result, userTier, model);
 
     return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {

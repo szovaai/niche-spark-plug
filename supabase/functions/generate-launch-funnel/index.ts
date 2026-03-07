@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
     const { productBrief, productContent } = data;
 
     const cacheKey = `launch-funnel-${(productBrief as any).title?.slice(0, 50)}`;
-    const cached = await getCachedResponse(cacheKey, "generate-launch-funnel");
+    const cached = await getCachedResponse(cacheKey);
     if (cached) return new Response(JSON.stringify(cached), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
     const userTier = await getUserTier(user.id);
@@ -72,9 +72,27 @@ The offerStack values should feel realistic and compelling. The askingPrice shou
 
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("Failed to parse AI response");
-    const result = JSON.parse(jsonMatch[0]);
+    let result;
+    try {
+      result = JSON.parse(jsonMatch[0]);
+    } catch (parseErr) {
+      console.error("JSON parse error, attempting cleanup");
+      // Try to fix common truncation issues by finding the last valid closing brace
+      const raw = jsonMatch[0];
+      let depth = 0;
+      let lastValid = -1;
+      for (let i = 0; i < raw.length; i++) {
+        if (raw[i] === '{') depth++;
+        else if (raw[i] === '}') { depth--; if (depth === 0) { lastValid = i; break; } }
+      }
+      if (lastValid > 0) {
+        result = JSON.parse(raw.slice(0, lastValid + 1));
+      } else {
+        throw parseErr;
+      }
+    }
 
-    await setCachedResponse(cacheKey, "generate-launch-funnel", result, userTier, model);
+    await setCachedResponse(cacheKey, "generate-launch-funnel", cacheKey, result, userTier, model);
 
     return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {
