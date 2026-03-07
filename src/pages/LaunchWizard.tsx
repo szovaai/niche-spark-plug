@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { WIZARD_STEPS } from "@/types/launchWizard";
 import type { Step1Product, Step2Content, Step3Funnel, Step4Marketing, Step5Checklist, BuyerAvatar } from "@/types/launchWizard";
+import type { ProductAssets } from "@/types/productAssets";
 import WizardStep1 from "@/components/wizard/WizardStep1";
 import WizardStep2 from "@/components/wizard/WizardStep2";
 import WizardStep3 from "@/components/wizard/WizardStep3";
@@ -39,6 +40,7 @@ const LaunchWizard = () => {
 
   // Step 2-5 state
   const [step2Result, setStep2Result] = useState<Step2Content | null>(null);
+  const [step2Assets, setStep2Assets] = useState<ProductAssets>({});
   const [step3Result, setStep3Result] = useState<Step3Funnel | null>(null);
   const [step4Result, setStep4Result] = useState<Step4Marketing | null>(null);
   const [step5Result, setStep5Result] = useState<Step5Checklist | null>(null);
@@ -67,6 +69,7 @@ const LaunchWizard = () => {
         topic: topic || null,
         step1_product: step1Result as any,
         step2_product_content: step2Result as any,
+        step2_assets: (Object.keys(step2Assets).length > 0 ? step2Assets : null) as any,
         step3_funnel: step3Result as any,
         step4_marketing: step4Result as any,
         step5_checklist: step5Result as any,
@@ -91,7 +94,7 @@ const LaunchWizard = () => {
     } finally {
       isSavingRef.current = false;
     }
-  }, [user, niche, targetAudience, productType, topic, step1Result, step2Result, step3Result, step4Result, step5Result, currentStep, existingProjectId, buyerAvatar]);
+  }, [user, niche, targetAudience, productType, topic, step1Result, step2Result, step2Assets, step3Result, step4Result, step5Result, currentStep, existingProjectId, buyerAvatar]);
 
   // Debounced autosave trigger on step result changes
   useEffect(() => {
@@ -99,7 +102,7 @@ const LaunchWizard = () => {
     if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
     autosaveTimerRef.current = setTimeout(() => { autosave(); }, 2000);
     return () => { if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current); };
-  }, [step1Result, step2Result, step3Result, step4Result, step5Result, currentStep, autosave]);
+  }, [step1Result, step2Result, step2Assets, step3Result, step4Result, step5Result, currentStep, autosave]);
 
   const loadProject = async (id: string) => {
     const { data, error } = await supabase
@@ -116,6 +119,7 @@ const LaunchWizard = () => {
     setTopic(data.topic || "");
     setStep1Result(data.step1_product as any);
     setStep2Result(data.step2_product_content as any);
+    setStep2Assets(((data as any).step2_assets as ProductAssets) || {});
     setStep3Result(data.step3_funnel as any);
     setStep4Result(data.step4_marketing as any);
     setStep5Result(data.step5_checklist as any);
@@ -220,6 +224,7 @@ const LaunchWizard = () => {
         topic,
         step1_product: step1Result as any,
         step2_product_content: step2Result as any,
+        step2_assets: (Object.keys(step2Assets).length > 0 ? step2Assets : null) as any,
         step3_funnel: step3Result as any,
         step4_marketing: step4Result as any,
         step5_checklist: step5Result as any,
@@ -312,6 +317,8 @@ const LaunchWizard = () => {
                 result={step2Result} setResult={setStep2Result}
                 onNext={() => setCurrentStep(3)}
                 userId={user?.id}
+                assets={step2Assets}
+                setAssets={setStep2Assets}
               />
             )}
             {currentStep === 3 && (
