@@ -22,6 +22,7 @@ Deno.serve(async (req) => {
 
     const selectedAngle = productBrief.selectedAngle || "";
     const angleInstruction = selectedAngle ? `\nIMPORTANT: Use the "${selectedAngle}" campaign angle as the primary messaging theme. All content should reinforce this angle consistently.` : "";
+    const mechanismInstruction = productBrief.uniqueMechanism ? `\nIMPORTANT: Reference the unique mechanism "${productBrief.uniqueMechanism}" in ad copy, email subject lines, and social posts.` : "";
 
     const prompt = `${HUMAN_TONE}
 
@@ -31,7 +32,7 @@ Product: ${productBrief.title} — ${productBrief.subtitle}
 Concept: ${productBrief.concept}
 Unique Mechanism: ${productBrief.uniqueMechanism}
 Pain Points: ${productBrief.painPoints?.join(", ")}
-Description: ${productContent?.description || ""}${angleInstruction}
+Description: ${productContent?.description || ""}${angleInstruction}${mechanismInstruction}
 
 Return ONLY valid JSON:
 {
@@ -49,7 +50,18 @@ Return ONLY valid JSON:
     { "headline": "...", "primaryText": "...", "cta": "...", "hookAngle": "..." },
     { "headline": "...", "primaryText": "...", "cta": "...", "hookAngle": "..." }
   ],
-  "targetingKeywords": ["keyword 1", "keyword 2", "keyword 3", "keyword 4", "keyword 5", "keyword 6", "keyword 7", "keyword 8"]
+  "targetingKeywords": ["keyword 1", "keyword 2", "keyword 3", "keyword 4", "keyword 5", "keyword 6", "keyword 7", "keyword 8"],
+  "affiliateKit": {
+    "headline": "A compelling JV page headline that makes affiliates excited to promote",
+    "emailSwipes": [
+      { "subject": "Affiliate email swipe subject 1", "body": "Ready-to-send email for affiliates to promote. 150 words." },
+      { "subject": "Affiliate email swipe subject 2", "body": "Different angle affiliate email. 150 words." },
+      { "subject": "Affiliate email swipe subject 3", "body": "Urgency-based affiliate email. 150 words." }
+    ],
+    "promoAngles": ["Promo angle 1 affiliates can use", "Promo angle 2", "Promo angle 3"],
+    "bonusPageHeadline": "A headline for an affiliate bonus page",
+    "jvPageCopy": "Complete JV/affiliate recruitment page copy. Include: commission rate (50-75%), product description, conversion stats placeholder, why this converts, what affiliates get (swipes, banners, bonuses). 300+ words with markdown formatting."
+  }
 }
 
 Generate exactly 5 emails (pre-launch teaser, launch announcement, value-add, objection handler, last chance).

@@ -36,6 +36,11 @@ Return ONLY valid JSON:
   "concept": "2-3 sentence product concept explaining what this is and why it matters",
   "uniqueMechanism": "The unique angle or method that makes this different from competitors",
   "painPoints": ["pain point 1", "pain point 2", "pain point 3", "pain point 4", "pain point 5"],
+  "mechanisms": [
+    { "name": "The [Adjective] [Noun] [Method/Protocol/System/Framework]", "tagline": "A punchy one-liner that captures the essence", "description": "2 sentences explaining how this framework works and why it's different" },
+    { "name": "The [Adjective] [Noun] [Method/Protocol/System/Framework]", "tagline": "A punchy one-liner", "description": "2 sentences explaining the framework" },
+    { "name": "The [Adjective] [Noun] [Method/Protocol/System/Framework]", "tagline": "A punchy one-liner", "description": "2 sentences explaining the framework" }
+  ],
   "campaignAngles": [
     { "name": "Speed", "hook": "A short punchy hook for this angle", "description": "2 sentences explaining why this angle resonates with the audience" },
     { "name": "Simplicity", "hook": "A short punchy hook for this angle", "description": "2 sentences explaining why this angle resonates with the audience" },
@@ -43,7 +48,12 @@ Return ONLY valid JSON:
   ]
 }
 
-The campaignAngles should be 3 distinctly different sales angles for marketing this product. Each angle should suggest a completely different emotional trigger (e.g., speed vs. authority vs. fear-of-missing-out). The hook should be a single compelling sentence usable as an ad headline.`;
+IMPORTANT for mechanisms:
+- Each mechanism must be a named, proprietary-sounding framework (e.g., "The Rapid Launch Protocol", "The AI Funnel Sprint", "The 1-Hour Product Framework")
+- They should feel like branded methods that make the product unique
+- Each must suggest a different approach or philosophy
+
+The campaignAngles should be 3 distinctly different sales angles for marketing this product. Each angle should suggest a completely different emotional trigger. The hook should be a single compelling sentence usable as an ad headline.`;
 
     const { content, model } = await callTieredAI([{ role: "user", content: prompt }], userTier, "standard");
 
