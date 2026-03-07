@@ -7,16 +7,24 @@ interface Props {
   product: Step1Product;
   niche?: string;
   targetAudience?: string;
+  avatarName?: string;
   compact?: boolean;
 }
 
-export default function LaunchDNACard({ product, niche, targetAudience, compact }: Props) {
+export default function LaunchDNACard({ product, niche, targetAudience, avatarName, compact }: Props) {
   const items = [
     { icon: Package, label: "Product", value: product.title },
     { icon: Target, label: "Angle", value: product.selectedAngle },
     { icon: Zap, label: "Mechanism", value: product.uniqueMechanism },
     { icon: Users, label: "Audience", value: targetAudience || "General" },
   ].filter(item => item.value);
+
+  const avatarBadge = avatarName ? (
+    <Badge variant="outline" className="text-xs gap-1 border-accent/30 text-accent">
+      <Users className="w-3 h-3" />
+      Writing for: {avatarName}
+    </Badge>
+  ) : null;
 
   if (compact) {
     return (
@@ -29,6 +37,7 @@ export default function LaunchDNACard({ product, niche, targetAudience, compact 
             {item.value}
           </Badge>
         ))}
+        {avatarBadge}
       </div>
     );
   }

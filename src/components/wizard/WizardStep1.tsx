@@ -8,11 +8,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sparkles, Rocket, Loader2, Brain, ArrowRight, DollarSign } from "lucide-react";
 import { PRODUCT_TYPES, Step1Product } from "@/types/launchWizard";
+import type { BuyerAvatar } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import CampaignAngleSelector from "./CampaignAngleSelector";
 import LaunchScoreCard from "./LaunchScoreCard";
 import MechanismSelector from "./MechanismSelector";
+import AvatarBuilder from "./AvatarBuilder";
 
 interface Props {
   niche: string;
@@ -32,9 +34,11 @@ interface Props {
   generatingAll: boolean;
   userId?: string;
   lockedMechanism?: string;
+  buyerAvatar: BuyerAvatar | null;
+  setBuyerAvatar: (v: BuyerAvatar | null) => void;
 }
 
-export default function WizardStep1({ niche, setNiche, targetAudience, setTargetAudience, productType, setProductType, topic, setTopic, price, setPrice, result, setResult, onNext, onGenerateAll, generatingAll, userId, lockedMechanism }: Props) {
+export default function WizardStep1({ niche, setNiche, targetAudience, setTargetAudience, productType, setProductType, topic, setTopic, price, setPrice, result, setResult, onNext, onGenerateAll, generatingAll, userId, lockedMechanism, buyerAvatar, setBuyerAvatar }: Props) {
   const [loading, setLoading] = useState(false);
   const [scoreLoading, setScoreLoading] = useState(false);
 
@@ -45,7 +49,7 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-launch-product", {
-        body: { niche, targetAudience, productType, topic, userId, lockedMechanism },
+        body: { niche, targetAudience, productType, topic, userId, lockedMechanism, buyerAvatar },
       });
       if (error) throw error;
       // If a locked mechanism was provided from Research Agent, preserve it exactly
@@ -171,6 +175,15 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
         </div>
       </div>
 
+      {/* Avatar Builder — before generation */}
+      <AvatarBuilder
+        niche={niche}
+        targetAudience={targetAudience}
+        topic={topic}
+        avatar={buyerAvatar}
+        setAvatar={setBuyerAvatar}
+      />
+
       <div className="flex flex-col sm:flex-row gap-3">
         <Button onClick={generate} disabled={!canGenerate || loading} className="gap-2">
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
@@ -224,6 +237,10 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
               mechanisms={result.mechanisms}
               selectedMechanism={result.uniqueMechanism}
               onSelect={selectMechanism}
+              niche={niche}
+              targetAudience={targetAudience}
+              productType={productType}
+              topic={topic}
             />
           )}
 

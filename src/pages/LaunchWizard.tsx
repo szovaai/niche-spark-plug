@@ -3,7 +3,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { WIZARD_STEPS } from "@/types/launchWizard";
-import type { Step1Product, Step2Content, Step3Funnel, Step4Marketing, Step5Checklist } from "@/types/launchWizard";
+import type { Step1Product, Step2Content, Step3Funnel, Step4Marketing, Step5Checklist, BuyerAvatar } from "@/types/launchWizard";
 import WizardStep1 from "@/components/wizard/WizardStep1";
 import WizardStep2 from "@/components/wizard/WizardStep2";
 import WizardStep3 from "@/components/wizard/WizardStep3";
@@ -35,6 +35,7 @@ const LaunchWizard = () => {
   const [price, setPrice] = useState(17);
   const [lockedMechanism] = useState(searchParams.get("mechanism") || "");
   const [step1Result, setStep1Result] = useState<Step1Product | null>(null);
+  const [buyerAvatar, setBuyerAvatar] = useState<BuyerAvatar | null>(null);
 
   // Step 2-5 state
   const [step2Result, setStep2Result] = useState<Step2Content | null>(null);
@@ -69,6 +70,7 @@ const LaunchWizard = () => {
         step3_funnel: step3Result as any,
         step4_marketing: step4Result as any,
         step5_checklist: step5Result as any,
+        buyer_avatar: buyerAvatar as any,
         current_step: currentStep,
         status: step5Result ? "complete" : "in_progress",
       };
@@ -89,7 +91,7 @@ const LaunchWizard = () => {
     } finally {
       isSavingRef.current = false;
     }
-  }, [user, niche, targetAudience, productType, topic, step1Result, step2Result, step3Result, step4Result, step5Result, currentStep, existingProjectId]);
+  }, [user, niche, targetAudience, productType, topic, step1Result, step2Result, step3Result, step4Result, step5Result, currentStep, existingProjectId, buyerAvatar]);
 
   // Debounced autosave trigger on step result changes
   useEffect(() => {
@@ -117,6 +119,7 @@ const LaunchWizard = () => {
     setStep3Result(data.step3_funnel as any);
     setStep4Result(data.step4_marketing as any);
     setStep5Result(data.step5_checklist as any);
+    setBuyerAvatar((data as any).buyer_avatar as any);
     setCurrentStep(data.current_step || 1);
   };
 
@@ -141,7 +144,7 @@ const LaunchWizard = () => {
       // Step 1
       setGenModalStep(1);
       const { data: s1, error: e1 } = await supabase.functions.invoke("generate-launch-product", {
-        body: { niche, targetAudience, productType, topic, userId: user?.id, lockedMechanism },
+        body: { niche, targetAudience, productType, topic, userId: user?.id, lockedMechanism, buyerAvatar },
       });
       if (e1) throw e1;
       // Preserve locked mechanism from Research Agent
@@ -155,7 +158,7 @@ const LaunchWizard = () => {
       // Step 2
       setGenModalStep(2);
       const { data: s2, error: e2 } = await supabase.functions.invoke("generate-launch-content", {
-        body: { productBrief: s1, productType, userId: user?.id },
+        body: { productBrief: s1, productType, userId: user?.id, buyerAvatar },
       });
       if (e2) throw e2;
       setStep2Result(s2);
@@ -165,7 +168,7 @@ const LaunchWizard = () => {
       // Step 3
       setGenModalStep(3);
       const { data: s3, error: e3 } = await supabase.functions.invoke("generate-launch-funnel", {
-        body: { productBrief: s1, productContent: s2, price, userId: user?.id },
+        body: { productBrief: s1, productContent: s2, price, userId: user?.id, buyerAvatar },
       });
       if (e3) throw e3;
       setStep3Result(s3);
@@ -175,7 +178,7 @@ const LaunchWizard = () => {
       // Step 4
       setGenModalStep(4);
       const { data: s4, error: e4 } = await supabase.functions.invoke("generate-launch-marketing", {
-        body: { productBrief: s1, productContent: s2, funnelCopy: s3, price, userId: user?.id },
+        body: { productBrief: s1, productContent: s2, funnelCopy: s3, price, userId: user?.id, buyerAvatar },
       });
       if (e4) throw e4;
       setStep4Result(s4);
@@ -220,6 +223,7 @@ const LaunchWizard = () => {
         step3_funnel: step3Result as any,
         step4_marketing: step4Result as any,
         step5_checklist: step5Result as any,
+        buyer_avatar: buyerAvatar as any,
         current_step: 5,
         status: step5Result ? "complete" : "in_progress",
       };
@@ -281,7 +285,7 @@ const LaunchWizard = () => {
         <div className="flex-1 p-6 max-w-4xl space-y-4">
           {/* Launch DNA Banner for steps 2-5 */}
           {currentStep > 1 && step1Result && (
-            <LaunchDNACard product={step1Result} targetAudience={targetAudience} compact />
+            <LaunchDNACard product={step1Result} targetAudience={targetAudience} avatarName={buyerAvatar?.personaName} compact />
           )}
           <motion.div key={currentStep} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.2 }}>
             {currentStep === 1 && (
@@ -297,6 +301,8 @@ const LaunchWizard = () => {
                 generatingAll={generatingAll}
                 userId={user?.id}
                 lockedMechanism={lockedMechanism}
+                buyerAvatar={buyerAvatar}
+                setBuyerAvatar={setBuyerAvatar}
               />
             )}
             {currentStep === 2 && (

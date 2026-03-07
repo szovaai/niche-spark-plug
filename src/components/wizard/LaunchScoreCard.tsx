@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Lightbulb, TrendingUp } from "lucide-react";
+import { Lightbulb, TrendingUp, AlertTriangle, DollarSign } from "lucide-react";
 import type { LaunchScore } from "@/types/launchWizard";
 
 interface Props {
@@ -16,34 +16,38 @@ const dimensions = [
 ] as const;
 
 function getScoreColor(score: number): string {
-  if (score >= 85) return "text-green-500";
-  if (score >= 70) return "text-primary";
+  if (score >= 75) return "text-green-500";
   if (score >= 50) return "text-yellow-500";
   return "text-red-500";
 }
 
-function getScoreLabel(score: number): string {
-  if (score >= 85) return "Excellent";
-  if (score >= 70) return "Great";
-  if (score >= 50) return "Good";
-  return "Needs Work";
+function getVerdict(score: LaunchScore): { color: string; bg: string; border: string; icon: string; label: string } {
+  const v = score.verdict || (score.overall >= 75 ? "green" : score.overall >= 50 ? "yellow" : "red");
+  if (v === "green") return { color: "text-green-500", bg: "bg-green-500/10", border: "border-green-500/30", icon: "🟢", label: "Strong — Build This Now" };
+  if (v === "yellow") return { color: "text-yellow-500", bg: "bg-yellow-500/10", border: "border-yellow-500/30", icon: "🟡", label: "Viable — Sharpen Your Angle" };
+  return { color: "text-red-500", bg: "bg-red-500/10", border: "border-red-500/30", icon: "🔴", label: "Risky — Consider Pivoting" };
 }
 
 export default function LaunchScoreCard({ score }: Props) {
+  const verdict = getVerdict(score);
+
   return (
     <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5">
       <CardContent className="p-6 space-y-5">
-        {/* Header with overall score */}
-        <div className="flex items-center justify-between">
+        {/* Header with overall score + verdict */}
+        <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
             <TrendingUp className="w-5 h-5 text-primary" />
             <h3 className="font-bold text-lg">Launch Score</h3>
           </div>
-          <div className="text-center">
+          <div className="text-right space-y-1">
             <div className={`text-3xl font-black ${getScoreColor(score.overall)}`}>
               {score.overall}<span className="text-lg text-muted-foreground">/100</span>
             </div>
-            <Badge variant="outline" className="text-xs mt-1">{getScoreLabel(score.overall)}</Badge>
+            <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${verdict.bg} ${verdict.border} border`}>
+              <span>{verdict.icon}</span>
+              <span className={verdict.color}>{verdict.label}</span>
+            </div>
           </div>
         </div>
 
@@ -67,6 +71,43 @@ export default function LaunchScoreCard({ score }: Props) {
             );
           })}
         </div>
+
+        {/* Price ceiling + affiliate */}
+        {(score.estimatedPriceCeiling || score.affiliateCommissionSweet) && (
+          <div className="flex flex-wrap gap-3">
+            {score.estimatedPriceCeiling && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/50 text-sm">
+                <DollarSign className="w-3.5 h-3.5 text-primary" />
+                <span className="text-muted-foreground">Price Ceiling:</span>
+                <span className="font-semibold">${score.estimatedPriceCeiling}</span>
+              </div>
+            )}
+            {score.affiliateCommissionSweet && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/50 text-sm">
+                <span className="text-muted-foreground">Affiliate Sweet Spot:</span>
+                <span className="font-semibold">{score.affiliateCommissionSweet}</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* AI-suggested pivots for low scores */}
+        {score.suggestedPivots && score.suggestedPivots.length > 0 && score.overall < 50 && (
+          <div className="space-y-2 p-3 rounded-lg bg-red-500/5 border border-red-500/20">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-red-500" />
+              <h4 className="font-semibold text-sm">Suggested Pivots</h4>
+            </div>
+            <ul className="space-y-1.5">
+              {score.suggestedPivots.map((p, i) => (
+                <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                  <span className="text-red-400 mt-0.5">→</span>
+                  {p}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* Suggestions */}
         {score.suggestions?.length > 0 && (

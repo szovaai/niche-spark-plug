@@ -16,10 +16,11 @@ Deno.serve(async (req) => {
       { field: 'productBrief', type: 'object', required: true, maxLength: 10000 },
       { field: 'productContent', type: 'object', maxLength: 50000 },
       { field: 'price', type: 'number', maxLength: 100 },
+      { field: 'buyerAvatar', type: 'object', maxLength: 10000 },
     ]);
     if (!valid) return validationErrorResponse(valError!, corsHeaders);
 
-    const { productBrief, productContent } = data;
+    const { productBrief, productContent, buyerAvatar } = data;
     const price = data.price || 17;
 
     const cacheKey = `launch-funnel-${(productBrief as any).title?.slice(0, 50)}-${price}`;
@@ -31,6 +32,10 @@ Deno.serve(async (req) => {
     const chapterTitles = productContent?.chapters?.map((c: any) => c.title).join(", ") || "N/A";
     const selectedAngle = productBrief.selectedAngle || "";
     const angleInstruction = selectedAngle ? `\nCAMPAIGN ANGLE: Use "${selectedAngle}" as the primary messaging theme across all copy.` : "";
+    const avatarContext = buyerAvatar
+      ? `\nBUYER AVATAR: ${(buyerAvatar as any).personaName} — ${(buyerAvatar as any).occupation}. Frustration: ${(buyerAvatar as any).dailyFrustration}. Fear: ${(buyerAvatar as any).biggestFear}. Dream: ${(buyerAvatar as any).secretDream}. Pain points: ${(buyerAvatar as any).painPoints?.join(", ")}. Language: ${(buyerAvatar as any).languageTheyUse?.join(", ")}`
+      : '';
+
     const mechanismInstruction = productBrief.uniqueMechanism ? `\nUNIQUE MECHANISM: "${productBrief.uniqueMechanism}" — reference this named framework in headlines, benefits, and CTAs.` : "";
 
     const prompt = `Generate complete funnel copy for this digital product.
@@ -41,7 +46,7 @@ UNIQUE MECHANISM: ${productBrief.uniqueMechanism}
 PAIN POINTS: ${productBrief.painPoints?.join(", ")}
 CHAPTERS: ${chapterTitles}
 DESCRIPTION: ${productContent?.description || ""}
-FRONT-END PRICE: $${price}${angleInstruction}${mechanismInstruction}
+FRONT-END PRICE: $${price}${angleInstruction}${mechanismInstruction}${avatarContext}
 
 Return ONLY valid JSON:
 {
