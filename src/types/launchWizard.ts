@@ -11,6 +11,45 @@ export interface AdVariation {
   hookAngle: string;
 }
 
+export interface LaunchScore {
+  demand: number;
+  competition: number;
+  monetization: number;
+  audienceClarity: number;
+  offerStrength: number;
+  overall: number;
+  suggestions: string[];
+  angleScores?: { angle: string; predictedConversion: string; reasoning: string }[];
+}
+
+export interface Mechanism {
+  name: string;
+  tagline: string;
+  description: string;
+}
+
+export interface OfferStackItem {
+  name: string;
+  description: string;
+  value: number;
+}
+
+export interface OfferStack {
+  coreProduct: { name: string; value: number };
+  bonuses: OfferStackItem[];
+  totalValue: number;
+  askingPrice: number;
+  stackCopy: string;
+}
+
+export interface AffiliateKit {
+  headline: string;
+  emailSwipes: { subject: string; body: string }[];
+  promoAngles: string[];
+  bonusPageHeadline: string;
+  jvPageCopy: string;
+}
+
 export interface LaunchProject {
   id: string;
   user_id: string;
@@ -38,6 +77,8 @@ export interface Step1Product {
   painPoints: string[];
   campaignAngles?: CampaignAngle[];
   selectedAngle?: string;
+  launchScore?: LaunchScore;
+  mechanisms?: Mechanism[];
 }
 
 export interface Step2Content {
@@ -61,6 +102,7 @@ export interface Step3Funnel {
   checkoutCopy: string;
   orderBump?: string;
   upsellOffer?: string;
+  offerStack?: OfferStack;
 }
 
 export interface Step4Marketing {
@@ -71,6 +113,7 @@ export interface Step4Marketing {
   videoScript: string;
   adCopy?: AdVariation[];
   targetingKeywords?: string[];
+  affiliateKit?: AffiliateKit;
 }
 
 export interface EmailItem {
