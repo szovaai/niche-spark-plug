@@ -7,6 +7,7 @@ import { Sparkles, Loader2, Copy, Check, ShoppingCart, ArrowUpCircle, DollarSign
 import { Step1Product, Step2Content, Step3Funnel } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import RenderedCopy from "@/components/RenderedCopy";
 
 interface Props {
   productBrief: Step1Product | null;
@@ -15,6 +16,7 @@ interface Props {
   setResult: (v: Step3Funnel | null) => void;
   onNext: () => void;
   userId?: string;
+  price?: number;
 }
 
 const FUNNEL_TABS = [
@@ -27,7 +29,7 @@ const FUNNEL_TABS = [
   { key: "upsellOffer", label: "Upsell", icon: ArrowUpCircle },
 ] as const;
 
-export default function WizardStep3({ productBrief, productContent, result, setResult, onNext, userId }: Props) {
+export default function WizardStep3({ productBrief, productContent, result, setResult, onNext, userId, price }: Props) {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
 
@@ -36,7 +38,7 @@ export default function WizardStep3({ productBrief, productContent, result, setR
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-launch-funnel", {
-        body: { productBrief, productContent, userId },
+        body: { productBrief, productContent, price: price || 17, userId },
       });
       if (error) throw error;
       setResult(data);
@@ -108,8 +110,12 @@ export default function WizardStep3({ productBrief, productContent, result, setR
                           Copy
                         </Button>
                       </div>
-                      <div className="text-sm text-muted-foreground whitespace-pre-wrap max-h-[500px] overflow-y-auto">
-                        {content}
+                      <div className="max-h-[500px] overflow-y-auto">
+                        <RenderedCopy
+                          content={content}
+                          mechanismName={productBrief?.uniqueMechanism}
+                          showScore={tab.key === "salesPage" || tab.key === "upsellOffer"}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -127,7 +133,6 @@ export default function WizardStep3({ productBrief, productContent, result, setR
                       Value Stack
                     </h3>
 
-                    {/* Core Product */}
                     <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
                       <div className="flex items-center justify-between">
                         <div>
@@ -138,7 +143,6 @@ export default function WizardStep3({ productBrief, productContent, result, setR
                       </div>
                     </div>
 
-                    {/* Bonuses */}
                     {result.offerStack.bonuses.map((bonus, i) => (
                       <div key={i} className="p-4 rounded-lg bg-accent/5 border border-accent/20">
                         <div className="flex items-center justify-between">
@@ -152,7 +156,6 @@ export default function WizardStep3({ productBrief, productContent, result, setR
                       </div>
                     ))}
 
-                    {/* Total & Price */}
                     <div className="p-5 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/30 text-center space-y-2">
                       <p className="text-sm text-muted-foreground">Total Value</p>
                       <p className="text-3xl font-black line-through text-muted-foreground">${result.offerStack.totalValue}</p>
@@ -160,7 +163,6 @@ export default function WizardStep3({ productBrief, productContent, result, setR
                       <p className="text-4xl font-black text-primary">${result.offerStack.askingPrice}</p>
                     </div>
 
-                    {/* Copyable Stack Copy */}
                     {result.offerStack.stackCopy && (
                       <div>
                         <div className="flex items-center justify-between mb-2">
@@ -170,8 +172,8 @@ export default function WizardStep3({ productBrief, productContent, result, setR
                             Copy
                           </Button>
                         </div>
-                        <div className="text-sm text-muted-foreground whitespace-pre-wrap p-3 rounded-lg bg-secondary/50 max-h-[300px] overflow-y-auto">
-                          {result.offerStack.stackCopy}
+                        <div className="p-3 rounded-lg bg-secondary/50 max-h-[300px] overflow-y-auto">
+                          <RenderedCopy content={result.offerStack.stackCopy} />
                         </div>
                       </div>
                     )}

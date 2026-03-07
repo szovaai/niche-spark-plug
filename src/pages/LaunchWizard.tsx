@@ -32,6 +32,7 @@ const LaunchWizard = () => {
   const [targetAudience, setTargetAudience] = useState(searchParams.get("audience") || "");
   const [productType, setProductType] = useState("");
   const [topic, setTopic] = useState(searchParams.get("topic") || "");
+  const [price, setPrice] = useState(17);
   const [step1Result, setStep1Result] = useState<Step1Product | null>(null);
 
   // Step 2-5 state
@@ -107,7 +108,7 @@ const LaunchWizard = () => {
       // Step 3
       setGenModalStep(3);
       const { data: s3, error: e3 } = await supabase.functions.invoke("generate-launch-funnel", {
-        body: { productBrief: s1, productContent: s2, userId: user?.id },
+        body: { productBrief: s1, productContent: s2, price, userId: user?.id },
       });
       if (e3) throw e3;
       setStep3Result(s3);
@@ -117,7 +118,7 @@ const LaunchWizard = () => {
       // Step 4
       setGenModalStep(4);
       const { data: s4, error: e4 } = await supabase.functions.invoke("generate-launch-marketing", {
-        body: { productBrief: s1, productContent: s2, funnelCopy: s3, userId: user?.id },
+        body: { productBrief: s1, productContent: s2, funnelCopy: s3, price, userId: user?.id },
       });
       if (e4) throw e4;
       setStep4Result(s4);
@@ -223,11 +224,12 @@ const LaunchWizard = () => {
           )}
           <motion.div key={currentStep} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.2 }}>
             {currentStep === 1 && (
-              <WizardStep1
+               <WizardStep1
                 niche={niche} setNiche={setNiche}
                 targetAudience={targetAudience} setTargetAudience={setTargetAudience}
                 productType={productType} setProductType={setProductType}
                 topic={topic} setTopic={setTopic}
+                price={price} setPrice={setPrice}
                 result={step1Result} setResult={setStep1Result}
                 onNext={() => setCurrentStep(2)}
                 onGenerateAll={generateAll}
@@ -245,22 +247,24 @@ const LaunchWizard = () => {
               />
             )}
             {currentStep === 3 && (
-              <WizardStep3
+               <WizardStep3
                 productBrief={step1Result}
                 productContent={step2Result}
                 result={step3Result} setResult={setStep3Result}
                 onNext={() => setCurrentStep(4)}
                 userId={user?.id}
+                price={price}
               />
             )}
             {currentStep === 4 && (
-              <WizardStep4
+               <WizardStep4
                 productBrief={step1Result}
                 productContent={step2Result}
                 funnelCopy={step3Result}
                 result={step4Result} setResult={setStep4Result}
                 onNext={() => setCurrentStep(5)}
                 userId={user?.id}
+                price={price}
               />
             )}
             {currentStep === 5 && (
