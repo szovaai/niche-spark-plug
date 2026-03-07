@@ -1,148 +1,111 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
+import { corsHeaders, validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
+import { callTieredAI, getUserTier } from "../_shared/tieredAI.ts";
+import { getCachedResponse, setCachedResponse } from "../_shared/cache.ts";
+import { validateInput, validationErrorResponse } from "../_shared/validate.ts";
+import { EMAIL_SEQUENCE_SYSTEM } from "../_shared/copyPrompts.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
-
-interface ContentSummary {
-  mainTransformation: string;
-  chapterThemes: { chapter: string; theme: string; keyTakeaway: string }[];
-  uniqueMechanisms: string[];
-  specificBenefits: string[];
-  painPointsAddressed: string[];
-  quotableInsights: string[];
-  tableOfContents: string[];
-}
-
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    // Validate authentication
     const { user, error: authError } = await validateAuth(req);
     if (authError || !user) {
       return unauthorizedResponse(authError || 'Authentication required', corsHeaders);
     }
-    console.log(`Authenticated user: ${user.id}`);
 
     const {
-      offerName, 
-      targetAudience, 
-      keyBenefits, 
-      uniqueMechanism, 
-      price, 
-      salesPageUrl,
-      contentSummary 
+      offerName, targetAudience, keyBenefits, uniqueMechanism,
+      price, salesPageUrl, contentSummary
     } = await req.json();
-    
-    const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
-    if (!DEEPSEEK_API_KEY) throw new Error("DEEPSEEK_API_KEY is not configured");
 
-    console.log("Generating content-aware 14-day email sequence for:", offerName);
+    console.log("Generating 5-email launch sequence for:", offerName);
 
-    let enhancedPrompt = "";
+    const userTier = await getUserTier(user.id);
+    const actualPrice = price || 17;
+
+    let prompt = "";
 
     if (contentSummary) {
-      const summary = contentSummary as ContentSummary;
-      
-      enhancedPrompt = `Generate a complete 14-Day pre-sale email sequence for "${offerName}" targeting ${targetAudience}.
+      const summary = contentSummary;
+      prompt = `Generate a 5-email post-purchase launch sequence for "${offerName}" at $${actualPrice} targeting ${targetAudience}.
 
-=== PRODUCT DETAILS ===
+=== PRODUCT CONTENT ===
 MAIN TRANSFORMATION: ${summary.mainTransformation}
-PRICE: $${price}
+CHAPTER THEMES: ${summary.chapterThemes?.map((c: any) => `${c.chapter}: ${c.keyTakeaway}`).join("; ") || "Complete guide"}
+UNIQUE MECHANISM: ${summary.uniqueMechanisms?.map((m: any) => `"${m}"`).join(", ") || uniqueMechanism || offerName}
+KEY BENEFITS: ${summary.specificBenefits?.join("; ") || keyBenefits?.join("; ") || ""}
+PAIN POINTS: ${summary.painPointsAddressed?.join("; ") || ""}
 
-=== WHAT THE PRODUCT TEACHES ===
-${summary.chapterThemes?.map(c => `• ${c.chapter}: ${c.keyTakeaway}`).join("\n") || "Complete guide"}
+=== EMAIL SEQUENCE ===
+Email 1 (Immediately after purchase): Welcome + Quick Win
+- Subject: curiosity or specific result within 24 hours
+- Body: Welcome, remind them of the transformation, give ONE action to take RIGHT NOW
+- No backstory — get them moving
 
-=== UNIQUE MECHANISMS TO REFERENCE ===
-${summary.uniqueMechanisms?.map(m => `"${m}"`).join(", ") || uniqueMechanism || `The ${offerName} System`}
+Email 2 (Day 2): The Story
+- Subject: pattern interrupt — unexpected or counterintuitive
+- Body: Specific story of someone like them who got results. Same fears, same past failures.
 
-=== KEY BENEFITS (Use these specifically) ===
-${summary.specificBenefits?.map(b => `• ${b}`).join("\n") || keyBenefits?.join("\n• ") || ""}
+Email 3 (Day 3): The Mistake
+- Subject: warn about a specific mistake
+- Body: #1 mistake people make + how to avoid it using what they learned
 
-=== PAIN POINTS TO ADDRESS ===
-${summary.painPointsAddressed?.map(p => `• ${p}`).join("\n") || ""}
+Email 4 (Day 5): Social Proof + Upsell
+- Subject: curiosity-driven, hint at a result
+- Body: Reinforce value, introduce upgrade as natural next step, specific benefit of upgrading
 
-=== EMAIL SEQUENCE STRUCTURE ===
-Map the 14 emails to reference actual chapter content:
+Email 5 (Day 7): Last Chance or Next Steps
+- Subject: urgency or forward momentum
+- Body: Urgency close on time-limited bonus, OR pivot to next action
 
-Days 1-2 (ORIGIN STORY): Share a relatable struggle that led to discovering the solution. Hint at the main transformation.
-
-Days 3-4 (INSIGHT REVEAL): Share a key insight from Chapter 1-2. Use specific language from the content.
-
-Days 5-6 (MECHANISM PREVIEW): Introduce the "${summary.uniqueMechanisms?.[0] || uniqueMechanism || 'system'}" method. Explain why it works differently.
-
-Day 7 (OFFER REVEAL): Full product reveal. List what's included using the actual table of contents.
-
-Days 8-9 (SOCIAL PROOF + OBJECTIONS): Handle common objections. Reference specific benefits from the content.
-
-Days 10-11 (DEEP DIVE): Preview specific chapters. Give a "taste" of the content without giving it all away.
-
-Days 12-13 (URGENCY): Deadline approaching. Stack the value using real content features.
-
-Day 14 (LAST CALL): Final hours. Remind them of the transformation.
-
-Return JSON format:
+Return JSON:
 {
-  "sequenceTheme": "A 2-3 word theme for the sequence",
-  "narrativeArc": "One sentence describing the story arc",
+  "sequenceTheme": "2-3 word theme",
+  "narrativeArc": "One sentence story arc",
   "emails": [
     {
       "day": 1,
-      "focus": "origin-story",
-      "subject": "Subject line with curiosity hook",
-      "previewText": "Preview text (50 chars max)",
-      "openingHook": "2-3 sentences to hook them in",
-      "storyAnalogy": "The story or analogy section (3-4 paragraphs)",
-      "lessonTwist": "The lesson or twist that connects to the product",
-      "offerBridge": "Bridge to the offer/next email",
-      "cta": "Call to action with link placeholder",
+      "focus": "welcome-quick-win",
+      "subject": "Under 50 chars — hook",
+      "previewText": "Under 50 chars",
+      "openingHook": "2-3 sentence hook — question, bold claim, or story fragment",
+      "storyAnalogy": "Main body (3-4 paragraphs, max 250 words total)",
+      "lessonTwist": "The lesson connecting to the product",
+      "offerBridge": "Bridge to next email or action",
+      "cta": "One specific CTA with link placeholder",
       "ps": "P.S. line with extra hook"
     }
   ]
 }
 
-CRITICAL: Reference ACTUAL chapter themes and mechanisms, not generic benefits. Each email should feel like it comes from someone who KNOWS what's in the product.`;
-
+RULES:
+- Reference ACTUAL chapter themes and mechanisms — not generic benefits
+- Every subject line under 50 chars
+- Every email under 300 words
+- ONE CTA per email — never more than one link
+- Open every email with a hook — never a corporate greeting`;
     } else {
-      // Fallback prompt
-      enhancedPrompt = `Generate a complete 14-Day email sequence for "${offerName}" targeting ${targetAudience}. Key benefits: ${keyBenefits?.join(", ") || "proven results"}. Unique mechanism: ${uniqueMechanism || "A proven system"}. Price: $${price}.
+      prompt = `Generate a 5-email sequence for "${offerName}" targeting ${targetAudience}. Benefits: ${keyBenefits?.join(", ") || "proven results"}. Mechanism: ${uniqueMechanism || "A proven system"}. Price: $${actualPrice}.
 
-Return JSON: {"sequenceTheme": "", "narrativeArc": "", "emails": [{"day": 1, "focus": "", "subject": "", "previewText": "", "openingHook": "", "storyAnalogy": "", "lessonTwist": "", "offerBridge": "", "cta": "", "ps": ""}]}`;
+Follow the 5-email structure: Welcome+QuickWin, Story, Mistake, SocialProof+Upsell, LastChance.
+
+Return JSON: {"sequenceTheme": "", "narrativeArc": "", "emails": [{"day": 1, "focus": "", "subject": "", "previewText": "", "openingHook": "", "storyAnalogy": "", "lessonTwist": "", "offerBridge": "", "cta": "", "ps": ""}]}
+
+Rules: subject under 50 chars, body under 300 words, ONE CTA per email, open with a hook.`;
     }
 
-    const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${DEEPSEEK_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        model: "deepseek-chat", 
-        messages: [
-          { role: "system", content: "You are Funnel Architect Pro - an expert email copywriter who writes story-driven sequences that feel personal and reference actual product content. Always respond with valid JSON." },
-          { role: "user", content: enhancedPrompt }
-        ],
-        temperature: 0.8,
-        max_tokens: 6000,
-      }),
-    });
+    const { content, model } = await callTieredAI([
+      { role: "system", content: EMAIL_SEQUENCE_SYSTEM },
+      { role: "user", content: prompt },
+    ], userTier, "complex");
 
-    if (!response.ok) {
-      if (response.status === 429) return new Response(JSON.stringify({ error: "Rate limit exceeded." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      throw new Error(`DeepSeek API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || "";
-    
-    // Extract JSON from response
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("Failed to parse response");
 
     const emailSequence = JSON.parse(jsonMatch[0]);
     emailSequence.offerName = offerName;
     emailSequence.targetAudience = targetAudience;
-    emailSequence.price = price;
+    emailSequence.price = actualPrice;
 
     return new Response(JSON.stringify(emailSequence), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {

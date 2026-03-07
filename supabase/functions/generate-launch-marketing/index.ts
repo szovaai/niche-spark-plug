@@ -2,8 +2,7 @@ import { corsHeaders, validateAuth, unauthorizedResponse } from "../_shared/auth
 import { callTieredAI, getUserTier } from "../_shared/tieredAI.ts";
 import { getCachedResponse, setCachedResponse } from "../_shared/cache.ts";
 import { validateInput, validationErrorResponse } from "../_shared/validate.ts";
-
-const HUMAN_TONE = `Write like a real person — use contractions, vary sentence length, add personality. Sound confident but not salesy. Avoid corporate buzzwords.`;
+import { AD_COPY_SYSTEM, EMAIL_SEQUENCE_SYSTEM, AFFILIATE_KIT_SYSTEM } from "../_shared/copyPrompts.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -17,70 +16,97 @@ Deno.serve(async (req) => {
       { field: 'productBrief', type: 'object', required: true, maxLength: 10000 },
       { field: 'productContent', type: 'object', maxLength: 50000 },
       { field: 'funnelCopy', type: 'object', maxLength: 50000 },
+      { field: 'price', type: 'number', maxLength: 100 },
     ]);
     if (!valid) return validationErrorResponse(valError!, corsHeaders);
 
     const { productBrief, productContent, funnelCopy } = data;
+    const price = data.price || 17;
 
-    const cacheKey = `launch-marketing-${(productBrief as any).title?.slice(0, 50)}`;
+    const cacheKey = `launch-marketing-${(productBrief as any).title?.slice(0, 50)}-${price}`;
     const cached = await getCachedResponse(cacheKey);
     if (cached) return new Response(JSON.stringify(cached), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
     const userTier = await getUserTier(user.id);
 
     const selectedAngle = productBrief.selectedAngle || "";
-    const angleInstruction = selectedAngle ? `\nIMPORTANT: Use the "${selectedAngle}" campaign angle as the primary messaging theme. All content should reinforce this angle consistently.` : "";
-    const mechanismInstruction = productBrief.uniqueMechanism ? `\nIMPORTANT: Reference the unique mechanism "${productBrief.uniqueMechanism}" in ad copy, email subject lines, and social posts.` : "";
+    const angleInstruction = selectedAngle ? `\nCAMPAIGN ANGLE: "${selectedAngle}" — weave this angle into all content.` : "";
+    const mechanismInstruction = productBrief.uniqueMechanism ? `\nMECHANISM: Reference "${productBrief.uniqueMechanism}" in ad copy, email subject lines, and social posts.` : "";
 
-    const prompt = `${HUMAN_TONE}
+    const prompt = `Generate a complete marketing asset kit for this digital product launch.
 
-You are a digital marketing expert. Generate a complete marketing asset kit for this product launch.
-
-Product: ${productBrief.title} — ${productBrief.subtitle}
-Concept: ${productBrief.concept}
-Unique Mechanism: ${productBrief.uniqueMechanism}
-Pain Points: ${productBrief.painPoints?.join(", ")}
-Description: ${productContent?.description || ""}${angleInstruction}${mechanismInstruction}
+PRODUCT: ${productBrief.title} — ${productBrief.subtitle}
+CONCEPT: ${productBrief.concept}
+UNIQUE MECHANISM: ${productBrief.uniqueMechanism}
+PAIN POINTS: ${productBrief.painPoints?.join(", ")}
+DESCRIPTION: ${productContent?.description || ""}
+FRONT-END PRICE: $${price}
+COMMISSION: 50-75%${angleInstruction}${mechanismInstruction}
 
 Return ONLY valid JSON:
 {
   "emails": [
-    { "subject": "Email subject line", "body": "Full email body with greeting, value, CTA. 150-200 words." }
+    { "subject": "Under 50 chars — curiosity or specific result", "body": "Full email body. Max 300 words. Open with a hook (question, bold statement, story fragment). End with ONE specific CTA. Never use corporate openers." }
   ],
-  "socialPosts": ["Post 1 text with hashtags", "Post 2 text", "...up to 10 posts"],
-  "pinterestPins": ["Pin description 1 with keywords", "Pin 2", "Pin 3", "Pin 4", "Pin 5"],
-  "blogArticle": "A complete 600-word blog article that provides value related to the product topic and naturally leads to the product as a solution. Use markdown formatting with headers.",
-  "videoScript": "A 2-minute YouTube video script with: Hook (10s), Problem (20s), Solution intro (15s), Product walkthrough (45s), CTA (15s), Outro (15s). Include speaker directions in brackets.",
+  "socialPosts": ["Post with hook, value, and hashtags", "...up to 10 posts"],
+  "pinterestPins": ["Pin description with keywords", "Pin 2", "Pin 3", "Pin 4", "Pin 5"],
+  "blogArticle": "600-word article: provide real value related to the topic, naturally lead to the product. Use headers and formatting.",
+  "videoScript": "2-minute script: Hook (10s) → Problem (20s) → Solution intro (15s) → Product walkthrough (45s) → CTA (15s) → Outro (15s). Speaker directions in brackets.",
   "adCopy": [
-    { "headline": "Ad headline under 40 chars", "primaryText": "Facebook/Instagram ad primary text 125 words max. Hook, problem, solution, CTA.", "cta": "CTA button text", "hookAngle": "Name of the angle used" },
-    { "headline": "...", "primaryText": "...", "cta": "...", "hookAngle": "..." },
-    { "headline": "...", "primaryText": "...", "cta": "...", "hookAngle": "..." },
-    { "headline": "...", "primaryText": "...", "cta": "...", "hookAngle": "..." },
-    { "headline": "...", "primaryText": "...", "cta": "...", "hookAngle": "..." }
+    { "headline": "Under 40 chars, specific result", "primaryText": "Hook → pain → solution → CTA. Max 5 sentences. Must stop the scroll.", "cta": "Get Instant Access", "hookAngle": "Speed" },
+    { "headline": "...", "primaryText": "...", "cta": "...", "hookAngle": "Skeptic" },
+    { "headline": "...", "primaryText": "...", "cta": "...", "hookAngle": "Simplicity" },
+    { "headline": "...", "primaryText": "...", "cta": "...", "hookAngle": "Result" },
+    { "headline": "...", "primaryText": "...", "cta": "...", "hookAngle": "Curiosity" }
   ],
   "targetingKeywords": ["keyword 1", "keyword 2", "keyword 3", "keyword 4", "keyword 5", "keyword 6", "keyword 7", "keyword 8"],
   "affiliateKit": {
-    "headline": "A compelling JV page headline that makes affiliates excited to promote",
+    "headline": "Why affiliates should promote this over everything else this week — specific conversion data",
     "emailSwipes": [
-      { "subject": "Affiliate email swipe subject 1", "body": "Ready-to-send email for affiliates to promote. 150 words." },
-      { "subject": "Affiliate email swipe subject 2", "body": "Different angle affiliate email. 150 words." },
-      { "subject": "Affiliate email swipe subject 3", "body": "Urgency-based affiliate email. 150 words." }
+      { "subject": "Under 50 chars", "body": "Direct benefit-led swipe. Under 250 words. Ends with [YOUR AFFILIATE LINK]" },
+      { "subject": "...", "body": "Story-led swipe. Ends with [YOUR AFFILIATE LINK]" },
+      { "subject": "...", "body": "Urgency/scarcity swipe. Ends with [YOUR AFFILIATE LINK]" }
     ],
-    "promoAngles": ["Promo angle 1 affiliates can use", "Promo angle 2", "Promo angle 3"],
-    "bonusPageHeadline": "A headline for an affiliate bonus page",
-    "jvPageCopy": "Complete JV/affiliate recruitment page copy. Include: commission rate (50-75%), product description, conversion stats placeholder, why this converts, what affiliates get (swipes, banners, bonuses). 300+ words with markdown formatting."
+    "promoAngles": ["Angle 1 with specific hook", "Angle 2", "Angle 3"],
+    "bonusPageHeadline": "Headline for affiliate bonus page",
+    "jvPageCopy": "Complete JV recruitment page. Include: 50-75% commission on $${price} FE, product description, why this converts, what affiliates get (swipes, banners, bonuses). 300+ words."
   }
 }
 
-Generate exactly 5 emails (pre-launch teaser, launch announcement, value-add, objection handler, last chance).
-Generate exactly 10 social posts (mix of educational, promotional, and engagement).
-Generate exactly 5 ad variations — each with a DIFFERENT hook angle (curiosity, fear, social proof, urgency, aspiration).`;
+EMAIL STRUCTURE (generate exactly 5):
+1. Pre-launch teaser: curiosity + specific promise within 24 hours
+2. Launch announcement: bold claim + mechanism name + CTA
+3. Value-add: share one key insight from the product
+4. Objection handler: address the #1 reason people don't buy
+5. Last chance: urgency close with specific deadline
 
-    const { content, model } = await callTieredAI([{ role: "user", content: prompt }], userTier, "complex");
+AD RULES:
+- Speed angle: "In 24 hours from now..."
+- Skeptic angle: "I know you've heard this before, but..."
+- Simplicity angle: "You don't need experience, a following, or tech skills..."
+- Result angle: lead with the specific outcome first
+- Curiosity angle: tease the mechanism without revealing it`;
+
+    const { content, model } = await callTieredAI([
+      { role: "system", content: `${AD_COPY_SYSTEM}\n\n${EMAIL_SEQUENCE_SYSTEM}\n\n${AFFILIATE_KIT_SYSTEM}` },
+      { role: "user", content: prompt },
+    ], userTier, "complex");
 
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("Failed to parse AI response");
-    const result = JSON.parse(jsonMatch[0]);
+    let result;
+    try {
+      result = JSON.parse(jsonMatch[0]);
+    } catch (parseErr) {
+      const raw = jsonMatch[0];
+      let depth = 0, lastValid = -1;
+      for (let i = 0; i < raw.length; i++) {
+        if (raw[i] === '{') depth++;
+        else if (raw[i] === '}') { depth--; if (depth === 0) { lastValid = i; break; } }
+      }
+      if (lastValid > 0) result = JSON.parse(raw.slice(0, lastValid + 1));
+      else throw parseErr;
+    }
 
     await setCachedResponse(cacheKey, "generate-launch-marketing", cacheKey, result, userTier, model);
 

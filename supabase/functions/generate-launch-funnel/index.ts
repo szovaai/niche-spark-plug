@@ -2,8 +2,7 @@ import { corsHeaders, validateAuth, unauthorizedResponse } from "../_shared/auth
 import { callTieredAI, getUserTier } from "../_shared/tieredAI.ts";
 import { getCachedResponse, setCachedResponse } from "../_shared/cache.ts";
 import { validateInput, validationErrorResponse } from "../_shared/validate.ts";
-
-const HUMAN_TONE = `Write like a real person — use contractions, vary sentence length, add personality. Sound confident but not salesy. Avoid corporate buzzwords.`;
+import { SALES_PAGE_SYSTEM, OTO_UPSELL_SYSTEM } from "../_shared/copyPrompts.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -16,12 +15,14 @@ Deno.serve(async (req) => {
     const { valid, error: valError, data } = validateInput(body, [
       { field: 'productBrief', type: 'object', required: true, maxLength: 10000 },
       { field: 'productContent', type: 'object', maxLength: 50000 },
+      { field: 'price', type: 'number', maxLength: 100 },
     ]);
     if (!valid) return validationErrorResponse(valError!, corsHeaders);
 
     const { productBrief, productContent } = data;
+    const price = data.price || 17;
 
-    const cacheKey = `launch-funnel-${(productBrief as any).title?.slice(0, 50)}`;
+    const cacheKey = `launch-funnel-${(productBrief as any).title?.slice(0, 50)}-${price}`;
     const cached = await getCachedResponse(cacheKey);
     if (cached) return new Response(JSON.stringify(cached), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
@@ -29,46 +30,52 @@ Deno.serve(async (req) => {
 
     const chapterTitles = productContent?.chapters?.map((c: any) => c.title).join(", ") || "N/A";
     const selectedAngle = productBrief.selectedAngle || "";
-    const angleInstruction = selectedAngle ? `\nIMPORTANT: Use the "${selectedAngle}" campaign angle as the primary messaging theme across all copy. Every section should reinforce this angle.` : "";
-    const mechanismInstruction = productBrief.uniqueMechanism ? `\nIMPORTANT: The product's unique mechanism is "${productBrief.uniqueMechanism}". Reference this named framework throughout the copy — in headlines, benefits, and CTAs.` : "";
+    const angleInstruction = selectedAngle ? `\nCAMPAIGN ANGLE: Use "${selectedAngle}" as the primary messaging theme across all copy.` : "";
+    const mechanismInstruction = productBrief.uniqueMechanism ? `\nUNIQUE MECHANISM: "${productBrief.uniqueMechanism}" — reference this named framework in headlines, benefits, and CTAs.` : "";
 
-    const prompt = `${HUMAN_TONE}
+    const prompt = `Generate complete funnel copy for this digital product.
 
-You are an expert copywriter. Generate complete funnel copy for this digital product.
-
-Product: ${productBrief.title} — ${productBrief.subtitle}
-Concept: ${productBrief.concept}
-Unique Mechanism: ${productBrief.uniqueMechanism}
-Pain Points: ${productBrief.painPoints?.join(", ")}
-Chapters: ${chapterTitles}
-Description: ${productContent?.description || ""}${angleInstruction}${mechanismInstruction}
+PRODUCT: ${productBrief.title} — ${productBrief.subtitle}
+CONCEPT: ${productBrief.concept}
+UNIQUE MECHANISM: ${productBrief.uniqueMechanism}
+PAIN POINTS: ${productBrief.painPoints?.join(", ")}
+CHAPTERS: ${chapterTitles}
+DESCRIPTION: ${productContent?.description || ""}
+FRONT-END PRICE: $${price}${angleInstruction}${mechanismInstruction}
 
 Return ONLY valid JSON:
 {
-  "salesPage": "Full sales page copy with headline, subheadline, problem section, solution section, what's inside, benefits, testimonial placeholders, CTA sections, and guarantee. Use markdown formatting.",
-  "optInPage": "Opt-in page copy with headline, 3 bullet benefits, and CTA. Include a free lead magnet angle.",
-  "thankYouPage": "Thank you page copy confirming their purchase/opt-in with next steps and a surprise bonus mention.",
-  "bonusPage": "Bonus page copy highlighting 3 exclusive bonuses they get with their purchase.",
-  "checkoutCopy": "Checkout page copy with order summary, urgency element, and trust badges text.",
-  "orderBump": "Order bump copy for the checkout page — a complementary low-price add-on offer ($7-$17). Include: product name, 2-3 sentence description of what it is, why they need it NOW, and a compelling reason to add it.",
-  "upsellOffer": "One-time upsell offer copy shown after purchase. Include: upsell product name, what it includes, the transformation it provides, original price vs special price, urgency element, and CTA.",
+  "salesPage": "Complete long-form sales page following the Dan Kennedy structure: pre-headline → main headline (specific result + timeframe) → subheadline → pain agitation → 'what nobody tells you' → product intro with mechanism → feature-to-benefit breakdown → what's included → named guarantee → price justification (anchor against $${price * 20}+ alternatives before revealing $${price}) → urgency close → two kinds of people → FAQ (5 questions). Minimum 800 words.",
+  "optInPage": "Opt-in page: headline with specific result, 3 bullet benefits with numbers, CTA: 'Yes — Send Me The Free [Lead Magnet Name]'. Lead magnet angle tied to product.",
+  "thankYouPage": "Thank you page: confirm purchase, specific next step to take RIGHT NOW, surprise bonus mention.",
+  "bonusPage": "Bonus page: 3 exclusive bonuses with names, specific descriptions, and individual perceived values.",
+  "checkoutCopy": "Checkout page copy: order summary emphasizing the $${price} price vs total value, urgency element, trust text.",
+  "orderBump": "Order bump ($${Math.min(price, 12)} add-on): product name, 2-3 sentence description of what it is, why they need it NOW, compelling reason to add it. Must feel like a no-brainer impulse add.",
+  "upsellOffer": "One-time upsell at $${Math.round(price * 2.5)}: congratulations opener → the gap → what this includes → transformation → original price $${Math.round(price * 8)} vs special $${Math.round(price * 2.5)} → urgency → CTA: 'Yes — Upgrade Me Now' / 'No thanks, I'll do it the slow way'.",
   "offerStack": {
-    "coreProduct": { "name": "Product name", "value": 297 },
+    "coreProduct": { "name": "${productBrief.title}", "value": ${Math.round(price * 15)} },
     "bonuses": [
-      { "name": "Bonus 1 Name", "description": "What it is and why it's valuable", "value": 97 },
-      { "name": "Bonus 2 Name", "description": "What it is and why it's valuable", "value": 67 },
-      { "name": "Bonus 3 Name", "description": "What it is and why it's valuable", "value": 47 }
+      { "name": "Bonus Name", "description": "What it is and specific result it produces", "value": ${Math.round(price * 5)} },
+      { "name": "Bonus Name", "description": "...", "value": ${Math.round(price * 4)} },
+      { "name": "Bonus Name", "description": "...", "value": ${Math.round(price * 3)} }
     ],
-    "totalValue": 508,
-    "askingPrice": 17,
-    "stackCopy": "Formatted value stack copy ready for a sales page, showing each item with its value, total value crossed out, and today's price."
+    "totalValue": ${Math.round(price * 27)},
+    "askingPrice": ${price},
+    "stackCopy": "Formatted value stack copy showing each item with its value, total crossed out, and today's price of $${price}."
   }
 }
 
-Make each section comprehensive — at least 300 words for salesPage, 150+ for upsellOffer and orderBump, 100+ for others.
-The offerStack values should feel realistic and compelling. The askingPrice should be a fraction of totalValue to create irresistible perceived value.`;
+CRITICAL:
+- The sales page MUST justify the $${price} price by anchoring against expensive alternatives BEFORE revealing the price
+- The guarantee must be named and bold (e.g. "The 30-Day 'Use It Or Lose Nothing' Guarantee")
+- Every CTA must include the product name
+- The upsell page must feel like momentum, not a hard sell
+- No generic phrases — every benefit must be specific and measurable`;
 
-    const { content, model } = await callTieredAI([{ role: "user", content: prompt }], userTier, "complex");
+    const { content, model } = await callTieredAI([
+      { role: "system", content: SALES_PAGE_SYSTEM },
+      { role: "user", content: prompt },
+    ], userTier, "complex");
 
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("Failed to parse AI response");
@@ -77,7 +84,6 @@ The offerStack values should feel realistic and compelling. The askingPrice shou
       result = JSON.parse(jsonMatch[0]);
     } catch (parseErr) {
       console.error("JSON parse error, attempting cleanup");
-      // Try to fix common truncation issues by finding the last valid closing brace
       const raw = jsonMatch[0];
       let depth = 0;
       let lastValid = -1;

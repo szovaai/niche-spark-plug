@@ -2,8 +2,7 @@ import { corsHeaders, validateAuth, unauthorizedResponse } from "../_shared/auth
 import { callTieredAI, getUserTier } from "../_shared/tieredAI.ts";
 import { getCachedResponse, setCachedResponse } from "../_shared/cache.ts";
 import { validateInput, validationErrorResponse } from "../_shared/validate.ts";
-
-const HUMAN_TONE = `Write like a real person — use contractions, vary sentence length, add personality. Sound confident but not salesy. Avoid corporate buzzwords.`;
+import { MASTER_SYSTEM_PROMPT } from "../_shared/copyPrompts.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -29,9 +28,7 @@ Deno.serve(async (req) => {
 
     const userTier = await getUserTier(user.id);
 
-    const prompt = `${HUMAN_TONE}
-
-You are a digital product strategist. Create a compelling product concept.
+    const prompt = `Create a compelling product concept for a digital product launch.
 
 Niche: ${niche}
 Target Audience: ${targetAudience || "General audience"}
@@ -40,31 +37,33 @@ Topic: ${topic}
 
 Return ONLY valid JSON:
 {
-  "title": "Catchy product title",
-  "subtitle": "Compelling subtitle",
-  "concept": "2-3 sentence product concept explaining what this is and why it matters",
-  "uniqueMechanism": "The unique angle or method that makes this different from competitors",
-  "painPoints": ["pain point 1", "pain point 2", "pain point 3", "pain point 4", "pain point 5"],
+  "title": "Catchy product title with a specific promise",
+  "subtitle": "Compelling subtitle that disarms the biggest objection",
+  "concept": "2-3 sentence product concept — lead with the pain it solves, then the specific outcome",
+  "uniqueMechanism": "A named, proprietary-sounding framework (e.g. 'The 24-Hour Service Velocity Framework')",
+  "painPoints": ["specific pain 1 with emotional detail", "pain 2", "pain 3", "pain 4", "pain 5"],
   "mechanisms": [
-    { "name": "The [Adjective] [Noun] [Method/Protocol/System/Framework]", "tagline": "A punchy one-liner that captures the essence", "description": "2 sentences explaining how this framework works and why it's different" },
-    { "name": "The [Adjective] [Noun] [Method/Protocol/System/Framework]", "tagline": "A punchy one-liner", "description": "2 sentences explaining the framework" },
-    { "name": "The [Adjective] [Noun] [Method/Protocol/System/Framework]", "tagline": "A punchy one-liner", "description": "2 sentences explaining the framework" }
+    { "name": "The [Adjective] [Noun] [Method/Protocol/System/Framework]", "tagline": "Specific result + timeframe in one sentence", "description": "2 sentences: how it works and why it's different from everything else" },
+    { "name": "...", "tagline": "...", "description": "..." },
+    { "name": "...", "tagline": "...", "description": "..." }
   ],
   "campaignAngles": [
-    { "name": "Speed", "hook": "A short punchy hook for this angle", "description": "2 sentences explaining why this angle resonates with the audience" },
-    { "name": "Simplicity", "hook": "A short punchy hook for this angle", "description": "2 sentences explaining why this angle resonates with the audience" },
-    { "name": "Results", "hook": "A short punchy hook for this angle", "description": "2 sentences explaining why this angle resonates with the audience" }
+    { "name": "Speed", "hook": "A scroll-stopping hook with a specific timeframe or number", "description": "2 sentences on why this angle resonates" },
+    { "name": "Simplicity", "hook": "A scroll-stopping hook emphasizing ease", "description": "..." },
+    { "name": "Results", "hook": "A scroll-stopping hook leading with a specific outcome", "description": "..." }
   ]
 }
 
-IMPORTANT for mechanisms:
-- Each mechanism must be a named, proprietary-sounding framework (e.g., "The Rapid Launch Protocol", "The AI Funnel Sprint", "The 1-Hour Product Framework")
-- They should feel like branded methods that make the product unique
-- Each must suggest a different approach or philosophy
+CRITICAL RULES:
+- Every mechanism name must sound proprietary and branded (e.g. "The Rapid Launch Protocol", "The AI Funnel Sprint")
+- Every hook must contain a number, timeframe, or specific result — NEVER vague promises
+- Pain points must be emotionally specific — describe the exact frustration, not a generic problem
+- Campaign angles should trigger completely different emotions (speed, fear of missing out, simplicity)`;
 
-The campaignAngles should be 3 distinctly different sales angles for marketing this product. Each angle should suggest a completely different emotional trigger. The hook should be a single compelling sentence usable as an ad headline.`;
-
-    const { content, model } = await callTieredAI([{ role: "user", content: prompt }], userTier, "standard");
+    const { content, model } = await callTieredAI([
+      { role: "system", content: MASTER_SYSTEM_PROMPT },
+      { role: "user", content: prompt },
+    ], userTier, "standard");
 
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("Failed to parse AI response");

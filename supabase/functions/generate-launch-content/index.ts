@@ -2,8 +2,7 @@ import { corsHeaders, validateAuth, unauthorizedResponse } from "../_shared/auth
 import { callTieredAI, getUserTier } from "../_shared/tieredAI.ts";
 import { getCachedResponse, setCachedResponse } from "../_shared/cache.ts";
 import { validateInput, validationErrorResponse } from "../_shared/validate.ts";
-
-const HUMAN_TONE = `Write like a real person — use contractions, vary sentence length, add personality. Sound confident but not salesy. Avoid corporate buzzwords.`;
+import { MASTER_SYSTEM_PROMPT } from "../_shared/copyPrompts.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -27,29 +26,36 @@ Deno.serve(async (req) => {
 
     const userTier = await getUserTier(user.id);
 
-    const prompt = `${HUMAN_TONE}
-
-You are a digital product creator. Generate a complete product outline.
+    const prompt = `Generate a complete product outline for a digital product.
 
 Product: ${productBrief.title}
 Subtitle: ${productBrief.subtitle}
 Concept: ${productBrief.concept}
 Type: ${productType || "ebook"}
-Unique Angle: ${productBrief.uniqueMechanism}
+Unique Mechanism: ${productBrief.uniqueMechanism}
+Pain Points: ${productBrief.painPoints?.join(", ") || ""}
 
 Return ONLY valid JSON:
 {
-  "outline": "A 2-3 paragraph overview of the entire product structure",
+  "outline": "2-3 paragraph overview — open with the reader's problem, introduce the mechanism, then outline the transformation path",
   "chapters": [
-    { "title": "Chapter title", "summary": "2-3 sentence chapter summary", "keyPoints": ["key point 1", "key point 2", "key point 3"] }
+    { "title": "Action-oriented chapter title with specific outcome", "summary": "2-3 sentences: what they'll learn and the result they'll get", "keyPoints": ["specific actionable point 1", "point 2", "point 3"] }
   ],
-  "bonuses": ["Bonus idea 1 with description", "Bonus idea 2 with description", "Bonus idea 3 with description"],
-  "description": "A compelling 150-word product description ready for a sales listing"
+  "bonuses": ["Bonus 1: [Name] — specific description of what it is and the result it produces", "Bonus 2: ...", "Bonus 3: ..."],
+  "description": "A compelling 150-word product description — lead with pain, introduce mechanism, promise specific result"
 }
 
-Generate 6-8 chapters. Each chapter should be actionable and build on the previous one.`;
+RULES:
+- Generate 6-8 chapters, each building on the previous one
+- Every chapter title must promise a specific outcome (not just a topic name)
+- Bonuses must be named products with clear value, not vague "extra resources"
+- Reference the unique mechanism "${productBrief.uniqueMechanism}" throughout
+- The description must read like sales copy, not a table of contents`;
 
-    const { content, model } = await callTieredAI([{ role: "user", content: prompt }], userTier, "standard");
+    const { content, model } = await callTieredAI([
+      { role: "system", content: MASTER_SYSTEM_PROMPT },
+      { role: "user", content: prompt },
+    ], userTier, "standard");
 
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("Failed to parse AI response");
