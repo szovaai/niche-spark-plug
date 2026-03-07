@@ -94,7 +94,7 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
         </Button>
         <Button onClick={onGenerateAll} disabled={!canGenerate || generatingAll} variant="hero" className="gap-2">
           {generatingAll ? <Loader2 className="w-4 h-4 animate-spin" /> : <Rocket className="w-4 h-4" />}
-          Generate Entire Launch System
+          Build My Launch System
         </Button>
       </div>
 
@@ -134,9 +134,13 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
             />
           )}
 
-          <Button onClick={onNext} className="gap-2 mt-2">
-            Continue to Product Content
-          </Button>
+          {result.selectedAngle ? (
+            <Button onClick={onNext} className="gap-2 mt-2">
+              Continue to Product Content
+            </Button>
+          ) : (
+            <p className="text-sm text-muted-foreground mt-2">↑ Select a campaign angle above to continue</p>
+          )}
         </div>
       )}
     </div>
