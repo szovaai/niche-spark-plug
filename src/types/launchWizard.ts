@@ -20,12 +20,34 @@ export interface LaunchScore {
   overall: number;
   suggestions: string[];
   angleScores?: { angle: string; predictedConversion: string; reasoning: string }[];
+  verdict?: "green" | "yellow" | "red";
+  verdictMessage?: string;
+  suggestedPivots?: string[];
+  estimatedPriceCeiling?: number;
+  affiliateCommissionSweet?: string;
 }
 
 export interface Mechanism {
   name: string;
   tagline: string;
   description: string;
+  formula?: string;
+  whyItWorks?: string;
+}
+
+export interface BuyerAvatar {
+  personaName: string;
+  occupation: string;
+  dailyFrustration: string;
+  triedBefore: string;
+  secretDream: string;
+  biggestFear: string;
+  languageTheyUse: string[];
+  emotionalState: string;
+  painPoints: string[];
+  desires: string[];
+  instantBuySentence: string;
+  dayInTheLife: string;
 }
 
 export interface OfferStackItem {
