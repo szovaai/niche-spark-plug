@@ -1,4 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
+import { validateInput, validationErrorResponse } from "../_shared/validate.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,12 +13,24 @@ serve(async (req) => {
   }
 
   try {
-    const { niche, productName, topic, type } = await req.json();
+    const { user, error: authError } = await validateAuth(req);
+    if (authError || !user) return unauthorizedResponse(authError || 'Authentication required', corsHeaders);
+
+    const body = await req.json();
+    const { valid, error: valError, data } = validateInput(body, [
+      { field: 'niche', type: 'string', maxLength: 200 },
+      { field: 'productName', type: 'string', maxLength: 200 },
+      { field: 'topic', type: 'string', maxLength: 500 },
+      { field: 'type', type: 'string', required: true, maxLength: 50, enum: ['ideas', 'script', 'ads', 'schedule'] },
+      { field: 'topics', type: 'array', maxItems: 20 },
+      { field: 'daysPerWeek', type: 'number', min: 1, max: 7 },
+    ]);
+    if (!valid) return validationErrorResponse(valError!, corsHeaders);
+
+    const { niche, productName, topic, type, topics, daysPerWeek } = data;
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
-    }
+    if (!LOVABLE_API_KEY) throw new Error("Server configuration error");
 
     let systemPrompt, userPrompt;
 
@@ -77,7 +91,6 @@ Output as JSON:
   "cta": "Final call to action..."
 }`;
     } else if (type === "ads") {
-      const { topics } = await req.json();
       systemPrompt = `You are a performance marketer for short-form ads on TikTok and Instagram.
 Create ad angles that convert viewers into buyers.
 
@@ -103,14 +116,13 @@ Output as JSON array:
   }
 ]`;
     } else {
-      // Default: schedule plan
-      const { daysPerWeek } = await req.json();
+      const days = (daysPerWeek as number) || 5;
       systemPrompt = `You are a content consistency coach.
 Create practical, sustainable posting plans.
 
 IMPORTANT: Return ONLY valid JSON, no markdown.`;
 
-      userPrompt = `I can post ${daysPerWeek || 5} days per week.
+      userPrompt = `I can post ${days} days per week.
 My system is:
 - 1 viral-style video per active day
 - 1 value-style video per active day
@@ -122,15 +134,15 @@ Create a simple explanation of my posting plan that:
 
 Output as JSON:
 {
-  "days_per_week": ${daysPerWeek || 5},
+  "days_per_week": ${days},
   "videos_per_day": 2,
-  "weekly_total": ${(daysPerWeek || 5) * 2},
+  "weekly_total": ${days * 2},
   "summary": "Your posting plan in 2-3 sentences...",
   "tips": ["Tip 1", "Tip 2", "Tip 3"]
 }`;
     }
 
-    console.log("Calling Lovable AI for content generation...");
+    console.log("Generating content for user:", user.id);
     
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -150,15 +162,15 @@ Output as JSON:
     if (!response.ok) {
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      throw new Error(`AI gateway error: ${response.status}`);
+      console.error("AI gateway error:", response.status);
+      throw new Error("Unable to generate content. Please try again.");
     }
 
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
+    const data2 = await response.json();
+    const content = data2.choices?.[0]?.message?.content;
     
     let result;
     try {
@@ -170,7 +182,7 @@ Output as JSON:
       }
     } catch (parseError) {
       console.error("Parse error:", parseError);
-      throw new Error("Failed to parse AI response");
+      throw new Error("Failed to parse content result");
     }
 
     return new Response(JSON.stringify(result), {
@@ -178,9 +190,8 @@ Output as JSON:
     });
   } catch (error) {
     console.error("Error in empire-generate-content:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    return new Response(JSON.stringify({ error: "Unable to generate content. Please try again." }), {
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
