@@ -31,9 +31,10 @@ interface Props {
   onGenerateAll: () => void;
   generatingAll: boolean;
   userId?: string;
+  lockedMechanism?: string;
 }
 
-export default function WizardStep1({ niche, setNiche, targetAudience, setTargetAudience, productType, setProductType, topic, setTopic, price, setPrice, result, setResult, onNext, onGenerateAll, generatingAll, userId }: Props) {
+export default function WizardStep1({ niche, setNiche, targetAudience, setTargetAudience, productType, setProductType, topic, setTopic, price, setPrice, result, setResult, onNext, onGenerateAll, generatingAll, userId, lockedMechanism }: Props) {
   const [loading, setLoading] = useState(false);
   const [scoreLoading, setScoreLoading] = useState(false);
 
@@ -44,9 +45,13 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-launch-product", {
-        body: { niche, targetAudience, productType, topic, userId },
+        body: { niche, targetAudience, productType, topic, userId, lockedMechanism },
       });
       if (error) throw error;
+      // If a locked mechanism was provided from Research Agent, preserve it exactly
+      if (lockedMechanism) {
+        data.uniqueMechanism = lockedMechanism;
+      }
       setResult(data);
       toast.success("Product concept generated!");
       generateScore(data);
@@ -213,7 +218,8 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
           )}
           {result.launchScore && <LaunchScoreCard score={result.launchScore} />}
 
-          {result.mechanisms && result.mechanisms.length > 0 && (
+          {/* Only show mechanism selector if no locked mechanism from Research Agent */}
+          {!lockedMechanism && result.mechanisms && result.mechanisms.length > 0 && (
             <MechanismSelector
               mechanisms={result.mechanisms}
               selectedMechanism={result.uniqueMechanism}
@@ -221,7 +227,14 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
             />
           )}
 
-          {(hasMechanismSelected || !result.mechanisms?.length) && result.campaignAngles && result.campaignAngles.length > 0 && (
+          {lockedMechanism && (
+            <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+              <p className="text-xs font-medium text-primary mb-1">🔒 Mechanism (from Research Agent)</p>
+              <p className="text-sm font-semibold">{lockedMechanism}</p>
+            </div>
+          )}
+
+          {(lockedMechanism || hasMechanismSelected || !result.mechanisms?.length) && result.campaignAngles && result.campaignAngles.length > 0 && (
             <CampaignAngleSelector
               angles={result.campaignAngles}
               selectedAngle={result.selectedAngle || ""}
@@ -234,7 +247,7 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
             <Button onClick={onNext} className="gap-2 mt-2">
               Continue to Product Content
             </Button>
-          ) : hasMechanismSelected ? (
+          ) : (lockedMechanism || hasMechanismSelected) ? (
             <p className="text-sm text-muted-foreground mt-2">↑ Select a campaign angle above to continue</p>
           ) : result.mechanisms?.length ? (
             <p className="text-sm text-muted-foreground mt-2">↑ Select your unique mechanism to unlock campaign angles</p>

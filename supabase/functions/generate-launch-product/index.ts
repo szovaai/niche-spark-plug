@@ -17,16 +17,21 @@ Deno.serve(async (req) => {
       { field: 'targetAudience', type: 'string', maxLength: 500 },
       { field: 'productType', type: 'string', required: true, maxLength: 100 },
       { field: 'topic', type: 'string', required: true, maxLength: 500 },
+      { field: 'lockedMechanism', type: 'string', maxLength: 500 },
     ]);
     if (!valid) return validationErrorResponse(valError!, corsHeaders);
 
-    const { niche, targetAudience, productType, topic } = data;
+    const { niche, targetAudience, productType, topic, lockedMechanism } = data;
 
     const cacheKey = `launch-product-${niche}-${productType}-${topic}`;
     const cached = await getCachedResponse(cacheKey);
     if (cached) return new Response(JSON.stringify(cached), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
     const userTier = await getUserTier(user.id);
+
+    const mechanismInstruction = lockedMechanism
+      ? `\n\nCRITICAL: The user has already approved this exact mechanism name from prior research: "${lockedMechanism}". You MUST use this EXACT name as the "uniqueMechanism" value. Do NOT rename, rephrase, or generate alternatives. The mechanisms array should still contain 3 options but the first one MUST use this exact name.`
+      : '';
 
     const prompt = `Create a compelling product concept for a digital product launch.
 
@@ -58,7 +63,7 @@ CRITICAL RULES:
 - Every mechanism name must sound proprietary and branded (e.g. "The Rapid Launch Protocol", "The AI Funnel Sprint")
 - Every hook must contain a number, timeframe, or specific result — NEVER vague promises
 - Pain points must be emotionally specific — describe the exact frustration, not a generic problem
-- Campaign angles should trigger completely different emotions (speed, fear of missing out, simplicity)`;
+- Campaign angles should trigger completely different emotions (speed, fear of missing out, simplicity)${mechanismInstruction}`;
 
     const { content, model } = await callTieredAI([
       { role: "system", content: MASTER_SYSTEM_PROMPT },

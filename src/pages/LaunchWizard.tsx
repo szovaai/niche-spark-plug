@@ -27,12 +27,13 @@ const LaunchWizard = () => {
   const [genModalCompleted, setGenModalCompleted] = useState<number[]>([]);
   const [existingProjectId, setExistingProjectId] = useState<string | null>(null);
 
-  // Step 1 state — pre-fill from URL params (from Steal This Launch)
+  // Step 1 state — pre-fill from URL params (from Research Agent / Steal This Launch)
   const [niche, setNiche] = useState(searchParams.get("niche") || "");
   const [targetAudience, setTargetAudience] = useState(searchParams.get("audience") || "");
-  const [productType, setProductType] = useState("");
+  const [productType, setProductType] = useState(searchParams.get("productType") || "");
   const [topic, setTopic] = useState(searchParams.get("topic") || "");
   const [price, setPrice] = useState(17);
+  const [lockedMechanism] = useState(searchParams.get("mechanism") || "");
   const [step1Result, setStep1Result] = useState<Step1Product | null>(null);
 
   // Step 2-5 state
@@ -88,9 +89,13 @@ const LaunchWizard = () => {
       // Step 1
       setGenModalStep(1);
       const { data: s1, error: e1 } = await supabase.functions.invoke("generate-launch-product", {
-        body: { niche, targetAudience, productType, topic, userId: user?.id },
+        body: { niche, targetAudience, productType, topic, userId: user?.id, lockedMechanism },
       });
       if (e1) throw e1;
+      // Preserve locked mechanism from Research Agent
+      if (lockedMechanism) {
+        s1.uniqueMechanism = lockedMechanism;
+      }
       setStep1Result(s1);
       setGenModalCompleted(prev => [...prev, 1]);
       setCurrentStep(2);
@@ -235,6 +240,7 @@ const LaunchWizard = () => {
                 onGenerateAll={generateAll}
                 generatingAll={generatingAll}
                 userId={user?.id}
+                lockedMechanism={lockedMechanism}
               />
             )}
             {currentStep === 2 && (
