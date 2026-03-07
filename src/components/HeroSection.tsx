@@ -34,7 +34,7 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-8"
         >
           <Sparkles className="w-4 h-4 text-primary" />
-          <span className="text-sm text-muted-foreground">AI-Powered Launch Engine</span>
+          <span className="text-sm text-muted-foreground">AI Launch Operating System</span>
         </motion.div>
         
         {/* Main heading */}
@@ -44,9 +44,10 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="text-5xl md:text-7xl font-bold mb-6 leading-tight"
         >
-          <span className="gradient-text glow-text">Launch</span>
-          <span className="text-foreground"> Your Digital Product </span>
-          <span className="gradient-text glow-text">in 60 Minutes</span>
+          <span className="text-foreground">The </span>
+          <span className="gradient-text glow-text">AI Operating System</span>
+          <span className="text-foreground"> for Launching </span>
+          <span className="gradient-text glow-text">Digital Products</span>
         </motion.h1>
         
         {/* Subheading */}
@@ -56,8 +57,8 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed"
         >
-          Create, launch, and start selling your own digital product using AI. 
-          Product, funnel, emails, marketing — all generated in one flow.
+          Plan, Build, and Launch Your Entire Digital Product Business From One Dashboard.
+          Product, funnel, emails, ads, affiliate kit — all generated in one flow.
         </motion.p>
         
         {/* CTA Buttons */}
@@ -71,9 +72,9 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
             <Wand2 className="w-5 h-5" />
             Start AI Launch Wizard
           </Button>
-          <Button variant="outline" size="lg" onClick={() => navigate("/templates")} className="hover:border-primary/50">
+          <Button variant="outline" size="lg" onClick={() => navigate("/steal")} className="hover:border-primary/50">
             <Rocket className="w-4 h-4" />
-            Browse Templates
+            Steal a Launch
           </Button>
         </motion.div>
         
@@ -85,7 +86,7 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
           className="grid grid-cols-3 gap-8 mt-16 max-w-lg mx-auto"
         >
           {[
-            { value: "5", label: "Wizard Steps" },
+            { value: "Launch Score", label: "AI-Powered Advisor" },
             { value: "30+", label: "Assets Generated" },
             { value: "< 60min", label: "Idea to Launch" },
           ].map((stat, index) => (

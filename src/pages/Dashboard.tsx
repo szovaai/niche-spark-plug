@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import RevenueProjector from "@/components/wizard/RevenueProjector";
+import LaunchDNACard from "@/components/wizard/LaunchDNACard";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -107,6 +108,16 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         </motion.div>
+
+        {/* Launch DNA Card */}
+        {latestProject?.step1_product && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
+            <LaunchDNACard
+              product={latestProject.step1_product as any}
+              targetAudience={latestProject.target_audience || ""}
+            />
+          </motion.div>
+        )}
 
         {/* Launch Progress Tracker */}
         {latestProject && (

@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Loader2, Copy, Check, Mail, MessageSquare, Image, FileText, Video, Megaphone } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { Sparkles, Loader2, Copy, Check, Mail, MessageSquare, Image, FileText, Video, Megaphone, Users } from "lucide-react";
 import { Step1Product, Step2Content, Step3Funnel, Step4Marketing } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -54,7 +53,7 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold mb-1">Marketing Asset Generator</h2>
-        <p className="text-muted-foreground">Create all your promotional content including ad copy.</p>
+        <p className="text-muted-foreground">Create all your promotional content including ad copy & affiliate kit.</p>
       </div>
 
       {!result && (
@@ -74,6 +73,9 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
               <TabsTrigger value="pins" className="gap-1 text-xs"><Image className="w-3 h-3" /> Pins</TabsTrigger>
               <TabsTrigger value="blog" className="gap-1 text-xs"><FileText className="w-3 h-3" /> Blog</TabsTrigger>
               <TabsTrigger value="video" className="gap-1 text-xs"><Video className="w-3 h-3" /> Video</TabsTrigger>
+              {result.affiliateKit && (
+                <TabsTrigger value="affiliate" className="gap-1 text-xs"><Users className="w-3 h-3" /> Affiliate Kit</TabsTrigger>
+              )}
             </TabsList>
 
             <TabsContent value="emails">
@@ -206,6 +208,83 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
                 </CardContent>
               </Card>
             </TabsContent>
+
+            {/* Affiliate Kit Tab */}
+            {result.affiliateKit && (
+              <TabsContent value="affiliate">
+                <div className="space-y-4">
+                  {/* JV Headline */}
+                  <Card className="border-accent/30">
+                    <CardContent className="p-5">
+                      <div className="flex items-center justify-between mb-2">
+                        <Badge className="bg-accent/20 text-accent-foreground">JV Page Headline</Badge>
+                        <Button variant="ghost" size="sm" onClick={() => copyText(result.affiliateKit!.headline, "jv-headline")} className="gap-1">
+                          {copied === "jv-headline" ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                        </Button>
+                      </div>
+                      <p className="text-lg font-bold">{result.affiliateKit.headline}</p>
+                    </CardContent>
+                  </Card>
+
+                  {/* Affiliate Email Swipes */}
+                  <h4 className="font-semibold text-sm flex items-center gap-2"><Mail className="w-4 h-4" /> Affiliate Email Swipes</h4>
+                  {result.affiliateKit.emailSwipes?.map((swipe, i) => (
+                    <Card key={i}>
+                      <CardContent className="p-4 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-semibold text-sm">Swipe {i + 1}: {swipe.subject}</h4>
+                          <Button variant="ghost" size="sm" onClick={() => copyText(`Subject: ${swipe.subject}\n\n${swipe.body}`, `swipe-${i}`)} className="gap-1">
+                            {copied === `swipe-${i}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                          </Button>
+                        </div>
+                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">{swipe.body}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
+
+                  {/* Promo Angles */}
+                  <Card>
+                    <CardContent className="p-4">
+                      <h4 className="font-semibold text-sm mb-2">Promo Angles for Affiliates</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {result.affiliateKit.promoAngles?.map((angle, i) => (
+                          <Badge key={i} variant="outline" className="text-xs">{angle}</Badge>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Bonus Page Headline */}
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-semibold text-sm">Bonus Page Headline</h4>
+                        <Button variant="ghost" size="sm" onClick={() => copyText(result.affiliateKit!.bonusPageHeadline, "bonus-headline")} className="gap-1">
+                          {copied === "bonus-headline" ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                        </Button>
+                      </div>
+                      <p className="text-sm font-medium">{result.affiliateKit.bonusPageHeadline}</p>
+                    </CardContent>
+                  </Card>
+
+                  {/* JV Page Copy */}
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-bold">JV Recruitment Page Copy</h3>
+                        <Button variant="ghost" size="sm" onClick={() => copyText(result.affiliateKit!.jvPageCopy, "jv-copy")} className="gap-1">
+                          {copied === "jv-copy" ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                          Copy
+                        </Button>
+                      </div>
+                      <div className="text-sm text-muted-foreground whitespace-pre-wrap max-h-[500px] overflow-y-auto">
+                        {result.affiliateKit.jvPageCopy}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+            )}
           </Tabs>
           <Button onClick={onNext} className="gap-2">Continue to Launch Checklist</Button>
         </div>

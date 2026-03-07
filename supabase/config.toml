@@ -104,3 +104,12 @@ verify_jwt = false
 
 [functions.generate-launch-checklist]
 verify_jwt = false
+
+[functions.generate-launch-score]
+verify_jwt = false
+
+[functions.analyze-competitor-launch]
+verify_jwt = false
+
+[functions.firecrawl-scrape]
+verify_jwt = false

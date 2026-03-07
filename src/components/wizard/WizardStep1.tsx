@@ -9,6 +9,8 @@ import { PRODUCT_TYPES, Step1Product } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import CampaignAngleSelector from "./CampaignAngleSelector";
+import LaunchScoreCard from "./LaunchScoreCard";
+import MechanismSelector from "./MechanismSelector";
 
 interface Props {
   niche: string;
@@ -29,6 +31,7 @@ interface Props {
 
 export default function WizardStep1({ niche, setNiche, targetAudience, setTargetAudience, productType, setProductType, topic, setTopic, result, setResult, onNext, onGenerateAll, generatingAll, userId }: Props) {
   const [loading, setLoading] = useState(false);
+  const [scoreLoading, setScoreLoading] = useState(false);
 
   const canGenerate = niche.trim() && productType && topic.trim();
 
@@ -42,6 +45,9 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
       if (error) throw error;
       setResult(data);
       toast.success("Product concept generated!");
+
+      // Auto-trigger launch score
+      generateScore(data);
     } catch (e: any) {
       toast.error(e.message || "Failed to generate");
     } finally {
@@ -49,10 +55,39 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
     }
   };
 
+  const generateScore = async (productData: Step1Product) => {
+    setScoreLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-launch-score", {
+        body: {
+          niche, targetAudience, productType, topic,
+          productConcept: productData.concept,
+          campaignAngles: productData.campaignAngles,
+          userId,
+        },
+      });
+      if (error) throw error;
+      setResult({ ...productData, launchScore: data });
+    } catch (e: any) {
+      console.error("Score generation failed:", e);
+    } finally {
+      setScoreLoading(false);
+    }
+  };
+
+  const selectMechanism = (mech: { name: string; tagline: string }) => {
+    if (!result) return;
+    setResult({ ...result, uniqueMechanism: `${mech.name} — ${mech.tagline}` });
+  };
+
   const selectAngle = (name: string) => {
     if (!result) return;
     setResult({ ...result, selectedAngle: name });
   };
+
+  // Determine which sections to show based on selection state
+  const hasMechanismSelected = result?.uniqueMechanism?.includes(" — ");
+  const hasAngleSelected = !!result?.selectedAngle;
 
   return (
     <div className="space-y-6">
@@ -99,7 +134,8 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
       </div>
 
       {result && (
-        <div className="space-y-4">
+        <div className="space-y-5">
+          {/* Product concept card */}
           <Card className="border-primary/30 bg-primary/5">
             <CardContent className="p-6 space-y-4">
               <div className="flex items-center justify-between">
@@ -126,18 +162,43 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
             </CardContent>
           </Card>
 
-          {result.campaignAngles && result.campaignAngles.length > 0 && (
+          {/* Launch Score */}
+          {scoreLoading && (
+            <div className="flex items-center gap-2 p-4 rounded-lg bg-primary/5 border border-primary/20">
+              <Loader2 className="w-4 h-4 animate-spin text-primary" />
+              <span className="text-sm text-muted-foreground">Analyzing launch potential...</span>
+            </div>
+          )}
+          {result.launchScore && <LaunchScoreCard score={result.launchScore} />}
+
+          {/* Mechanism Selector */}
+          {result.mechanisms && result.mechanisms.length > 0 && (
+            <MechanismSelector
+              mechanisms={result.mechanisms}
+              selectedMechanism={result.uniqueMechanism}
+              onSelect={selectMechanism}
+            />
+          )}
+
+          {/* Campaign Angles - shown after mechanism selected (or if no mechanisms available) */}
+          {(hasMechanismSelected || !result.mechanisms?.length) && result.campaignAngles && result.campaignAngles.length > 0 && (
             <CampaignAngleSelector
               angles={result.campaignAngles}
               selectedAngle={result.selectedAngle || ""}
               onSelect={selectAngle}
+              angleScores={result.launchScore?.angleScores}
             />
           )}
 
-          {result.selectedAngle ? (
+          {/* Continue button */}
+          {hasAngleSelected ? (
             <Button onClick={onNext} className="gap-2 mt-2">
               Continue to Product Content
             </Button>
+          ) : hasMechanismSelected ? (
+            <p className="text-sm text-muted-foreground mt-2">↑ Select a campaign angle above to continue</p>
+          ) : result.mechanisms?.length ? (
+            <p className="text-sm text-muted-foreground mt-2">↑ Select your unique mechanism to unlock campaign angles</p>
           ) : (
             <p className="text-sm text-muted-foreground mt-2">↑ Select a campaign angle above to continue</p>
           )}

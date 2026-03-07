@@ -23,6 +23,7 @@ Deno.serve(async (req) => {
     const chapterTitles = productContent?.chapters?.map((c: any) => c.title).join(", ") || "N/A";
     const selectedAngle = productBrief.selectedAngle || "";
     const angleInstruction = selectedAngle ? `\nIMPORTANT: Use the "${selectedAngle}" campaign angle as the primary messaging theme across all copy. Every section should reinforce this angle.` : "";
+    const mechanismInstruction = productBrief.uniqueMechanism ? `\nIMPORTANT: The product's unique mechanism is "${productBrief.uniqueMechanism}". Reference this named framework throughout the copy — in headlines, benefits, and CTAs.` : "";
 
     const prompt = `${HUMAN_TONE}
 
@@ -33,7 +34,7 @@ Concept: ${productBrief.concept}
 Unique Mechanism: ${productBrief.uniqueMechanism}
 Pain Points: ${productBrief.painPoints?.join(", ")}
 Chapters: ${chapterTitles}
-Description: ${productContent?.description || ""}${angleInstruction}
+Description: ${productContent?.description || ""}${angleInstruction}${mechanismInstruction}
 
 Return ONLY valid JSON:
 {
@@ -42,11 +43,23 @@ Return ONLY valid JSON:
   "thankYouPage": "Thank you page copy confirming their purchase/opt-in with next steps and a surprise bonus mention.",
   "bonusPage": "Bonus page copy highlighting 3 exclusive bonuses they get with their purchase.",
   "checkoutCopy": "Checkout page copy with order summary, urgency element, and trust badges text.",
-  "orderBump": "Order bump copy for the checkout page — a complementary low-price add-on offer ($7-$17). Include: product name, 2-3 sentence description of what it is, why they need it NOW, and a compelling reason to add it. Format as a short persuasive block.",
-  "upsellOffer": "One-time upsell offer copy shown after purchase. Include: upsell product name, what it includes, the transformation it provides, original price vs special price, urgency element, and CTA. Format as a full upsell page with headline, body, and CTA."
+  "orderBump": "Order bump copy for the checkout page — a complementary low-price add-on offer ($7-$17). Include: product name, 2-3 sentence description of what it is, why they need it NOW, and a compelling reason to add it.",
+  "upsellOffer": "One-time upsell offer copy shown after purchase. Include: upsell product name, what it includes, the transformation it provides, original price vs special price, urgency element, and CTA.",
+  "offerStack": {
+    "coreProduct": { "name": "Product name", "value": 297 },
+    "bonuses": [
+      { "name": "Bonus 1 Name", "description": "What it is and why it's valuable", "value": 97 },
+      { "name": "Bonus 2 Name", "description": "What it is and why it's valuable", "value": 67 },
+      { "name": "Bonus 3 Name", "description": "What it is and why it's valuable", "value": 47 }
+    ],
+    "totalValue": 508,
+    "askingPrice": 17,
+    "stackCopy": "Formatted value stack copy ready for a sales page, showing each item with its value, total value crossed out, and today's price."
+  }
 }
 
-Make each section comprehensive — at least 300 words for salesPage, 150+ for upsellOffer and orderBump, 100+ for others.`;
+Make each section comprehensive — at least 300 words for salesPage, 150+ for upsellOffer and orderBump, 100+ for others.
+The offerStack values should feel realistic and compelling. The askingPrice should be a fraction of totalValue to create irresistible perceived value.`;
 
     const { content, model } = await callTieredAI([{ role: "user", content: prompt }], userTier, "complex");
 

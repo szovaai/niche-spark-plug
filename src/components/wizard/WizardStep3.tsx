@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Sparkles, Loader2, Copy, Check, ShoppingCart, ArrowUpCircle } from "lucide-react";
+import { Sparkles, Loader2, Copy, Check, ShoppingCart, ArrowUpCircle, DollarSign } from "lucide-react";
 import { Step1Product, Step2Content, Step3Funnel } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -61,7 +62,7 @@ export default function WizardStep3({ productBrief, productContent, result, setR
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold mb-1">Funnel Builder</h2>
-        <p className="text-muted-foreground">Generate complete sales funnel copy including order bump & upsell.</p>
+        <p className="text-muted-foreground">Generate complete sales funnel copy including order bump, upsell & offer stack.</p>
       </div>
 
       {!result && (
@@ -77,7 +78,7 @@ export default function WizardStep3({ productBrief, productContent, result, setR
             <TabsList className="w-full flex-wrap h-auto gap-1">
               {FUNNEL_TABS.map(tab => {
                 const content = result[tab.key as keyof Step3Funnel];
-                if (!content) return null;
+                if (!content || typeof content !== "string") return null;
                 return (
                   <TabsTrigger key={tab.key} value={tab.key} className="text-xs gap-1">
                     {'icon' in tab && tab.icon && <tab.icon className="w-3 h-3" />}
@@ -85,10 +86,17 @@ export default function WizardStep3({ productBrief, productContent, result, setR
                   </TabsTrigger>
                 );
               })}
+              {result.offerStack && (
+                <TabsTrigger value="offerStack" className="text-xs gap-1">
+                  <DollarSign className="w-3 h-3" />
+                  Offer Stack
+                </TabsTrigger>
+              )}
             </TabsList>
+
             {FUNNEL_TABS.map(tab => {
               const content = result[tab.key as keyof Step3Funnel];
-              if (!content) return null;
+              if (!content || typeof content !== "string") return null;
               return (
                 <TabsContent key={tab.key} value={tab.key}>
                   <Card>
@@ -108,6 +116,69 @@ export default function WizardStep3({ productBrief, productContent, result, setR
                 </TabsContent>
               );
             })}
+
+            {/* Offer Stack Tab */}
+            {result.offerStack && (
+              <TabsContent value="offerStack">
+                <Card className="border-accent/30">
+                  <CardContent className="p-6 space-y-5">
+                    <h3 className="font-bold text-lg flex items-center gap-2">
+                      <DollarSign className="w-5 h-5 text-accent" />
+                      Value Stack
+                    </h3>
+
+                    {/* Core Product */}
+                    <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Badge className="mb-1">Core Product</Badge>
+                          <p className="font-semibold">{result.offerStack.coreProduct.name}</p>
+                        </div>
+                        <span className="text-lg font-bold text-muted-foreground">${result.offerStack.coreProduct.value} value</span>
+                      </div>
+                    </div>
+
+                    {/* Bonuses */}
+                    {result.offerStack.bonuses.map((bonus, i) => (
+                      <div key={i} className="p-4 rounded-lg bg-accent/5 border border-accent/20">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Badge variant="secondary" className="mb-1">Bonus {i + 1}</Badge>
+                            <p className="font-semibold">{bonus.name}</p>
+                            <p className="text-xs text-muted-foreground mt-1">{bonus.description}</p>
+                          </div>
+                          <span className="text-lg font-bold text-muted-foreground shrink-0 ml-4">${bonus.value} value</span>
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Total & Price */}
+                    <div className="p-5 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/30 text-center space-y-2">
+                      <p className="text-sm text-muted-foreground">Total Value</p>
+                      <p className="text-3xl font-black line-through text-muted-foreground">${result.offerStack.totalValue}</p>
+                      <p className="text-sm text-muted-foreground">Today Only</p>
+                      <p className="text-4xl font-black text-primary">${result.offerStack.askingPrice}</p>
+                    </div>
+
+                    {/* Copyable Stack Copy */}
+                    {result.offerStack.stackCopy && (
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-semibold text-sm">Stack Copy (for sales page)</h4>
+                          <Button variant="ghost" size="sm" onClick={() => copyText(result.offerStack!.stackCopy, "stackCopy")} className="gap-1">
+                            {copied === "stackCopy" ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                            Copy
+                          </Button>
+                        </div>
+                        <div className="text-sm text-muted-foreground whitespace-pre-wrap p-3 rounded-lg bg-secondary/50 max-h-[300px] overflow-y-auto">
+                          {result.offerStack.stackCopy}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            )}
           </Tabs>
           <Button onClick={onNext} className="gap-2">Continue to Marketing Assets</Button>
         </div>
