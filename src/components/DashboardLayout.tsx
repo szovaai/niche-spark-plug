@@ -11,8 +11,13 @@ interface DashboardLayoutProps {
 
 const pageTitles: Record<string, string> = {
   "/dashboard": "Dashboard",
-  "/create": "Create Toolkit",
-  "/my-toolkits": "My Toolkits",
+  "/wizard": "AI Launch Wizard",
+  "/products": "Products",
+  "/funnels": "Funnels",
+  "/assets": "Marketing Assets",
+  "/checklist": "Launch Checklist",
+  "/templates": "Templates",
+  "/settings": "Settings",
   "/pricing": "Pricing",
 };
 
