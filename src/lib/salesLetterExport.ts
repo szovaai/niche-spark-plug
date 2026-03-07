@@ -309,6 +309,54 @@ const generatePremiumKennedyTemplate = (data: SalesPageData): string => {
 </html>`;
 };
 
+// Kennedy letter template wrapping AI-generated body content
+const kennedyLetterTemplate = (data: SalesLetterData): string => {
+  const { title, subtitle, salesLetter, niche, targetAudience, price = 17 } = data;
+  const year = new Date().getFullYear();
+  const todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${title}</title>
+  <style>
+    ${KENNEDY_CSS}
+  </style>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  ${salesLetter}
+
+  <!-- FOOTER -->
+  <footer>
+    <p style="margin-bottom: 12px;">
+      <a href="#">Privacy Policy</a> &nbsp;·&nbsp;
+      <a href="#">Terms of Service</a> &nbsp;·&nbsp;
+      <a href="#">Contact</a>
+    </p>
+    <p>© ${year} ${title}. All rights reserved.</p>
+  </footer>
+
+</div><!-- end page-wrapper -->
+
+</body>
+</html>`;
+};
+
+// Legacy generator for backwards compatibility
+export const generateSalesLetterHTML = (data: SalesLetterData): string => {
+  return kennedyLetterTemplate(data);
+};
+
+// NEW: Generate from structured SalesPageData
+export const generatePremiumSalesPageHTML = (data: SalesPageData, template: SalesPageTemplate = 'premium-dark'): string => {
+  return generatePremiumKennedyTemplate(data);
+};
+
 // Upsell template
 export const generateUpsellHTML = (
   title: string,
