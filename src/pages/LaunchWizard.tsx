@@ -89,9 +89,13 @@ const LaunchWizard = () => {
       // Step 1
       setGenModalStep(1);
       const { data: s1, error: e1 } = await supabase.functions.invoke("generate-launch-product", {
-        body: { niche, targetAudience, productType, topic, userId: user?.id },
+        body: { niche, targetAudience, productType, topic, userId: user?.id, lockedMechanism },
       });
       if (e1) throw e1;
+      // Preserve locked mechanism from Research Agent
+      if (lockedMechanism) {
+        s1.uniqueMechanism = lockedMechanism;
+      }
       setStep1Result(s1);
       setGenModalCompleted(prev => [...prev, 1]);
       setCurrentStep(2);
