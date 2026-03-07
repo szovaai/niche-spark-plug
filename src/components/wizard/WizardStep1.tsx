@@ -15,6 +15,7 @@ import CampaignAngleSelector from "./CampaignAngleSelector";
 import LaunchScoreCard from "./LaunchScoreCard";
 import MechanismSelector from "./MechanismSelector";
 import AvatarBuilder from "./AvatarBuilder";
+import PricingPsychologyCard from "./PricingPsychologyCard";
 
 interface Props {
   niche: string;
@@ -230,6 +231,9 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
             </div>
           )}
           {result.launchScore && <LaunchScoreCard score={result.launchScore} />}
+          {result.launchScore?.pricingPsychology && (
+            <PricingPsychologyCard pricing={result.launchScore.pricingPsychology} />
+          )}
 
           {/* Only show mechanism selector if no locked mechanism from Research Agent */}
           {!lockedMechanism && result.mechanisms && result.mechanisms.length > 0 && (
