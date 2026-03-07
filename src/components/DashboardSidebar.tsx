@@ -13,6 +13,7 @@ import {
   ClipboardList,
   LayoutTemplate,
   Search,
+  Brain,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
@@ -36,6 +37,7 @@ import {
 
 const mainNavItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Research Agent", url: "/research-agent", icon: Brain },
   { title: "Products", url: "/products", icon: ShoppingBag },
   { title: "Funnels", url: "/funnels", icon: BarChart3 },
   { title: "Marketing Assets", url: "/assets", icon: Package },
