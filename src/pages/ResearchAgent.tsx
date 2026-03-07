@@ -89,6 +89,12 @@ export default function ResearchAgent() {
       audience: b.targetAudience || recommended?.audience || "",
       topic: b.topic || recommended?.suggestedAngle || "",
     });
+    if (recommended?.uniqueMechanism) {
+      params.set("mechanism", recommended.uniqueMechanism);
+    }
+    if (b.productType) {
+      params.set("productType", b.productType);
+    }
     navigate(`/wizard?${params.toString()}`);
   };
 

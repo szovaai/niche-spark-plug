@@ -27,12 +27,13 @@ const LaunchWizard = () => {
   const [genModalCompleted, setGenModalCompleted] = useState<number[]>([]);
   const [existingProjectId, setExistingProjectId] = useState<string | null>(null);
 
-  // Step 1 state — pre-fill from URL params (from Steal This Launch)
+  // Step 1 state — pre-fill from URL params (from Research Agent / Steal This Launch)
   const [niche, setNiche] = useState(searchParams.get("niche") || "");
   const [targetAudience, setTargetAudience] = useState(searchParams.get("audience") || "");
-  const [productType, setProductType] = useState("");
+  const [productType, setProductType] = useState(searchParams.get("productType") || "");
   const [topic, setTopic] = useState(searchParams.get("topic") || "");
   const [price, setPrice] = useState(17);
+  const [lockedMechanism] = useState(searchParams.get("mechanism") || "");
   const [step1Result, setStep1Result] = useState<Step1Product | null>(null);
 
   // Step 2-5 state
@@ -235,6 +236,7 @@ const LaunchWizard = () => {
                 onGenerateAll={generateAll}
                 generatingAll={generatingAll}
                 userId={user?.id}
+                lockedMechanism={lockedMechanism}
               />
             )}
             {currentStep === 2 && (
