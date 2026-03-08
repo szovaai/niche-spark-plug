@@ -193,6 +193,31 @@ export const createLaunchBoxZip = async (
     }
   }
 
+  // === GRAPHICS folder ===
+  advance("Adding product graphics...");
+  const graphicsFolder = zip.folder("GRAPHICS");
+  if (data.graphics) {
+    const addImageToZip = async (url: string, filename: string) => {
+      try {
+        if (url.startsWith("data:")) {
+          const base64Data = url.split(",")[1];
+          if (base64Data) {
+            graphicsFolder?.file(filename, base64Data, { base64: true });
+          }
+        }
+      } catch {
+        // Skip failed images silently
+      }
+    };
+    if (data.graphics.coverUrl) await addImageToZip(data.graphics.coverUrl, `${productName}_ProductCover.png`);
+    if (data.graphics.bundleUrl) await addImageToZip(data.graphics.bundleUrl, `${productName}_BundleBox.png`);
+    if (data.graphics.bonusCoverUrls?.length) {
+      for (let i = 0; i < data.graphics.bonusCoverUrls.length; i++) {
+        await addImageToZip(data.graphics.bonusCoverUrls[i], `${productName}_BonusCover${i + 1}.png`);
+      }
+    }
+  }
+
   // === LAUNCH folder ===
   advance("Generating launch plan...");
   const launchFolder = zip.folder("LAUNCH");
