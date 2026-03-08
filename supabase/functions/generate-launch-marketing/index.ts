@@ -18,10 +18,11 @@ Deno.serve(async (req) => {
       { field: 'funnelCopy', type: 'object', maxLength: 50000 },
       { field: 'price', type: 'number', maxLength: 100 },
       { field: 'buyerAvatar', type: 'object', maxLength: 10000 },
+      { field: 'launchMode', type: 'string', maxLength: 20 },
     ]);
     if (!valid) return validationErrorResponse(valError!, corsHeaders);
 
-    const { productBrief, productContent, funnelCopy, buyerAvatar } = data;
+    const { productBrief, productContent, funnelCopy, buyerAvatar, launchMode } = data;
     const price = data.price || 17;
 
     const cacheKey = `launch-marketing-${(productBrief as any).title?.slice(0, 50)}-${price}`;
@@ -96,7 +97,18 @@ AD RULES:
 
 PLATFORM-SPECIFIC RULES:
 - tiktokScript: Include timing cues [0:00-0:03], keep under 60 seconds, conversational tone
-- instagramCarousel: Exactly 8 slides, each slide is one sentence/concept, Slide 1 must stop the scroll`;
+- instagramCarousel: Exactly 8 slides, each slide is one sentence/concept, Slide 1 must stop the scroll${launchMode === "warriorplus" ? `
+
+WARRIORPLUS MODE — CRITICAL OVERRIDES:
+- ALL emails must be SHORT (under 200 words), punchy, with ONE clear CTA
+- Email subjects must create urgency or curiosity — use numbers and brackets: "[LIVE] $17 gets you..."
+- Social posts must be bold-claim-first, not educational — "I just generated $847 in 3 days using..."
+- Ad copy must lead with specific results and dollar amounts — NOT soft benefits
+- Affiliate kit must emphasize: 50-75% commissions, proven EPC data, ready-made swipes
+- JV page must open with conversion stats and commission structure — affiliates care about MONEY
+- TikTok script must be raw, authentic, fast — like a real WarriorPlus seller filming quick
+- Blog article should be a "case study" format showing the method in action with results
+- ALL content must feel like it comes from a successful WarriorPlus launcher, not a content marketer` : ""}`;
 
 
     const { content, model } = await callTieredAI([

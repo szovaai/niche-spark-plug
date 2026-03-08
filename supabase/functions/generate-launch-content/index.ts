@@ -71,10 +71,11 @@ Return ONLY valid JSON:
       { field: 'productBrief', type: 'object', required: true, maxLength: 10000 },
       { field: 'productType', type: 'string', maxLength: 100 },
       { field: 'buyerAvatar', type: 'object', maxLength: 10000 },
+      { field: 'launchMode', type: 'string', maxLength: 20 },
     ]);
     if (!valid) return validationErrorResponse(valError!, corsHeaders);
 
-    const { productBrief, productType, buyerAvatar } = data;
+    const { productBrief, productType, buyerAvatar, launchMode } = data;
 
     const cacheKey = `launch-content-${JSON.stringify(productBrief).slice(0, 100)}`;
     const cached = await getCachedResponse(cacheKey);
@@ -154,7 +155,18 @@ RULES:
 - Write in a warm, direct, conversational tone
 - Generate exactly 5 testimonial templates
 - Generate 5-7 before/after rows
-- Quick wins must be SPECIFIC and TANGIBLE`;
+- Quick wins must be SPECIFIC and TANGIBLE${launchMode === "warriorplus" ? `
+
+WARRIORPLUS MODE — CRITICAL OVERRIDES:
+- Generate 5-6 chapters (NOT 8) — WarriorPlus buyers want concise, fast-action products
+- Each chapter must be SHORT and TACTICAL — more bullets, fewer paragraphs
+- Cut all theory — every section must be "do this, then this, get this result"
+- Chapter titles must be action-verb-first: "Deploy...", "Launch...", "Activate...", "Install..."
+- Action steps must be completable in 10-15 minutes each — NO multi-day projects
+- Real examples must include specific dollar amounts and timeframes under 30 days
+- Bonuses must sound like standalone products: "The $97 [Name] — yours FREE"
+- Description must open with a bold claim and close with urgency
+- Tone: fast, bold, no-fluff — like a top seller's product, not a textbook` : ""}`;
 
     const { content, model } = await callTieredAI([
       { role: "system", content: MASTER_SYSTEM_PROMPT },

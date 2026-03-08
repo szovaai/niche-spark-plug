@@ -13,6 +13,8 @@ import ContentQualityReport from "./ContentQualityReport";
 import AssetFactory from "./AssetFactory";
 import type { ProductAssets } from "@/types/productAssets";
 
+import type { LaunchMode } from "@/pages/LaunchWizard";
+
 interface Props {
   productBrief: Step1Product | null;
   productType: string;
@@ -22,6 +24,7 @@ interface Props {
   userId?: string;
   assets?: ProductAssets;
   setAssets?: (a: ProductAssets) => void;
+  launchMode?: LaunchMode;
 }
 
 function StructuredChapter({ chapter, index, copied, onCopy }: { chapter: ChapterItem; index: number; copied: string | null; onCopy: (text: string, label: string) => void }) {
@@ -113,7 +116,7 @@ function StructuredChapter({ chapter, index, copied, onCopy }: { chapter: Chapte
   );
 }
 
-export default function WizardStep2({ productBrief, productType, result, setResult, onNext, userId, assets, setAssets }: Props) {
+export default function WizardStep2({ productBrief, productType, result, setResult, onNext, userId, assets, setAssets, launchMode }: Props) {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
   const [expandingIndex, setExpandingIndex] = useState<number | null>(null);
@@ -123,7 +126,7 @@ export default function WizardStep2({ productBrief, productType, result, setResu
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-launch-content", {
-        body: { productBrief, productType, userId },
+        body: { productBrief, productType, userId, launchMode },
       });
       if (error) throw error;
       setResult(data);

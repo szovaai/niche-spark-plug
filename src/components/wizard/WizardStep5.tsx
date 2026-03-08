@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import FunnelSiteExport from "./FunnelSiteExport";
 
+import type { LaunchMode } from "@/pages/LaunchWizard";
+
 interface Props {
   productBrief: Step1Product | null;
   hasContent: boolean;
@@ -20,16 +22,17 @@ interface Props {
   funnelData?: Step3Funnel | null;
   price?: number;
   niche?: string;
+  launchMode?: LaunchMode;
 }
 
-export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMarketing, result, setResult, onSave, userId, funnelData, price, niche }: Props) {
+export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMarketing, result, setResult, onSave, userId, funnelData, price, niche, launchMode }: Props) {
   const [loading, setLoading] = useState(false);
 
   const generate = async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-launch-checklist", {
-        body: { productBrief, hasContent, hasFunnel, hasMarketing, userId },
+        body: { productBrief, hasContent, hasFunnel, hasMarketing, userId, launchMode },
       });
       if (error) throw error;
       setResult(data);

@@ -16,6 +16,8 @@ import SalesPageAudit from "./SalesPageAudit";
 import SalesStyleSelector from "./SalesStyleSelector";
 import SalesPageSectionsUI from "./SalesPageSections";
 
+import type { LaunchMode } from "@/pages/LaunchWizard";
+
 interface Props {
   productBrief: Step1Product | null;
   productContent: Step2Content | null;
@@ -24,6 +26,7 @@ interface Props {
   onNext: () => void;
   userId?: string;
   price?: number;
+  launchMode?: LaunchMode;
 }
 
 const FUNNEL_TABS = [
@@ -36,7 +39,7 @@ const FUNNEL_TABS = [
   { key: "upsellOffer", label: "Upsell", icon: ArrowUpCircle },
 ] as const;
 
-export default function WizardStep3({ productBrief, productContent, result, setResult, onNext, userId, price }: Props) {
+export default function WizardStep3({ productBrief, productContent, result, setResult, onNext, userId, price, launchMode }: Props) {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
   const [previewContent, setPreviewContent] = useState<{ title: string; html: string } | null>(null);
@@ -49,7 +52,7 @@ export default function WizardStep3({ productBrief, productContent, result, setR
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-launch-funnel", {
-        body: { productBrief, productContent, price: price || 17, userId, salesStyle },
+        body: { productBrief, productContent, price: price || 17, userId, salesStyle: launchMode === "warriorplus" ? "warriorplus" : salesStyle, launchMode },
       });
       if (error) throw error;
       setResult(data);
