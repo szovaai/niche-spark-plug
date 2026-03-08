@@ -408,6 +408,7 @@ const LaunchWizard = () => {
                 assets={step2Assets}
                 price={price}
                 niche={niche}
+                productType={productType}
                 launchMode={launchMode}
                 graphicsData={step3Graphics}
               />

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import FunnelSiteExport from "./FunnelSiteExport";
 import LaunchBoxExportButton from "./LaunchBoxExportButton";
+import LaunchMultiplier from "./LaunchMultiplier";
 import type { ProductAssets } from "@/types/productAssets";
 
 import type { LaunchMode } from "@/pages/LaunchWizard";
@@ -27,12 +29,14 @@ interface Props {
   assets?: ProductAssets;
   price?: number;
   niche?: string;
+  productType?: string;
   launchMode?: LaunchMode;
   graphicsData?: Step3Graphics | null;
 }
 
-export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMarketing, result, setResult, onSave, userId, funnelData, contentData, marketingData, assets, price, niche, launchMode, graphicsData }: Props) {
+export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMarketing, result, setResult, onSave, userId, funnelData, contentData, marketingData, assets, price, niche, productType, launchMode, graphicsData }: Props) {
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const generate = async () => {
     setLoading(true);
@@ -164,6 +168,17 @@ export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMa
               niche={niche}
             />
           )}
+
+          {/* Launch Multiplier */}
+          <LaunchMultiplier
+            productBrief={productBrief}
+            niche={niche || ""}
+            productType={productType || "ebook"}
+            onSelectVariation={(newTopic, newTitle) => {
+              navigate(`/wizard?niche=${encodeURIComponent(niche || "")}&topic=${encodeURIComponent(newTopic)}&productType=${encodeURIComponent(productType || "ebook")}`);
+              toast.success(`Starting new launch: ${newTitle}`);
+            }}
+          />
 
           <Button onClick={onSave} variant="hero" className="gap-2 w-full">
             Save Launch Project
