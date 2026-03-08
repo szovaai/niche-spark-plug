@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sparkles, Loader2, Copy, Check, ShoppingCart, ArrowUpCircle, DollarSign, Eye, RefreshCw } from "lucide-react";
-import { Step1Product, Step2Content, Step3Funnel } from "@/types/launchWizard";
+import { Step1Product, Step2Content, Step3Funnel, SalesStyle, SalesPageSections } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import RenderedCopy from "@/components/RenderedCopy";
@@ -13,6 +13,8 @@ import { sanitizeHTML } from "@/lib/sanitize";
 import { markdownToHTML } from "@/lib/copyUtils";
 import ObjectionKiller from "./ObjectionKiller";
 import SalesPageAudit from "./SalesPageAudit";
+import SalesStyleSelector from "./SalesStyleSelector";
+import SalesPageSectionsUI from "./SalesPageSections";
 
 interface Props {
   productBrief: Step1Product | null;
@@ -38,13 +40,16 @@ export default function WizardStep3({ productBrief, productContent, result, setR
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
   const [previewContent, setPreviewContent] = useState<{ title: string; html: string } | null>(null);
+  const [salesStyle, setSalesStyle] = useState<SalesStyle>("warriorplus");
+
+  const hasSections = !!(result?.salesPageSections);
 
   const generate = async () => {
     if (!productBrief) return;
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-launch-funnel", {
-        body: { productBrief, productContent, price: price || 17, userId },
+        body: { productBrief, productContent, price: price || 17, userId, salesStyle },
       });
       if (error) throw error;
       setResult(data);
@@ -68,6 +73,12 @@ export default function WizardStep3({ productBrief, productContent, result, setR
     setPreviewContent({ title, html });
   };
 
+  const handleSectionsUpdate = (sections: SalesPageSections) => {
+    if (result) {
+      setResult({ ...result, salesPageSections: sections });
+    }
+  };
+
   if (!productBrief) {
     return <div className="text-center py-12 text-muted-foreground">Complete previous steps first.</div>;
   }
@@ -76,28 +87,45 @@ export default function WizardStep3({ productBrief, productContent, result, setR
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold mb-1">Funnel Builder</h2>
-        <p className="text-muted-foreground">Generate complete sales funnel copy including order bump, upsell & offer stack.</p>
+        <p className="text-muted-foreground">Generate complete sales funnel copy with section-by-section editing.</p>
       </div>
 
+      {/* Style selector — show before generation or allow re-generation */}
       {!result && (
-        <Button onClick={generate} disabled={loading} className="gap-2">
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-          Generate Funnel Copy
-        </Button>
+        <div className="space-y-4">
+          <SalesStyleSelector value={salesStyle} onChange={setSalesStyle} disabled={loading} />
+          <Button onClick={generate} disabled={loading} className="gap-2">
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            Generate Funnel Copy
+          </Button>
+        </div>
       )}
 
       {result && (
         <div className="space-y-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Badge variant="outline" className="text-xs">
+              {salesStyle === "warriorplus" ? "WarriorPlus Style" : salesStyle === "longform" ? "Long-Form" : salesStyle === "vsl" ? "VSL Script" : "Short Page"}
+            </Badge>
             <Button variant="outline" size="sm" onClick={generate} disabled={loading} className="gap-1">
               {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
               Regenerate All
             </Button>
+            <SalesStyleSelector value={salesStyle} onChange={setSalesStyle} disabled={loading} />
           </div>
 
-          <Tabs defaultValue="salesPage">
+          <Tabs defaultValue={hasSections ? "sections" : "salesPage"}>
             <TabsList className="w-full flex-wrap h-auto gap-1">
+              {/* Section-based tab if we have structured sections */}
+              {hasSections && (
+                <TabsTrigger value="sections" className="text-xs gap-1 font-semibold">
+                  <Sparkles className="w-3 h-3" />
+                  Sales Page (Sections)
+                </TabsTrigger>
+              )}
               {FUNNEL_TABS.map(tab => {
+                // Skip salesPage tab if we have sections (it's redundant)
+                if (tab.key === "salesPage" && hasSections) return null;
                 const content = result[tab.key as keyof Step3Funnel];
                 if (!content || typeof content !== "string") return null;
                 return (
@@ -113,8 +141,27 @@ export default function WizardStep3({ productBrief, productContent, result, setR
                   Offer Stack
                 </TabsTrigger>
               )}
+              {/* Full Page fallback tab when sections exist */}
+              {hasSections && result.salesPage && typeof result.salesPage === "string" && (
+                <TabsTrigger value="salesPage" className="text-xs gap-1">
+                  <Eye className="w-3 h-3" />
+                  Full Page View
+                </TabsTrigger>
+              )}
             </TabsList>
 
+            {/* Section-based sales page editor */}
+            {hasSections && (
+              <TabsContent value="sections">
+                <SalesPageSectionsUI
+                  sections={result.salesPageSections!}
+                  onUpdate={handleSectionsUpdate}
+                  askingPrice={price}
+                />
+              </TabsContent>
+            )}
+
+            {/* Standard funnel tabs */}
             {FUNNEL_TABS.map(tab => {
               const content = result[tab.key as keyof Step3Funnel];
               if (!content || typeof content !== "string") return null;
@@ -206,6 +253,7 @@ export default function WizardStep3({ productBrief, productContent, result, setR
               </TabsContent>
             )}
           </Tabs>
+
           {result.objections && result.objections.length > 0 && (
             <ObjectionKiller objections={result.objections} />
           )}
