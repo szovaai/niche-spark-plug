@@ -376,6 +376,9 @@ const LaunchWizard = () => {
                 onSave={saveProject}
                 userId={user?.id}
                 funnelData={step3Result}
+                contentData={step2Result}
+                marketingData={step4Result}
+                assets={step2Assets}
                 price={price}
                 niche={niche}
                 launchMode={launchMode}
