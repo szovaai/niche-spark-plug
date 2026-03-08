@@ -1,53 +1,48 @@
 
 
-# DigiLaunchKit AI — Refactor Plan
+# Clone My Funnel — Implementation Plan
 
-## What This Changes
+## Overview
 
-This is a major restructuring that repositions the app from a collection of separate tools (Empire Mode, Micro Factory, Toolkit Builder, Research, Launch) into a unified **AI Launch Engine** with one primary flow: the **AI Launch Wizard**.
+Add a "Clone Funnel" feature to the Funnels page that lets users duplicate an existing funnel into a new launch project, optionally with AI-powered rewriting to adapt it to a new niche/audience/product.
 
-## Current State vs. Target State
+## How It Works
 
-**Current navigation:** Dashboard, Empire Mode, Micro Factory, Research, My Toolkits, Launch
+1. User clicks "Clone Funnel" button on the Funnels page
+2. Modal opens showing their existing funnels (from `launch_projects` with `step3_funnel`)
+3. User selects a source funnel, then enters new details: product name, target market, tone
+4. Two modes: **Clone** (duplicate as-is into new project) and **Clone & Improve** (AI rewrites all funnel pages for new context with stronger copy)
+5. Creates a new `launch_projects` row with the cloned/rewritten `step3_funnel`, pre-filled niche/audience/product fields
+6. Navigates user to the new project in the Launch Wizard
 
-**New navigation:** Dashboard, AI Launch Wizard, Products, Funnels, Marketing Assets, Launch Checklist, Templates, Settings
+## Files to Create
 
-## Implementation Status: ✅ COMPLETE
+### `src/components/CloneFunnelModal.tsx`
+- Modal with two views: **Select Funnel** (list of user's funnels) → **Customize** (inputs for new product name, target market, tone selector, clone mode toggle)
+- Tone options: WarriorPlus, Authority, Friendly, Bold
+- Two buttons: "Clone Funnel" (direct copy) and "Clone & Improve" (calls edge function)
+- Loading state during AI rewrite
 
-### Phase 1: Database ✅
-- Created `launch_projects` table with JSONB fields for each wizard step
-- RLS policies: users can only CRUD their own rows
-- Auto-updated `updated_at` trigger
+### `supabase/functions/clone-funnel/index.ts`
+- Accepts: `sourceFunnel` (the step3_funnel JSON), `newProductName`, `newAudience`, `newNiche`, `tone`, `improve` (boolean)
+- If `improve=false`: returns the source funnel with simple find/replace of product name and audience references
+- If `improve=true`: calls AI to rewrite each funnel section (salesPage, optInPage, thankYouPage, bonusPage, checkoutCopy, orderBump, upsellOffer) for the new context with stronger hooks, headlines, and pricing suggestions
+- Uses existing `callTieredAI` and auth patterns
 
-### Phase 2: Edge Functions ✅
-- `generate-launch-product` — product concept from niche/audience/type/topic
-- `generate-launch-content` — outline, chapters, bonuses, description
-- `generate-launch-funnel` — sales page, opt-in, thank you, bonus, checkout copy
-- `generate-launch-marketing` — 5 emails, 10 social posts, 5 pins, blog, video script
-- `generate-launch-checklist` — personalized launch roadmap
+## Files to Modify
 
-### Phase 3: AI Launch Wizard ✅
-- 5-step wizard at `/wizard` with left stepper + right content
-- "Generate Entire Launch System" button runs all 5 steps sequentially
-- All outputs saved to `launch_projects` table
+### `src/pages/Funnels.tsx`
+- Add "Clone Funnel" button next to header
+- Import and render `CloneFunnelModal`
+- Pass projects list to modal for selection
 
-### Phase 4: Section Pages ✅
-- `/products` — list/delete launch projects
-- `/funnels` — tabbed funnel copy library
-- `/assets` — marketing asset library (emails, posts, pins, blog, video)
-- `/checklist` — interactive launch checklists with toggle
-- `/templates` — 5 pre-built niche templates
+### `supabase/config.toml`
+- Register `clone-funnel` function with `verify_jwt = false`
 
-### Phase 5: Navigation ✅
-- New sidebar: Dashboard, Products, Funnels, Marketing Assets, Launch Checklist, Templates
-- CTA button: "New Launch" → `/wizard`
-- Legacy routes preserved: `/empire`, `/micro-factory`, `/research`, `/my-toolkits`, `/launch`
+## Implementation Priority
+1. `CloneFunnelModal` component with select + customize UI
+2. Direct clone mode (no AI — just duplicates into new project row)
+3. `clone-funnel` edge function for AI-powered rewrite
+4. "Clone & Improve" mode integration
+5. Navigate to new project after clone
 
-### Phase 6: Dashboard ✅
-- Launch-focused: progress tracker, active projects, adapted stats
-- "Start New Launch" CTA
-
-### Phase 7: Branding ✅
-- Title: "DigiLaunchKit AI"
-- Hero: "Launch Your Digital Product in 60 Minutes"
-- Updated Navbar, HeroSection, index.html
