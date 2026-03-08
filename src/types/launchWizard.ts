@@ -135,6 +135,12 @@ export interface Step2Content {
   proofStack?: ProofStack;
 }
 
+export interface Step3Graphics {
+  coverUrl: string | null;
+  bundleUrl: string | null;
+  bonusCoverUrls: string[];
+}
+
 export interface ActionPlanStep {
   step: string;
   action: string;
@@ -229,7 +235,8 @@ export const PRODUCT_TYPES = [
 export const WIZARD_STEPS = [
   { number: 1, title: "Product Setup", description: "Define your niche and product" },
   { number: 2, title: "Product Content", description: "Generate your product" },
-  { number: 3, title: "Funnel Copy", description: "Build your sales funnel" },
-  { number: 4, title: "Marketing Assets", description: "Create promotional content" },
-  { number: 5, title: "Launch Checklist", description: "Your launch roadmap" },
+  { number: 3, title: "Product Graphics", description: "Generate product visuals" },
+  { number: 4, title: "Funnel Copy", description: "Build your sales funnel" },
+  { number: 5, title: "Marketing Assets", description: "Create promotional content" },
+  { number: 6, title: "Launch Checklist", description: "Your launch roadmap" },
 ] as const;
