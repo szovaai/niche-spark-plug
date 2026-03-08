@@ -1,53 +1,76 @@
 
 
-# DigiLaunchKit AI — Refactor Plan
+# Upgrade Sales Page Generator — Section-Based, High-Converting, Style-Selectable
 
-## What This Changes
+## What's Wrong Now
 
-This is a major restructuring that repositions the app from a collection of separate tools (Empire Mode, Micro Factory, Toolkit Builder, Research, Launch) into a unified **AI Launch Engine** with one primary flow: the **AI Launch Wizard**.
+The current funnel builder generates a **single long text blob** for the sales page. It's rendered as one continuous markdown document via `RenderedCopy`. There's no section-level editing, no style selector, no visual product stack, and the AI prompt produces generic copy despite having a strong system prompt.
 
-## Current State vs. Target State
+## What Changes
 
-**Current navigation:** Dashboard, Empire Mode, Micro Factory, Research, My Toolkits, Launch
+### 1. Sales Letter Style Selector (new)
+Add a dropdown/radio selector **before** generation with 4 styles:
+- **WarriorPlus Style** (default) — urgency-heavy, scarcity, value stacking, pattern interrupts
+- **Long-Form Copy** — classic Dan Kennedy letter format (already partially implemented)
+- **Video Sales Letter Script** — teleprompter-ready script with timing cues
+- **Short Landing Page** — hero + mechanism + stack + CTA only
 
-**New navigation:** Dashboard, AI Launch Wizard, Products, Funnels, Marketing Assets, Launch Checklist, Templates, Settings
+Each style maps to a different prompt template in the edge function.
 
-## Implementation Status: ✅ COMPLETE
+### 2. Section-Based Sales Page Output (replaces single blob)
+Instead of `salesPage: "one big string"`, the edge function returns structured JSON sections:
 
-### Phase 1: Database ✅
-- Created `launch_projects` table with JSONB fields for each wizard step
-- RLS policies: users can only CRUD their own rows
-- Auto-updated `updated_at` trigger
+```text
+{
+  "salesPageSections": {
+    "patternInterrupt": "...",
+    "bigPromise": "...",
+    "curiosityHook": "...",
+    "problemAgitation": "...",
+    "mechanismIntro": "...",
+    "systemSteps": [...],
+    "productBreakdown": [{ module, title, description, value }],
+    "bonusStack": [{ name, description, value }],
+    "testimonials": "...",
+    "objectionHandling": "...",
+    "guarantee": "...",
+    "urgencyClose": "...",
+    "callToAction": "..."
+  }
+}
+```
 
-### Phase 2: Edge Functions ✅
-- `generate-launch-product` — product concept from niche/audience/type/topic
-- `generate-launch-content` — outline, chapters, bonuses, description
-- `generate-launch-funnel` — sales page, opt-in, thank you, bonus, checkout copy
-- `generate-launch-marketing` — 5 emails, 10 social posts, 5 pins, blog, video script
-- `generate-launch-checklist` — personalized launch roadmap
+### 3. Section Tab UI in WizardStep3
+Replace the single "Sales Page" tab content with **sub-tabs** for each section:
+- Headline | Hook | Problem | Mechanism | System Steps | Product Breakdown | Bonus Stack | Testimonials | Objections | Guarantee | CTA
+- Each section is individually editable (textarea) and regenerable
+- "Copy Section" and "Preview Section" per tab
 
-### Phase 3: AI Launch Wizard ✅
-- 5-step wizard at `/wizard` with left stepper + right content
-- "Generate Entire Launch System" button runs all 5 steps sequentially
-- All outputs saved to `launch_projects` table
+### 4. Product Breakdown Visual Card
+A dedicated visual component showing module breakdown with perceived values — similar to the existing Offer Stack but for the product modules themselves. Auto-generated from Step 2 chapters.
 
-### Phase 4: Section Pages ✅
-- `/products` — list/delete launch projects
-- `/funnels` — tabbed funnel copy library
-- `/assets` — marketing asset library (emails, posts, pins, blog, video)
-- `/checklist` — interactive launch checklists with toggle
-- `/templates` — 5 pre-built niche templates
+### 5. Edge Function Prompt Overhaul
+Update `generate-launch-funnel` to:
+- Accept a `salesStyle` parameter
+- Use style-specific prompt templates with the WarriorPlus framework (pattern interrupt → curiosity hook → mechanism → stack → urgency)
+- Return structured sections instead of a single string
+- Keep backward compatibility: if `salesPageSections` exists, use section UI; if `salesPage` string exists, fall back to current blob view
 
-### Phase 5: Navigation ✅
-- New sidebar: Dashboard, Products, Funnels, Marketing Assets, Launch Checklist, Templates
-- CTA button: "New Launch" → `/wizard`
-- Legacy routes preserved: `/empire`, `/micro-factory`, `/research`, `/my-toolkits`, `/launch`
+## Files to Create
+- `src/components/wizard/SalesStyleSelector.tsx` — radio cards for the 4 styles
+- `src/components/wizard/SalesPageSections.tsx` — tabbed section editor/viewer for the structured sales page
+- `src/components/wizard/ProductBreakdownCard.tsx` — visual module stack with values
 
-### Phase 6: Dashboard ✅
-- Launch-focused: progress tracker, active projects, adapted stats
-- "Start New Launch" CTA
+## Files to Modify
+- `supabase/functions/generate-launch-funnel/index.ts` — add style-specific prompts, structured section output
+- `src/components/wizard/WizardStep3.tsx` — integrate style selector, section-based UI, backward compat
+- `src/types/launchWizard.ts` — add `SalesPageSections`, `SalesStyle` types, update `Step3Funnel`
 
-### Phase 7: Branding ✅
-- Title: "DigiLaunchKit AI"
-- Hero: "Launch Your Digital Product in 60 Minutes"
-- Updated Navbar, HeroSection, index.html
+## Implementation Priority
+1. Types + style selector UI
+2. Edge function prompt overhaul (4 style templates, structured JSON output)
+3. `SalesPageSections` tabbed editor component
+4. `ProductBreakdownCard` with module values
+5. Integration into WizardStep3 with backward compatibility
+6. Individual section regeneration (calls edge function with `regenerateSection` param)
+
