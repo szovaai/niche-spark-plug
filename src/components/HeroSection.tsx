@@ -34,7 +34,7 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-8"
         >
           <Sparkles className="w-4 h-4 text-primary" />
-          <span className="text-sm text-muted-foreground">AI Launch Operating System</span>
+          <span className="text-sm text-muted-foreground">The 60-Minute Launch System</span>
         </motion.div>
         
         {/* Main heading */}
@@ -44,10 +44,8 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="text-5xl md:text-7xl font-bold mb-6 leading-tight"
         >
-          <span className="text-foreground">The </span>
-          <span className="gradient-text glow-text">AI Operating System</span>
-          <span className="text-foreground"> for Launching </span>
-          <span className="gradient-text glow-text">Digital Products</span>
+          <span className="gradient-text glow-text">Launch Your First Digital Product Tonight</span>
+          <span className="text-foreground"> — Without Writing A Word</span>
         </motion.h1>
         
         {/* Subheading */}
@@ -57,8 +55,7 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed"
         >
-          Plan, Build, and Launch Your Entire Digital Product Business From One Dashboard.
-          Product, funnel, emails, ads, affiliate kit — all generated in one flow.
+          DigiLaunchKit uses the 60-Minute Launch Method to automatically build your product, funnel, bonuses, emails and affiliate kit. Pick a topic. Click build. Launch your product.
         </motion.p>
         
         {/* CTA Buttons */}
