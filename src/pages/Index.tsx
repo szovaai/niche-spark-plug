@@ -5,12 +5,12 @@ import {
   Sparkles, ArrowRight, Check, X,
   Wand2, Zap, Target, DollarSign, Users, Search, Brain,
   Package, Mail, Megaphone, FileText, ClipboardList, BarChart3,
-  ShieldCheck, Key, Rocket, Eye, HelpCircle, ChevronDown
+  ShieldCheck, Key, Rocket, Eye, HelpCircle, ChevronDown, Timer, Upload, MousePointerClick
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const fadeIn = {
   initial: { opacity: 0, y: 24 },
@@ -45,15 +45,55 @@ const FAQItem = ({ q, a }: { q: string; a: string }) => {
   );
 };
 
+const getProgressText = (pct: number) => {
+  if (pct < 25) return "Discover how DigiLaunchKit works";
+  if (pct < 50) return "See what DigiLaunchKit builds for you";
+  if (pct < 75) return "See how the launch system works";
+  return "You're almost there — see the launch price below";
+};
+
 const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [showFloatingBar, setShowFloatingBar] = useState(false);
 
   const handleCTA = () => navigate(user ? "/wizard" : "/auth");
+
+  useEffect(() => {
+    const onScroll = () => {
+      const docH = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = docH > 0 ? (window.scrollY / docH) * 100 : 0;
+      setScrollProgress(Math.min(pct, 100));
+      setShowFloatingBar(window.scrollY > window.innerHeight * 0.85);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const scrollToPricing = () => {
+    const el = document.getElementById("pricing-section");
+    el?.scrollIntoView({ behavior: "smooth" });
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
+
+      {/* ===== SCROLL PROGRESS BAR ===== */}
+      <div className="fixed top-0 left-0 right-0 z-50">
+        <div className="h-1 bg-secondary/30">
+          <div
+            className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-150 ease-out"
+            style={{ width: `${scrollProgress}%` }}
+          />
+        </div>
+        <div className="bg-background/80 backdrop-blur-sm border-b border-border/30">
+          <p className="text-[10px] text-muted-foreground text-center py-0.5 px-4 truncate">
+            {getProgressText(scrollProgress)}
+          </p>
+        </div>
+      </div>
 
       {/* ===== HERO ===== */}
       <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden px-4 pt-24">
@@ -79,9 +119,16 @@ const Index = () => {
             <span className="text-foreground"> — Without Writing A Word</span>
           </motion.h1>
 
-          <motion.p {...fadeIn} transition={{ delay: 0.2 }} className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
+          <motion.p {...fadeIn} transition={{ delay: 0.2 }} className="text-lg md:text-xl text-muted-foreground mb-6 max-w-2xl mx-auto leading-relaxed">
             DigiLaunchKit uses the 60-Minute Launch Method to automatically build your product, funnel, bonuses, emails and affiliate kit. Pick a topic. Click build. Launch your product.
           </motion.p>
+
+          {/* Three-line tagline */}
+          <motion.div {...fadeIn} transition={{ delay: 0.25 }} className="flex flex-col items-center gap-1 mb-8">
+            {["Build your product.", "Build your funnel.", "Build your launch."].map((line, i) => (
+              <p key={i} className="text-base md:text-lg font-semibold text-foreground">{line}</p>
+            ))}
+          </motion.div>
 
           <motion.div {...fadeIn} transition={{ delay: 0.3 }} className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button variant="hero" size="xl" onClick={handleCTA} className="dual-glow">
@@ -89,6 +136,20 @@ const Index = () => {
               Get Instant Access Now
               <ArrowRight className="w-5 h-5" />
             </Button>
+          </motion.div>
+
+          {/* Reassurance bullets */}
+          <motion.div {...fadeIn} transition={{ delay: 0.35 }} className="flex flex-wrap items-center justify-center gap-4 mt-4">
+            {[
+              { icon: Timer, text: "Build Your First Launch In Under 60 Minutes" },
+              { icon: Wand2, text: "No Writing Required" },
+              { icon: Rocket, text: "Launch Tonight" },
+            ].map((item, i) => (
+              <span key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <item.icon className="w-3.5 h-3.5 text-primary" />
+                {item.text}
+              </span>
+            ))}
           </motion.div>
 
           {/* Asset checklist — concrete outputs */}
@@ -171,6 +232,46 @@ const Index = () => {
             </div>
             <p className="text-foreground font-semibold text-center text-lg">That ends today.</p>
           </motion.div>
+        </div>
+      </section>
+
+      <SectionDivider />
+
+      {/* ===== YOUR FIRST LAUNCH IN 60 MINUTES ===== */}
+      <section className="py-20 px-4 bg-secondary/20">
+        <div className="max-w-4xl mx-auto">
+          <motion.div {...fadeIn} className="text-center mb-14">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-4">
+              <Timer className="w-4 h-4 text-primary" />
+              <span className="text-sm gradient-text font-medium">Simple 4-Step Process</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Your First Launch In 60 Minutes</h2>
+            <p className="text-muted-foreground">No experience needed. No writing required. Just follow the steps.</p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { step: "1", icon: MousePointerClick, title: "Enter Your Topic", desc: "Tell DigiLaunchKit your niche, audience, and product idea in plain English." },
+              { step: "2", icon: Wand2, title: "AI Builds Everything", desc: "Product, sales page, bonuses, emails, affiliate kit — generated automatically." },
+              { step: "3", icon: Package, title: "Export Launch Kit", desc: "Download your complete Launch-In-A-Box ZIP with every asset organized and ready." },
+              { step: "4", icon: Rocket, title: "Deploy & Sell", desc: "Upload to WarriorPlus, ClickBank, or Gumroad and start taking sales tonight." },
+            ].map((item, i) => (
+              <motion.div key={i} {...fadeIn} transition={{ delay: i * 0.1 }}>
+                <Card className="h-full border-border/50 hover:border-primary/30 transition-colors relative overflow-hidden">
+                  <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-xs font-bold text-primary">{item.step}</span>
+                  </div>
+                  <CardContent className="p-6 pt-8">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                      <item.icon className="w-6 h-6 text-primary" />
+                    </div>
+                    <h3 className="font-bold text-lg mb-2">{item.title}</h3>
+                    <p className="text-sm text-muted-foreground">{item.desc}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -416,8 +517,74 @@ const Index = () => {
 
       <SectionDivider />
 
-      {/* ===== WHO IT'S FOR / NOT FOR ===== */}
+      {/* ===== WHAT THIS REPLACES ===== */}
       <section className="py-20 px-4 bg-secondary/20">
+        <div className="max-w-4xl mx-auto">
+          <motion.div {...fadeIn} className="text-center mb-14">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">What This Replaces</h2>
+            <p className="text-muted-foreground">See why creators are switching to DigiLaunchKit.</p>
+          </motion.div>
+
+          <motion.div {...fadeIn} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Without */}
+            <Card className="border-destructive/30 bg-destructive/5">
+              <CardContent className="p-6">
+                <h3 className="font-bold text-lg mb-5 flex items-center gap-2">
+                  <X className="w-5 h-5 text-destructive" />
+                  Without DigiLaunchKit
+                </h3>
+                <ul className="space-y-3">
+                  {[
+                    "Weeks creating your product",
+                    "Hiring copywriters ($3,000+)",
+                    "Building funnels from scratch",
+                    "Writing emails one by one",
+                    "Designing graphics yourself",
+                    "Planning launches with spreadsheets",
+                    "Guessing what will sell",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <X className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* With */}
+            <Card className="border-primary/30 bg-primary/5">
+              <CardContent className="p-6">
+                <h3 className="font-bold text-lg mb-5 flex items-center gap-2">
+                  <Check className="w-5 h-5 text-primary" />
+                  With DigiLaunchKit
+                </h3>
+                <ul className="space-y-3">
+                  {[
+                    "Enter your topic",
+                    "Click build",
+                    "Product generated in minutes",
+                    "Sales page written automatically",
+                    "Email sequence created instantly",
+                    "Graphics and affiliate kit included",
+                    "Launch your product tonight",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <Check className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      </section>
+
+      <SectionDivider />
+
+      {/* ===== WHO IT'S FOR / NOT FOR ===== */}
+      <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto">
           <motion.h2 {...fadeIn} className="text-3xl md:text-4xl font-bold mb-10 text-center">Who This Is For (and Who It's Not)</motion.h2>
 
@@ -467,7 +634,7 @@ const Index = () => {
       <SectionDivider />
 
       {/* ===== WHAT MAKES IT DIFFERENT ===== */}
-      <section className="py-20 px-4">
+      <section className="py-20 px-4 bg-secondary/20">
         <div className="max-w-3xl mx-auto">
           <motion.div {...fadeIn}>
             <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center">What Makes This Different</h2>
@@ -488,7 +655,7 @@ const Index = () => {
       <SectionDivider />
 
       {/* ===== TEMPLATES + BYOK ===== */}
-      <section className="py-16 px-4 bg-secondary/20">
+      <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
           <motion.div {...fadeIn}>
             <div className="flex items-center gap-2 mb-4">
@@ -530,7 +697,7 @@ const Index = () => {
       <SectionDivider />
 
       {/* ===== WHAT THIS BUILDS FOR YOU ===== */}
-      <section className="py-20 px-4">
+      <section id="pricing-section" className="py-20 px-4 bg-secondary/20">
         <div className="max-w-3xl mx-auto">
           <motion.div {...fadeIn} className="text-center mb-10">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">What DigiLaunchKit Builds For You</h2>
@@ -575,7 +742,7 @@ const Index = () => {
       <SectionDivider />
 
       {/* ===== GUARANTEE ===== */}
-      <section className="py-20 px-4 bg-secondary/20">
+      <section className="py-20 px-4">
         <div className="max-w-3xl mx-auto text-center">
           <motion.div {...fadeIn}>
             <ShieldCheck className="w-16 h-16 text-primary mx-auto mb-6" />
@@ -593,7 +760,7 @@ const Index = () => {
       <SectionDivider />
 
       {/* ===== INVESTMENT ===== */}
-      <section className="py-20 px-4">
+      <section className="py-20 px-4 bg-secondary/20">
         <div className="max-w-3xl mx-auto text-center">
           <motion.div {...fadeIn}>
             <h2 className="text-3xl md:text-4xl font-bold mb-6">Here's What This Investment Looks Like</h2>
@@ -625,7 +792,7 @@ const Index = () => {
       <SectionDivider />
 
       {/* ===== FINAL WORD ===== */}
-      <section className="py-20 px-4 bg-secondary/20">
+      <section className="py-20 px-4">
         <div className="max-w-3xl mx-auto">
           <motion.div {...fadeIn}>
             <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center">A Final Word Before You Decide</h2>
@@ -660,7 +827,7 @@ const Index = () => {
       <SectionDivider />
 
       {/* ===== FAQ ===== */}
-      <section className="py-20 px-4">
+      <section className="py-20 px-4 bg-secondary/20">
         <div className="max-w-3xl mx-auto">
           <motion.div {...fadeIn} className="text-center mb-10">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Frequently Asked Questions</h2>
@@ -711,6 +878,29 @@ const Index = () => {
           <p className="text-sm text-muted-foreground">© 2025 DigiLaunchKit AI</p>
         </div>
       </footer>
+
+      {/* ===== FLOATING BUY BAR ===== */}
+      {showFloatingBar && (
+        <motion.div
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-xl border-t border-primary/20 shadow-[0_-4px_30px_hsl(var(--primary)/0.15)]"
+        >
+          <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+            <div className="hidden sm:block">
+              <p className="text-sm font-bold text-foreground">DigiLaunchKit AI</p>
+              <p className="text-xs text-muted-foreground">60-Minute Digital Product Launch System</p>
+            </div>
+            <div className="flex items-center gap-4 w-full sm:w-auto justify-center sm:justify-end">
+              <span className="text-lg font-black gradient-text">$37</span>
+              <Button variant="hero" size="sm" onClick={scrollToPricing} className="dual-glow">
+                <Rocket className="w-4 h-4" />
+                Get Instant Access
+              </Button>
+            </div>
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 };
