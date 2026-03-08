@@ -20,10 +20,11 @@ Deno.serve(async (req) => {
       { field: 'lockedMechanism', type: 'string', maxLength: 500 },
       { field: 'buyerAvatar', type: 'object', maxLength: 10000 },
       { field: 'qualityMode', type: 'string', maxLength: 20 },
+      { field: 'launchMode', type: 'string', maxLength: 20 },
     ]);
     if (!valid) return validationErrorResponse(valError!, corsHeaders);
 
-    const { niche, targetAudience, productType, topic, lockedMechanism, buyerAvatar, qualityMode } = data;
+    const { niche, targetAudience, productType, topic, lockedMechanism, buyerAvatar, qualityMode, launchMode } = data;
 
     const cacheKey = `launch-product-${niche}-${productType}-${topic}`;
     const cached = await getCachedResponse(cacheKey);
@@ -93,7 +94,17 @@ PREMIUM QUALITY INSTRUCTIONS:
 - Each pain point must include an emotional detail AND a specific scenario
 - Each mechanism description must include a mini case study: "[Name] used this to [specific result] in [timeframe]"
 - Campaign angle hooks must be scroll-stopping — use numbers, timeframes, or provocative statements
-- Add a "Pro Tip" element to each mechanism's whyItWorks explaining how to position it` : ""}`;
+- Add a "Pro Tip" element to each mechanism's whyItWorks explaining how to position it` : ""}${launchMode === "warriorplus" ? `
+
+WARRIORPLUS MODE — CRITICAL OVERRIDES:
+- Title must be SHORT (5-8 words max), punchy, action-oriented. Think "$500 Client Formula" not "The Complete Guide To..."
+- Subtitle should create urgency: "How I [result] In [timeframe] Without [objection]"
+- Concept must lead with a bold, specific claim — not soft academic language
+- Pain points must be RAW and emotional — use the words real buyers use in forums
+- All mechanisms must sound like proprietary "insider secrets" — short, branded, memorable
+- Campaign angle hooks must be WarriorPlus-native: bold claims, specific dollar amounts, fast timeframes
+- Price anchor everything against $997+ courses — position as the "shortcut"
+- Tone: confident, no-BS, fast-paced — like a top WarriorPlus seller, not a professor` : ""}`;
 
 
     const { content, model } = await callTieredAI([

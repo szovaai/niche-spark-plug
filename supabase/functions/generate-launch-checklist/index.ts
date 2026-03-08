@@ -15,10 +15,11 @@ Deno.serve(async (req) => {
       { field: 'hasContent', type: 'boolean' },
       { field: 'hasFunnel', type: 'boolean' },
       { field: 'hasMarketing', type: 'boolean' },
+      { field: 'launchMode', type: 'string', maxLength: 20 },
     ]);
     if (!valid) return validationErrorResponse(valError!, corsHeaders);
 
-    const { productBrief, hasContent, hasFunnel, hasMarketing } = data;
+    const { productBrief, hasContent, hasFunnel, hasMarketing, launchMode } = data;
 
     const userTier = await getUserTier(user.id);
 
@@ -46,7 +47,17 @@ Generate 10-14 launch steps organized into a 7-day launch timeline. Group steps 
 - Day 7: Follow up with buyers, gather testimonials, iterate
 
 Mark steps as completed=true if the user already has that asset generated (e.g. if hasContent is true, mark product-related steps as completed).
-Each day should have 1-3 steps. Assign the "day" field (1-7) to each step.`;
+Each day should have 1-3 steps. Assign the "day" field (1-7) to each step.${launchMode === "warriorplus" ? `
+
+WARRIORPLUS MODE — Customize the timeline for a WarriorPlus launch:
+- Day 1: Finalize product + set up WarriorPlus vendor account
+- Day 2: Create sales page + configure WarriorPlus product listing (price, commission %)
+- Day 3: Set up JV/affiliate page + recruit first 5-10 affiliates
+- Day 4: Configure order bump + OTO upsell in WarriorPlus
+- Day 5: Send JV swipes to affiliates + schedule launch emails
+- Day 6: Launch day — go live on WarriorPlus, announce in FB groups, email list
+- Day 7: Follow up, respond to support tickets, share EPC stats with affiliates
+- Include WarriorPlus-specific steps like "Set commission to 50-100%", "Submit to deal of the day"` : ""}`;
 
     const { content } = await callTieredAI([{ role: "user", content: prompt }], userTier, "simple");
 
