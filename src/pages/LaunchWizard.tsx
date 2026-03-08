@@ -172,7 +172,7 @@ const LaunchWizard = () => {
       // Step 3
       setGenModalStep(3);
       const { data: s3, error: e3 } = await supabase.functions.invoke("generate-launch-funnel", {
-        body: { productBrief: s1, productContent: s2, price, userId: user?.id, buyerAvatar },
+        body: { productBrief: s1, productContent: s2, price, userId: user?.id, buyerAvatar, salesStyle: "warriorplus" },
       });
       if (e3) throw e3;
       setStep3Result(s3);
