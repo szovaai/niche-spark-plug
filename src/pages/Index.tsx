@@ -67,7 +67,7 @@ const Index = () => {
         <div className="relative z-10 max-w-4xl mx-auto text-center">
           <motion.div {...fadeIn} className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-8">
             <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-sm text-muted-foreground">AI Launch Operating System</span>
+            <span className="text-sm text-muted-foreground">The 60-Minute Launch System</span>
           </motion.div>
 
           <motion.p {...fadeIn} transition={{ delay: 0.05 }} className="text-sm md:text-base uppercase tracking-widest text-primary font-semibold mb-4">
@@ -75,13 +75,12 @@ const Index = () => {
           </motion.p>
 
           <motion.h1 {...fadeIn} transition={{ delay: 0.1 }} className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-            <span className="text-foreground">New AI System Builds Your Entire Digital Product Launch — </span>
-            <span className="gradient-text glow-text">Sales Funnel, Email Sequence, Ad Copy, Affiliate Kit & Launch Checklist</span>
-            <span className="text-foreground"> — In Under 60 Minutes.</span>
+            <span className="gradient-text glow-text">Launch Your First Digital Product Tonight</span>
+            <span className="text-foreground"> — Without Writing A Word</span>
           </motion.h1>
 
           <motion.p {...fadeIn} transition={{ delay: 0.2 }} className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-            If you can type a niche and a rough idea into a text box, you already know everything you need to use it.
+            DigiLaunchKit uses the 60-Minute Launch Method to automatically build your product, funnel, bonuses, emails and affiliate kit. Pick a topic. Click build. Launch your product.
           </motion.p>
 
           <motion.div {...fadeIn} transition={{ delay: 0.3 }} className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -92,17 +91,26 @@ const Index = () => {
             </Button>
           </motion.div>
 
-          <motion.div {...fadeIn} transition={{ delay: 0.4 }} className="grid grid-cols-3 gap-8 mt-16 max-w-lg mx-auto">
+          {/* Asset checklist — concrete outputs */}
+          <motion.div {...fadeIn} transition={{ delay: 0.4 }} className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-14 max-w-2xl mx-auto">
             {[
-              { value: "30+", label: "Assets Generated" },
-              { value: "< 60min", label: "Idea to Launch" },
-              { value: "One Click", label: "Generate Everything" },
-            ].map((stat, i) => (
-              <div key={i} className="text-center">
-                <div className="text-2xl md:text-3xl font-bold gradient-text">{stat.value}</div>
-                <div className="text-xs text-muted-foreground mt-1">{stat.label}</div>
+              "✔ Full Ebook Generated",
+              "✔ Sales Page Written",
+              "✔ Bonuses Created",
+              "✔ Email Sequence Ready",
+              "✔ Affiliate Kit Built",
+              "✔ Product Graphics",
+              "✔ Launch Timeline",
+              "✔ Complete Launch Kit",
+            ].map((item, i) => (
+              <div key={i} className="text-xs text-primary font-medium text-left py-1">
+                {item}
               </div>
             ))}
+          </motion.div>
+
+          <motion.div {...fadeIn} transition={{ delay: 0.5 }} className="mt-8">
+            <p className="text-xs text-muted-foreground">Research → Product → Funnel → Launch Kit — built automatically in minutes.</p>
           </motion.div>
         </div>
       </section>
@@ -521,35 +529,45 @@ const Index = () => {
 
       <SectionDivider />
 
-      {/* ===== EVERYTHING YOU GET ===== */}
+      {/* ===== WHAT THIS BUILDS FOR YOU ===== */}
       <section className="py-20 px-4">
         <div className="max-w-3xl mx-auto">
           <motion.div {...fadeIn} className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Here's Everything You Get Today</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">What DigiLaunchKit Builds For You</h2>
+            <p className="text-muted-foreground">In about 60 minutes, your entire launch is ready.</p>
           </motion.div>
 
-          <motion.div {...fadeIn} className="space-y-3">
+          <motion.div {...fadeIn} className="space-y-3 mb-10">
             {[
-              "DigiLaunchKit AI Full Platform Access",
-              "AI Launch Wizard — 5-step guided launch builder",
-              "Complete Launch Asset Generation (30+ assets per launch)",
-              "Sales Funnel Copy Library",
-              "Email Sequence Generator (5 emails per launch)",
-              "Ad Copy & Social Media Assets (15 assets per launch)",
-              "Affiliate Kit Generator — JV page, swipes, angles",
-              "Launch Checklist with Day-by-Day Timeline",
-              "Steal This Launch — Competitive Intelligence Tool",
-              "Launch Research Agent (4 research modes)",
-              "Launch Score Advisor",
-              "5 Pre-Built Launch Templates",
-              "BYOK Support for DeepSeek, OpenAI, and Claude APIs",
-              "Dashboard with Revenue Projector",
+              { asset: "Digital Product (ebook or guide)", emoji: "📚" },
+              { asset: "High-Converting Sales Page", emoji: "📄" },
+              { asset: "Bonus Stack (3+ bonuses)", emoji: "🎁" },
+              { asset: "5-Email Launch Sequence", emoji: "📧" },
+              { asset: "Affiliate Promo Kit & JV Page", emoji: "🤝" },
+              { asset: "Product Bundle Graphics", emoji: "🎨" },
+              { asset: "Ad Copy & Social Media Posts", emoji: "📣" },
+              { asset: "Day-by-Day Launch Timeline", emoji: "📅" },
+              { asset: "Complete Launch-In-A-Box ZIP", emoji: "📦" },
+              { asset: "Deployable Funnel Website", emoji: "🌐" },
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30 border border-border/50">
-                <Check className="w-5 h-5 text-primary shrink-0" />
-                <span className="text-sm font-medium">{item}</span>
+                <span className="text-lg shrink-0">{item.emoji}</span>
+                <span className="text-sm font-medium">{item.asset}</span>
               </div>
             ))}
+          </motion.div>
+
+          {/* Value anchor */}
+          <motion.div {...fadeIn} className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-8 text-center">
+            <p className="text-sm text-muted-foreground mb-2">Total Value Of Assets Created</p>
+            <p className="text-4xl font-black text-foreground line-through decoration-destructive/60 mb-1">$997+</p>
+            <p className="text-sm text-muted-foreground mb-4">Yours today for just</p>
+            <p className="text-5xl font-black gradient-text">$37</p>
+            <Button variant="hero" size="xl" onClick={handleCTA} className="dual-glow mt-6">
+              <Wand2 className="w-5 h-5" />
+              Get Instant Access Now
+              <ArrowRight className="w-5 h-5" />
+            </Button>
           </motion.div>
         </div>
       </section>
