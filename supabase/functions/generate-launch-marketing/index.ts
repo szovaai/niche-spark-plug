@@ -73,11 +73,34 @@ Return ONLY valid JSON:
     "emailSwipes": [
       { "subject": "Under 50 chars", "body": "Direct benefit-led swipe. Under 250 words. Ends with [YOUR AFFILIATE LINK]" },
       { "subject": "...", "body": "Story-led swipe. Ends with [YOUR AFFILIATE LINK]" },
-      { "subject": "...", "body": "Urgency/scarcity swipe. Ends with [YOUR AFFILIATE LINK]" }
+      { "subject": "...", "body": "Urgency/scarcity swipe. Ends with [YOUR AFFILIATE LINK]" },
+      { "subject": "...", "body": "Social proof/results swipe. Ends with [YOUR AFFILIATE LINK]" },
+      { "subject": "...", "body": "Last chance/countdown swipe. Ends with [YOUR AFFILIATE LINK]" }
     ],
-    "promoAngles": ["Angle 1 with specific hook", "Angle 2", "Angle 3"],
+    "promoAngles": ["Angle 1 with specific hook", "Angle 2", "Angle 3", "Angle 4"],
     "bonusPageHeadline": "Headline for affiliate bonus page",
-    "jvPageCopy": "Complete JV recruitment page. Include: 50-75% commission on $${price} FE, product description, why this converts, what affiliates get (swipes, banners, bonuses). 300+ words."
+    "jvPageCopy": "Complete JV recruitment page. Include: Launch Overview, Product Summary, Why This Will Convert, Commission Structure (50-75% on $${price} FE + upsells), Prize Pool details, Promo Schedule, What Affiliates Get (swipes, banners, bonuses). 500+ words.",
+    "contestPrizes": [
+      { "place": "1st Place", "prize": "$500 Cash" },
+      { "place": "2nd Place", "prize": "$250 Cash" },
+      { "place": "3rd Place", "prize": "$100 Cash" },
+      { "place": "Top 10", "prize": "Free Product Access" }
+    ],
+    "launchCalendar": [
+      { "event": "JV Page Opens", "date": "Day 1", "description": "Send JV page to affiliates" },
+      { "event": "Affiliate Approval", "date": "Day 3", "description": "Approve affiliate requests" },
+      { "event": "Review Copies Sent", "date": "Day 5", "description": "Send review access to top affiliates" },
+      { "event": "Launch Day", "date": "Day 7", "description": "GO LIVE — cart opens" },
+      { "event": "Mid-Launch Push", "date": "Day 9", "description": "Send leaderboard update to affiliates" },
+      { "event": "Cart Closes", "date": "Day 10", "description": "Final urgency push — cart closes" }
+    ],
+    "outreachEmails": [
+      { "subject": "Would you be open to promoting this?", "body": "Personalized cold outreach email to recruit an affiliate. Under 150 words. Professional but casual. Mention the product name, niche, commission rate, and offer review access. End with a soft ask.", "targetType": "Cold Outreach" },
+      { "subject": "Quick question about a JV opportunity", "body": "Warm outreach for affiliates in the same niche. Reference their audience. Under 150 words.", "targetType": "Warm Outreach" },
+      { "subject": "Your audience would love this — here's why", "body": "Outreach email for top affiliates. Lead with conversion data and EPC estimates. Under 200 words.", "targetType": "Top Affiliate" }
+    ],
+    "topAffiliateNiches": ["List 5 related niches where you can find affiliates who promote similar products"],
+    "commissionStructure": "Front End ($${price}): 50-75% commission\\nOrder Bump ($27): 50% commission\\nUpsell 1 ($67): 50% commission\\nUpsell 2 ($97): 50% commission\\n\\nExample: Affiliate sends 100 clicks → 5% conversion = 5 sales × $${price} × 75% = $${Math.round(price * 5 * 0.75)} per 100 clicks"
   }
 }
 
