@@ -1,6 +1,6 @@
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
-import type { Step1Product, Step2Content, Step3Funnel, Step4Marketing, Step5Checklist } from "@/types/launchWizard";
+import type { Step1Product, Step2Content, Step3Graphics, Step3Funnel, Step4Marketing, Step5Checklist } from "@/types/launchWizard";
 import type { ProductAssets } from "@/types/productAssets";
 
 export interface LaunchBoxData {
@@ -9,6 +9,7 @@ export interface LaunchBoxData {
   funnel: Step3Funnel | null;
   marketing: Step4Marketing | null;
   checklist: Step5Checklist | null;
+  graphics: Step3Graphics | null;
   assets: ProductAssets;
   niche: string;
   price: number;
@@ -32,7 +33,7 @@ export const createLaunchBoxZip = async (
   onProgress?: (p: LaunchBoxProgress) => void
 ): Promise<void> => {
   const zip = new JSZip();
-  const total = 7;
+  const total = 8;
   let step = 0;
   const advance = (label: string) => { step++; onProgress?.({ step: label, current: step, total }); };
 
