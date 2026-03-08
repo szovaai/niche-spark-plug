@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Package, Download, Loader2, CheckCircle2, FolderOpen } from "lucide-react";
 import { createLaunchBoxZip, type LaunchBoxData, type LaunchBoxProgress } from "@/lib/launchBoxExport";
-import type { Step1Product, Step2Content, Step3Funnel, Step4Marketing, Step5Checklist } from "@/types/launchWizard";
+import type { Step1Product, Step2Content, Step3Graphics, Step3Funnel, Step4Marketing, Step5Checklist } from "@/types/launchWizard";
 import type { ProductAssets } from "@/types/productAssets";
 import { toast } from "sonner";
 
@@ -14,6 +14,7 @@ interface Props {
   funnel: Step3Funnel | null;
   marketing: Step4Marketing | null;
   checklist: Step5Checklist | null;
+  graphics?: Step3Graphics | null;
   assets: ProductAssets;
   niche: string;
   price: number;
@@ -26,10 +27,11 @@ const FOLDER_ITEMS = [
   { folder: "FUNNEL", files: ["SalesPageCopy.txt", "OptinPageCopy.txt", "UpsellPageCopy.txt", "OrderBumpCopy.txt"], icon: "🔗" },
   { folder: "AFFILIATE", files: ["JVPage.txt", "AffiliateEmails.txt", "SocialPosts.txt"], icon: "🤝" },
   { folder: "MARKETING", files: ["EmailSwipes.txt", "AdCopy.txt", "VideoScript.txt"], icon: "📣" },
+  { folder: "GRAPHICS", files: ["ProductCover.png", "BundleBox.png"], icon: "🎨" },
   { folder: "LAUNCH", files: ["LaunchTimeline.txt", "LaunchChecklist.txt"], icon: "🚀" },
 ];
 
-export default function LaunchBoxExportButton({ product, content, funnel, marketing, checklist, assets, niche, price, authorName }: Props) {
+export default function LaunchBoxExportButton({ product, content, funnel, marketing, checklist, graphics, assets, niche, price, authorName }: Props) {
   const [exporting, setExporting] = useState(false);
   const [progress, setProgress] = useState<LaunchBoxProgress | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -40,11 +42,11 @@ export default function LaunchBoxExportButton({ product, content, funnel, market
     if (!product) return;
     setExporting(true);
     setShowModal(true);
-    setProgress({ step: "Preparing...", current: 0, total: 7 });
+    setProgress({ step: "Preparing...", current: 0, total: 8 });
 
     try {
       await createLaunchBoxZip(
-        { product, content, funnel, marketing, checklist, assets, niche, price, authorName },
+        { product, content, funnel, marketing, checklist, graphics: graphics || null, assets, niche, price, authorName },
         setProgress
       );
       toast.success("🎉 Your Launch Kit has been downloaded!");

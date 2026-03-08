@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Loader2, CheckCircle2, Circle, Calendar } from "lucide-react";
-import { Step1Product, Step2Content, Step3Funnel, Step4Marketing, Step5Checklist } from "@/types/launchWizard";
+import { Step1Product, Step2Content, Step3Graphics, Step3Funnel, Step4Marketing, Step5Checklist } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import FunnelSiteExport from "./FunnelSiteExport";
@@ -28,9 +28,10 @@ interface Props {
   price?: number;
   niche?: string;
   launchMode?: LaunchMode;
+  graphicsData?: Step3Graphics | null;
 }
 
-export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMarketing, result, setResult, onSave, userId, funnelData, contentData, marketingData, assets, price, niche, launchMode }: Props) {
+export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMarketing, result, setResult, onSave, userId, funnelData, contentData, marketingData, assets, price, niche, launchMode, graphicsData }: Props) {
   const [loading, setLoading] = useState(false);
 
   const generate = async () => {
@@ -147,6 +148,7 @@ export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMa
             funnel={funnelData || null}
             marketing={marketingData || null}
             checklist={result}
+            graphics={graphicsData}
             assets={assets || {}}
             niche={niche || ""}
             price={price || 17}

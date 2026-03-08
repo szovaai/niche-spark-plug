@@ -1,6 +1,6 @@
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
-import type { Step1Product, Step2Content, Step3Funnel, Step4Marketing, Step5Checklist } from "@/types/launchWizard";
+import type { Step1Product, Step2Content, Step3Graphics, Step3Funnel, Step4Marketing, Step5Checklist } from "@/types/launchWizard";
 import type { ProductAssets } from "@/types/productAssets";
 
 export interface LaunchBoxData {
@@ -9,6 +9,7 @@ export interface LaunchBoxData {
   funnel: Step3Funnel | null;
   marketing: Step4Marketing | null;
   checklist: Step5Checklist | null;
+  graphics: Step3Graphics | null;
   assets: ProductAssets;
   niche: string;
   price: number;
@@ -32,7 +33,7 @@ export const createLaunchBoxZip = async (
   onProgress?: (p: LaunchBoxProgress) => void
 ): Promise<void> => {
   const zip = new JSZip();
-  const total = 7;
+  const total = 8;
   let step = 0;
   const advance = (label: string) => { step++; onProgress?.({ step: label, current: step, total }); };
 
@@ -189,6 +190,31 @@ export const createLaunchBoxZip = async (
       marketingFolder?.file("PinterestPins.txt", wrapText("PINTEREST PIN DESCRIPTIONS",
         data.marketing.pinterestPins.map((p, i) => `Pin ${i + 1}: ${p}`).join("\n\n")
       ));
+    }
+  }
+
+  // === GRAPHICS folder ===
+  advance("Adding product graphics...");
+  const graphicsFolder = zip.folder("GRAPHICS");
+  if (data.graphics) {
+    const addImageToZip = async (url: string, filename: string) => {
+      try {
+        if (url.startsWith("data:")) {
+          const base64Data = url.split(",")[1];
+          if (base64Data) {
+            graphicsFolder?.file(filename, base64Data, { base64: true });
+          }
+        }
+      } catch {
+        // Skip failed images silently
+      }
+    };
+    if (data.graphics.coverUrl) await addImageToZip(data.graphics.coverUrl, `${productName}_ProductCover.png`);
+    if (data.graphics.bundleUrl) await addImageToZip(data.graphics.bundleUrl, `${productName}_BundleBox.png`);
+    if (data.graphics.bonusCoverUrls?.length) {
+      for (let i = 0; i < data.graphics.bonusCoverUrls.length; i++) {
+        await addImageToZip(data.graphics.bonusCoverUrls[i], `${productName}_BonusCover${i + 1}.png`);
+      }
     }
   }
 
