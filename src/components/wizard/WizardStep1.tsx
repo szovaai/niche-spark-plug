@@ -17,6 +17,8 @@ import MechanismSelector from "./MechanismSelector";
 import AvatarBuilder from "./AvatarBuilder";
 import PricingPsychologyCard from "./PricingPsychologyCard";
 
+import type { LaunchMode } from "@/pages/LaunchWizard";
+
 interface Props {
   niche: string;
   setNiche: (v: string) => void;
@@ -37,9 +39,10 @@ interface Props {
   lockedMechanism?: string;
   buyerAvatar: BuyerAvatar | null;
   setBuyerAvatar: (v: BuyerAvatar | null) => void;
+  launchMode?: LaunchMode;
 }
 
-export default function WizardStep1({ niche, setNiche, targetAudience, setTargetAudience, productType, setProductType, topic, setTopic, price, setPrice, result, setResult, onNext, onGenerateAll, generatingAll, userId, lockedMechanism, buyerAvatar, setBuyerAvatar }: Props) {
+export default function WizardStep1({ niche, setNiche, targetAudience, setTargetAudience, productType, setProductType, topic, setTopic, price, setPrice, result, setResult, onNext, onGenerateAll, generatingAll, userId, lockedMechanism, buyerAvatar, setBuyerAvatar, launchMode }: Props) {
   const [loading, setLoading] = useState(false);
   const [scoreLoading, setScoreLoading] = useState(false);
 
@@ -50,7 +53,7 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-launch-product", {
-        body: { niche, targetAudience, productType, topic, userId, lockedMechanism, buyerAvatar },
+        body: { niche, targetAudience, productType, topic, userId, lockedMechanism, buyerAvatar, launchMode },
       });
       if (error) throw error;
       // If a locked mechanism was provided from Research Agent, preserve it exactly

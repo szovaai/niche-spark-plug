@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import RenderedCopy from "@/components/RenderedCopy";
 import AssetDownloadButtons from "@/components/AssetDownloadButtons";
 
+import type { LaunchMode } from "@/pages/LaunchWizard";
+
 interface Props {
   productBrief: Step1Product | null;
   productContent: Step2Content | null;
@@ -19,9 +21,10 @@ interface Props {
   onNext: () => void;
   userId?: string;
   price?: number;
+  launchMode?: LaunchMode;
 }
 
-export default function WizardStep4({ productBrief, productContent, funnelCopy, result, setResult, onNext, userId, price }: Props) {
+export default function WizardStep4({ productBrief, productContent, funnelCopy, result, setResult, onNext, userId, price, launchMode }: Props) {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
 
@@ -30,7 +33,7 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-launch-marketing", {
-        body: { productBrief, productContent, funnelCopy, price: price || 17, userId },
+        body: { productBrief, productContent, funnelCopy, price: price || 17, userId, launchMode },
       });
       if (error) throw error;
       setResult(data);
