@@ -290,15 +290,16 @@ serve(async (req) => {
     if (phase === "raw") {
       const pb = promptBoxData as PromptBoxData;
       
-      systemPrompt = `You are organizing someone's product description into a clear sales letter format.
-You do NOT add persuasion, hype, statistics, or testimonials.
-You simply take their input and make it easy to read.
-Write like you're explaining something to a friend - honest, direct, helpful.`;
+      systemPrompt = `You are a direct-response sales copywriter who writes raw drafts that are clear, specific, and psychologically compelling.
+You do NOT add fake testimonials or made-up statistics.
+You write like a trusted advisor having a real conversation — short sentences, punchy rhythm, specific details.
+You use the three WarriorPlus psychological triggers: Fast Result Promise, Simple Named Mechanism, and Money Opportunity.
+BANNED WORDS: leverage, optimize, elevate, game changer, revolutionary, unlock potential, harness, dive into, journey, at the end of the day, in today's digital world, it's time to, without further ado, breakthrough, amazing, incredible, powerful.`;
 
-      prompt = `Organize this product information into a CLEAR, SIMPLE sales letter draft.
+      prompt = `Write a COMPELLING raw sales letter draft for this product.
 
-PRODUCT DETAILS FROM USER:
-${pb?.whatProductIs ? `• What it is: ${pb.whatProductIs}` : `• Product: ${title} - a digital toolkit in the ${niche} niche`}
+PRODUCT DETAILS:
+${pb?.whatProductIs ? `• What it is: ${pb.whatProductIs}` : `• Product: ${title} - a digital product in the ${niche} niche`}
 ${pb?.whoItsFor ? `• Who it's for: ${pb.whoItsFor}` : `• Audience: ${targetAudience || "online entrepreneurs"}`}
 ${pb?.mainProblem ? `• Problem it solves: ${pb.mainProblem}` : ""}
 ${pb?.desiredOutcome ? `• Desired outcome: ${pb.desiredOutcome}` : ""}
@@ -306,23 +307,52 @@ ${pb?.bonusesIncluded ? `• What's included: ${pb.bonusesIncluded}` : `• Comp
 
 PRICE: $${price || 17}
 
-=== RULES FOR THIS RAW DRAFT ===
-1. NO hype, NO fake stats, NO testimonials
-2. NO urgency tactics or pressure
-3. Just organize this information clearly
-4. Use simple, conversational language
-5. Be honest about what the product is
+=== STRUCTURE (use this exact flow) ===
 
-=== STRUCTURE (simple and clear) ===
-- Open with a relatable situation or problem (2-3 sentences)
-- Explain what the product is clearly (1 paragraph)
-- List what's included with brief descriptions
-- Explain the main benefit/transformation
-- Simple closing with price and call-to-action
+1. PATTERN INTERRUPT HEADLINE
+   - NOT generic. Make it stop the reader cold.
+   - Example style: "Stop Chasing Clients. Make Them Ask YOU For Work Instead."
+   - Use a contrarian angle or unexpected statement.
 
-This should feel like: "Here's what this is and why it might help you."
+2. BIG PROMISE (2-3 sentences)
+   - Specific result + timeframe + "even if" qualifier
+   - Example: "Discover the simple AI system that can land your first paying client in as little as 7 days — even if you have no audience, no ads, and no tech skills."
 
-Format as clean HTML with <p>, <h2>, <ul>, <li> tags. Keep paragraphs short (2-3 sentences max).`;
+3. CURIOSITY HOOK (1-2 sentences)
+   - A "what if" question that makes them keep reading
+   - Example: "What if you could open one tool, click one button, and instantly generate everything you need to start getting paid?"
+
+4. PROBLEM AGITATION (3-4 short paragraphs)
+   - Name specific frustrations they feel RIGHT NOW
+   - Short paragraphs. 1-2 sentences each.
+   - End with: "But what if you need [result] this week?"
+
+5. THE NAMED MECHANISM (give the system a name)
+   - Create a specific method name like "The 60-Minute Launch Method" or "The AI Client Magnet Framework"
+   - Explain it in 3-4 simple steps
+   - Each step = one sentence, action-oriented
+
+6. PRODUCT BREAKDOWN (this is critical — list everything included)
+   - Format each item as: Module/Component Name → what it does → specific benefit
+   - Use specific numbers: "7 chapters", "12 worksheets", "15 scripts"
+   - This section should feel SUBSTANTIAL
+
+7. FASCINATION BULLETS (8-12 curiosity-driven bullets)
+   - Each bullet should make them think "I need to know this"
+   - Include specific numbers, timeframes, and dollar amounts
+   - Example: "The $47 service package that took one beginner from zero to 3 paying clients in 11 days (page 34)"
+
+8. PRICE ANCHOR + CLOSE
+   - Compare to alternatives: copywriter ($3,000), consultant ($5,000), course ($997)
+   - Show total value of everything included
+   - Reveal the price with confident, no-pressure language
+
+Format as clean HTML with <p>, <h2>, <h3>, <ul>, <li>, <strong>, <em> tags. 
+Keep paragraphs SHORT — 2 sentences max.
+Use <h2> for major section breaks.
+Use <strong> liberally for emphasis.
+Write in FIRST PERSON — "I", "you", "we".
+The tone should feel like a confident friend giving real advice, NOT a corporate brochure.`;
 
     // PHASE 2: POLISH - Apply DigiStream Conversion Pattern with WarriorPlus HTML structure
     } else if (phase === "polish") {
@@ -330,11 +360,19 @@ Format as clean HTML with <p>, <h2>, <ul>, <li> tags. Keep paragraphs short (2-3
 
 You enhance structure and persuasion WITHOUT changing what the offer is.
 You NEVER add fake testimonials, made-up statistics, or invented claims.
-You work ONLY with the raw draft provided - do not re-interpret or change the core offer.
-You output clean, structured HTML that matches the Kennedy direct-response letter aesthetic — cream background, serif fonts, red accents, personal letter tone.
+You work ONLY with the raw draft provided — do not re-interpret or change the core offer.
+You output clean, structured HTML that matches the Kennedy direct-response letter aesthetic.
 
-TONE: Authoritative, conversational, direct — like a letter from a trusted advisor. Not salesy, not corporate.
-STYLE: Long-form letter format with pull-quotes, fascination bullets, testimonial blocks, comparison tables, bonus stacks, and a clear order box.`;
+TONE: Authoritative yet conversational — like a letter from a trusted advisor who genuinely wants to help. Short sentences. Em-dashes. Contractions. Real talk.
+STYLE: Long-form letter format with pull-quotes, fascination bullets, comparison tables, bonus stacks, and a clear order box.
+
+BANNED WORDS: leverage, optimize, elevate, game changer, revolutionary, unlock potential, harness, dive into, journey, at the end of the day, in today's digital world, it's time to, without further ado, breakthrough, amazing, incredible, powerful, cutting-edge.
+
+PSYCHOLOGICAL TRIGGERS TO WEAVE IN:
+1. FAST RESULT — emphasize speed: "tonight", "this week", "in 60 minutes"
+2. NAMED MECHANISM — reference the system name from the raw draft prominently
+3. MONEY OPPORTUNITY — frame as income potential, not just learning
+4. DONE-FOR-YOU — emphasize automation and completeness`;
 
       prompt = `Take this EXACT raw draft and restructure it as a Dan Kennedy-style direct-response sales letter.
 
@@ -346,14 +384,17 @@ ${DCP_FRAMEWORK}
 ${KENNEDY_HTML_STRUCTURE}
 
 === CRITICAL RULES ===
-1. Keep the SAME offer, price, and components from the raw draft - DO NOT change them
-2. DO NOT invent fake testimonials or statistics — generate placeholder testimonials clearly marked as examples
-3. DO NOT use hype words like "breakthrough", "revolutionary", "secret", "amazing"
+1. Keep the SAME offer, price, and components from the raw draft — DO NOT change them
+2. DO NOT invent fake testimonials — generate placeholder testimonials clearly marked as [EXAMPLE]
+3. Use SHORT paragraphs — 2 sentences max per paragraph
 4. Write in FIRST PERSON — "I", "me", "my" — like a personal letter
-5. Use the transformation language from the raw draft
-6. Format using the EXACT HTML structure shown above with Kennedy classes
-7. Include ALL required sections: urgency-bar, letter-header, headline-box, salutation, body-copy with pull-quotes, fascinations, check-lists, testimonial blocks, comparison table, who-this-is-for, bonus stack, order-box, guarantee, FAQ, PS section
-8. Make it read like a REAL direct-response sales letter — conversational, persuasive, personal
+5. PATTERN INTERRUPT headline — not generic. Make the reader stop scrolling.
+6. Include a NAMED MECHANISM prominently (from the raw draft)
+7. FASCINATION BULLETS must include specific numbers, dollar amounts, and timeframes
+8. PRODUCT BREAKDOWN must list every component with specific quantities ("7 chapters", "12 worksheets")
+9. PRICE ANCHOR: compare to hiring a copywriter ($3,000), consultant ($5,000), course ($997)
+10. Format using the EXACT HTML structure shown above with Kennedy classes
+11. Include ALL required sections: urgency-bar, letter-header, headline-box, salutation, body-copy with pull-quotes, fascinations, check-lists, comparison table, who-this-is-for, bonus stack, order-box, guarantee, FAQ, PS section
 
 === ADDITIONAL CONTEXT ===
 Product: ${title}
@@ -362,10 +403,11 @@ Target Audience: ${(promptBoxData as PromptBoxData)?.whoItsFor || targetAudience
 Price: $${price || 17}
 Author: ${authorName || "The Creator"}
 
-Remember: Conversion comes from Clarity → Belief → Momentum → Action. 
+Remember: Conversion comes from Clarity → Belief → Momentum → Action.
 NOT from hype, pressure, or fake scarcity.
+The reader should feel: "This is exactly what I need — and it's a no-brainer at this price."
 
-OUTPUT ONLY THE HTML CONTENT starting from the urgency-bar div. Do not include <!DOCTYPE>, <html>, <head>, or <body> tags — just the content that goes inside the page-wrapper.`;
+OUTPUT ONLY THE HTML CONTENT starting from the urgency-bar div. Do not include <!DOCTYPE>, <html>, <head>, or <body> tags.`;
 
 
     // LEGACY MODE - Original behavior for backwards compatibility
