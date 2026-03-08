@@ -6,7 +6,9 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Sparkles, Loader2, Copy, Check, RefreshCw, Target, BookOpen, Lightbulb, ListOrdered, CheckCircle, AlertTriangle, Pencil, Key, FileText, ChevronDown, ClipboardList, FileCode, BookMarked, Footprints } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Progress } from "@/components/ui/progress";
+import { Sparkles, Loader2, Copy, Check, RefreshCw, Target, BookOpen, Lightbulb, ListOrdered, CheckCircle, AlertTriangle, Pencil, Key, FileText, ChevronDown, ClipboardList, FileCode, BookMarked, Footprints, PenLine, Download } from "lucide-react";
 import { Step1Product, Step2Content, ChapterItem, ContentDepth, ExpansionType } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -226,6 +228,9 @@ export default function WizardStep2({ productBrief, productType, result, setResu
   const [expandingIndex, setExpandingIndex] = useState<number | null>(null);
   const [expandingType, setExpandingType] = useState<string | null>(null);
   const [contentDepth, setContentDepth] = useState<ContentDepth>("standard");
+  const [writingIndex, setWritingIndex] = useState<number | null>(null);
+  const [writingAll, setWritingAll] = useState(false);
+  const [writeAllProgress, setWriteAllProgress] = useState(0);
 
   const generate = async () => {
     if (!productBrief) return;
@@ -288,6 +293,70 @@ export default function WizardStep2({ productBrief, productType, result, setResu
       setExpandingIndex(null);
       setExpandingType(null);
     }
+  };
+
+  const writeFullChapter = async (index: number) => {
+    if (!result || !productBrief) return;
+    setWritingIndex(index);
+    try {
+      const chapter = result.chapters[index];
+      const { data, error } = await supabase.functions.invoke("generate-launch-content", {
+        body: {
+          writeFullChapter: true,
+          chapterToExpand: chapter,
+          productBrief,
+          productType,
+        },
+      });
+      if (error) throw error;
+      if (data?.fullContent) {
+        const updatedChapters = [...result.chapters];
+        updatedChapters[index] = { ...updatedChapters[index], fullContent: data.fullContent };
+        setResult({ ...result, chapters: updatedChapters });
+        toast.success(`Chapter ${index + 1} full content written!`);
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Failed to write chapter");
+    } finally {
+      setWritingIndex(null);
+    }
+  };
+
+  const writeAllChapters = async () => {
+    if (!result || !productBrief) return;
+    setWritingAll(true);
+    setWriteAllProgress(0);
+    const total = result.chapters.length;
+    for (let i = 0; i < total; i++) {
+      if (result.chapters[i].fullContent) {
+        setWriteAllProgress(((i + 1) / total) * 100);
+        continue;
+      }
+      setWritingIndex(i);
+      try {
+        const chapter = result.chapters[i];
+        const { data, error } = await supabase.functions.invoke("generate-launch-content", {
+          body: {
+            writeFullChapter: true,
+            chapterToExpand: chapter,
+            productBrief,
+            productType,
+          },
+        });
+        if (error) throw error;
+        if (data?.fullContent) {
+          const updatedChapters = [...result.chapters];
+          updatedChapters[i] = { ...updatedChapters[i], fullContent: data.fullContent };
+          setResult({ ...result, chapters: updatedChapters });
+        }
+      } catch (e: any) {
+        toast.error(`Failed to write chapter ${i + 1}`);
+      }
+      setWriteAllProgress(((i + 1) / total) * 100);
+    }
+    setWritingIndex(null);
+    setWritingAll(false);
+    toast.success("All chapters written!");
   };
 
   const copyText = (text: string, label: string) => {
@@ -404,13 +473,28 @@ export default function WizardStep2({ productBrief, productType, result, setResu
                     ~{estimatedPages} pages
                   </Badge>
                 </div>
-                <AssetDownloadButtons
-                  content={result.chapters?.map((ch, i) =>
-                    `Chapter ${i + 1}: ${ch.title}\n${ch.summary}\n\nKey Points:\n${ch.keyPoints?.map(kp => `- ${kp}`).join("\n") || ""}`
-                  ).join("\n\n---\n\n") || ""}
-                  title={`${productBrief.title} - Chapters`}
-                />
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" className="gap-1 text-xs" disabled={writingAll || writingIndex !== null} onClick={writeAllChapters}>
+                    {writingAll ? <Loader2 className="w-3 h-3 animate-spin" /> : <PenLine className="w-3 h-3" />}
+                    Write All Chapters
+                  </Button>
+                  <AssetDownloadButtons
+                    content={result.chapters?.map((ch, i) =>
+                      `Chapter ${i + 1}: ${ch.title}\n${ch.fullContent || `${ch.summary}\n\nKey Points:\n${ch.keyPoints?.map(kp => `- ${kp}`).join("\n") || ""}`}`
+                    ).join("\n\n---\n\n") || ""}
+                    title={`${productBrief.title} - Chapters`}
+                  />
+                </div>
               </div>
+              {writingAll && (
+                <div className="mb-4 space-y-1">
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>Writing chapters...</span>
+                    <span>{Math.round(writeAllProgress)}%</span>
+                  </div>
+                  <Progress value={writeAllProgress} className="h-2" />
+                </div>
+              )}
               <Accordion type="multiple" className="space-y-2">
                 {result.chapters?.map((ch, i) => (
                   <AccordionItem key={i} value={`ch-${i}`} className="border rounded-lg px-4">
@@ -426,9 +510,44 @@ export default function WizardStep2({ productBrief, productType, result, setResu
                     </AccordionTrigger>
                     <AccordionContent className="space-y-2">
                       <StructuredChapter chapter={ch} index={i} copied={copied} onCopy={copyText} />
+
+                      {/* Full written chapter content */}
+                      {ch.fullContent && (
+                        <div className="border-t border-border/50 pt-3 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                              <PenLine className="w-3 h-3" /> Full Chapter Content
+                            </p>
+                            <div className="flex items-center gap-1">
+                              <Button variant="ghost" size="sm" className="h-6 px-2 text-xs gap-1" onClick={() => copyText(ch.fullContent!, `full-${i}`)}>
+                                {copied === `full-${i}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />} Copy
+                              </Button>
+                              <Button variant="ghost" size="sm" className="h-6 px-2 text-xs gap-1" onClick={() => {
+                                const blob = new Blob([ch.fullContent!], { type: "text/markdown" });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement("a");
+                                a.href = url;
+                                a.download = `Chapter_${i + 1}_${ch.title.replace(/[^a-zA-Z0-9]/g, "_")}.md`;
+                                a.click();
+                                URL.revokeObjectURL(url);
+                              }}>
+                                <Download className="w-3 h-3" /> Save
+                              </Button>
+                            </div>
+                          </div>
+                          <ScrollArea className="max-h-[400px] rounded-lg border border-border/50 bg-background/50 p-4">
+                            <div className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{ch.fullContent}</div>
+                          </ScrollArea>
+                        </div>
+                      )}
+
                       <div className="flex items-center gap-2 pt-2 flex-wrap">
                         <Button variant="ghost" size="sm" onClick={() => copyText(`${ch.title}\n\n${ch.summary}\n\n${ch.keyPoints?.join("\n")}`, `ch-${i}`)} className="gap-1 text-xs">
                           {copied === `ch-${i}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />} Copy All
+                        </Button>
+                        <Button variant="default" size="sm" className="gap-1 text-xs" disabled={writingIndex === i || writingAll} onClick={() => writeFullChapter(i)}>
+                          {writingIndex === i ? <Loader2 className="w-3 h-3 animate-spin" /> : <PenLine className="w-3 h-3" />}
+                          {ch.fullContent ? "Rewrite" : "Write Full Content"}
                         </Button>
                         <Button variant="outline" size="sm" className="gap-1 text-xs" disabled={expandingIndex === i} onClick={() => expandChapter(i)}>
                           {expandingIndex === i && !expandingType?.match(/case|work|temp|check|real/) ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
