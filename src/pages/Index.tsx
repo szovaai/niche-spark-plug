@@ -139,16 +139,17 @@ const Index = () => {
             </Button>
           </motion.div>
 
-          {/* Reassurance bullets */}
-          <motion.div {...fadeIn} transition={{ delay: 0.35 }} className="flex flex-wrap items-center justify-center gap-4 mt-4">
+          {/* Power bullets */}
+          <motion.div {...fadeIn} transition={{ delay: 0.35 }} className="flex flex-col items-center gap-2 mt-6 max-w-md mx-auto">
             {[
-              { icon: Timer, text: "Build Your First Launch In Under 60 Minutes" },
-              { icon: Wand2, text: "No Writing Required" },
-              { icon: Rocket, text: "Launch Tonight" },
-            ].map((item, i) => (
-              <span key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <item.icon className="w-3.5 h-3.5 text-primary" />
-                {item.text}
+              "Generate a complete product launch in under 60 minutes",
+              "No writing, no funnels, no complicated tools",
+              "Built for WarriorPlus-style launches",
+              "Perfect for beginners",
+            ].map((line, i) => (
+              <span key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Zap className="w-3.5 h-3.5 text-primary shrink-0" />
+                {line}
               </span>
             ))}
           </motion.div>
@@ -177,21 +178,135 @@ const Index = () => {
         </div>
       </section>
 
-      {/* ===== WATCH THIS IN ACTION ===== */}
-      <section className="py-16 px-4">
-        <div className="max-w-3xl mx-auto text-center">
-          <motion.div {...fadeIn}>
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">See DigiLaunchKit Build A Product In Under 60 Seconds</h2>
-            <p className="text-muted-foreground mb-8">Watch how DigiLaunchKit turns a simple idea into a complete digital product launch — including product, funnel, bonuses, and affiliate kit — in minutes.</p>
-            <div className="relative aspect-video rounded-2xl border-2 border-border/50 bg-secondary/30 overflow-hidden cursor-pointer group">
-              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/5 to-accent/5">
-                <div className="w-20 h-20 rounded-full bg-primary/90 flex items-center justify-center shadow-xl shadow-primary/30 group-hover:scale-110 transition-transform">
-                  <Play className="w-8 h-8 text-primary-foreground ml-1" />
+      {/* ===== SEE IT IN ACTION — VISUAL FLOW ===== */}
+      <section className="py-20 px-4">
+        <div className="max-w-4xl mx-auto">
+          <motion.div {...fadeIn} className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Watch DigiLaunchKit Build A Complete Product Launch In 60 Seconds</h2>
+            <p className="text-muted-foreground">See exactly how an idea turns into a product, funnel, emails, and launch kit — automatically.</p>
+          </motion.div>
+
+          {/* Visual Flow: Idea → Product → Sales Page → Emails → Launch Kit */}
+          <div className="space-y-6">
+            {[
+              {
+                step: "1",
+                title: "Research",
+                label: "Input",
+                inputText: '"AI Local Lead Generation"',
+                outputTitle: "AI Local Lead Machine",
+                outputLines: [
+                  "Audience: beginners wanting fast income",
+                  "Mechanism: AI Local Client Method",
+                  'Angle: land your first $500 client',
+                ],
+              },
+              {
+                step: "2",
+                title: "Product",
+                label: "Generated Ebook",
+                inputText: "AI Local Lead Machine",
+                outputTitle: "Complete Digital Product",
+                outputLines: [
+                  "7 Chapters with examples & action steps",
+                  "Worksheets for each chapter",
+                  "Outreach scripts & service templates",
+                  "Cheat sheets & quick-start guide",
+                ],
+              },
+              {
+                step: "3",
+                title: "Sales Funnel",
+                label: "Generated Headline",
+                inputText: null,
+                outputTitle: null,
+                outputLines: [],
+                customContent: (
+                  <div className="p-5 rounded-xl bg-secondary/50 border border-border/50 text-left">
+                    <p className="text-xs text-primary font-semibold uppercase tracking-wider mb-2">Generated Sales Page Hook</p>
+                    <p className="text-foreground font-bold text-lg leading-snug mb-1">You're Still Buying Courses?</p>
+                    <p className="text-foreground font-bold text-lg leading-snug mb-1">Stop.</p>
+                    <p className="text-muted-foreground text-sm leading-relaxed">Start Getting Paid $500 This Week Helping Local Businesses Generate Leads With AI.</p>
+                  </div>
+                ),
+              },
+              {
+                step: "4",
+                title: "Emails",
+                label: "Generated Email",
+                inputText: null,
+                outputTitle: null,
+                outputLines: [],
+                customContent: (
+                  <div className="p-5 rounded-xl bg-secondary/50 border border-border/50 text-left">
+                    <p className="text-xs text-primary font-semibold uppercase tracking-wider mb-2">Launch Email #1</p>
+                    <p className="text-foreground font-semibold mb-2">Subject: Make $500 This Week?</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed">Local businesses are desperate for leads. Now beginners are getting paid to help them using simple AI tools…</p>
+                  </div>
+                ),
+              },
+              {
+                step: "5",
+                title: "Launch Kit",
+                label: "Complete Package",
+                inputText: null,
+                outputTitle: "Ready To Deploy",
+                outputLines: [
+                  "Sales page & opt-in page",
+                  "Thank you page & delivery",
+                  "Affiliate promo kit & JV page",
+                  "7-day launch timeline",
+                  "Bonus stack with perceived value",
+                  "Complete Launch-In-A-Box ZIP",
+                ],
+              },
+            ].map((item, i) => (
+              <motion.div key={i} {...fadeIn} transition={{ delay: i * 0.1 }}>
+                <div className="flex gap-4 items-start">
+                  {/* Step number + connector */}
+                  <div className="flex flex-col items-center shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-primary/15 border-2 border-primary/40 flex items-center justify-center">
+                      <span className="text-sm font-bold text-primary">{item.step}</span>
+                    </div>
+                    {i < 4 && <div className="w-0.5 h-6 bg-primary/20 mt-1" />}
+                  </div>
+                  {/* Content */}
+                  <div className="flex-1 pb-2">
+                    <p className="text-xs text-primary font-semibold uppercase tracking-wider mb-1">Step {item.step} — {item.title}</p>
+                    {(item as any).customContent ? (
+                      (item as any).customContent
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {item.inputText && (
+                          <div className="p-4 rounded-xl bg-secondary/50 border border-border/50">
+                            <p className="text-xs text-muted-foreground font-medium mb-1">{item.label}</p>
+                            <p className="text-sm font-semibold text-foreground">{item.inputText}</p>
+                          </div>
+                        )}
+                        <div className={`p-4 rounded-xl bg-primary/5 border border-primary/20 ${!item.inputText ? "sm:col-span-2" : ""}`}>
+                          {item.outputTitle && <p className="text-xs text-primary font-medium mb-2">{item.outputTitle}</p>}
+                          <ul className="space-y-1">
+                            {item.outputLines.map((line, j) => (
+                              <li key={j} className="flex items-start gap-2 text-sm text-muted-foreground">
+                                <Check className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                                <span>{line}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div className="absolute bottom-4 left-4 right-4 text-center">
-                <p className="text-xs text-muted-foreground">Demo video coming soon — click to preview the wizard</p>
-              </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Differentiator line */}
+          <motion.div {...fadeIn} className="mt-12 text-center">
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-6">
+              <p className="text-foreground font-bold text-lg">Most AI tools write content.</p>
+              <p className="gradient-text font-bold text-lg">DigiLaunchKit builds the entire business around it.</p>
             </div>
           </motion.div>
         </div>
@@ -706,6 +821,35 @@ const Index = () => {
 
       <SectionDivider />
 
+      {/* ===== WHAT YOU CAN BUILD ===== */}
+      <section className="py-20 px-4 bg-secondary/20">
+        <div className="max-w-3xl mx-auto text-center">
+          <motion.div {...fadeIn}>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">What You Can Build With DigiLaunchKit</h2>
+            <p className="text-muted-foreground mb-8">Stop thinking about one product. Start thinking about an entire business.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg mx-auto text-left">
+              {[
+                "AI Side Hustle Course",
+                "Affiliate Marketing Guide",
+                "Local Lead Generation Blueprint",
+                "AI Content Agency Starter",
+                "Digital Marketing Templates",
+                "Coaching Program Kit",
+                "SaaS Launch Playbook",
+                "Freelance Business Bundle",
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-2 p-3 rounded-lg bg-secondary/50 border border-border/50">
+                  <Sparkles className="w-4 h-4 text-primary shrink-0" />
+                  <span className="text-sm font-medium">{item}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      <SectionDivider />
+
       {/* ===== TEMPLATES + BYOK ===== */}
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -778,15 +922,15 @@ const Index = () => {
 
           {/* Itemized Value Stack */}
           <motion.div {...fadeIn} className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-8">
-            <h3 className="text-lg font-bold text-center mb-6">Here's What You're Getting Today</h3>
+            <h3 className="text-lg font-bold text-center mb-2">Typical Cost Of Building A Product Launch:</h3>
+            <p className="text-center text-sm text-muted-foreground mb-6">Here's what you'd normally pay for each piece…</p>
             <div className="space-y-2 mb-6">
               {[
-                { item: "Product Generator", value: "$297" },
-                { item: "Funnel Builder", value: "$197" },
-                { item: "Email Launch System", value: "$97" },
-                { item: "Affiliate Kit Builder", value: "$97" },
-                { item: "Launch Planner", value: "$97" },
-                { item: "Revenue Projector", value: "$67" },
+                { item: "Product creation", value: "$297" },
+                { item: "Sales page copy", value: "$197" },
+                { item: "Email launch sequence", value: "$97" },
+                { item: "Affiliate promo kit", value: "$97" },
+                { item: "Funnel setup", value: "$197" },
               ].map((row, i) => (
                 <div key={i} className="flex items-center justify-between p-2.5 rounded-lg bg-secondary/30 border border-border/30">
                   <span className="flex items-center gap-2 text-sm font-medium">
@@ -798,9 +942,10 @@ const Index = () => {
               ))}
             </div>
             <div className="border-t border-border/50 pt-6 text-center space-y-2">
-              <p className="text-sm text-muted-foreground">Total Value</p>
-              <p className="text-4xl font-black text-foreground line-through decoration-destructive/60">$852</p>
-              <p className="text-sm text-muted-foreground">Yours today for just</p>
+              <p className="text-sm text-muted-foreground">Total</p>
+              <p className="text-4xl font-black text-foreground line-through decoration-destructive/60">$885+</p>
+              <p className="text-sm text-muted-foreground font-medium">DigiLaunchKit does it automatically.</p>
+              <p className="text-sm text-muted-foreground">Today:</p>
               <p className="text-5xl font-black gradient-text">$37</p>
             </div>
             <div className="text-center mt-6">
