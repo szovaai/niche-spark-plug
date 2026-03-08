@@ -90,6 +90,16 @@ export function auditChapter(chapter: ChapterItem): ContentAuditResult {
   const tacticalRatio = tacticalCount / total;
   const ratioScore = Math.min(100, tacticalRatio * 140);
 
+  // Asset Depth
+  const assetCount = (chapter.caseStudies?.length || 0) + (chapter.worksheets?.length || 0) +
+    (chapter.templates?.length || 0) + (chapter.checklists?.length || 0) + (chapter.additionalExamples?.length || 0);
+  const assetScore = Math.min(100, assetCount * 25);
+
+  // Example Richness — look for specific numbers, dollar amounts, timeframes
+  const numberPattern = /\$\d+|\d+%|\d+\s*(day|week|month|hour|minute|client|sale|lead|customer)/gi;
+  const numberMatches = (fullText.match(numberPattern) || []).length;
+  const richnessScore = Math.min(100, numberMatches * 12);
+
   const dimensions: DimensionScore[] = [
     {
       label: "Specificity",
@@ -115,6 +125,19 @@ export function auditChapter(chapter: ChapterItem): ContentAuditResult {
       score: Math.round(ratioScore),
       grade: getGrade(ratioScore),
       details: `${Math.round(tacticalRatio * 100)}% tactical content (target: 70%+)`,
+    },
+    {
+      label: "Asset Depth",
+      score: Math.round(assetScore),
+      grade: getGrade(assetScore),
+      details: assetCount === 0 ? "No worksheets, case studies, or templates yet" : `${assetCount} asset(s) added`,
+      flaggedItems: assetCount === 0 ? ["+ Add a worksheet", "+ Add a case study", "+ Add a template"] : undefined,
+    },
+    {
+      label: "Example Richness",
+      score: Math.round(richnessScore),
+      grade: getGrade(richnessScore),
+      details: `${numberMatches} specific numbers/amounts found (target: 8+)`,
     },
   ];
 

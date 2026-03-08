@@ -3,8 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Sparkles, Loader2, Copy, Check, RefreshCw, Target, BookOpen, Lightbulb, ListOrdered, CheckCircle, AlertTriangle, Pencil, Key } from "lucide-react";
-import { Step1Product, Step2Content, ChapterItem } from "@/types/launchWizard";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Sparkles, Loader2, Copy, Check, RefreshCw, Target, BookOpen, Lightbulb, ListOrdered, CheckCircle, AlertTriangle, Pencil, Key, FileText, ChevronDown, ClipboardList, FileCode, BookMarked, Footprints } from "lucide-react";
+import { Step1Product, Step2Content, ChapterItem, ContentDepth, ExpansionType } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import AssetDownloadButtons from "@/components/AssetDownloadButtons";
@@ -25,6 +28,36 @@ interface Props {
   assets?: ProductAssets;
   setAssets?: (a: ProductAssets) => void;
   launchMode?: LaunchMode;
+}
+
+const DEPTH_CONFIG: Record<ContentDepth, { label: string; pages: string; wordsPerChapter: number }> = {
+  quick: { label: "Quick", pages: "20–30 pages", wordsPerChapter: 800 },
+  standard: { label: "Standard", pages: "40–60 pages", wordsPerChapter: 1200 },
+  premium: { label: "Premium", pages: "80–120 pages", wordsPerChapter: 2000 },
+  authority: { label: "Authority", pages: "150+ pages", wordsPerChapter: 2500 },
+};
+
+const EXPANSION_OPTIONS: { type: ExpansionType; label: string; icon: typeof FileText }[] = [
+  { type: "caseStudy", label: "Add Case Study", icon: BookMarked },
+  { type: "worksheet", label: "Add Worksheet", icon: ClipboardList },
+  { type: "template", label: "Add Template", icon: FileCode },
+  { type: "checklist", label: "Add Checklist", icon: CheckCircle },
+  { type: "realExample", label: "Add Real Example", icon: Footprints },
+];
+
+function estimatePages(chapters: ChapterItem[], depth: ContentDepth): number {
+  const baseWords = DEPTH_CONFIG[depth].wordsPerChapter;
+  let totalPages = 0;
+  for (const ch of chapters) {
+    let words = baseWords;
+    words += (ch.caseStudies?.length || 0) * 300;
+    words += (ch.worksheets?.length || 0) * 500;
+    words += (ch.templates?.length || 0) * 400;
+    words += (ch.checklists?.length || 0) * 200;
+    words += (ch.additionalExamples?.length || 0) * 350;
+    totalPages += words / 250; // ~250 words per page
+  }
+  return Math.round(totalPages);
 }
 
 function StructuredChapter({ chapter, index, copied, onCopy }: { chapter: ChapterItem; index: number; copied: string | null; onCopy: (text: string, label: string) => void }) {
@@ -107,6 +140,77 @@ function StructuredChapter({ chapter, index, copied, onCopy }: { chapter: Chapte
         </div>
       )}
 
+      {/* Expanded assets display */}
+      {chapter.caseStudies && chapter.caseStudies.length > 0 && (
+        <div className="border-t border-border/50 pt-3 space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1"><BookMarked className="w-3 h-3" /> Case Studies</p>
+          {chapter.caseStudies.map((cs, j) => (
+            <div key={j} className="p-3 rounded-lg bg-primary/5 border border-primary/10 text-sm space-y-1">
+              <p className="font-semibold">{cs.name}</p>
+              <p><span className="text-xs font-medium text-destructive">Problem:</span> {cs.problem}</p>
+              <p><span className="text-xs font-medium text-accent">Solution:</span> {cs.solution}</p>
+              <p><span className="text-xs font-medium text-emerald-400">Result:</span> {cs.result}</p>
+              {cs.quote && <p className="italic text-muted-foreground border-l-2 border-accent pl-2 mt-1">"{cs.quote}"</p>}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {chapter.worksheets && chapter.worksheets.length > 0 && (
+        <div className="border-t border-border/50 pt-3 space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1"><ClipboardList className="w-3 h-3" /> Worksheets</p>
+          {chapter.worksheets.map((ws, j) => (
+            <div key={j} className="p-3 rounded-lg bg-secondary/30 text-sm space-y-1">
+              <p className="font-semibold">{ws.title}</p>
+              <p className="text-xs text-muted-foreground">{ws.instructions}</p>
+              <ul className="list-disc list-inside text-muted-foreground text-xs space-y-0.5 mt-1">
+                {ws.fields.map((f, k) => <li key={k}>{f}</li>)}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {chapter.templates && chapter.templates.length > 0 && (
+        <div className="border-t border-border/50 pt-3 space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1"><FileCode className="w-3 h-3" /> Templates</p>
+          {chapter.templates.map((t, j) => (
+            <div key={j} className="p-3 rounded-lg bg-secondary/30 text-sm space-y-1">
+              <p className="font-semibold">{t.name}</p>
+              <p className="text-xs text-muted-foreground whitespace-pre-wrap">{t.content}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {chapter.checklists && chapter.checklists.length > 0 && (
+        <div className="border-t border-border/50 pt-3 space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Checklists</p>
+          {chapter.checklists.map((cl, j) => (
+            <div key={j} className="p-3 rounded-lg bg-secondary/30 text-sm space-y-1">
+              <p className="font-semibold">{cl.title}</p>
+              <ul className="space-y-0.5">
+                {cl.items.map((item, k) => <li key={k} className="text-xs text-muted-foreground flex items-center gap-1">☐ {item}</li>)}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {chapter.additionalExamples && chapter.additionalExamples.length > 0 && (
+        <div className="border-t border-border/50 pt-3 space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1"><Footprints className="w-3 h-3" /> Real Examples</p>
+          {chapter.additionalExamples.map((ex, j) => (
+            <div key={j} className="p-3 rounded-lg bg-secondary/30 text-sm space-y-1">
+              <p className="font-semibold">{ex.title}</p>
+              <ol className="list-decimal list-inside text-xs text-muted-foreground space-y-0.5">
+                {ex.steps.map((s, k) => <li key={k}>{s}</li>)}
+              </ol>
+            </div>
+          ))}
+        </div>
+      )}
+
       {chapter.keyPoints?.length > 0 && !chapter.actionPlan?.length && (
         <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
           {chapter.keyPoints.map((kp, j) => <li key={j}>{kp}</li>)}
@@ -120,13 +224,15 @@ export default function WizardStep2({ productBrief, productType, result, setResu
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
   const [expandingIndex, setExpandingIndex] = useState<number | null>(null);
+  const [expandingType, setExpandingType] = useState<string | null>(null);
+  const [contentDepth, setContentDepth] = useState<ContentDepth>("standard");
 
   const generate = async () => {
     if (!productBrief) return;
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-launch-content", {
-        body: { productBrief, productType, userId, launchMode },
+        body: { productBrief, productType, userId, launchMode, contentDepth },
       });
       if (error) throw error;
       setResult(data);
@@ -138,9 +244,10 @@ export default function WizardStep2({ productBrief, productType, result, setResu
     }
   };
 
-  const expandChapter = async (index: number) => {
+  const expandChapter = async (index: number, expansionType?: ExpansionType) => {
     if (!result || !productBrief) return;
     setExpandingIndex(index);
+    setExpandingType(expansionType || "expand");
     try {
       const chapter = result.chapters[index];
       const { data, error } = await supabase.functions.invoke("generate-launch-content", {
@@ -150,19 +257,36 @@ export default function WizardStep2({ productBrief, productType, result, setResu
           expandChapter: true,
           chapterToExpand: chapter,
           chapterIndex: index,
+          expansionType: expansionType || undefined,
         },
       });
       if (error) throw error;
       if (data?.expandedChapter) {
         const updatedChapters = [...result.chapters];
-        updatedChapters[index] = data.expandedChapter;
+        if (expansionType) {
+          // Merge expansion into existing chapter
+          const existing = updatedChapters[index];
+          const expanded = data.expandedChapter;
+          updatedChapters[index] = {
+            ...existing,
+            caseStudies: [...(existing.caseStudies || []), ...(expanded.caseStudies || [])],
+            worksheets: [...(existing.worksheets || []), ...(expanded.worksheets || [])],
+            templates: [...(existing.templates || []), ...(expanded.templates || [])],
+            checklists: [...(existing.checklists || []), ...(expanded.checklists || [])],
+            additionalExamples: [...(existing.additionalExamples || []), ...(expanded.additionalExamples || [])],
+          };
+        } else {
+          updatedChapters[index] = data.expandedChapter;
+        }
         setResult({ ...result, chapters: updatedChapters });
-        toast.success(`Chapter ${index + 1} expanded with examples and walkthroughs!`);
+        const label = expansionType ? EXPANSION_OPTIONS.find(o => o.type === expansionType)?.label || "Content" : "examples and walkthroughs";
+        toast.success(`Chapter ${index + 1} expanded with ${label}!`);
       }
     } catch (e: any) {
       toast.error(e.message || "Failed to expand chapter");
     } finally {
       setExpandingIndex(null);
+      setExpandingType(null);
     }
   };
 
@@ -172,6 +296,8 @@ export default function WizardStep2({ productBrief, productType, result, setResu
     toast.success("Copied!");
     setTimeout(() => setCopied(null), 2000);
   };
+
+  const estimatedPages = result?.chapters ? estimatePages(result.chapters, contentDepth) : 0;
 
   if (!productBrief) {
     return (
@@ -194,6 +320,41 @@ export default function WizardStep2({ productBrief, productType, result, setResu
         </CardContent>
       </Card>
 
+      {/* Content Depth Selector */}
+      <Card className="border-accent/20">
+        <CardContent className="p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-semibold text-sm">Content Depth</p>
+              <p className="text-xs text-muted-foreground">Choose how comprehensive your product will be</p>
+            </div>
+            {estimatedPages > 0 && (
+              <Badge variant="secondary" className="gap-1 text-xs">
+                <FileText className="w-3 h-3" />
+                ~{estimatedPages} pages
+              </Badge>
+            )}
+          </div>
+          <RadioGroup value={contentDepth} onValueChange={(v) => setContentDepth(v as ContentDepth)} className="grid grid-cols-2 gap-2">
+            {(Object.entries(DEPTH_CONFIG) as [ContentDepth, typeof DEPTH_CONFIG[ContentDepth]][]).map(([key, config]) => (
+              <Label
+                key={key}
+                htmlFor={`depth-${key}`}
+                className={`flex items-center gap-2 p-3 rounded-lg border cursor-pointer transition-colors ${
+                  contentDepth === key ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                }`}
+              >
+                <RadioGroupItem value={key} id={`depth-${key}`} />
+                <div>
+                  <p className="text-sm font-medium">{config.label}</p>
+                  <p className="text-xs text-muted-foreground">{config.pages}</p>
+                </div>
+              </Label>
+            ))}
+          </RadioGroup>
+        </CardContent>
+      </Card>
+
       {!result && (
         <Button onClick={generate} disabled={loading} className="gap-2">
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
@@ -213,7 +374,7 @@ export default function WizardStep2({ productBrief, productType, result, setResu
           {/* Content Quality Report */}
           <ContentQualityReport
             content={result}
-            onExpandChapter={expandChapter}
+            onExpandChapter={(i) => expandChapter(i)}
             expandingIndex={expandingIndex}
           />
 
@@ -236,7 +397,13 @@ export default function WizardStep2({ productBrief, productType, result, setResu
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
-                <h3 className="font-bold text-lg">Chapters ({result.chapters?.length || 0})</h3>
+                <div className="flex items-center gap-3">
+                  <h3 className="font-bold text-lg">Chapters ({result.chapters?.length || 0})</h3>
+                  <Badge variant="secondary" className="gap-1 text-xs">
+                    <FileText className="w-3 h-3" />
+                    ~{estimatedPages} pages
+                  </Badge>
+                </div>
                 <AssetDownloadButtons
                   content={result.chapters?.map((ch, i) =>
                     `Chapter ${i + 1}: ${ch.title}\n${ch.summary}\n\nKey Points:\n${ch.keyPoints?.map(kp => `- ${kp}`).join("\n") || ""}`
@@ -248,18 +415,41 @@ export default function WizardStep2({ productBrief, productType, result, setResu
                 {result.chapters?.map((ch, i) => (
                   <AccordionItem key={i} value={`ch-${i}`} className="border rounded-lg px-4">
                     <AccordionTrigger className="text-sm font-medium">
-                      Chapter {i + 1}: {ch.title}
+                      <div className="flex items-center gap-2">
+                        <span>Chapter {i + 1}: {ch.title}</span>
+                        {((ch.caseStudies?.length || 0) + (ch.worksheets?.length || 0) + (ch.templates?.length || 0) + (ch.checklists?.length || 0) + (ch.additionalExamples?.length || 0)) > 0 && (
+                          <Badge variant="outline" className="text-[10px] shrink-0">
+                            {(ch.caseStudies?.length || 0) + (ch.worksheets?.length || 0) + (ch.templates?.length || 0) + (ch.checklists?.length || 0) + (ch.additionalExamples?.length || 0)} assets
+                          </Badge>
+                        )}
+                      </div>
                     </AccordionTrigger>
                     <AccordionContent className="space-y-2">
                       <StructuredChapter chapter={ch} index={i} copied={copied} onCopy={copyText} />
-                      <div className="flex items-center gap-2 pt-2">
+                      <div className="flex items-center gap-2 pt-2 flex-wrap">
                         <Button variant="ghost" size="sm" onClick={() => copyText(`${ch.title}\n\n${ch.summary}\n\n${ch.keyPoints?.join("\n")}`, `ch-${i}`)} className="gap-1 text-xs">
                           {copied === `ch-${i}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />} Copy All
                         </Button>
                         <Button variant="outline" size="sm" className="gap-1 text-xs" disabled={expandingIndex === i} onClick={() => expandChapter(i)}>
-                          {expandingIndex === i ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                          {expandingIndex === i && !expandingType?.match(/case|work|temp|check|real/) ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
                           Expand
                         </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm" className="gap-1 text-xs" disabled={expandingIndex === i}>
+                              {expandingIndex === i && expandingType !== "expand" ? <Loader2 className="w-3 h-3 animate-spin" /> : <ChevronDown className="w-3 h-3" />}
+                              Add Asset
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {EXPANSION_OPTIONS.map((opt) => (
+                              <DropdownMenuItem key={opt.type} onClick={() => expandChapter(i, opt.type)} className="gap-2 text-xs">
+                                <opt.icon className="w-3 h-3" />
+                                {opt.label}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </AccordionContent>
                   </AccordionItem>

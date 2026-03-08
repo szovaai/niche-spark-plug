@@ -4,6 +4,32 @@ import { getCachedResponse, setCachedResponse } from "../_shared/cache.ts";
 import { validateInput, validationErrorResponse } from "../_shared/validate.ts";
 import { MASTER_SYSTEM_PROMPT } from "../_shared/copyPrompts.ts";
 
+const DEPTH_CHAPTER_COUNTS: Record<string, { min: number; max: number; detail: string }> = {
+  quick: { min: 4, max: 5, detail: "concise and fast-action. Each chapter should be short — 2-3 key points max, no fluff." },
+  standard: { min: 6, max: 8, detail: "well-structured with examples and action steps per chapter." },
+  premium: { min: 8, max: 10, detail: "comprehensive with expanded examples, worksheets, frameworks, and detailed walkthroughs per chapter. Each chapter should feel like a mini-course." },
+  authority: { min: 12, max: 15, detail: "deeply comprehensive — each chapter must include case studies, scripts, templates, checklists, and multiple real-world examples. This is a definitive authority resource." },
+};
+
+function getExpansionPrompt(type: string, chapter: any, productBrief: any): string {
+  const base = `Product: ${productBrief?.title || "Unknown"}\nChapter: "${chapter.title}"\nSummary: ${chapter.summary}`;
+
+  switch (type) {
+    case "caseStudy":
+      return `${base}\n\nGenerate a detailed case study for this chapter. Return ONLY valid JSON:\n{\n  "expandedChapter": {\n    "caseStudies": [{\n      "name": "Case Study: How [Name] [Achieved Result]",\n      "problem": "Specific problem they faced with details",\n      "solution": "Exactly what they did step by step",\n      "result": "Specific measurable result with numbers and timeframe",\n      "quote": "A testimonial-style quote from the person"\n    }]\n  }\n}`;
+    case "worksheet":
+      return `${base}\n\nGenerate a practical worksheet for this chapter. Return ONLY valid JSON:\n{\n  "expandedChapter": {\n    "worksheets": [{\n      "title": "Worksheet: [Action-Oriented Title]",\n      "instructions": "Brief instructions on how to complete this worksheet",\n      "fields": ["Field 1: [Description]", "Field 2: [Description]", "Field 3: [Description]", "Field 4: [Description]", "Field 5: [Description]", "Field 6: [Description]"]\n    }]\n  }\n}`;
+    case "template":
+      return `${base}\n\nGenerate a ready-to-use template/script for this chapter. Return ONLY valid JSON:\n{\n  "expandedChapter": {\n    "templates": [{\n      "name": "Template: [Descriptive Name]",\n      "content": "The full template text with [PLACEHOLDER] fields that the reader fills in. Make it copy-paste ready."\n    }]\n  }\n}`;
+    case "checklist":
+      return `${base}\n\nGenerate an action checklist for this chapter. Return ONLY valid JSON:\n{\n  "expandedChapter": {\n    "checklists": [{\n      "title": "Checklist: [Action-Oriented Title]",\n      "items": ["Step 1: Specific action item", "Step 2: Specific action item", "Step 3: Specific action item", "Step 4: Specific action item", "Step 5: Specific action item", "Step 6: Specific action item", "Step 7: Specific action item"]\n    }]\n  }\n}`;
+    case "realExample":
+      return `${base}\n\nGenerate a detailed real-world example walkthrough for this chapter. Return ONLY valid JSON:\n{\n  "expandedChapter": {\n    "additionalExamples": [{\n      "title": "Example: [Specific Scenario Title]",\n      "steps": ["Step 1: Specific action with details", "Step 2: What to do next with specifics", "Step 3: The result you get", "Step 4: How to scale or improve", "Step 5: Expected outcome with numbers"]\n    }]\n  }\n}`;
+    default:
+      return "";
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -15,10 +41,16 @@ Deno.serve(async (req) => {
 
     // Handle chapter expansion mode
     if (body.expandChapter) {
-      const { chapterToExpand, chapterIndex, productBrief } = body;
+      const { chapterToExpand, chapterIndex, productBrief, expansionType } = body;
       const userTier = await getUserTier(user.id);
 
-      const expandPrompt = `You are expanding a chapter of a digital product to make it more specific, actionable, and example-rich.
+      let expandPrompt: string;
+
+      if (expansionType && getExpansionPrompt(expansionType, chapterToExpand, productBrief)) {
+        expandPrompt = getExpansionPrompt(expansionType, chapterToExpand, productBrief);
+      } else {
+        // Original full expansion
+        expandPrompt = `You are expanding a chapter of a digital product to make it more specific, actionable, and example-rich.
 
 Original Chapter: "${chapterToExpand.title}"
 Summary: ${chapterToExpand.summary}
@@ -53,6 +85,7 @@ Return ONLY valid JSON:
     "moduleSummary": ["Key takeaway 1", "Key takeaway 2", "Key takeaway 3"]
   }
 }`;
+      }
 
       const { content } = await callTieredAI([
         { role: "system", content: MASTER_SYSTEM_PROMPT },
@@ -72,12 +105,15 @@ Return ONLY valid JSON:
       { field: 'productType', type: 'string', maxLength: 100 },
       { field: 'buyerAvatar', type: 'object', maxLength: 10000 },
       { field: 'launchMode', type: 'string', maxLength: 20 },
+      { field: 'contentDepth', type: 'string', maxLength: 20 },
     ]);
     if (!valid) return validationErrorResponse(valError!, corsHeaders);
 
-    const { productBrief, productType, buyerAvatar, launchMode } = data;
+    const { productBrief, productType, buyerAvatar, launchMode, contentDepth } = data;
+    const depth = contentDepth || "standard";
+    const depthConfig = DEPTH_CHAPTER_COUNTS[depth] || DEPTH_CHAPTER_COUNTS.standard;
 
-    const cacheKey = `launch-content-${JSON.stringify(productBrief).slice(0, 100)}`;
+    const cacheKey = `launch-content-${depth}-${JSON.stringify(productBrief).slice(0, 100)}`;
     const cached = await getCachedResponse(cacheKey);
     if (cached) return new Response(JSON.stringify(cached), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
@@ -95,6 +131,9 @@ Concept: ${productBrief.concept}
 Type: ${productType || "ebook"}
 Unique Mechanism: ${productBrief.uniqueMechanism}
 Pain Points: ${productBrief.painPoints?.join(", ") || ""}
+
+CONTENT DEPTH: ${depth.toUpperCase()}
+Generate ${depthConfig.min}-${depthConfig.max} chapters. Content should be ${depthConfig.detail}
 
 Return ONLY valid JSON:
 {
@@ -146,7 +185,7 @@ Return ONLY valid JSON:
 }
 
 RULES:
-- Generate 6-8 chapters, each building on the previous one
+- Generate ${depthConfig.min}-${depthConfig.max} chapters, each building on the previous one
 - Every chapter MUST include moduleGoal, hook, coreConcept, actionPlan (3-5 steps), realExample, commonMistakes (2-3), actionStep, and moduleSummary (3 bullets)
 - Each actionPlan step must have a specific, concrete action — not "learn about X" but "open [tool], click [button], paste [template]"
 - Each realExample must include specific numbers, timeframes, or names — not "a student got results" but "Sarah K. used this template and generated $847 in her first 14 days"
@@ -158,7 +197,6 @@ RULES:
 - Quick wins must be SPECIFIC and TANGIBLE${launchMode === "warriorplus" ? `
 
 WARRIORPLUS MODE — CRITICAL OVERRIDES:
-- Generate 5-6 chapters (NOT 8) — WarriorPlus buyers want concise, fast-action products
 - Each chapter must be SHORT and TACTICAL — more bullets, fewer paragraphs
 - Cut all theory — every section must be "do this, then this, get this result"
 - Chapter titles must be action-verb-first: "Deploy...", "Launch...", "Activate...", "Install..."
