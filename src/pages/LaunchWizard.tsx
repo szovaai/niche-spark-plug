@@ -351,6 +351,9 @@ const LaunchWizard = () => {
                 result={step5Result} setResult={setStep5Result}
                 onSave={saveProject}
                 userId={user?.id}
+                funnelData={step3Result}
+                price={price}
+                niche={niche}
               />
             )}
           </motion.div>
