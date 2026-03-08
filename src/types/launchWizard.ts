@@ -169,6 +169,39 @@ export interface ActionPlanStep {
   why: string;
 }
 
+export interface CaseStudy {
+  name: string;
+  problem: string;
+  solution: string;
+  result: string;
+  quote: string;
+}
+
+export interface Worksheet {
+  title: string;
+  instructions: string;
+  fields: string[];
+}
+
+export interface ChapterTemplate {
+  name: string;
+  content: string;
+}
+
+export interface ChapterChecklist {
+  title: string;
+  items: string[];
+}
+
+export interface AdditionalExample {
+  title: string;
+  steps: string[];
+}
+
+export type ContentDepth = "quick" | "standard" | "premium" | "authority";
+
+export type ExpansionType = "caseStudy" | "worksheet" | "template" | "checklist" | "realExample";
+
 export interface ChapterItem {
   title: string;
   summary: string;
@@ -181,6 +214,11 @@ export interface ChapterItem {
   commonMistakes?: string[];
   actionStep?: string;
   moduleSummary?: string[];
+  caseStudies?: CaseStudy[];
+  worksheets?: Worksheet[];
+  templates?: ChapterTemplate[];
+  checklists?: ChapterChecklist[];
+  additionalExamples?: AdditionalExample[];
 }
 
 export type SalesStyle = "warriorplus" | "longform" | "vsl" | "short";
