@@ -3,10 +3,11 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { WIZARD_STEPS } from "@/types/launchWizard";
-import type { Step1Product, Step2Content, Step3Funnel, Step4Marketing, Step5Checklist, BuyerAvatar } from "@/types/launchWizard";
+import type { Step1Product, Step2Content, Step3Graphics, Step3Funnel, Step4Marketing, Step5Checklist, BuyerAvatar } from "@/types/launchWizard";
 import type { ProductAssets } from "@/types/productAssets";
 import WizardStep1 from "@/components/wizard/WizardStep1";
 import WizardStep2 from "@/components/wizard/WizardStep2";
+import WizardStep3Graphics from "@/components/wizard/WizardStep3Graphics";
 import WizardStep3 from "@/components/wizard/WizardStep3";
 import WizardStep4 from "@/components/wizard/WizardStep4";
 import WizardStep5 from "@/components/wizard/WizardStep5";
@@ -32,7 +33,7 @@ const LaunchWizard = () => {
   const [existingProjectId, setExistingProjectId] = useState<string | null>(null);
   const [launchMode, setLaunchMode] = useState<LaunchMode>("standard");
 
-  // Step 1 state — pre-fill from URL params (from Research Agent / Steal This Launch)
+  // Step 1 state
   const [niche, setNiche] = useState(searchParams.get("niche") || "");
   const [targetAudience, setTargetAudience] = useState(searchParams.get("audience") || "");
   const [productType, setProductType] = useState(searchParams.get("productType") || "");
@@ -42,25 +43,23 @@ const LaunchWizard = () => {
   const [step1Result, setStep1Result] = useState<Step1Product | null>(null);
   const [buyerAvatar, setBuyerAvatar] = useState<BuyerAvatar | null>(null);
 
-  // Step 2-5 state
+  // Step 2-6 state
   const [step2Result, setStep2Result] = useState<Step2Content | null>(null);
   const [step2Assets, setStep2Assets] = useState<ProductAssets>({});
-  const [step3Result, setStep3Result] = useState<Step3Funnel | null>(null);
-  const [step4Result, setStep4Result] = useState<Step4Marketing | null>(null);
-  const [step5Result, setStep5Result] = useState<Step5Checklist | null>(null);
+  const [step3Graphics, setStep3Graphics] = useState<Step3Graphics | null>(null);
+  const [step4Funnel, setStep4Funnel] = useState<Step3Funnel | null>(null);
+  const [step5Marketing, setStep5Marketing] = useState<Step4Marketing | null>(null);
+  const [step6Checklist, setStep6Checklist] = useState<Step5Checklist | null>(null);
 
   const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isSavingRef = useRef(false);
 
-  // Load existing project if projectId provided
   useEffect(() => {
     if (projectId && user) loadProject(projectId);
   }, [projectId, user]);
 
-  // Autosave whenever any step result changes
   const autosave = useCallback(async () => {
     if (!user || isSavingRef.current) return;
-    // Need at least step 1 data to save
     if (!step1Result && !niche.trim()) return;
 
     isSavingRef.current = true;
@@ -74,12 +73,12 @@ const LaunchWizard = () => {
         step1_product: step1Result as any,
         step2_product_content: step2Result as any,
         step2_assets: (Object.keys(step2Assets).length > 0 ? step2Assets : null) as any,
-        step3_funnel: step3Result as any,
-        step4_marketing: step4Result as any,
-        step5_checklist: step5Result as any,
+        step3_funnel: step4Funnel as any,
+        step4_marketing: step5Marketing as any,
+        step5_checklist: step6Checklist as any,
         buyer_avatar: buyerAvatar as any,
         current_step: currentStep,
-        status: step5Result ? "complete" : "in_progress",
+        status: step6Checklist ? "complete" : "in_progress",
       };
 
       if (existingProjectId) {
@@ -98,15 +97,14 @@ const LaunchWizard = () => {
     } finally {
       isSavingRef.current = false;
     }
-  }, [user, niche, targetAudience, productType, topic, step1Result, step2Result, step2Assets, step3Result, step4Result, step5Result, currentStep, existingProjectId, buyerAvatar]);
+  }, [user, niche, targetAudience, productType, topic, step1Result, step2Result, step2Assets, step4Funnel, step5Marketing, step6Checklist, currentStep, existingProjectId, buyerAvatar]);
 
-  // Debounced autosave trigger on step result changes
   useEffect(() => {
     if (!user || (!step1Result && !niche.trim())) return;
     if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
     autosaveTimerRef.current = setTimeout(() => { autosave(); }, 2000);
     return () => { if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current); };
-  }, [step1Result, step2Result, step2Assets, step3Result, step4Result, step5Result, currentStep, autosave]);
+  }, [step1Result, step2Result, step2Assets, step4Funnel, step5Marketing, step6Checklist, currentStep, autosave]);
 
   const loadProject = async (id: string) => {
     const { data, error } = await supabase
@@ -124,9 +122,9 @@ const LaunchWizard = () => {
     setStep1Result(data.step1_product as any);
     setStep2Result(data.step2_product_content as any);
     setStep2Assets(((data as any).step2_assets as ProductAssets) || {});
-    setStep3Result(data.step3_funnel as any);
-    setStep4Result(data.step4_marketing as any);
-    setStep5Result(data.step5_checklist as any);
+    setStep4Funnel(data.step3_funnel as any);
+    setStep5Marketing(data.step4_marketing as any);
+    setStep6Checklist(data.step5_checklist as any);
     setBuyerAvatar((data as any).buyer_avatar as any);
     setCurrentStep(data.current_step || 1);
   };
@@ -135,9 +133,10 @@ const LaunchWizard = () => {
     switch (step) {
       case 1: return !!step1Result;
       case 2: return !!step2Result;
-      case 3: return !!step3Result;
-      case 4: return !!step4Result;
-      case 5: return !!step5Result;
+      case 3: return !!step3Graphics;
+      case 4: return !!step4Funnel;
+      case 5: return !!step5Marketing;
+      case 6: return !!step6Checklist;
       default: return false;
     }
   };
@@ -149,21 +148,18 @@ const LaunchWizard = () => {
     setGenModalCompleted([]);
 
     try {
-      // Step 1
+      // Step 1 — Product Concept
       setGenModalStep(1);
       const { data: s1, error: e1 } = await supabase.functions.invoke("generate-launch-product", {
         body: { niche, targetAudience, productType, topic, userId: user?.id, lockedMechanism, buyerAvatar, launchMode },
       });
       if (e1) throw e1;
-      // Preserve locked mechanism from Research Agent
-      if (lockedMechanism) {
-        s1.uniqueMechanism = lockedMechanism;
-      }
+      if (lockedMechanism) s1.uniqueMechanism = lockedMechanism;
       setStep1Result(s1);
       setGenModalCompleted(prev => [...prev, 1]);
       setCurrentStep(2);
 
-      // Step 2
+      // Step 2 — Product Content
       setGenModalStep(2);
       const { data: s2, error: e2 } = await supabase.functions.invoke("generate-launch-content", {
         body: { productBrief: s1, productType, userId: user?.id, buyerAvatar, launchMode },
@@ -173,42 +169,63 @@ const LaunchWizard = () => {
       setGenModalCompleted(prev => [...prev, 2]);
       setCurrentStep(3);
 
-      // Step 3
+      // Step 3 — Product Graphics (generate cover)
       setGenModalStep(3);
+      try {
+        const { data: gfx, error: gfxErr } = await supabase.functions.invoke("generate-ecover", {
+          body: {
+            title: s1.title,
+            niche,
+            targetAudience,
+            selectedComponents: ["guide", "worksheet", "checklist", "templates"],
+            stylePreset: launchMode === "warriorplus" ? "warriorplus" : "premium",
+            depthMode: "stacked",
+          },
+        });
+        if (!gfxErr && gfx?.imageUrl) {
+          setStep3Graphics({ coverUrl: gfx.imageUrl, bundleUrl: gfx.imageUrl, bonusCoverUrls: [] });
+        }
+      } catch {
+        // Graphics are optional — don't fail the whole build
+      }
+      setGenModalCompleted(prev => [...prev, 3]);
+      setCurrentStep(4);
+
+      // Step 4 — Funnel Copy
+      setGenModalStep(4);
       const { data: s3, error: e3 } = await supabase.functions.invoke("generate-launch-funnel", {
         body: { productBrief: s1, productContent: s2, price, userId: user?.id, buyerAvatar, salesStyle: launchMode === "warriorplus" ? "warriorplus" : "warriorplus", launchMode },
       });
       if (e3) throw e3;
-      setStep3Result(s3);
-      setGenModalCompleted(prev => [...prev, 3]);
-      setCurrentStep(4);
+      setStep4Funnel(s3);
+      setGenModalCompleted(prev => [...prev, 4]);
+      setCurrentStep(5);
 
-      // Step 4
-      setGenModalStep(4);
+      // Step 5 — Marketing Assets
+      setGenModalStep(5);
       const { data: s4, error: e4 } = await supabase.functions.invoke("generate-launch-marketing", {
         body: { productBrief: s1, productContent: s2, funnelCopy: s3, price, userId: user?.id, buyerAvatar, launchMode },
       });
       if (e4) throw e4;
-      setStep4Result(s4);
-      setGenModalCompleted(prev => [...prev, 4]);
-      setCurrentStep(5);
+      setStep5Marketing(s4);
+      setGenModalCompleted(prev => [...prev, 5]);
+      setCurrentStep(6);
 
-      // Step 5
-      setGenModalStep(5);
+      // Step 6 — Launch Checklist
+      setGenModalStep(6);
       const { data: s5, error: e5 } = await supabase.functions.invoke("generate-launch-checklist", {
         body: { productBrief: s1, hasContent: true, hasFunnel: true, hasMarketing: true, userId: user?.id, launchMode },
       });
       if (e5) throw e5;
-      setStep5Result(s5);
-      setGenModalCompleted(prev => [...prev, 5]);
+      setStep6Checklist(s5);
+      setGenModalCompleted(prev => [...prev, 6]);
 
       toast.success("🚀 Your entire launch system is ready!");
     } catch (e: any) {
       toast.error(e.message || "Generation failed");
     } finally {
       setGeneratingAll(false);
-      // Keep modal open briefly to show completion
-      setTimeout(() => { setGenModalStep(0); setGenModalCompleted([]); }, 1500);
+      setTimeout(() => { setGenModalStep(0); setGenModalCompleted([]); }, 3000);
     }
   };
 
@@ -229,12 +246,12 @@ const LaunchWizard = () => {
         step1_product: step1Result as any,
         step2_product_content: step2Result as any,
         step2_assets: (Object.keys(step2Assets).length > 0 ? step2Assets : null) as any,
-        step3_funnel: step3Result as any,
-        step4_marketing: step4Result as any,
-        step5_checklist: step5Result as any,
+        step3_funnel: step4Funnel as any,
+        step4_marketing: step5Marketing as any,
+        step5_checklist: step6Checklist as any,
         buyer_avatar: buyerAvatar as any,
-        current_step: 5,
-        status: step5Result ? "complete" : "in_progress",
+        current_step: 6,
+        status: step6Checklist ? "complete" : "in_progress",
       };
 
       if (existingProjectId) {
@@ -308,7 +325,7 @@ const LaunchWizard = () => {
 
         {/* Right content */}
         <div className="flex-1 p-6 max-w-4xl space-y-4">
-          {/* Launch DNA Banner for steps 2-5 */}
+          {/* Launch DNA Banner for steps 2+ */}
           {currentStep > 1 && step1Result && (
             <LaunchDNACard product={step1Result} targetAudience={targetAudience} avatarName={buyerAvatar?.personaName} compact />
           )}
@@ -344,22 +361,20 @@ const LaunchWizard = () => {
               />
             )}
             {currentStep === 3 && (
-               <WizardStep3
+              <WizardStep3Graphics
                 productBrief={step1Result}
-                productContent={step2Result}
-                result={step3Result} setResult={setStep3Result}
+                niche={niche}
+                result={step3Graphics}
+                setResult={setStep3Graphics}
                 onNext={() => setCurrentStep(4)}
                 userId={user?.id}
-                price={price}
-                launchMode={launchMode}
               />
             )}
             {currentStep === 4 && (
-               <WizardStep4
+               <WizardStep3
                 productBrief={step1Result}
                 productContent={step2Result}
-                funnelCopy={step3Result}
-                result={step4Result} setResult={setStep4Result}
+                result={step4Funnel} setResult={setStep4Funnel}
                 onNext={() => setCurrentStep(5)}
                 userId={user?.id}
                 price={price}
@@ -367,21 +382,34 @@ const LaunchWizard = () => {
               />
             )}
             {currentStep === 5 && (
+               <WizardStep4
+                productBrief={step1Result}
+                productContent={step2Result}
+                funnelCopy={step4Funnel}
+                result={step5Marketing} setResult={setStep5Marketing}
+                onNext={() => setCurrentStep(6)}
+                userId={user?.id}
+                price={price}
+                launchMode={launchMode}
+              />
+            )}
+            {currentStep === 6 && (
               <WizardStep5
                 productBrief={step1Result}
                 hasContent={!!step2Result}
-                hasFunnel={!!step3Result}
-                hasMarketing={!!step4Result}
-                result={step5Result} setResult={setStep5Result}
+                hasFunnel={!!step4Funnel}
+                hasMarketing={!!step5Marketing}
+                result={step6Checklist} setResult={setStep6Checklist}
                 onSave={saveProject}
                 userId={user?.id}
-                funnelData={step3Result}
+                funnelData={step4Funnel}
                 contentData={step2Result}
-                marketingData={step4Result}
+                marketingData={step5Marketing}
                 assets={step2Assets}
                 price={price}
                 niche={niche}
                 launchMode={launchMode}
+                graphicsData={step3Graphics}
               />
             )}
           </motion.div>
