@@ -148,6 +148,7 @@ export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMa
             funnel={funnelData || null}
             marketing={marketingData || null}
             checklist={result}
+            graphics={graphicsData}
             assets={assets || {}}
             niche={niche || ""}
             price={price || 17}
