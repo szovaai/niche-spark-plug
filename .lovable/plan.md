@@ -1,53 +1,76 @@
 
 
-# DigiLaunchKit AI — Refactor Plan
+# Landing Page Conversion Optimization
 
-## What This Changes
+## What's Being Added
 
-This is a major restructuring that repositions the app from a collection of separate tools (Empire Mode, Micro Factory, Toolkit Builder, Research, Launch) into a unified **AI Launch Engine** with one primary flow: the **AI Launch Wizard**.
+Three high-impact conversion features plus two micro-copy enhancements:
 
-## Current State vs. Target State
+1. **Floating Buy Bar** — sticky bottom CTA that appears after scrolling past hero
+2. **Scroll Progress Bar** — thin gradient bar at top with dynamic contextual text
+3. **"What This Replaces" Comparison Section** — Without vs With visual comparison
+4. **"Your First Launch In 60 Minutes" Steps Section** — 4-step visual breakdown
+5. **Hero micro-copy enhancement** — add "Build your product / Build your funnel / Build your launch" lines + reassurance bullets under CTA
 
-**Current navigation:** Dashboard, Empire Mode, Micro Factory, Research, My Toolkits, Launch
+## Implementation
 
-**New navigation:** Dashboard, AI Launch Wizard, Products, Funnels, Marketing Assets, Launch Checklist, Templates, Settings
+### File: `src/pages/Index.tsx`
 
-## Implementation Status: ✅ COMPLETE
+**Add state + scroll listener** for:
+- `scrollProgress` (0-100 percentage)
+- `showFloatingBar` (boolean, true when scrolled past hero ~90vh)
 
-### Phase 1: Database ✅
-- Created `launch_projects` table with JSONB fields for each wizard step
-- RLS policies: users can only CRUD their own rows
-- Auto-updated `updated_at` trigger
+**New sections inserted into the page flow:**
 
-### Phase 2: Edge Functions ✅
-- `generate-launch-product` — product concept from niche/audience/type/topic
-- `generate-launch-content` — outline, chapters, bonuses, description
-- `generate-launch-funnel` — sales page, opt-in, thank you, bonus, checkout copy
-- `generate-launch-marketing` — 5 emails, 10 social posts, 5 pins, blog, video script
-- `generate-launch-checklist` — personalized launch roadmap
+1. **Scroll Progress Bar** (fixed top, z-50): Thin gradient bar showing scroll %. Below it, dynamic text that changes:
+   - 0-25%: "Discover how DigiLaunchKit works"
+   - 25-50%: "See what DigiLaunchKit builds for you"
+   - 50-75%: "See how the launch system works"
+   - 75-100%: "You're almost there — see the launch price below"
 
-### Phase 3: AI Launch Wizard ✅
-- 5-step wizard at `/wizard` with left stepper + right content
-- "Generate Entire Launch System" button runs all 5 steps sequentially
-- All outputs saved to `launch_projects` table
+2. **"Your First Launch In 60 Minutes"** section — inserted after the "What Nobody Admits" section (before "Introducing"). 4 numbered steps: Enter topic → AI builds → Export kit → Deploy & sell.
 
-### Phase 4: Section Pages ✅
-- `/products` — list/delete launch projects
-- `/funnels` — tabbed funnel copy library
-- `/assets` — marketing asset library (emails, posts, pins, blog, video)
-- `/checklist` — interactive launch checklists with toggle
-- `/templates` — 5 pre-built niche templates
+3. **"What This Replaces"** section — inserted after the "Launch Score Advisor" section (before "Who It's For"). Two-column comparison: Without (red X items, weeks/expensive) vs With (green check items, minutes/automatic).
 
-### Phase 5: Navigation ✅
-- New sidebar: Dashboard, Products, Funnels, Marketing Assets, Launch Checklist, Templates
-- CTA button: "New Launch" → `/wizard`
-- Legacy routes preserved: `/empire`, `/micro-factory`, `/research`, `/my-toolkits`, `/launch`
+4. **Floating Buy Bar** (fixed bottom, z-50): Dark glass bar with product name on left, "$37 Launch Price" + "Get Instant Access" button on right. Hidden on mobile or collapsed to just the button. Appears after hero scroll threshold via `showFloatingBar`.
 
-### Phase 6: Dashboard ✅
-- Launch-focused: progress tracker, active projects, adapted stats
-- "Start New Launch" CTA
+5. **Hero enhancement**: Add 3 short lines under the subheading: "Build your product. Build your funnel. Build your launch." Plus 3 reassurance bullets under the CTA button: "Build Your First Launch In Under 60 Minutes", "No Writing Required", "Launch Tonight".
 
-### Phase 7: Branding ✅
-- Title: "DigiLaunchKit AI"
-- Hero: "Launch Your Digital Product in 60 Minutes"
-- Updated Navbar, HeroSection, index.html
+### File: `src/components/HeroSection.tsx`
+
+No changes needed — it's not currently used by `Index.tsx` (the hero is inline in Index.tsx).
+
+## Page Flow (Updated)
+
+```
+Hero (with new micro-copy)
+↓ Scroll progress bar (fixed top)
+Problem / Pain
+"Your First Launch In 60 Minutes" ← NEW
+What Nobody Admits
+Introducing DigiLaunchKit
+What Gets Built (feature grid)
+Steal This Launch
+Research Agent
+Launch Score Advisor
+"What This Replaces" ← NEW
+Who It's For
+What Makes It Different
+Templates + BYOK
+Value Stack ($997 → $37)
+Guarantee
+Investment Comparison
+Final Word
+FAQ
+Footer
+↑ Floating Buy Bar (fixed bottom) ← NEW
+```
+
+## Files Modified
+
+| File | Changes |
+|------|---------|
+| `src/pages/Index.tsx` | Add scroll state, progress bar, floating bar, 2 new sections, hero micro-copy |
+
+Single file change — everything lives in `Index.tsx`.
+
