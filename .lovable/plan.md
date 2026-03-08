@@ -1,70 +1,53 @@
 
 
-# Sales Page & Dashboard Psychology Upgrades
+# DigiLaunchKit AI — Refactor Plan
 
-## Assessment
+## What This Changes
 
-Most features the user mentioned already exist in the codebase:
-- "Generate Entire Launch" button = existing `GenerateAllModal` ("Build My Launch System")
-- "Launch Factory" / Multiplier = existing `LaunchMultiplier` component
-- "Steal This Launch" library = existing `/steal` page
-- Affiliate Launch Kit = existing in `WizardStep4.tsx`
+This is a major restructuring that repositions the app from a collection of separate tools (Empire Mode, Micro Factory, Toolkit Builder, Research, Launch) into a unified **AI Launch Engine** with one primary flow: the **AI Launch Wizard**.
 
-The actual new work is **positioning and psychology upgrades** — not new features.
+## Current State vs. Target State
 
-## Changes
+**Current navigation:** Dashboard, Empire Mode, Micro Factory, Research, My Toolkits, Launch
 
-### 1. Dashboard — Add "Launch Tonight" Hero CTA
-**File: `src/pages/Dashboard.tsx`**
+**New navigation:** Dashboard, AI Launch Wizard, Products, Funnels, Marketing Assets, Launch Checklist, Templates, Settings
 
-Replace the current "AI Launch Wizard" card with a more urgent "Launch Tonight" card:
-- Headline: "🚀 Launch Tonight"
-- Sub: "Generate your complete product, funnel, emails & affiliate kit in 60 minutes"
-- Button: "Launch Tonight" (navigates to `/wizard`)
-- Gradient: more prominent, pulsing border animation
+## Implementation Status: ✅ COMPLETE
 
-### 2. Landing Page — Itemized Value Stack ($852)
-**File: `src/pages/Index.tsx`**
+### Phase 1: Database ✅
+- Created `launch_projects` table with JSONB fields for each wizard step
+- RLS policies: users can only CRUD their own rows
+- Auto-updated `updated_at` trigger
 
-Replace the generic `$997+` strikethrough in the pricing section with an itemized breakdown:
+### Phase 2: Edge Functions ✅
+- `generate-launch-product` — product concept from niche/audience/type/topic
+- `generate-launch-content` — outline, chapters, bonuses, description
+- `generate-launch-funnel` — sales page, opt-in, thank you, bonus, checkout copy
+- `generate-launch-marketing` — 5 emails, 10 social posts, 5 pins, blog, video script
+- `generate-launch-checklist` — personalized launch roadmap
 
-```
-Product Generator         $297
-Funnel Builder            $197  
-Email Launch System        $97
-Affiliate Kit Builder      $97
-Launch Planner             $97
-Revenue Projector          $67
-─────────────────────────
-Total Value:              $852
-Today:                     $37
-```
+### Phase 3: AI Launch Wizard ✅
+- 5-step wizard at `/wizard` with left stepper + right content
+- "Generate Entire Launch System" button runs all 5 steps sequentially
+- All outputs saved to `launch_projects` table
 
-Each line item gets its own row with a check mark, making the value feel concrete and justified.
+### Phase 4: Section Pages ✅
+- `/products` — list/delete launch projects
+- `/funnels` — tabbed funnel copy library
+- `/assets` — marketing asset library (emails, posts, pins, blog, video)
+- `/checklist` — interactive launch checklists with toggle
+- `/templates` — 5 pre-built niche templates
 
-### 3. Landing Page — "Watch This In Action" Demo Section
-**File: `src/pages/Index.tsx`**
+### Phase 5: Navigation ✅
+- New sidebar: Dashboard, Products, Funnels, Marketing Assets, Launch Checklist, Templates
+- CTA button: "New Launch" → `/wizard`
+- Legacy routes preserved: `/empire`, `/micro-factory`, `/research`, `/my-toolkits`, `/launch`
 
-Add a section right after the hero (before "The Problem"):
-- Heading: "See DigiLaunchKit Build A Product In Under 60 Seconds"
-- Placeholder video frame (dark rounded card with play button icon)
-- Sub-copy: "Watch how DigiLaunchKit turns a simple idea into a complete digital product launch"
-- This section is a placeholder — user can later embed an actual demo video/GIF
+### Phase 6: Dashboard ✅
+- Launch-focused: progress tracker, active projects, adapted stats
+- "Start New Launch" CTA
 
-### 4. Landing Page — "Built For WarriorPlus" Section
-**File: `src/pages/Index.tsx`**
-
-Add after "What Makes This Different" section:
-- Heading: "Built For WarriorPlus Launches"
-- 5 checkmarks: Optimized $17 front-end funnels, Affiliate promo kit included, JV page generated automatically, Launch email swipes included, Bonus stack builder
-- This signals to affiliates and vendors that the tool is purpose-built for their ecosystem
-
-## Files Modified
-
-| File | Changes |
-|------|---------|
-| `src/pages/Dashboard.tsx` | Upgrade wizard CTA to "Launch Tonight" with urgency styling |
-| `src/pages/Index.tsx` | Itemized $852 value stack, demo video placeholder section, WarriorPlus section |
-
-Two files, pure UI/copy changes. No backend or edge function changes needed.
-
+### Phase 7: Branding ✅
+- Title: "DigiLaunchKit AI"
+- Hero: "Launch Your Digital Product in 60 Minutes"
+- Updated Navbar, HeroSection, index.html

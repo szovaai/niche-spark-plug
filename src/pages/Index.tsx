@@ -5,7 +5,8 @@ import {
   Sparkles, ArrowRight, Check, X,
   Wand2, Zap, Target, DollarSign, Users, Search, Brain,
   Package, Mail, Megaphone, FileText, ClipboardList, BarChart3,
-  ShieldCheck, Key, Rocket, Eye, HelpCircle, ChevronDown, Timer, Upload, MousePointerClick
+  ShieldCheck, Key, Rocket, Eye, HelpCircle, ChevronDown, Timer, Upload, MousePointerClick,
+  Play, Trophy
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -175,6 +176,28 @@ const Index = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* ===== WATCH THIS IN ACTION ===== */}
+      <section className="py-16 px-4">
+        <div className="max-w-3xl mx-auto text-center">
+          <motion.div {...fadeIn}>
+            <h2 className="text-2xl md:text-3xl font-bold mb-4">See DigiLaunchKit Build A Product In Under 60 Seconds</h2>
+            <p className="text-muted-foreground mb-8">Watch how DigiLaunchKit turns a simple idea into a complete digital product launch — including product, funnel, bonuses, and affiliate kit — in minutes.</p>
+            <div className="relative aspect-video rounded-2xl border-2 border-border/50 bg-secondary/30 overflow-hidden cursor-pointer group">
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/5 to-accent/5">
+                <div className="w-20 h-20 rounded-full bg-primary/90 flex items-center justify-center shadow-xl shadow-primary/30 group-hover:scale-110 transition-transform">
+                  <Play className="w-8 h-8 text-primary-foreground ml-1" />
+                </div>
+              </div>
+              <div className="absolute bottom-4 left-4 right-4 text-center">
+                <p className="text-xs text-muted-foreground">Demo video coming soon — click to preview the wizard</p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      <SectionDivider />
 
       {/* ===== THE PROBLEM ===== */}
       <section className="py-20 px-4">
@@ -654,6 +677,35 @@ const Index = () => {
 
       <SectionDivider />
 
+      {/* ===== BUILT FOR WARRIORPLUS ===== */}
+      <section className="py-20 px-4">
+        <div className="max-w-3xl mx-auto text-center">
+          <motion.div {...fadeIn}>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-6">
+              <Trophy className="w-4 h-4 text-primary" />
+              <span className="text-sm gradient-text font-medium">Purpose-Built</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-8">Built For WarriorPlus Launches</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg mx-auto text-left">
+              {[
+                "Optimized $17 front-end funnels",
+                "Affiliate promo kit included",
+                "JV page generated automatically",
+                "Launch email swipes included",
+                "Bonus stack builder",
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-2 p-3 rounded-lg bg-primary/5 border border-primary/10">
+                  <Check className="w-4 h-4 text-primary shrink-0" />
+                  <span className="text-sm font-medium">{item}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      <SectionDivider />
+
       {/* ===== TEMPLATES + BYOK ===== */}
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -724,17 +776,40 @@ const Index = () => {
             ))}
           </motion.div>
 
-          {/* Value anchor */}
-          <motion.div {...fadeIn} className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-8 text-center">
-            <p className="text-sm text-muted-foreground mb-2">Total Value Of Assets Created</p>
-            <p className="text-4xl font-black text-foreground line-through decoration-destructive/60 mb-1">$997+</p>
-            <p className="text-sm text-muted-foreground mb-4">Yours today for just</p>
-            <p className="text-5xl font-black gradient-text">$37</p>
-            <Button variant="hero" size="xl" onClick={handleCTA} className="dual-glow mt-6">
-              <Wand2 className="w-5 h-5" />
-              Get Instant Access Now
-              <ArrowRight className="w-5 h-5" />
-            </Button>
+          {/* Itemized Value Stack */}
+          <motion.div {...fadeIn} className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-8">
+            <h3 className="text-lg font-bold text-center mb-6">Here's What You're Getting Today</h3>
+            <div className="space-y-2 mb-6">
+              {[
+                { item: "Product Generator", value: "$297" },
+                { item: "Funnel Builder", value: "$197" },
+                { item: "Email Launch System", value: "$97" },
+                { item: "Affiliate Kit Builder", value: "$97" },
+                { item: "Launch Planner", value: "$97" },
+                { item: "Revenue Projector", value: "$67" },
+              ].map((row, i) => (
+                <div key={i} className="flex items-center justify-between p-2.5 rounded-lg bg-secondary/30 border border-border/30">
+                  <span className="flex items-center gap-2 text-sm font-medium">
+                    <Check className="w-4 h-4 text-primary shrink-0" />
+                    {row.item}
+                  </span>
+                  <span className="text-sm text-muted-foreground font-semibold">{row.value}</span>
+                </div>
+              ))}
+            </div>
+            <div className="border-t border-border/50 pt-6 text-center space-y-2">
+              <p className="text-sm text-muted-foreground">Total Value</p>
+              <p className="text-4xl font-black text-foreground line-through decoration-destructive/60">$852</p>
+              <p className="text-sm text-muted-foreground">Yours today for just</p>
+              <p className="text-5xl font-black gradient-text">$37</p>
+            </div>
+            <div className="text-center mt-6">
+              <Button variant="hero" size="xl" onClick={handleCTA} className="dual-glow">
+                <Wand2 className="w-5 h-5" />
+                Get Instant Access Now
+                <ArrowRight className="w-5 h-5" />
+              </Button>
+            </div>
           </motion.div>
         </div>
       </section>

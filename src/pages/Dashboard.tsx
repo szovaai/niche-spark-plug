@@ -126,26 +126,27 @@ const Dashboard = () => {
           </Card>
         </motion.div>
 
-        {/* Quick Launch CTA */}
+        {/* 🚀 Launch Tonight CTA */}
         <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}>
-          <Card className="relative overflow-hidden border-primary/30 bg-gradient-to-br from-primary/10 via-accent/5 to-transparent">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/20 to-transparent rounded-bl-full" />
+          <Card className="relative overflow-hidden border-primary/40 bg-gradient-to-br from-primary/15 via-accent/10 to-primary/5 shadow-lg shadow-primary/10">
+            <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-primary/25 to-transparent rounded-bl-full" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-accent/20 to-transparent rounded-tr-full" />
             <CardContent className="p-6">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div className="flex items-start gap-4">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-primary to-accent shrink-0">
-                    <Wand2 className="w-6 h-6 text-white" />
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-primary to-accent shrink-0 animate-pulse">
+                    <Rocket className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg">AI Launch Wizard</h3>
+                    <h3 className="font-bold text-xl">🚀 Launch Tonight</h3>
                     <p className="text-sm text-muted-foreground max-w-md">
-                      Create your complete digital product launch — product, funnel, emails, marketing — all in one guided flow.
+                      Generate your complete product, funnel, emails & affiliate kit in 60 minutes.
                     </p>
                   </div>
                 </div>
-                <Button onClick={() => navigate("/wizard")} variant="hero" className="gap-2 shrink-0">
+                <Button onClick={() => navigate("/wizard")} variant="hero" size="lg" className="gap-2 shrink-0">
                   <Rocket className="w-4 h-4" />
-                  Start New Launch
+                  Launch Tonight
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
