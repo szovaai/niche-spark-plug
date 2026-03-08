@@ -3,10 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Loader2, CheckCircle2, Circle, Calendar } from "lucide-react";
-import { Step1Product, Step3Funnel, Step5Checklist } from "@/types/launchWizard";
+import { Step1Product, Step2Content, Step3Funnel, Step4Marketing, Step5Checklist } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import FunnelSiteExport from "./FunnelSiteExport";
+import LaunchBoxExportButton from "./LaunchBoxExportButton";
+import type { ProductAssets } from "@/types/productAssets";
 
 import type { LaunchMode } from "@/pages/LaunchWizard";
 
@@ -20,12 +22,15 @@ interface Props {
   onSave: () => void;
   userId?: string;
   funnelData?: Step3Funnel | null;
+  contentData?: Step2Content | null;
+  marketingData?: Step4Marketing | null;
+  assets?: ProductAssets;
   price?: number;
   niche?: string;
   launchMode?: LaunchMode;
 }
 
-export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMarketing, result, setResult, onSave, userId, funnelData, price, niche, launchMode }: Props) {
+export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMarketing, result, setResult, onSave, userId, funnelData, contentData, marketingData, assets, price, niche, launchMode }: Props) {
   const [loading, setLoading] = useState(false);
 
   const generate = async () => {
@@ -134,6 +139,18 @@ export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMa
               </div>
             ))}
           </div>
+
+          {/* Launch In A Box Export */}
+          <LaunchBoxExportButton
+            product={productBrief}
+            content={contentData || null}
+            funnel={funnelData || null}
+            marketing={marketingData || null}
+            checklist={result}
+            assets={assets || {}}
+            niche={niche || ""}
+            price={price || 17}
+          />
 
           {/* Instant Funnel Site Export */}
           {funnelData && (

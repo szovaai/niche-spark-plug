@@ -18,6 +18,7 @@ import Settings from "./pages/Settings";
 import EmpireMode from "./pages/EmpireMode";
 import MicroFactory from "./pages/MicroFactory";
 import LaunchWizard from "./pages/LaunchWizard";
+import LaunchTemplates from "./pages/LaunchTemplates";
 import Products from "./pages/Products";
 import Funnels from "./pages/Funnels";
 import MarketingAssets from "./pages/MarketingAssets";
@@ -42,6 +43,7 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/wizard" element={<LaunchWizard />} />
             <Route path="/wizard/:projectId" element={<LaunchWizard />} />
+            <Route path="/launch-templates" element={<LaunchTemplates />} />
             <Route path="/products" element={<Products />} />
             <Route path="/funnels" element={<Funnels />} />
             <Route path="/assets" element={<MarketingAssets />} />
