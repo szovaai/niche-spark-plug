@@ -94,7 +94,7 @@ DESCRIPTION: ${productContent?.description || ""}
 FRONT-END PRICE: $${price}${angleInstruction}${mechanismInstruction}${avatarContext}`;
 
   const sectionsJson = `
-"salesPageSections": {
+  "salesPageSections": {
     "patternInterrupt": "A bold, pattern-interrupt headline — NOT a generic 'How To' title. Use a contrarian statement, a provocative question, or a specific result that stops the scroll. Example: 'Stop Chasing Clients. Make Them Ask YOU For Work Instead.' Max 2 lines.",
     "bigPromise": "The core promise in 2-3 sentences. Must contain: specific result + timeframe + qualifier ('even if you have no audience, no ads, no tech skills'). This is the subheadline beneath the pattern interrupt.",
     "curiosityHook": "A 'what if' curiosity hook that makes the reader lean in. Must reference the mechanism by name. 3-4 sentences that create an open loop.",
@@ -112,6 +112,9 @@ FRONT-END PRICE: $${price}${angleInstruction}${mechanismInstruction}${avatarCont
       {"name": "...", "description": "...", "value": ${Math.round(price * 4)}},
       {"name": "...", "description": "...", "value": ${Math.round(price * 3)}}
     ],
+    "socialProofBar": "Join [realistic 4-digit number]+ [target audience] who have already [specific result]. Use a credibility-building number that feels real, not round.",
+    "buyerSignals": "Two sections: 'This Is For You If...' (4-5 bullet points matching the ideal buyer) and 'This Is NOT For You If...' (3-4 bullet points filtering out bad fits). This builds trust and increases conversions.",
+    "implementationPath": "A '3-Day Quick Start' timeline: Day 1 — [specific first action + expected result]. Day 2 — [next step + milestone]. Day 3 — [launch action + outcome]. Make it feel achievable and exciting.",
     "testimonials": "3 realistic testimonial templates showing before state → product used → specific result → life now. Use first names and specific numbers.",
     "objectionHandling": "Address top 3 objections inline: price ('less than a single Uber Eats order'), skepticism ('here is exactly why this works differently'), time ('15 minutes a day is all you need').",
     "guarantee": "Named guarantee with bold framing. Example: 'The 30-Day Use-It-Or-Get-Your-Money-Back Guarantee'. 2-3 sentences explaining the risk reversal.",

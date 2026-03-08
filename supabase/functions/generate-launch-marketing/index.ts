@@ -51,12 +51,14 @@ COMMISSION: 50-75%${angleInstruction}${mechanismInstruction}${avatarContext}
 Return ONLY valid JSON:
 {
   "emails": [
-    { "subject": "Under 50 chars — curiosity or specific result", "body": "Full email body. Max 300 words. Open with a hook (question, bold statement, story fragment). End with ONE specific CTA. Never use corporate openers." }
+    { "subject": "Under 50 chars — curiosity or specific result", "body": "Full email body. Max 300 words. Open with a hook (question, bold statement, story fragment). End with ONE specific CTA. Never use corporate openers.", "hookType": "Story|Curiosity|Proof|Urgency|FOMO" }
   ],
   "socialPosts": ["Post with hook, value, and hashtags", "...up to 10 posts"],
   "pinterestPins": ["Pin description with keywords", "Pin 2", "Pin 3", "Pin 4", "Pin 5"],
   "blogArticle": "600-word article: provide real value related to the topic, naturally lead to the product. Use headers and formatting.",
   "videoScript": "2-minute script: Hook (10s) → Problem (20s) → Solution intro (15s) → Product walkthrough (45s) → CTA (15s) → Outro (15s). Speaker directions in brackets.",
+  "tiktokScript": "[0:00-0:03] HOOK — Pattern interrupt opening line that stops the scroll\\n[0:03-0:15] PROBLEM — Quick relatable pain statement\\n[0:15-0:40] SOLUTION — Show/describe the method\\n[0:40-0:55] PROOF — Quick result or stat\\n[0:55-1:00] CTA — Tell them where to go. Keep total under 60 seconds.",
+  "instagramCarousel": ["Slide 1: Bold hook headline", "Slide 2: The problem", "Slide 3: The old way vs new way", "Slide 4: Step 1 of the method", "Slide 5: Step 2", "Slide 6: Step 3", "Slide 7: Result/proof", "Slide 8: CTA with link mention"],
   "adCopy": [
     { "headline": "Under 40 chars, specific result", "primaryText": "Hook → pain → solution → CTA. Max 5 sentences. Must stop the scroll.", "cta": "Get Instant Access", "hookAngle": "Speed" },
     { "headline": "...", "primaryText": "...", "cta": "...", "hookAngle": "Skeptic" },
@@ -78,19 +80,24 @@ Return ONLY valid JSON:
   }
 }
 
-EMAIL STRUCTURE (generate exactly 5):
-1. Pre-launch teaser: curiosity + specific promise within 24 hours
-2. Launch announcement: bold claim + mechanism name + CTA
-3. Value-add: share one key insight from the product
-4. Objection handler: address the #1 reason people don't buy
-5. Last chance: urgency close with specific deadline
+EMAIL STRUCTURE (generate exactly 5 — each MUST have a hookType label):
+1. Pre-launch teaser (hookType: "Curiosity"): curiosity + specific promise within 24 hours
+2. Launch announcement (hookType: "Proof"): bold claim + mechanism name + CTA
+3. Value-add (hookType: "Story"): share one key insight from the product using a mini-story
+4. Objection handler (hookType: "FOMO"): address the #1 reason people don't buy + what they miss
+5. Last chance (hookType: "Urgency"): urgency close with specific deadline
 
 AD RULES:
 - Speed angle: "In 24 hours from now..."
 - Skeptic angle: "I know you've heard this before, but..."
 - Simplicity angle: "You don't need experience, a following, or tech skills..."
 - Result angle: lead with the specific outcome first
-- Curiosity angle: tease the mechanism without revealing it`;
+- Curiosity angle: tease the mechanism without revealing it
+
+PLATFORM-SPECIFIC RULES:
+- tiktokScript: Include timing cues [0:00-0:03], keep under 60 seconds, conversational tone
+- instagramCarousel: Exactly 8 slides, each slide is one sentence/concept, Slide 1 must stop the scroll`;
+
 
     const { content, model } = await callTieredAI([
       { role: "system", content: `${AD_COPY_SYSTEM}\n\n${EMAIL_SEQUENCE_SYSTEM}\n\n${AFFILIATE_KIT_SYSTEM}` },
