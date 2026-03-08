@@ -80,12 +80,34 @@ export interface Objection {
   followUpQuestion: string;
 }
 
+export interface AffiliatePrize {
+  place: string;
+  prize: string;
+}
+
+export interface LaunchCalendar {
+  event: string;
+  date: string;
+  description: string;
+}
+
+export interface OutreachEmail {
+  subject: string;
+  body: string;
+  targetType: string;
+}
+
 export interface AffiliateKit {
   headline: string;
   emailSwipes: { subject: string; body: string }[];
   promoAngles: string[];
   bonusPageHeadline: string;
   jvPageCopy: string;
+  contestPrizes?: AffiliatePrize[];
+  launchCalendar?: LaunchCalendar[];
+  outreachEmails?: OutreachEmail[];
+  topAffiliateNiches?: string[];
+  commissionStructure?: string;
 }
 
 export interface ProofStack {
