@@ -266,7 +266,7 @@ const LaunchWizard = () => {
           <div className="mb-4 p-3 rounded-xl border border-border bg-card">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <Zap className={`w-4 h-4 ${launchMode === "warriorplus" ? "text-amber-500" : "text-muted-foreground"}`} />
+                <Zap className={`w-4 h-4 ${launchMode === "warriorplus" ? "text-primary" : "text-muted-foreground"}`} />
                 <span className="text-xs font-bold uppercase tracking-wider">WP Mode</span>
               </div>
               <Switch
@@ -275,7 +275,7 @@ const LaunchWizard = () => {
               />
             </div>
             {launchMode === "warriorplus" && (
-              <p className="text-[10px] text-amber-500/80 mt-1">Short, bold, fast-action copy for WarriorPlus launches</p>
+              <p className="text-[10px] text-primary/80 mt-1">Short, bold, fast-action copy for WarriorPlus launches</p>
             )}
           </div>
           <h3 className="font-bold text-sm text-muted-foreground uppercase tracking-wider mb-4">Steps</h3>
