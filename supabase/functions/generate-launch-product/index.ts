@@ -19,10 +19,11 @@ Deno.serve(async (req) => {
       { field: 'topic', type: 'string', required: true, maxLength: 500 },
       { field: 'lockedMechanism', type: 'string', maxLength: 500 },
       { field: 'buyerAvatar', type: 'object', maxLength: 10000 },
+      { field: 'qualityMode', type: 'string', maxLength: 20 },
     ]);
     if (!valid) return validationErrorResponse(valError!, corsHeaders);
 
-    const { niche, targetAudience, productType, topic, lockedMechanism, buyerAvatar } = data;
+    const { niche, targetAudience, productType, topic, lockedMechanism, buyerAvatar, qualityMode } = data;
 
     const cacheKey = `launch-product-${niche}-${productType}-${topic}`;
     const cached = await getCachedResponse(cacheKey);
@@ -85,7 +86,15 @@ CRITICAL RULES:
 - Each "whyItWorks" must explain the psychological principle behind that naming formula (1 sentence)
 - Every hook must contain a number, timeframe, or specific result — NEVER vague promises
 - Pain points must be emotionally specific — describe the exact frustration, not a generic problem
-- Campaign angles should trigger completely different emotions${mechanismInstruction}`;
+- Campaign angles should trigger completely different emotions${mechanismInstruction}${qualityMode === "premium" ? `
+
+PREMIUM QUALITY INSTRUCTIONS:
+- Include a real-world statistic or data point in the concept (e.g., "73% of freelancers report...")
+- Each pain point must include an emotional detail AND a specific scenario
+- Each mechanism description must include a mini case study: "[Name] used this to [specific result] in [timeframe]"
+- Campaign angle hooks must be scroll-stopping — use numbers, timeframes, or provocative statements
+- Add a "Pro Tip" element to each mechanism's whyItWorks explaining how to position it` : ""}`;
+
 
     const { content, model } = await callTieredAI([
       { role: "system", content: MASTER_SYSTEM_PROMPT },
