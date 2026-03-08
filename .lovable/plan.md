@@ -1,82 +1,53 @@
 
 
-# Sales Letter & Product Content Quality Upgrade
+# DigiLaunchKit AI — Refactor Plan
 
-## What's Being Improved
+## What This Changes
 
-The sales letter generator produces decent structure but weak conversion copy. The product generator creates outlines but not full written content. Two targeted upgrades fix both:
+This is a major restructuring that repositions the app from a collection of separate tools (Empire Mode, Micro Factory, Toolkit Builder, Research, Launch) into a unified **AI Launch Engine** with one primary flow: the **AI Launch Wizard**.
 
-1. **Sales Letter Raw Draft Prompt Overhaul** — Add module-by-module value stack, bonus stack with dollar values, scarcity section, risk reversal, and fast-action CTA to the raw draft prompt structure
-2. **Full Chapter Content Generation** — Add a "Write Full Chapter" button that generates 1,500-2,500 words of actual readable content per chapter (not just outlines)
+## Current State vs. Target State
 
-## Changes
+**Current navigation:** Dashboard, Empire Mode, Micro Factory, Research, My Toolkits, Launch
 
-### 1. Sales Letter Raw Draft — Enhanced Prompt Structure
-**File: `supabase/functions/generate-sales-letter/index.ts`**
+**New navigation:** Dashboard, AI Launch Wizard, Products, Funnels, Marketing Assets, Launch Checklist, Templates, Settings
 
-Update the raw draft prompt (Phase 1, ~lines 310-355) to add 4 missing sections after the current 8:
+## Implementation Status: ✅ COMPLETE
 
-```
-9. MODULE-BY-MODULE VALUE STACK
-   - List each module with a name, what they'll discover, and perceived value ($47-$297)
-   - Format: "Module 1: [Name] — [What they learn] — Value: $XX"
-   - Total the values at the bottom
+### Phase 1: Database ✅
+- Created `launch_projects` table with JSONB fields for each wizard step
+- RLS policies: users can only CRUD their own rows
+- Auto-updated `updated_at` trigger
 
-10. BONUS STACK (3-5 bonuses)
-   - Each bonus: name, one-line benefit, perceived value
-   - Format: "Bonus #1: [Name] — [Benefit] — Value: $XX"
+### Phase 2: Edge Functions ✅
+- `generate-launch-product` — product concept from niche/audience/type/topic
+- `generate-launch-content` — outline, chapters, bonuses, description
+- `generate-launch-funnel` — sales page, opt-in, thank you, bonus, checkout copy
+- `generate-launch-marketing` — 5 emails, 10 social posts, 5 pins, blog, video script
+- `generate-launch-checklist` — personalized launch roadmap
 
-11. SCARCITY + RISK REVERSAL
-   - Launch pricing angle (not fake countdown)
-   - Full money-back guarantee with confident language
-   - Example: "Try the entire system. If it doesn't help you [result], request a refund."
+### Phase 3: AI Launch Wizard ✅
+- 5-step wizard at `/wizard` with left stepper + right content
+- "Generate Entire Launch System" button runs all 5 steps sequentially
+- All outputs saved to `launch_projects` table
 
-12. FAST ACTION CTA
-   - Direct, confident call to action
-   - "Click the button below to get instant access"
-   - Repeat the total value vs. price comparison
-```
+### Phase 4: Section Pages ✅
+- `/products` — list/delete launch projects
+- `/funnels` — tabbed funnel copy library
+- `/assets` — marketing asset library (emails, posts, pins, blog, video)
+- `/checklist` — interactive launch checklists with toggle
+- `/templates` — 5 pre-built niche templates
 
-Also update the polish phase (Phase 2, ~lines 386-410) to ensure Kennedy HTML output includes:
-- `bonus-row` divs for each bonus with perceived values
-- A visible value stack table inside the `order-box`
-- A guarantee section with specific risk-reversal language
+### Phase 5: Navigation ✅
+- New sidebar: Dashboard, Products, Funnels, Marketing Assets, Launch Checklist, Templates
+- CTA button: "New Launch" → `/wizard`
+- Legacy routes preserved: `/empire`, `/micro-factory`, `/research`, `/my-toolkits`, `/launch`
 
-### 2. Full Chapter Content Generator
-**File: `supabase/functions/generate-launch-content/index.ts`**
+### Phase 6: Dashboard ✅
+- Launch-focused: progress tracker, active projects, adapted stats
+- "Start New Launch" CTA
 
-Add a new mode alongside `expandChapter` — called `writeFullChapter`. When triggered, the edge function generates 1,500-2,500 words of actual readable chapter content (not JSON structure) including:
-- Opening hook paragraph
-- Core teaching with examples
-- Action steps inline
-- Closing summary
-
-Returns: `{ fullContent: "..." }` as markdown text.
-
-**File: `src/components/wizard/WizardStep2.tsx`**
-
-Add a "Write Full Content" button next to each chapter's Expand button. When clicked:
-- Calls `generate-launch-content` with `{ writeFullChapter: true, chapterToExpand: chapter, productBrief }`
-- Stores the result in a new optional `fullContent?: string` field on `ChapterItem`
-- Displays the full content in a scrollable text area within the accordion
-- Includes copy/download buttons for the full text
-
-Also add a "Write All Chapters" button at the top of the chapters card that sequentially generates full content for all chapters with a progress indicator.
-
-### 3. Chapter Data Model Update
-**File: `src/types/launchWizard.ts`**
-
-Add to `ChapterItem`:
-```typescript
-fullContent?: string;  // Full written chapter content (1500-2500 words)
-```
-
-## Files Modified
-
-| File | Changes |
-|------|---------|
-| `supabase/functions/generate-sales-letter/index.ts` | Add value stack, bonus stack, scarcity, risk reversal, CTA sections to raw + polish prompts |
-| `supabase/functions/generate-launch-content/index.ts` | Add `writeFullChapter` mode for full 1,500-2,500 word chapter generation |
-| `src/types/launchWizard.ts` | Add `fullContent` field to ChapterItem |
-| `src/components/wizard/WizardStep2.tsx` | Add "Write Full Content" per-chapter button + "Write All Chapters" bulk button with progress |
-
+### Phase 7: Branding ✅
+- Title: "DigiLaunchKit AI"
+- Hero: "Launch Your Digital Product in 60 Minutes"
+- Updated Navbar, HeroSection, index.html

@@ -219,6 +219,7 @@ export interface ChapterItem {
   templates?: ChapterTemplate[];
   checklists?: ChapterChecklist[];
   additionalExamples?: AdditionalExample[];
+  fullContent?: string;
 }
 
 export type SalesStyle = "warriorplus" | "longform" | "vsl" | "short";

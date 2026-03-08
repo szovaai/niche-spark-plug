@@ -347,6 +347,33 @@ PRICE: $${price || 17}
    - Show total value of everything included
    - Reveal the price with confident, no-pressure language
 
+9. MODULE-BY-MODULE VALUE STACK (this section is CRITICAL for conversions)
+   - List EVERY module/component with a name, what they'll discover, and a perceived dollar value ($47-$297 each)
+   - Format: "Module 1: [Name] — [What they'll learn/get] — Value: $XX"
+   - Add up all the values at the bottom
+   - Example:
+     Module 1: The $500 Client Blueprint — Learn how to identify people already ready to pay — Value: $97
+     Module 2: The AI Prompt System — Copy-paste prompts that generate leads instantly — Value: $147
+     Total Value: $XXX
+
+10. BONUS STACK (3-5 bonuses — each must feel like a standalone product)
+   - Each bonus: catchy product-style name, one-line benefit, perceived value
+   - Format: "Bonus #1: [Product-Style Name] — [Specific benefit] — Value: $XX"
+   - Example: "Bonus #1: AI Client Outreach Script Pack — 15 copy-paste scripts for landing clients — Value: $67"
+   - Total bonus value at the bottom
+
+11. SCARCITY + RISK REVERSAL
+   - Launch pricing angle: "This is a launch price. When we update this product next month, the price goes up."
+   - Full money-back guarantee with CONFIDENT language — no weasel words
+   - Example: "Try the entire system for 30 days. If it doesn't help you [specific result], simply request a refund. No questions. No hassle."
+   - Make the guarantee feel generous and confident, not defensive
+
+12. FAST ACTION CTA
+   - Direct, confident call to action
+   - Repeat the total value vs. actual price one more time
+   - Example: "You're getting $XXX worth of tools, templates, and training for just $XX. Click the button below to get instant access."
+   - End with urgency: "This launch price won't last."
+
 Format as clean HTML with <p>, <h2>, <h3>, <ul>, <li>, <strong>, <em> tags. 
 Keep paragraphs SHORT — 2 sentences max.
 Use <h2> for major section breaks.
@@ -395,6 +422,10 @@ ${KENNEDY_HTML_STRUCTURE}
 9. PRICE ANCHOR: compare to hiring a copywriter ($3,000), consultant ($5,000), course ($997)
 10. Format using the EXACT HTML structure shown above with Kennedy classes
 11. Include ALL required sections: urgency-bar, letter-header, headline-box, salutation, body-copy with pull-quotes, fascinations, check-lists, comparison table, who-this-is-for, bonus stack, order-box, guarantee, FAQ, PS section
+12. BONUS STACK must use <div class="bonus-row"> for each bonus with the bonus name, benefit, and perceived value displayed
+13. ORDER BOX must include a visible value stack table showing each module/bonus with its value, the total value, and the actual price in large text
+14. GUARANTEE section must use specific risk-reversal language — not generic "money-back guarantee" but confident, detailed language like "Try the entire system for 30 days. Use every template, run every prompt. If it doesn't help you [specific result], request a refund."
+15. Include a FAST ACTION section after the order box that repeats the value comparison and has a direct CTA
 
 === ADDITIONAL CONTEXT ===
 Product: ${title}

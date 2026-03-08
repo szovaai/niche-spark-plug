@@ -39,6 +39,69 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
 
+    // Handle full chapter content writing mode
+    if (body.writeFullChapter) {
+      const { chapterToExpand, productBrief: pb } = body;
+      const userTier = await getUserTier(user.id);
+
+      const writePrompt = `You are writing the FULL, COMPLETE content for one chapter of a digital product. This is NOT an outline — this is the actual readable chapter that a buyer will read.
+
+PRODUCT: ${pb?.title || "Unknown"}
+UNIQUE MECHANISM: ${pb?.uniqueMechanism || ""}
+CHAPTER TITLE: "${chapterToExpand.title}"
+CHAPTER SUMMARY: ${chapterToExpand.summary}
+KEY POINTS TO COVER: ${chapterToExpand.keyPoints?.join(", ") || "none"}
+${chapterToExpand.moduleGoal ? `MODULE GOAL: ${chapterToExpand.moduleGoal}` : ""}
+${chapterToExpand.coreConcept ? `CORE CONCEPT: ${chapterToExpand.coreConcept}` : ""}
+
+Write 1,500-2,500 words of ACTUAL CHAPTER CONTENT in markdown format. Structure it like a real book chapter:
+
+1. OPENING HOOK (2-3 paragraphs)
+   - Start with a relatable story, surprising fact, or provocative question
+   - Pull the reader in emotionally — make them feel "this is about ME"
+   - Transition into what this chapter will teach them
+
+2. THE CORE TEACHING (main body — 800-1500 words)
+   - Explain the concept clearly with analogies and real examples
+   - Use specific names, numbers, timeframes, and dollar amounts — NOT generic statements
+   - Break complex ideas into numbered steps or bullet points
+   - Include "Here's exactly what to do" sections with copy-paste scripts/templates where relevant
+   - Add "Pro Tip:" callouts for insider knowledge
+   - Reference the ${pb?.uniqueMechanism || "core system"} naturally throughout
+
+3. REAL-WORLD EXAMPLE (1-2 paragraphs)
+   - A detailed scenario showing someone applying this chapter's teaching
+   - Include specific numbers: "$347 in first 9 days", "landed 3 clients in 2 weeks"
+   - Make it feel REAL — use a first name, describe their situation before and after
+
+4. ACTION STEPS (3-5 concrete steps)
+   - Each step should be completable in 10-15 minutes
+   - Format: "Step 1: [Action] — [One sentence explaining how]"
+   - These should be SPECIFIC, not vague ("Open ChatGPT and paste this prompt:" NOT "use AI to help you")
+
+5. CHAPTER SUMMARY (2-3 bullet points)
+   - "In this chapter, you learned..."
+   - End with a transition to what comes next
+
+WRITING RULES:
+- Write in a warm, direct, conversational tone — like a mentor talking to a friend
+- Short paragraphs (2-3 sentences max)
+- Use "you" and "your" — speak directly to the reader
+- NO corporate buzzwords: leverage, optimize, elevate, harness, dive into, journey
+- Include specific examples with numbers, not generic advice
+- Make every paragraph either teach something, show an example, or tell them what to do
+- This should feel like premium content someone would pay $47+ for
+
+Return the content as plain markdown text. Do NOT wrap in JSON. Just write the chapter.`;
+
+      const { content } = await callTieredAI([
+        { role: "system", content: MASTER_SYSTEM_PROMPT },
+        { role: "user", content: writePrompt },
+      ], userTier, "standard");
+
+      return new Response(JSON.stringify({ fullContent: content }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     // Handle chapter expansion mode
     if (body.expandChapter) {
       const { chapterToExpand, chapterIndex, productBrief, expansionType } = body;
