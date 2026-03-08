@@ -5,13 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Copy, Check, FileText, Eye } from "lucide-react";
+import { Copy, Check, FileText, Eye, GitBranch } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import RenderedCopy from "@/components/RenderedCopy";
 import { sanitizeHTML } from "@/lib/sanitize";
 import { markdownToHTML } from "@/lib/copyUtils";
+import CloneFunnelModal from "@/components/CloneFunnelModal";
 
 const TABS = ["salesPage", "optInPage", "thankYouPage", "bonusPage", "checkoutCopy"] as const;
 const TAB_LABELS: Record<string, string> = {
@@ -24,6 +25,7 @@ const Funnels = () => {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState<string | null>(null);
   const [previewContent, setPreviewContent] = useState<{ title: string; html: string } | null>(null);
+  const [cloneOpen, setCloneOpen] = useState(false);
 
   useEffect(() => {
     if (user) fetchProjects();
@@ -55,9 +57,16 @@ const Funnels = () => {
   return (
     <DashboardLayout title="Funnels">
       <div className="p-6 max-w-5xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold">Funnel Copy Library</h1>
-          <p className="text-muted-foreground text-sm">All your generated funnel assets — full, untruncated copy.</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">Funnel Copy Library</h1>
+            <p className="text-muted-foreground text-sm">All your generated funnel assets — full, untruncated copy.</p>
+          </div>
+          {projects.length > 0 && (
+            <Button onClick={() => setCloneOpen(true)} className="gap-2">
+              <GitBranch className="w-4 h-4" /> Clone Funnel
+            </Button>
+          )}
         </div>
 
         {loading ? (
@@ -104,6 +113,8 @@ const Funnels = () => {
             ))}
           </Tabs>
         )}
+
+        <CloneFunnelModal open={cloneOpen} onOpenChange={setCloneOpen} projects={projects} />
 
         {/* Full Page Preview Modal */}
         <Dialog open={!!previewContent} onOpenChange={() => setPreviewContent(null)}>

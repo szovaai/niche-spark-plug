@@ -119,3 +119,6 @@ verify_jwt = false
 
 [functions.generate-product-assets]
 verify_jwt = false
+
+[functions.clone-funnel]
+verify_jwt = false
