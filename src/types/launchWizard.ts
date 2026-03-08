@@ -155,8 +155,28 @@ export interface ChapterItem {
   moduleSummary?: string[];
 }
 
+export type SalesStyle = "warriorplus" | "longform" | "vsl" | "short";
+
+export interface SalesPageSections {
+  patternInterrupt: string;
+  bigPromise: string;
+  curiosityHook: string;
+  problemAgitation: string;
+  mechanismIntro: string;
+  systemSteps: string[];
+  productBreakdown: { module: string; title: string; description: string; value: number }[];
+  bonusStack: { name: string; description: string; value: number }[];
+  testimonials: string;
+  objectionHandling: string;
+  guarantee: string;
+  urgencyClose: string;
+  callToAction: string;
+}
+
 export interface Step3Funnel {
   salesPage: string;
+  salesPageSections?: SalesPageSections;
+  salesStyle?: SalesStyle;
   optInPage: string;
   thankYouPage: string;
   bonusPage: string;
