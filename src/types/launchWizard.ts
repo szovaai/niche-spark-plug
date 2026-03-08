@@ -171,6 +171,9 @@ export interface SalesPageSections {
   guarantee: string;
   urgencyClose: string;
   callToAction: string;
+  socialProofBar?: string;
+  buyerSignals?: string;
+  implementationPath?: string;
 }
 
 export interface Step3Funnel {

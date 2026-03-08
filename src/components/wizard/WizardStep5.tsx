@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Loader2, CheckCircle2, Circle, Calendar } from "lucide-react";
-import { Step1Product, Step5Checklist } from "@/types/launchWizard";
+import { Step1Product, Step3Funnel, Step5Checklist } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import FunnelSiteExport from "./FunnelSiteExport";
 
 interface Props {
   productBrief: Step1Product | null;
@@ -16,9 +17,12 @@ interface Props {
   setResult: (v: Step5Checklist | null) => void;
   onSave: () => void;
   userId?: string;
+  funnelData?: Step3Funnel | null;
+  price?: number;
+  niche?: string;
 }
 
-export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMarketing, result, setResult, onSave, userId }: Props) {
+export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMarketing, result, setResult, onSave, userId, funnelData, price, niche }: Props) {
   const [loading, setLoading] = useState(false);
 
   const generate = async () => {
@@ -127,6 +131,17 @@ export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMa
               </div>
             ))}
           </div>
+
+          {/* Instant Funnel Site Export */}
+          {funnelData && (
+            <FunnelSiteExport
+              funnel={funnelData}
+              productTitle={productBrief?.title || "My Product"}
+              productSubtitle={productBrief?.subtitle}
+              price={price}
+              niche={niche}
+            />
+          )}
 
           <Button onClick={onSave} variant="hero" className="gap-2 w-full">
             Save Launch Project
