@@ -12,6 +12,7 @@ import {
   CreditCard,
   Radar,
   Dna,
+  BarChart3,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
