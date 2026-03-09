@@ -29,6 +29,7 @@ import ResearchAgent from "./pages/ResearchAgent";
 import OpportunityRadar from "./pages/OpportunityRadar";
 import GenomeLibrary from "./pages/GenomeLibrary";
 import AffiliatePredictor from "./pages/AffiliatePredictor";
+import CommandCenter from "./pages/CommandCenter";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
