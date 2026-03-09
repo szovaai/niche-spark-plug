@@ -44,7 +44,7 @@ const Navbar = () => {
               <Zap className="w-5 h-5 text-primary-foreground" />
             </div>
             <span className="text-xl font-bold">
-              Digi<span className="gradient-text">LaunchKit</span>
+              Launch<span className="gradient-text">Stack</span>
               <span className="text-xs text-muted-foreground ml-1">AI</span>
             </span>
           </button>
