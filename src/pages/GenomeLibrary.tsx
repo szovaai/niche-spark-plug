@@ -32,6 +32,7 @@ interface Genome {
   uses_count: number;
   is_public: boolean;
   user_id: string;
+  project_id: string | null;
   created_at: string;
 }
 
