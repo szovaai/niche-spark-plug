@@ -17,7 +17,7 @@ import SalesStyleSelector from "./SalesStyleSelector";
 import SalesPageSectionsUI from "./SalesPageSections";
 import SalesHookGenerator from "./SalesHookGenerator";
 import BelievabilityFilter from "./BelievabilityFilter";
-import FunnelSiteExport from "./FunnelSiteExport";
+import FunnelInjectionEngine from "./FunnelInjectionEngine";
 
 import type { LaunchMode } from "@/pages/LaunchWizard";
 
@@ -290,8 +290,8 @@ export default function WizardStep3({ productBrief, productContent, result, setR
             />
           )}
 
-          {/* Instant Funnel Site Export */}
-          <FunnelSiteExport
+          {/* Funnel Injection Engine */}
+          <FunnelInjectionEngine
             funnel={result}
             productTitle={productBrief.title}
             productSubtitle={productBrief.subtitle}

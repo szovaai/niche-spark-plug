@@ -1,4 +1,33 @@
-import type { Step3Funnel, SalesPageSections } from "@/types/launchWizard";
+import type { Step3Funnel, SalesPageSections, Step4Marketing, AffiliateKit } from "@/types/launchWizard";
+
+export type FunnelType = "simple" | "leadmagnet-tripwire" | "warriorplus-launch" | "list-building";
+
+export interface FunnelTypeConfig {
+  id: FunnelType;
+  label: string;
+  description: string;
+  pages: string[];
+  icon: string;
+}
+
+export const FUNNEL_TYPES: FunnelTypeConfig[] = [
+  { id: "simple", label: "Simple Product Funnel", description: "Sales page → Checkout → Thank you. The fastest way to sell.", pages: ["index.html", "checkout.html", "thankyou.html"], icon: "🎯" },
+  { id: "leadmagnet-tripwire", label: "Lead Magnet + Tripwire", description: "Opt-in → Tripwire sales page → Upsell → Delivery.", pages: ["optin.html", "index.html", "upsell.html", "thankyou.html", "bonus-delivery.html"], icon: "🧲" },
+  { id: "warriorplus-launch", label: "WarriorPlus Launch Funnel", description: "Full launch: Sales → Upsell → Downsell → Bonus → Affiliate page.", pages: ["index.html", "checkout.html", "upsell.html", "downsell.html", "thankyou.html", "bonus-delivery.html", "affiliate.html"], icon: "🔥" },
+  { id: "list-building", label: "List Building Funnel", description: "Opt-in → Thank you → Nurture. Grow your email list first.", pages: ["optin.html", "thankyou.html", "bonus-delivery.html"], icon: "📧" },
+];
+
+export interface AutoresponderConfig {
+  provider: string;
+  webhookUrl?: string;
+  listId?: string;
+  tagName?: string;
+}
+
+export interface FunnelDeployConfig {
+  funnelType: FunnelType;
+  autoresponder?: AutoresponderConfig;
+}
 
 export type FunnelTemplate = "classic-im" | "minimal-creator" | "toolkit-launch";
 
@@ -393,6 +422,147 @@ ${funnel.orderBump ? `<div style="background:${template === "toolkit-launch" ? "
   return wrapPage("Checkout — " + config.productTitle, template, body);
 }
 
+export function generateUpsellPageHTML(funnel: Step3Funnel, config: FunnelSiteConfig): string {
+  const template = config.template || "classic-im";
+  const upsellCopy = funnel.upsellOffer || "Upgrade your order with this exclusive add-on.";
+  const body = `<div class="hero">
+<h1>⚡ Wait — Special One-Time Offer</h1>
+<p class="subtitle">This offer is only available right now and won't be shown again.</p>
+</div>
+<div class="container">
+<div class="card" style="border-color:${template === "toolkit-launch" ? "var(--accent)" : "var(--gold, var(--accent))"}">
+<h2>Upgrade Your Order</h2>
+<p>${nl2br(upsellCopy)}</p>
+<div style="text-align:center;margin-top:24px">
+<a href="${escapeHtml(config.paymentLink || "#")}" class="cta-btn">Yes — Add This To My Order</a>
+<p style="margin-top:16px"><a href="thankyou.html" style="font-size:.9rem;color:${template === "toolkit-launch" ? "var(--muted)" : "#888"}">No thanks, take me to my purchase →</a></p>
+</div>
+</div>
+</div>
+<div class="footer"><p>&copy; ${new Date().getFullYear()} ${escapeHtml(config.authorName || "")}</p></div>`;
+  return wrapPage("Special Offer — " + config.productTitle, template, body);
+}
+
+export function generateDownsellPageHTML(funnel: Step3Funnel, config: FunnelSiteConfig): string {
+  const template = config.template || "classic-im";
+  const price = config.price || 17;
+  const litePrice = Math.round(price * 0.6);
+  const body = `<div class="hero">
+<h1>Before You Go…</h1>
+<p class="subtitle">We'd hate for you to miss out. Here's a lighter version at a special price.</p>
+</div>
+<div class="container">
+<div class="card">
+<h2>${escapeHtml(config.productTitle)} — Lite Edition</h2>
+<p>Get the core system without the advanced bonuses. Perfect if you want to start small and upgrade later.</p>
+<ul class="bullet-list">
+<li>Core training included</li>
+<li>Quick-start guide</li>
+<li>Email support</li>
+</ul>
+<div class="price-box" style="margin-top:20px">
+<p class="was">Regular: $${price}</p>
+<p class="now">Just $${litePrice}</p>
+<br><a href="${escapeHtml(config.paymentLink || "#")}" class="cta-btn">Get The Lite Version — $${litePrice}</a>
+<p style="margin-top:16px"><a href="thankyou.html" style="font-size:.9rem;color:${template === "toolkit-launch" ? "var(--muted)" : "#888"}">No thanks, I'll pass →</a></p>
+</div>
+</div>
+</div>
+<div class="footer"><p>&copy; ${new Date().getFullYear()} ${escapeHtml(config.authorName || "")}</p></div>`;
+  return wrapPage("Special Price — " + config.productTitle, template, body);
+}
+
+export function generateBonusDeliveryPageHTML(funnel: Step3Funnel, config: FunnelSiteConfig): string {
+  const template = config.template || "classic-im";
+  const sections = funnel.salesPageSections;
+  let bonusLinks = "";
+  if (sections?.bonusStack?.length) {
+    bonusLinks = sections.bonusStack.map((b, i) => `<div class="card">
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+<span style="font-size:1.5rem">📦</span>
+<div>
+<h3 style="margin:0">${escapeHtml(b.name)}</h3>
+<p style="margin:4px 0 0;font-size:.9rem;color:${template === "toolkit-launch" ? "var(--muted)" : "#666"}">${escapeHtml(b.description)}</p>
+</div>
+</div>
+<a href="#" class="cta-btn" style="font-size:.9rem;padding:10px 24px">Download ${escapeHtml(b.name)}</a>
+</div>`).join("");
+  }
+  const body = `<div class="hero">
+<h1>🎉 Your Bonuses Are Ready!</h1>
+<p class="subtitle">Download everything below. You'll also receive links via email.</p>
+</div>
+<div class="container">
+<div class="card" style="text-align:center;border-color:${template === "toolkit-launch" ? "var(--accent)" : "var(--gold, var(--accent))"}">
+<h2>📥 Main Product Access</h2>
+<p>Click below to access ${escapeHtml(config.productTitle)}</p>
+<a href="#" class="cta-btn" style="margin-top:16px">Access ${escapeHtml(config.productTitle)}</a>
+</div>
+${bonusLinks || `<div class="card"><p>Your bonus files will be available here. Check your email for download links.</p></div>`}
+<div class="section" style="text-align:center">
+<h2>Need Help?</h2>
+<p>Contact us at ${escapeHtml(config.contactEmail || "support@example.com")} for any questions.</p>
+</div>
+</div>
+<div class="footer"><p>&copy; ${new Date().getFullYear()} ${escapeHtml(config.authorName || "")}</p></div>`;
+  return wrapPage("Your Downloads — " + config.productTitle, template, body);
+}
+
+export function generateAffiliatePageHTML(funnel: Step3Funnel, config: FunnelSiteConfig, affiliateKit?: AffiliateKit): string {
+  const template = config.template || "classic-im";
+  const price = config.price || 17;
+  const commission = Math.round(price * 0.5);
+
+  let swipesHtml = "";
+  if (affiliateKit?.emailSwipes?.length) {
+    swipesHtml = affiliateKit.emailSwipes.map((s, i) => `<div class="card">
+<h3>Swipe #${i + 1}: ${escapeHtml(s.subject)}</h3>
+<pre style="white-space:pre-wrap;font-family:inherit;font-size:.9rem;color:${template === "toolkit-launch" ? "var(--muted)" : "#555"};background:${template === "toolkit-launch" ? "rgba(255,255,255,.03)" : "#f9f7f2"};padding:16px;border-radius:8px;margin-top:8px">${escapeHtml(s.body)}</pre>
+</div>`).join("");
+  }
+
+  let anglesHtml = "";
+  if (affiliateKit?.promoAngles?.length) {
+    anglesHtml = `<div class="card"><h3>Promo Angles</h3><ul class="bullet-list">${affiliateKit.promoAngles.map(a => `<li>${escapeHtml(a)}</li>`).join("")}</ul></div>`;
+  }
+
+  const body = `<div class="hero">
+<h1>🤝 Promote ${escapeHtml(config.productTitle)}</h1>
+<p class="subtitle">Earn $${commission}+ per sale with our affiliate program. Copy-paste swipes included.</p>
+</div>
+<div class="container">
+<div class="card" style="text-align:center;border-color:${template === "toolkit-launch" ? "var(--accent)" : "var(--gold, var(--accent))"}">
+<h2>Commission: 50%</h2>
+<p>Earn <strong>$${commission}</strong> for every sale you refer.</p>
+<p style="margin-top:8px;font-size:.95rem">Product Price: $${price} | Your Commission: $${commission}</p>
+<a href="#" class="cta-btn" style="margin-top:20px">Get Your Affiliate Link</a>
+</div>
+
+<div class="section">
+<h2>Why Promote This?</h2>
+<ul class="bullet-list">
+<li>High-converting sales page (tested copy)</li>
+<li>Ready-made email swipes below</li>
+<li>Growing niche with hungry buyers</li>
+<li>Full support for affiliates</li>
+</ul>
+</div>
+
+${affiliateKit?.jvPageCopy ? `<div class="card"><p>${nl2br(affiliateKit.jvPageCopy)}</p></div>` : ""}
+
+${swipesHtml ? `<div class="section"><h2>📧 Email Swipes (Copy & Paste)</h2>${swipesHtml}</div>` : ""}
+${anglesHtml}
+
+<div class="section" style="text-align:center">
+<h2>Ready to Promote?</h2>
+<a href="#" class="cta-btn">Get Your Affiliate Link Now</a>
+<p style="margin-top:12px;font-size:.85rem;color:${template === "toolkit-launch" ? "var(--muted)" : "#888"}">Questions? Email ${escapeHtml(config.contactEmail || "affiliates@example.com")}</p>
+</div>
+</div>
+<div class="footer"><p>&copy; ${new Date().getFullYear()} ${escapeHtml(config.authorName || "")}</p></div>`;
+  return wrapPage("Affiliate Program — " + config.productTitle, template, body);
+}
+
 export function generateReadmeTxt(config: FunnelSiteConfig): string {
   return `========================================
 HOW TO GO LIVE IN 5 MINUTES
@@ -411,11 +581,15 @@ OPTION 2: Any Web Host
 3. Your site is live at your domain
 
 FILES INCLUDED:
-- index.html     → Your sales page
-- optin.html     → Opt-in / squeeze page
-- thankyou.html  → Thank you / delivery page
-- bonus.html     → Bonus showcase page
-- checkout.html  → Checkout / order page
+- index.html          → Sales page
+- optin.html           → Opt-in / squeeze page
+- thankyou.html        → Thank you / delivery page
+- bonus.html           → Bonus showcase page
+- checkout.html        → Checkout / order page
+- upsell.html          → One-time upsell offer
+- downsell.html        → Downsell / lite version
+- bonus-delivery.html  → Download / access page
+- affiliate.html       → Affiliate promo page
 
 IMPORTANT:
 - Update the payment link in checkout.html to your Gumroad, PayPal, or Stripe link
@@ -431,21 +605,31 @@ Generated by DigiLaunchKit
 }
 
 export interface FunnelSiteFiles {
-  "index.html": string;
-  "optin.html": string;
-  "thankyou.html": string;
-  "bonus.html": string;
-  "checkout.html": string;
-  "README.txt": string;
+  [key: string]: string;
 }
 
-export function generateFunnelSite(funnel: Step3Funnel, config: FunnelSiteConfig): FunnelSiteFiles {
-  return {
-    "index.html": generateSalesPageHTML(funnel, config),
-    "optin.html": generateOptinPageHTML(funnel, config),
-    "thankyou.html": generateThankYouPageHTML(funnel, config),
-    "bonus.html": generateBonusPageHTML(funnel, config),
-    "checkout.html": generateCheckoutPageHTML(funnel, config),
-    "README.txt": generateReadmeTxt(config),
-  };
+export function generateFunnelSite(
+  funnel: Step3Funnel,
+  config: FunnelSiteConfig,
+  funnelType?: FunnelType,
+  affiliateKit?: AffiliateKit
+): FunnelSiteFiles {
+  const type = funnelType || "warriorplus-launch";
+  const typeConfig = FUNNEL_TYPES.find(t => t.id === type) || FUNNEL_TYPES[2];
+  const pages = typeConfig.pages;
+
+  const files: FunnelSiteFiles = {};
+
+  if (pages.includes("index.html")) files["index.html"] = generateSalesPageHTML(funnel, config);
+  if (pages.includes("optin.html")) files["optin.html"] = generateOptinPageHTML(funnel, config);
+  if (pages.includes("thankyou.html")) files["thankyou.html"] = generateThankYouPageHTML(funnel, config);
+  if (pages.includes("checkout.html")) files["checkout.html"] = generateCheckoutPageHTML(funnel, config);
+  if (pages.includes("bonus.html")) files["bonus.html"] = generateBonusPageHTML(funnel, config);
+  if (pages.includes("upsell.html")) files["upsell.html"] = generateUpsellPageHTML(funnel, config);
+  if (pages.includes("downsell.html")) files["downsell.html"] = generateDownsellPageHTML(funnel, config);
+  if (pages.includes("bonus-delivery.html")) files["bonus-delivery.html"] = generateBonusDeliveryPageHTML(funnel, config);
+  if (pages.includes("affiliate.html")) files["affiliate.html"] = generateAffiliatePageHTML(funnel, config, affiliateKit);
+
+  files["README.txt"] = generateReadmeTxt(config);
+  return files;
 }
