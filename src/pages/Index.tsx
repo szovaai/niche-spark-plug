@@ -629,7 +629,7 @@ const Index = () => {
 
           <motion.div {...fadeIn}>
             <p className="text-muted-foreground leading-relaxed mb-6">
-              Before you spend a single hour building, DigiLaunchKit's Launch Score Advisor analyzes your idea and scores it across four critical dimensions:
+              Before you spend a single hour building, LaunchStack AI's Launch Score Advisor analyzes your idea and scores it across four critical dimensions:
             </p>
             <div className="grid grid-cols-2 gap-3 mb-8">
               {[
