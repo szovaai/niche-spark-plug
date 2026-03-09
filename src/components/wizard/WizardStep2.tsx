@@ -17,6 +17,7 @@ import ProofStackBuilder from "./ProofStackBuilder";
 import ContentQualityReport from "./ContentQualityReport";
 import AssetFactory from "./AssetFactory";
 import OutcomeLockCard, { OutcomeLock, isOutcomeLockComplete } from "./OutcomeLockCard";
+import ScenarioGenerator from "./ScenarioGenerator";
 import { auditFullContent } from "@/lib/contentAudit";
 import type { ProductAssets } from "@/types/productAssets";
 
@@ -665,6 +666,17 @@ export default function WizardStep2({ productBrief, productType, result, setResu
           </Card>
 
           {result.proofStack && <ProofStackBuilder proofStack={result.proofStack} />}
+
+          {/* AI Client Scenario Generator */}
+          {productBrief && outcomeLock && (
+            <ScenarioGenerator
+              productTitle={productBrief.title}
+              niche={outcomeLock.audience}
+              targetAudience={outcomeLock.audience}
+              promisedResult={outcomeLock.promisedResult}
+              uniqueMechanism={productBrief.uniqueMechanism}
+            />
+          )}
 
           {/* Digital Product Asset Factory */}
           {productBrief && assets !== undefined && setAssets && (
