@@ -44,6 +44,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/opportunities" element={<OpportunityRadar />} />
+            <Route path="/genome" element={<GenomeLibrary />} />
             <Route path="/wizard" element={<LaunchWizard />} />
             <Route path="/wizard/:projectId" element={<LaunchWizard />} />
             <Route path="/launch-templates" element={<LaunchTemplates />} />

@@ -1343,6 +1343,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_genome_uses: { Args: { genome_id: string }; Returns: undefined }
       increment_search_count: { Args: { p_user_id: string }; Returns: Json }
       increment_view_count: { Args: { p_user_id: string }; Returns: Json }
     }
