@@ -881,7 +881,7 @@ const Index = () => {
               <h3 className="font-bold text-lg">BYOK: Control Your AI Costs</h3>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
-              Connect your own OpenAI, Anthropic (Claude), or DeepSeek API keys and use DigiLaunchKit at your own cost structure, with no middleman markup.
+              Connect your own OpenAI, Anthropic (Claude), or DeepSeek API keys and use LaunchStack AI at your own cost structure, with no middleman markup.
             </p>
             <p className="text-sm text-muted-foreground">
               For power users and agencies, run at scale without worrying about platform limits. For everyone else, the app works out of the box with no API key required.
