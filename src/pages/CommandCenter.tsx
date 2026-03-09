@@ -17,7 +17,7 @@ import {
   CheckCircle2, Circle, ArrowRight, Zap, Target, BarChart3,
   Package, FileText, Mail, Share2, ChevronRight, AlertTriangle,
   Lightbulb, Play, Wand2, Globe, ArrowDown, Monitor, Clock,
-  Shield, Star, ExternalLink, Activity, Gauge
+  Shield, Star, ExternalLink, Activity, Gauge, Bot, RefreshCw
 } from "lucide-react";
 
 // --- Types ---
