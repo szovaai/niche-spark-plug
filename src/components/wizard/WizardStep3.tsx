@@ -267,7 +267,6 @@ export default function WizardStep3({ productBrief, productContent, result, setR
           <SalesHookGenerator
             productName={productBrief.title}
             mechanism={productBrief.uniqueMechanism}
-            targetAudience={productBrief.targetAudience || productContent?.targetAudience}
             painPoints={productBrief.painPoints}
             price={price}
           />
