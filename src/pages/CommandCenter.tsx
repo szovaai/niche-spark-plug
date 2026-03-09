@@ -239,6 +239,8 @@ export default function CommandCenter() {
   const [allProjects, setAllProjects] = useState<ProjectData[]>([]);
   const [loading, setLoading] = useState(true);
   const [deploying, setDeploying] = useState(false);
+  const [agentInsights, setAgentInsights] = useState<Array<{ text: string; type: "success" | "warning" | "info"; agentName?: string }>>([]);
+  const [agentLoading, setAgentLoading] = useState(false);
 
   useKeyboardShortcuts(navigate);
 
