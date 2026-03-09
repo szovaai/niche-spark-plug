@@ -122,3 +122,9 @@ verify_jwt = false
 
 [functions.clone-funnel]
 verify_jwt = false
+
+[functions.generate-viral-content]
+verify_jwt = false
+
+[functions.generate-sales-hooks]
+verify_jwt = false

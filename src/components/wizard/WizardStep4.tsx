@@ -3,12 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Loader2, Copy, Check, Mail, MessageSquare, Image, FileText, Video, Megaphone, Users, RefreshCw, Trophy, Calendar, Send, Target } from "lucide-react";
+import { Sparkles, Loader2, Copy, Check, Mail, MessageSquare, Image, FileText, Video, Megaphone, Users, RefreshCw, Trophy, Calendar, Send, Target, Zap } from "lucide-react";
 import { Step1Product, Step2Content, Step3Funnel, Step4Marketing } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import RenderedCopy from "@/components/RenderedCopy";
 import AssetDownloadButtons from "@/components/AssetDownloadButtons";
+import ViralContentEngine from "@/components/wizard/ViralContentEngine";
+
+
 
 import type { LaunchMode } from "@/pages/LaunchWizard";
 
@@ -84,6 +87,7 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
               <TabsTrigger value="emails" className="gap-1 text-xs"><Mail className="w-3 h-3" /> Emails</TabsTrigger>
               <TabsTrigger value="ads" className="gap-1 text-xs"><Megaphone className="w-3 h-3" /> Ads</TabsTrigger>
               <TabsTrigger value="posts" className="gap-1 text-xs"><MessageSquare className="w-3 h-3" /> Posts</TabsTrigger>
+              <TabsTrigger value="viral" className="gap-1 text-xs font-semibold text-orange-600"><Zap className="w-3 h-3" /> Viral Engine</TabsTrigger>
               <TabsTrigger value="pins" className="gap-1 text-xs"><Image className="w-3 h-3" /> Pins</TabsTrigger>
               <TabsTrigger value="blog" className="gap-1 text-xs"><FileText className="w-3 h-3" /> Blog</TabsTrigger>
               <TabsTrigger value="video" className="gap-1 text-xs"><Video className="w-3 h-3" /> Video</TabsTrigger>
@@ -182,6 +186,11 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
                   </Card>
                 ))}
               </div>
+            </TabsContent>
+
+            {/* === Viral Engine Tab === */}
+            <TabsContent value="viral">
+              <ViralContentEngine productBrief={productBrief} productContent={productContent} funnelCopy={funnelCopy} />
             </TabsContent>
 
             {/* === Pins Tab === */}
