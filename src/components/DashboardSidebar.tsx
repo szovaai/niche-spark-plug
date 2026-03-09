@@ -42,6 +42,7 @@ const coreItems = [
   { title: "Assets", url: "/assets", icon: Package },
   { title: "Funnels", url: "/funnels", icon: FileText },
   { title: "Deploy", url: "/checklist", icon: Rocket },
+  { title: "Affiliate AI", url: "/affiliate-predictor", icon: BarChart3 },
 ];
 
 const accountItems = [

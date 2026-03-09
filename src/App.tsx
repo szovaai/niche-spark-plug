@@ -69,6 +69,7 @@ const App = () => (
             <Route path="/empire" element={<EmpireMode />} />
             <Route path="/empire/:id" element={<EmpireMode />} />
             <Route path="/micro-factory" element={<MicroFactory />} />
+            <Route path="/affiliate-predictor" element={<AffiliatePredictor />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
