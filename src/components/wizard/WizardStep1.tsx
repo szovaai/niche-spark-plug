@@ -143,6 +143,20 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
           </Card>
         </TabsContent>
 
+        <TabsContent value="intelligence">
+          <LaunchIntelligenceAgent
+            userId={userId}
+            currentNiche={niche}
+            currentProductType={productType}
+            onApplyRecommendation={(rec) => {
+              if (rec.suggestedNiche) setNiche(rec.suggestedNiche);
+              if (rec.suggestedTopic) setTopic(rec.suggestedTopic);
+              if (rec.suggestedAudience) setTargetAudience(rec.suggestedAudience);
+              toast.success("Blueprint applied! Switch to Manual Entry to review.");
+            }}
+          />
+        </TabsContent>
+
         <TabsContent value="manual">
       <div className="grid md:grid-cols-2 gap-4">
         <div className="space-y-2">
