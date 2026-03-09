@@ -460,7 +460,7 @@ const Index = () => {
               <Package className="w-4 h-4 text-primary" />
               <span className="text-sm gradient-text font-medium">Complete Launch Package</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Here's Everything DigiLaunchKit AI Builds For You</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Here's Everything LaunchStack AI Builds For You</h2>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
