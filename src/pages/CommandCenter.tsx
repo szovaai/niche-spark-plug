@@ -254,10 +254,47 @@ export default function CommandCenter() {
       const { data } = await supabase.from("launch_projects").select("*").order("updated_at", { ascending: false });
       const all = (data || []) as unknown as ProjectData[];
       setAllProjects(all);
-      if (projectId) setProject(all.find(p => p.id === projectId) || all[0] || null);
-      else if (all.length > 0) setProject(all[0]);
+      const active = projectId ? all.find(p => p.id === projectId) || all[0] || null : all[0] || null;
+      setProject(active);
+      if (active) fetchAgentInsights(active);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
+  };
+
+  const fetchAgentInsights = async (proj: ProjectData) => {
+    setAgentLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("ai-agent-analyze", {
+        body: { project: proj, useAI: false },
+      });
+      if (!error && data?.agents) {
+        const insights = data.agents
+          .flatMap((a: any) => a.insights.map((ins: any) => ({ ...ins, agentName: a.agentName })))
+          .sort((a: any, b: any) => a.priority - b.priority)
+          .slice(0, 6);
+        setAgentInsights(insights);
+      }
+    } catch (e) { console.error("Agent analysis failed:", e); }
+    finally { setAgentLoading(false); }
+  };
+
+  const runAIEnhance = async () => {
+    if (!project) return;
+    setAgentLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("ai-agent-analyze", {
+        body: { project, useAI: true },
+      });
+      if (!error && data?.agents) {
+        const insights = data.agents
+          .flatMap((a: any) => a.insights.map((ins: any) => ({ ...ins, agentName: a.agentName })))
+          .sort((a: any, b: any) => a.priority - b.priority)
+          .slice(0, 8);
+        setAgentInsights(insights);
+        toast.success("AI agents analyzed your launch");
+      }
+    } catch (e: any) { toast.error("Agent analysis failed"); }
+    finally { setAgentLoading(false); }
   };
 
   const completedStages = useMemo(() => project ? PIPELINE.filter(s => s.check(project)).length : 0, [project]);
