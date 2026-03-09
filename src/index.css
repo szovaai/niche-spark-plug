@@ -241,3 +241,27 @@
     animation-delay: 2s;
   }
 }
+
+/* Custom scrollbar - blend with dark theme */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(220 40% 12%) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: hsl(220 40% 12%);
+  border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: hsl(220 40% 18%);
+}
