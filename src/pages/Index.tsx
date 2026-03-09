@@ -1108,7 +1108,7 @@ const Index = () => {
         >
           <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
             <div className="hidden sm:block">
-              <p className="text-sm font-bold text-foreground">DigiLaunchKit AI</p>
+              <p className="text-sm font-bold text-foreground">LaunchStack AI</p>
               <p className="text-xs text-muted-foreground">60-Minute Digital Product Launch System</p>
             </div>
             <div className="flex items-center gap-4 w-full sm:w-auto justify-center sm:justify-end">
