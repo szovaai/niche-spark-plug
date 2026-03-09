@@ -20,7 +20,6 @@ Deno.serve(async (req) => {
 
     if (mode === "believability-check") {
       // --- Believability Filter ---
-      const { copyText } = await req.json().catch(() => ({ copyText: "" }));
       const checkPrompt = `You are a direct-response copy editor specializing in the MMO/WarriorPlus niche.
 
 Review this sales copy and flag any claims that could hurt credibility or increase refund risk.
