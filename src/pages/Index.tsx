@@ -182,7 +182,7 @@ const Index = () => {
       <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto">
           <motion.div {...fadeIn} className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Watch DigiLaunchKit Build A Complete Product Launch In 60 Seconds</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Watch LaunchStack AI Build A Complete Product Launch In 60 Seconds</h2>
             <p className="text-muted-foreground">See exactly how an idea turns into a product, funnel, emails, and launch kit — automatically.</p>
           </motion.div>
 
