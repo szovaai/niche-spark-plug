@@ -263,6 +263,23 @@ export default function WizardStep3({ productBrief, productContent, result, setR
             <ObjectionKiller objections={result.objections} />
           )}
 
+          {/* Sales Hook Generator */}
+          <SalesHookGenerator
+            productName={productBrief.title}
+            mechanism={productBrief.uniqueMechanism}
+            targetAudience={productBrief.targetAudience || productContent?.targetAudience}
+            painPoints={productBrief.painPoints}
+            price={price}
+          />
+
+          {/* Believability Filter */}
+          {result.salesPage && typeof result.salesPage === "string" && (
+            <BelievabilityFilter
+              copyText={result.salesPage}
+              productName={productBrief.title}
+            />
+          )}
+
           {result.salesPage && typeof result.salesPage === "string" && (
             <SalesPageAudit
               salesPageCopy={result.salesPage}
