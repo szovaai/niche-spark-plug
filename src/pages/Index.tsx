@@ -780,7 +780,7 @@ const Index = () => {
               Most AI tools are general-purpose. They were built to write emails, blog posts, and social media captions. When you try to use them for a digital product launch, you get disconnected, generic pieces that still require a skilled marketer to assemble.
             </p>
             <p className="text-muted-foreground leading-relaxed mb-6">
-              DigiLaunchKit AI was built from the ground up for <strong className="text-foreground">one thing: launching digital products.</strong> Every prompt, every framework, every output was engineered specifically for the WarriorPlus/ClickBank/Gumroad ecosystem.
+              LaunchStack AI was built from the ground up for <strong className="text-foreground">one thing: launching digital products.</strong> Every prompt, every framework, every output was engineered specifically for the WarriorPlus/ClickBank/Gumroad ecosystem.
             </p>
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-5 text-center">
               <p className="text-foreground font-semibold">This is the difference between a Swiss Army knife and a scalpel.</p>
