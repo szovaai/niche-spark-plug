@@ -825,7 +825,7 @@ const Index = () => {
       <section className="py-20 px-4 bg-secondary/20">
         <div className="max-w-3xl mx-auto text-center">
           <motion.div {...fadeIn}>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">What You Can Build With DigiLaunchKit</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">What You Can Build With LaunchStack AI</h2>
             <p className="text-muted-foreground mb-8">Stop thinking about one product. Start thinking about an entire business.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg mx-auto text-left">
               {[
