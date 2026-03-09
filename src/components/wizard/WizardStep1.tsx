@@ -119,6 +119,9 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
           <TabsTrigger value="agent" className="gap-1.5">
             <Brain className="w-3.5 h-3.5" /> AI Research Agent
           </TabsTrigger>
+          <TabsTrigger value="intelligence" className="gap-1.5">
+            <Zap className="w-3.5 h-3.5" /> Smart Build
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="agent">
