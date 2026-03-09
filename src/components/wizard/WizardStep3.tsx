@@ -17,6 +17,7 @@ import SalesStyleSelector from "./SalesStyleSelector";
 import SalesPageSectionsUI from "./SalesPageSections";
 import SalesHookGenerator from "./SalesHookGenerator";
 import BelievabilityFilter from "./BelievabilityFilter";
+import FunnelSiteExport from "./FunnelSiteExport";
 
 import type { LaunchMode } from "@/pages/LaunchWizard";
 
@@ -288,6 +289,15 @@ export default function WizardStep3({ productBrief, productContent, result, setR
               price={price}
             />
           )}
+
+          {/* Instant Funnel Site Export */}
+          <FunnelSiteExport
+            funnel={result}
+            productTitle={productBrief.title}
+            productSubtitle={productBrief.subtitle}
+            price={price}
+            niche={productBrief.painPoints?.[0]}
+          />
 
           <Button onClick={onNext} className="gap-2">Continue to Marketing Assets</Button>
         </div>
