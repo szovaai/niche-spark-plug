@@ -19,6 +19,11 @@ import RevenueProjector from "@/components/wizard/RevenueProjector";
 import LaunchDNACard from "@/components/wizard/LaunchDNACard";
 import ProductScorecard from "@/components/wizard/ProductScorecard";
 import PreLaunchAudit from "@/components/wizard/PreLaunchAudit";
+import DailyLaunchTasks from "@/components/momentum/DailyLaunchTasks";
+import AILaunchCoach from "@/components/momentum/AILaunchCoach";
+import LaunchJourney from "@/components/momentum/LaunchJourney";
+import ProductFactoryCard from "@/components/momentum/ProductFactoryCard";
+import RevenueGoalWidget from "@/components/RevenueGoalWidget";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -70,19 +75,7 @@ const Dashboard = () => {
     navigate(`/wizard/${data.id}`);
   };
 
-  // Get latest project's checklist for progress tracker
   const latestProject = projects[0];
-  const checklist = latestProject?.step5_checklist as any;
-  const checklistSteps = checklist?.steps || [];
-  const completedSteps = checklistSteps.filter((s: any) => s.completed).length;
-
-  const progressStages = [
-    { label: "Product", done: !!latestProject?.step1_product },
-    { label: "Content", done: !!latestProject?.step2_product_content },
-    { label: "Funnel", done: !!latestProject?.step3_funnel },
-    { label: "Marketing", done: !!latestProject?.step4_marketing },
-    { label: "Ready", done: !!latestProject?.step5_checklist },
-  ];
 
   return (
     <DashboardLayout title="Dashboard">
@@ -164,32 +157,26 @@ const Dashboard = () => {
           </motion.div>
         )}
 
-        {/* Launch Progress Tracker */}
-        {latestProject && (
+        {/* ===== MOMENTUM ENGINE ===== */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Launch Journey (vertical progress) */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold">Launch Progress — {latestProject.name}</h3>
-                  <Badge variant={latestProject.status === "complete" ? "default" : "secondary"}>{latestProject.status}</Badge>
-                </div>
-                <div className="flex items-center gap-2">
-                  {progressStages.map((stage, i) => (
-                    <div key={stage.label} className="flex items-center gap-2 flex-1">
-                      <div className={`flex items-center gap-1.5 ${stage.done ? "text-primary" : "text-muted-foreground"}`}>
-                        {stage.done ? <CheckCircle2 className="w-4 h-4" /> : <Circle className="w-4 h-4" />}
-                        <span className="text-xs font-medium hidden sm:inline">{stage.label}</span>
-                      </div>
-                      {i < progressStages.length - 1 && (
-                        <div className={`flex-1 h-0.5 rounded ${stage.done ? "bg-primary" : "bg-secondary"}`} />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <LaunchJourney project={latestProject} />
           </motion.div>
-        )}
+
+          {/* Daily Tasks */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}>
+            <DailyLaunchTasks project={latestProject} />
+          </motion.div>
+
+          {/* AI Coach */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.21 }}>
+            <AILaunchCoach project={latestProject} />
+          </motion.div>
+        </div>
+
+        {/* Product Factory Card */}
+        <ProductFactoryCard projectCount={stats.products} />
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -246,19 +233,23 @@ const Dashboard = () => {
           </Card>
         </motion.div>
 
-        {/* Scorecard + Audit + Revenue */}
+        {/* Revenue Goal + Scorecard + Audit */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.33 }}>
+            <RevenueGoalWidget />
+          </motion.div>
           {latestProject && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
               <ProductScorecard project={latestProject} />
             </motion.div>
           )}
-          {latestProject && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 }}>
-              <PreLaunchAudit project={latestProject} />
-            </motion.div>
-          )}
         </div>
+
+        {latestProject && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 }}>
+            <PreLaunchAudit project={latestProject} />
+          </motion.div>
+        )}
 
         {/* Revenue Projector */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
