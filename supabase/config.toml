@@ -134,3 +134,6 @@ verify_jwt = false
 
 [functions.predict-affiliate-profit]
 verify_jwt = false
+
+[functions.ai-agent-analyze]
+verify_jwt = false

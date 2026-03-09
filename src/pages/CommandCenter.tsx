@@ -17,7 +17,7 @@ import {
   CheckCircle2, Circle, ArrowRight, Zap, Target, BarChart3,
   Package, FileText, Mail, Share2, ChevronRight, AlertTriangle,
   Lightbulb, Play, Wand2, Globe, ArrowDown, Monitor, Clock,
-  Shield, Star, ExternalLink, Activity, Gauge
+  Shield, Star, ExternalLink, Activity, Gauge, Bot, RefreshCw
 } from "lucide-react";
 
 // --- Types ---
@@ -239,6 +239,8 @@ export default function CommandCenter() {
   const [allProjects, setAllProjects] = useState<ProjectData[]>([]);
   const [loading, setLoading] = useState(true);
   const [deploying, setDeploying] = useState(false);
+  const [agentInsights, setAgentInsights] = useState<Array<{ text: string; type: "success" | "warning" | "info"; agentName?: string }>>([]);
+  const [agentLoading, setAgentLoading] = useState(false);
 
   useKeyboardShortcuts(navigate);
 
@@ -252,10 +254,47 @@ export default function CommandCenter() {
       const { data } = await supabase.from("launch_projects").select("*").order("updated_at", { ascending: false });
       const all = (data || []) as unknown as ProjectData[];
       setAllProjects(all);
-      if (projectId) setProject(all.find(p => p.id === projectId) || all[0] || null);
-      else if (all.length > 0) setProject(all[0]);
+      const active = projectId ? all.find(p => p.id === projectId) || all[0] || null : all[0] || null;
+      setProject(active);
+      if (active) fetchAgentInsights(active);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
+  };
+
+  const fetchAgentInsights = async (proj: ProjectData) => {
+    setAgentLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("ai-agent-analyze", {
+        body: { project: proj, useAI: false },
+      });
+      if (!error && data?.agents) {
+        const insights = data.agents
+          .flatMap((a: any) => a.insights.map((ins: any) => ({ ...ins, agentName: a.agentName })))
+          .sort((a: any, b: any) => a.priority - b.priority)
+          .slice(0, 6);
+        setAgentInsights(insights);
+      }
+    } catch (e) { console.error("Agent analysis failed:", e); }
+    finally { setAgentLoading(false); }
+  };
+
+  const runAIEnhance = async () => {
+    if (!project) return;
+    setAgentLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("ai-agent-analyze", {
+        body: { project, useAI: true },
+      });
+      if (!error && data?.agents) {
+        const insights = data.agents
+          .flatMap((a: any) => a.insights.map((ins: any) => ({ ...ins, agentName: a.agentName })))
+          .sort((a: any, b: any) => a.priority - b.priority)
+          .slice(0, 8);
+        setAgentInsights(insights);
+        toast.success("AI agents analyzed your launch");
+      }
+    } catch (e: any) { toast.error("Agent analysis failed"); }
+    finally { setAgentLoading(false); }
   };
 
   const completedStages = useMemo(() => project ? PIPELINE.filter(s => s.check(project)).length : 0, [project]);
@@ -732,11 +771,17 @@ export default function CommandCenter() {
 
             {/* AI Advisor */}
             <GlassCard className="p-5 sticky top-20 border-accent/10">
-              <div className="flex items-center gap-1.5 text-[10px] font-semibold text-accent/60 uppercase tracking-widest mb-3">
-                <Sparkles className="h-3 w-3" /> AI Launch Advisor
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-1.5 text-[10px] font-semibold text-accent/60 uppercase tracking-widest">
+                  <Bot className="h-3 w-3" /> AI Agent Advisor
+                </div>
+                <Button variant="ghost" size="sm" onClick={runAIEnhance} disabled={agentLoading} className="h-6 px-2 text-[9px]">
+                  <RefreshCw className={`h-2.5 w-2.5 mr-1 ${agentLoading ? "animate-spin" : ""}`} />
+                  {agentLoading ? "..." : "Enhance"}
+                </Button>
               </div>
               <div className="space-y-2">
-                {advisorTips.map((tip, i) => {
+                {(agentInsights.length > 0 ? agentInsights : advisorTips.map(t => ({ ...t, agentName: undefined }))).map((tip, i) => {
                   const iconMap = { success: CheckCircle2, warning: AlertTriangle, info: Lightbulb };
                   const colorMap = {
                     success: "bg-chart-2/4 text-chart-2 border-chart-2/10",
@@ -747,17 +792,26 @@ export default function CommandCenter() {
                   return (
                     <motion.div key={i} initial={{ opacity: 0, y: 8, x: -5 }}
                       animate={{ opacity: 1, y: 0, x: 0 }}
-                      transition={{ delay: i * 0.15 }}
+                      transition={{ delay: i * 0.1 }}
                       whileHover={{ x: 3 }}
                       className={`flex items-start gap-2 p-3 rounded-lg border text-xs leading-relaxed cursor-default ${colorMap[tip.type]}`}>
                       <Icon className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-                      <span>{tip.text}</span>
+                      <div>
+                        {tip.agentName && <span className="text-[8px] opacity-50 block mb-0.5">{tip.agentName}</span>}
+                        <span>{tip.text}</span>
+                      </div>
                     </motion.div>
                   );
                 })}
               </div>
 
               <Separator className="opacity-10 my-3" />
+
+              {/* Agent Hub Link */}
+              <Button variant="outline" size="sm" className="w-full justify-start gap-2 text-xs h-8 border-border/15 hover:border-accent/20 mb-3"
+                onClick={() => navigate("/agent-hub")}>
+                <Bot className="h-3 w-3" /> Open Agent Hub
+              </Button>
 
               {/* Quick Stats */}
               <div className="space-y-2">

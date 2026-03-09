@@ -22,6 +22,7 @@ import {
   LineChart,
   Users,
   Eye,
+  Bot,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
@@ -51,6 +52,7 @@ const workspaceItems = [
 
 const buildItems = [
   { title: "Command Center", url: "/command-center", icon: Monitor },
+  { title: "AI Agent Hub", url: "/agent-hub", icon: Bot },
   { title: "Product Builder", url: "/wizard", icon: Wand2 },
   { title: "Sales Copy Engine", url: "/sales-copy", icon: PenTool },
   { title: "Email Engine", url: "/email-engine", icon: Mail },
