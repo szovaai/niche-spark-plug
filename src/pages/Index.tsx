@@ -1082,7 +1082,7 @@ const Index = () => {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <span className="font-bold flex items-center gap-2">
             <Zap className="w-5 h-5 text-primary" />
-            DigiLaunchKit AI
+            LaunchStack AI
           </span>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
             <button onClick={() => navigate("/wizard")} className="hover:text-foreground transition-colors">
