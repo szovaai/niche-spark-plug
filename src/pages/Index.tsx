@@ -998,7 +998,7 @@ const Index = () => {
               ))}
             </div>
             <p className="text-muted-foreground leading-relaxed mb-8">
-              DigiLaunchKit AI replaces all of that. Today, during this launch window, you can get access for a one-time investment that is a fraction of what a single freelancer would charge for a single asset.
+              LaunchStack AI replaces all of that. Today, during this launch window, you can get access for a one-time investment that is a fraction of what a single freelancer would charge for a single asset.
             </p>
             <Button variant="hero" size="xl" onClick={handleCTA} className="dual-glow">
               <Wand2 className="w-5 h-5" />
