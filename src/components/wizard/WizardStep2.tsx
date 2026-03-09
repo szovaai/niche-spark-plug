@@ -233,6 +233,9 @@ export default function WizardStep2({ productBrief, productType, result, setResu
   const [writingIndex, setWritingIndex] = useState<number | null>(null);
   const [writingAll, setWritingAll] = useState(false);
   const [writeAllProgress, setWriteAllProgress] = useState(0);
+  const [outcomeLock, setOutcomeLock] = useState<OutcomeLock | null>(null);
+  const [outcomeLocked, setOutcomeLocked] = useState(false);
+  const [humanizing, setHumanizing] = useState(false);
 
   const generate = async () => {
     if (!productBrief) return;
