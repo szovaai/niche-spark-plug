@@ -290,8 +290,8 @@ export default function WizardStep3({ productBrief, productContent, result, setR
             />
           )}
 
-          {/* Instant Funnel Site Export */}
-          <FunnelSiteExport
+          {/* Funnel Injection Engine */}
+          <FunnelInjectionEngine
             funnel={result}
             productTitle={productBrief.title}
             productSubtitle={productBrief.subtitle}
