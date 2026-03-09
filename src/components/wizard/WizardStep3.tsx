@@ -18,6 +18,7 @@ import SalesPageSectionsUI from "./SalesPageSections";
 import SalesHookGenerator from "./SalesHookGenerator";
 import BelievabilityFilter from "./BelievabilityFilter";
 import FunnelInjectionEngine from "./FunnelInjectionEngine";
+import FunnelSimulationMap from "./FunnelSimulationMap";
 
 import type { LaunchMode } from "@/pages/LaunchWizard";
 
