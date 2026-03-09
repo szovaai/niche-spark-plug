@@ -424,7 +424,7 @@ const Index = () => {
               <span className="text-sm gradient-text font-medium">Introducing</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              <span className="gradient-text glow-text">DigiLaunchKit AI</span>
+              <span className="gradient-text glow-text">LaunchStack AI</span>
             </h2>
             <p className="text-lg text-muted-foreground mb-4">
               The World's First AI Operating System Built Specifically for Launching Digital Products on WarriorPlus, ClickBank, Gumroad, JVZoo, and Etsy
