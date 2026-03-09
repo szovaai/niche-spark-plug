@@ -1063,7 +1063,7 @@ const Index = () => {
             />
             <FAQItem
               q="Does this actually work for complete beginners?"
-              a="Yes. In fact, beginners often get more from DigiLaunchKit than experienced marketers because they haven't spent years building bad habits. The system guides you through every decision."
+              a="Yes. In fact, beginners often get more from LaunchStack AI than experienced marketers because they haven't spent years building bad habits. The system guides you through every decision."
             />
             <FAQItem
               q="What if my niche isn't covered in the templates?"
