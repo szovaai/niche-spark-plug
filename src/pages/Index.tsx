@@ -556,7 +556,7 @@ const Index = () => {
           </motion.div>
           <motion.div {...fadeIn}>
             <p className="text-muted-foreground leading-relaxed mb-6">
-              Paste any WarriorPlus, ClickBank, Gumroad, JVZoo, or Etsy product URL into DigiLaunchKit AI, click Analyze, and the AI will:
+              Paste any WarriorPlus, ClickBank, Gumroad, JVZoo, or Etsy product URL into LaunchStack AI, click Analyze, and the AI will:
             </p>
             <div className="space-y-3 mb-6">
               {[
