@@ -37,6 +37,7 @@ import FunnelSimulation from "./pages/FunnelSimulation";
 import TrafficPlanner from "./pages/TrafficPlanner";
 import Analytics from "./pages/Analytics";
 import Integrations from "./pages/Integrations";
+import AgentHub from "./pages/AgentHub";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
