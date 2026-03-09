@@ -10,11 +10,8 @@ import { toast } from "sonner";
 import RenderedCopy from "@/components/RenderedCopy";
 import AssetDownloadButtons from "@/components/AssetDownloadButtons";
 import ViralContentEngine from "@/components/wizard/ViralContentEngine";
-import { Step1Product, Step2Content, Step3Funnel, Step4Marketing } from "@/types/launchWizard";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import RenderedCopy from "@/components/RenderedCopy";
-import AssetDownloadButtons from "@/components/AssetDownloadButtons";
+
+
 
 import type { LaunchMode } from "@/pages/LaunchWizard";
 
