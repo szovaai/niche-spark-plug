@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sparkles, Rocket, Loader2, Brain, ArrowRight, DollarSign } from "lucide-react";
+import { Sparkles, Rocket, Loader2, Brain, ArrowRight, DollarSign, Zap } from "lucide-react";
 import { PRODUCT_TYPES, Step1Product } from "@/types/launchWizard";
 import type { BuyerAvatar } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
