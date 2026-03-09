@@ -290,6 +290,15 @@ export default function WizardStep3({ productBrief, productContent, result, setR
             />
           )}
 
+          {/* Instant Funnel Site Export */}
+          <FunnelSiteExport
+            funnel={result}
+            productTitle={productBrief.title}
+            productSubtitle={productBrief.subtitle}
+            price={price}
+            niche={productBrief.painPoints?.[0]}
+          />
+
           <Button onClick={onNext} className="gap-2">Continue to Marketing Assets</Button>
         </div>
       )}
