@@ -677,7 +677,20 @@ export default function WizardStep2({ productBrief, productType, result, setResu
             />
           )}
 
-          <Button onClick={onNext} className="gap-2">Continue to Funnel Builder</Button>
+          <Button
+            onClick={onNext}
+            disabled={audit ? !audit.canContinue : false}
+            className="gap-2"
+          >
+            {audit && !audit.canContinue ? (
+              <>
+                <Lock className="w-4 h-4" />
+                Fix Issues Before Continuing
+              </>
+            ) : (
+              "Continue to Funnel Builder"
+            )}
+          </Button>
         </div>
       )}
     </div>
