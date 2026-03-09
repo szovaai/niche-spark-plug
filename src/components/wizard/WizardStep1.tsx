@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sparkles, Rocket, Loader2, Brain, ArrowRight, DollarSign } from "lucide-react";
+import { Sparkles, Rocket, Loader2, Brain, ArrowRight, DollarSign, Zap } from "lucide-react";
 import { PRODUCT_TYPES, Step1Product } from "@/types/launchWizard";
 import type { BuyerAvatar } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +16,7 @@ import LaunchScoreCard from "./LaunchScoreCard";
 import MechanismSelector from "./MechanismSelector";
 import AvatarBuilder from "./AvatarBuilder";
 import PricingPsychologyCard from "./PricingPsychologyCard";
+import LaunchIntelligenceAgent from "./LaunchIntelligenceAgent";
 
 import type { LaunchMode } from "@/pages/LaunchWizard";
 
@@ -118,6 +119,9 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
           <TabsTrigger value="agent" className="gap-1.5">
             <Brain className="w-3.5 h-3.5" /> AI Research Agent
           </TabsTrigger>
+          <TabsTrigger value="intelligence" className="gap-1.5">
+            <Zap className="w-3.5 h-3.5" /> Smart Build
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="agent">
@@ -137,6 +141,20 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
               </Button>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="intelligence">
+          <LaunchIntelligenceAgent
+            userId={userId}
+            currentNiche={niche}
+            currentProductType={productType}
+            onApplyRecommendation={(rec) => {
+              if (rec.suggestedNiche) setNiche(rec.suggestedNiche);
+              if (rec.suggestedTopic) setTopic(rec.suggestedTopic);
+              if (rec.suggestedAudience) setTargetAudience(rec.suggestedAudience);
+              toast.success("Blueprint applied! Switch to Manual Entry to review.");
+            }}
+          />
         </TabsContent>
 
         <TabsContent value="manual">

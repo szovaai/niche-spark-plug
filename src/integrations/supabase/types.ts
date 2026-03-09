@@ -221,6 +221,104 @@ export type Database = {
         }
         Relationships: []
       }
+      launch_intelligence: {
+        Row: {
+          affiliate_interest: string | null
+          blueprint_tags: string[] | null
+          bonus_count: number | null
+          click_through_rate: number | null
+          copy_tone: string | null
+          created_at: string
+          email_open_rate: number | null
+          email_sequence_type: string | null
+          headline_style: string | null
+          hooks_used: Json | null
+          id: string
+          mechanism_name: string | null
+          niche: string | null
+          notes: string | null
+          offer_structure: Json | null
+          performance_rating: string | null
+          platform: string | null
+          price_point: number | null
+          product_type: string | null
+          project_id: string | null
+          sales_count: number | null
+          sales_style: string | null
+          social_engagement: string | null
+          target_audience: string | null
+          topic: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          affiliate_interest?: string | null
+          blueprint_tags?: string[] | null
+          bonus_count?: number | null
+          click_through_rate?: number | null
+          copy_tone?: string | null
+          created_at?: string
+          email_open_rate?: number | null
+          email_sequence_type?: string | null
+          headline_style?: string | null
+          hooks_used?: Json | null
+          id?: string
+          mechanism_name?: string | null
+          niche?: string | null
+          notes?: string | null
+          offer_structure?: Json | null
+          performance_rating?: string | null
+          platform?: string | null
+          price_point?: number | null
+          product_type?: string | null
+          project_id?: string | null
+          sales_count?: number | null
+          sales_style?: string | null
+          social_engagement?: string | null
+          target_audience?: string | null
+          topic?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          affiliate_interest?: string | null
+          blueprint_tags?: string[] | null
+          bonus_count?: number | null
+          click_through_rate?: number | null
+          copy_tone?: string | null
+          created_at?: string
+          email_open_rate?: number | null
+          email_sequence_type?: string | null
+          headline_style?: string | null
+          hooks_used?: Json | null
+          id?: string
+          mechanism_name?: string | null
+          niche?: string | null
+          notes?: string | null
+          offer_structure?: Json | null
+          performance_rating?: string | null
+          platform?: string | null
+          price_point?: number | null
+          product_type?: string | null
+          project_id?: string | null
+          sales_count?: number | null
+          sales_style?: string | null
+          social_engagement?: string | null
+          target_audience?: string | null
+          topic?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "launch_intelligence_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "launch_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       launch_packs: {
         Row: {
           category: string
