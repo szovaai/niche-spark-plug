@@ -55,7 +55,7 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed"
         >
-          DigiLaunchKit uses the 60-Minute Launch Method to automatically build your product, funnel, bonuses, emails and affiliate kit. Pick a topic. Click build. Launch your product.
+          LaunchStack AI uses the 60-Minute Launch Method to automatically build your product, funnel, bonuses, emails and affiliate kit. Pick a topic. Click build. Launch your product.
         </motion.p>
         
         {/* CTA Buttons */}

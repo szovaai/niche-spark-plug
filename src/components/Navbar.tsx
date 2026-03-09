@@ -44,7 +44,7 @@ const Navbar = () => {
               <Zap className="w-5 h-5 text-primary-foreground" />
             </div>
             <span className="text-xl font-bold">
-              Digi<span className="gradient-text">LaunchKit</span>
+              Launch<span className="gradient-text">Stack</span>
               <span className="text-xs text-muted-foreground ml-1">AI</span>
             </span>
           </button>
@@ -94,7 +94,7 @@ const Navbar = () => {
                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
                       <Zap className="w-4 h-4 text-primary-foreground" />
                     </div>
-                    <span className="text-lg font-bold">DigiLaunchKit AI</span>
+                    <span className="text-lg font-bold">LaunchStack AI</span>
                   </SheetTitle>
                 </SheetHeader>
 

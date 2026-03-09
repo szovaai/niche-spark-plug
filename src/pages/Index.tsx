@@ -47,8 +47,8 @@ const FAQItem = ({ q, a }: { q: string; a: string }) => {
 };
 
 const getProgressText = (pct: number) => {
-  if (pct < 25) return "Discover how DigiLaunchKit works";
-  if (pct < 50) return "See what DigiLaunchKit builds for you";
+  if (pct < 25) return "Discover how LaunchStack AI works";
+  if (pct < 50) return "See what LaunchStack AI builds for you";
   if (pct < 75) return "See how the launch system works";
   return "You're almost there — see the launch price below";
 };
@@ -121,7 +121,7 @@ const Index = () => {
           </motion.h1>
 
           <motion.p {...fadeIn} transition={{ delay: 0.2 }} className="text-lg md:text-xl text-muted-foreground mb-6 max-w-2xl mx-auto leading-relaxed">
-            DigiLaunchKit uses the 60-Minute Launch Method to automatically build your product, funnel, bonuses, emails and affiliate kit. Pick a topic. Click build. Launch your product.
+            LaunchStack AI uses the 60-Minute Launch Method to automatically build your product, funnel, bonuses, emails and affiliate kit. Pick a topic. Click build. Launch your product.
           </motion.p>
 
           {/* Three-line tagline */}
@@ -182,7 +182,7 @@ const Index = () => {
       <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto">
           <motion.div {...fadeIn} className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Watch DigiLaunchKit Build A Complete Product Launch In 60 Seconds</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Watch LaunchStack AI Build A Complete Product Launch In 60 Seconds</h2>
             <p className="text-muted-foreground">See exactly how an idea turns into a product, funnel, emails, and launch kit — automatically.</p>
           </motion.div>
 
@@ -306,7 +306,7 @@ const Index = () => {
           <motion.div {...fadeIn} className="mt-12 text-center">
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-6">
               <p className="text-foreground font-bold text-lg">Most AI tools write content.</p>
-              <p className="gradient-text font-bold text-lg">DigiLaunchKit builds the entire business around it.</p>
+              <p className="gradient-text font-bold text-lg">LaunchStack AI builds the entire business around it.</p>
             </div>
           </motion.div>
         </div>
@@ -389,7 +389,7 @@ const Index = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { step: "1", icon: MousePointerClick, title: "Enter Your Topic", desc: "Tell DigiLaunchKit your niche, audience, and product idea in plain English." },
+              { step: "1", icon: MousePointerClick, title: "Enter Your Topic", desc: "Tell LaunchStack AI your niche, audience, and product idea in plain English." },
               { step: "2", icon: Wand2, title: "AI Builds Everything", desc: "Product, sales page, bonuses, emails, affiliate kit — generated automatically." },
               { step: "3", icon: Package, title: "Export Launch Kit", desc: "Download your complete Launch-In-A-Box ZIP with every asset organized and ready." },
               { step: "4", icon: Rocket, title: "Deploy & Sell", desc: "Upload to WarriorPlus, ClickBank, or Gumroad and start taking sales tonight." },
@@ -424,7 +424,7 @@ const Index = () => {
               <span className="text-sm gradient-text font-medium">Introducing</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              <span className="gradient-text glow-text">DigiLaunchKit AI</span>
+              <span className="gradient-text glow-text">LaunchStack AI</span>
             </h2>
             <p className="text-lg text-muted-foreground mb-4">
               The World's First AI Operating System Built Specifically for Launching Digital Products on WarriorPlus, ClickBank, Gumroad, JVZoo, and Etsy
@@ -460,7 +460,7 @@ const Index = () => {
               <Package className="w-4 h-4 text-primary" />
               <span className="text-sm gradient-text font-medium">Complete Launch Package</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Here's Everything DigiLaunchKit AI Builds For You</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Here's Everything LaunchStack AI Builds For You</h2>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -556,7 +556,7 @@ const Index = () => {
           </motion.div>
           <motion.div {...fadeIn}>
             <p className="text-muted-foreground leading-relaxed mb-6">
-              Paste any WarriorPlus, ClickBank, Gumroad, JVZoo, or Etsy product URL into DigiLaunchKit AI, click Analyze, and the AI will:
+              Paste any WarriorPlus, ClickBank, Gumroad, JVZoo, or Etsy product URL into LaunchStack AI, click Analyze, and the AI will:
             </p>
             <div className="space-y-3 mb-6">
               {[
@@ -629,7 +629,7 @@ const Index = () => {
 
           <motion.div {...fadeIn}>
             <p className="text-muted-foreground leading-relaxed mb-6">
-              Before you spend a single hour building, DigiLaunchKit's Launch Score Advisor analyzes your idea and scores it across four critical dimensions:
+              Before you spend a single hour building, LaunchStack AI's Launch Score Advisor analyzes your idea and scores it across four critical dimensions:
             </p>
             <div className="grid grid-cols-2 gap-3 mb-8">
               {[
@@ -660,7 +660,7 @@ const Index = () => {
         <div className="max-w-4xl mx-auto">
           <motion.div {...fadeIn} className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">What This Replaces</h2>
-            <p className="text-muted-foreground">See why creators are switching to DigiLaunchKit.</p>
+            <p className="text-muted-foreground">See why creators are switching to LaunchStack AI.</p>
           </motion.div>
 
           <motion.div {...fadeIn} className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -669,7 +669,7 @@ const Index = () => {
               <CardContent className="p-6">
                 <h3 className="font-bold text-lg mb-5 flex items-center gap-2">
                   <X className="w-5 h-5 text-destructive" />
-                  Without DigiLaunchKit
+                  Without LaunchStack AI
                 </h3>
                 <ul className="space-y-3">
                   {[
@@ -695,7 +695,7 @@ const Index = () => {
               <CardContent className="p-6">
                 <h3 className="font-bold text-lg mb-5 flex items-center gap-2">
                   <Check className="w-5 h-5 text-primary" />
-                  With DigiLaunchKit
+                   With LaunchStack AI
                 </h3>
                 <ul className="space-y-3">
                   {[
@@ -755,7 +755,7 @@ const Index = () => {
                   {[
                     "You're looking for a magic button that requires zero effort",
                     "You don't believe in digital products as a business model",
-                    "You want to sell junk — DigiLaunchKit helps you build real offers for real markets",
+                    "You want to sell junk — LaunchStack AI helps you build real offers for real markets",
                   ].map((item, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
                       <X className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
@@ -780,7 +780,7 @@ const Index = () => {
               Most AI tools are general-purpose. They were built to write emails, blog posts, and social media captions. When you try to use them for a digital product launch, you get disconnected, generic pieces that still require a skilled marketer to assemble.
             </p>
             <p className="text-muted-foreground leading-relaxed mb-6">
-              DigiLaunchKit AI was built from the ground up for <strong className="text-foreground">one thing: launching digital products.</strong> Every prompt, every framework, every output was engineered specifically for the WarriorPlus/ClickBank/Gumroad ecosystem.
+              LaunchStack AI was built from the ground up for <strong className="text-foreground">one thing: launching digital products.</strong> Every prompt, every framework, every output was engineered specifically for the WarriorPlus/ClickBank/Gumroad ecosystem.
             </p>
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-5 text-center">
               <p className="text-foreground font-semibold">This is the difference between a Swiss Army knife and a scalpel.</p>
@@ -825,7 +825,7 @@ const Index = () => {
       <section className="py-20 px-4 bg-secondary/20">
         <div className="max-w-3xl mx-auto text-center">
           <motion.div {...fadeIn}>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">What You Can Build With DigiLaunchKit</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">What You Can Build With LaunchStack AI</h2>
             <p className="text-muted-foreground mb-8">Stop thinking about one product. Start thinking about an entire business.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg mx-auto text-left">
               {[
@@ -881,7 +881,7 @@ const Index = () => {
               <h3 className="font-bold text-lg">BYOK: Control Your AI Costs</h3>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
-              Connect your own OpenAI, Anthropic (Claude), or DeepSeek API keys and use DigiLaunchKit at your own cost structure, with no middleman markup.
+              Connect your own OpenAI, Anthropic (Claude), or DeepSeek API keys and use LaunchStack AI at your own cost structure, with no middleman markup.
             </p>
             <p className="text-sm text-muted-foreground">
               For power users and agencies, run at scale without worrying about platform limits. For everyone else, the app works out of the box with no API key required.
@@ -896,7 +896,7 @@ const Index = () => {
       <section id="pricing-section" className="py-20 px-4 bg-secondary/20">
         <div className="max-w-3xl mx-auto">
           <motion.div {...fadeIn} className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">What DigiLaunchKit Builds For You</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">What LaunchStack AI Builds For You</h2>
             <p className="text-muted-foreground">In about 60 minutes, your entire launch is ready.</p>
           </motion.div>
 
@@ -944,7 +944,7 @@ const Index = () => {
             <div className="border-t border-border/50 pt-6 text-center space-y-2">
               <p className="text-sm text-muted-foreground">Total</p>
               <p className="text-4xl font-black text-foreground line-through decoration-destructive/60">$885+</p>
-              <p className="text-sm text-muted-foreground font-medium">DigiLaunchKit does it automatically.</p>
+              <p className="text-sm text-muted-foreground font-medium">LaunchStack AI does it automatically.</p>
               <p className="text-sm text-muted-foreground">Today:</p>
               <p className="text-5xl font-black gradient-text">$37</p>
             </div>
@@ -968,7 +968,7 @@ const Index = () => {
             <ShieldCheck className="w-16 h-16 text-primary mx-auto mb-6" />
             <h2 className="text-3xl md:text-4xl font-bold mb-6">The "Launch Or It's Free" Guarantee</h2>
             <p className="text-muted-foreground leading-relaxed mb-6">
-              Use DigiLaunchKit AI. Run the Launch Wizard. Generate your assets. If after using this system you don't have a complete, ready-to-publish digital product launch in your hands — or if for any reason you're not satisfied — contact us within 30 days and we'll refund every penny. No questions. No hoops. No guilt trip.
+              Use LaunchStack AI. Run the Launch Wizard. Generate your assets. If after using this system you don't have a complete, ready-to-publish digital product launch in your hands — or if for any reason you're not satisfied — contact us within 30 days and we'll refund every penny. No questions. No hoops. No guilt trip.
             </p>
             <p className="text-foreground font-semibold">
               The only way you don't get results is if you don't use it.
@@ -998,7 +998,7 @@ const Index = () => {
               ))}
             </div>
             <p className="text-muted-foreground leading-relaxed mb-8">
-              DigiLaunchKit AI replaces all of that. Today, during this launch window, you can get access for a one-time investment that is a fraction of what a single freelancer would charge for a single asset.
+              LaunchStack AI replaces all of that. Today, during this launch window, you can get access for a one-time investment that is a fraction of what a single freelancer would charge for a single asset.
             </p>
             <Button variant="hero" size="xl" onClick={handleCTA} className="dual-glow">
               <Wand2 className="w-5 h-5" />
@@ -1054,8 +1054,8 @@ const Index = () => {
           </motion.div>
           <motion.div {...fadeIn} className="space-y-3">
             <FAQItem
-              q="Do I need any technical skills to use DigiLaunchKit AI?"
-              a="None. If you can type and click a mouse, you can use DigiLaunchKit. The entire system is guided — it tells you what to enter at every step."
+              q="Do I need any technical skills to use LaunchStack AI?"
+              a="None. If you can type and click a mouse, you can use LaunchStack AI. The entire system is guided — it tells you what to enter at every step."
             />
             <FAQItem
               q="What kind of products can I launch with this?"
@@ -1063,7 +1063,7 @@ const Index = () => {
             />
             <FAQItem
               q="Does this actually work for complete beginners?"
-              a="Yes. In fact, beginners often get more from DigiLaunchKit than experienced marketers because they haven't spent years building bad habits. The system guides you through every decision."
+              a="Yes. In fact, beginners often get more from LaunchStack AI than experienced marketers because they haven't spent years building bad habits. The system guides you through every decision."
             />
             <FAQItem
               q="What if my niche isn't covered in the templates?"
@@ -1082,7 +1082,7 @@ const Index = () => {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <span className="font-bold flex items-center gap-2">
             <Zap className="w-5 h-5 text-primary" />
-            DigiLaunchKit AI
+            LaunchStack AI
           </span>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
             <button onClick={() => navigate("/wizard")} className="hover:text-foreground transition-colors">
@@ -1095,7 +1095,7 @@ const Index = () => {
               Pricing
             </button>
           </div>
-          <p className="text-sm text-muted-foreground">© 2025 DigiLaunchKit AI</p>
+          <p className="text-sm text-muted-foreground">© 2025 LaunchStack AI</p>
         </div>
       </footer>
 
@@ -1108,7 +1108,7 @@ const Index = () => {
         >
           <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
             <div className="hidden sm:block">
-              <p className="text-sm font-bold text-foreground">DigiLaunchKit AI</p>
+              <p className="text-sm font-bold text-foreground">LaunchStack AI</p>
               <p className="text-xs text-muted-foreground">60-Minute Digital Product Launch System</p>
             </div>
             <div className="flex items-center gap-4 w-full sm:w-auto justify-center sm:justify-end">
