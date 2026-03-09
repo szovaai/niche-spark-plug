@@ -660,7 +660,7 @@ const Index = () => {
         <div className="max-w-4xl mx-auto">
           <motion.div {...fadeIn} className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">What This Replaces</h2>
-            <p className="text-muted-foreground">See why creators are switching to DigiLaunchKit.</p>
+            <p className="text-muted-foreground">See why creators are switching to LaunchStack AI.</p>
           </motion.div>
 
           <motion.div {...fadeIn} className="grid grid-cols-1 md:grid-cols-2 gap-8">
