@@ -13,6 +13,7 @@ import {
   Radar,
   Dna,
   BarChart3,
+  Monitor,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
@@ -36,6 +37,7 @@ import {
 
 const coreItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Command Center", url: "/command-center", icon: Monitor },
   { title: "Opportunities", url: "/opportunities", icon: Radar },
   { title: "Genome™", url: "/genome", icon: Dna },
   { title: "Products", url: "/products", icon: ShoppingBag },
