@@ -755,7 +755,7 @@ const Index = () => {
                   {[
                     "You're looking for a magic button that requires zero effort",
                     "You don't believe in digital products as a business model",
-                    "You want to sell junk — DigiLaunchKit helps you build real offers for real markets",
+                    "You want to sell junk — LaunchStack AI helps you build real offers for real markets",
                   ].map((item, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
                       <X className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
