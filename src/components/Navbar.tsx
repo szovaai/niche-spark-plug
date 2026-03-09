@@ -94,7 +94,7 @@ const Navbar = () => {
                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
                       <Zap className="w-4 h-4 text-primary-foreground" />
                     </div>
-                    <span className="text-lg font-bold">DigiLaunchKit AI</span>
+                    <span className="text-lg font-bold">LaunchStack AI</span>
                   </SheetTitle>
                 </SheetHeader>
 
