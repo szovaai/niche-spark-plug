@@ -221,6 +221,80 @@ export type Database = {
         }
         Relationships: []
       }
+      launch_genomes: {
+        Row: {
+          bonus_count: number | null
+          conversion_style: string | null
+          created_at: string
+          email_style: string | null
+          funnel_layout: string | null
+          genome_data: Json
+          headline_style: string | null
+          id: string
+          is_public: boolean | null
+          name: string
+          niche: string
+          offer_type: string
+          performance_score: number | null
+          price_point: number | null
+          project_id: string | null
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+          uses_count: number | null
+        }
+        Insert: {
+          bonus_count?: number | null
+          conversion_style?: string | null
+          created_at?: string
+          email_style?: string | null
+          funnel_layout?: string | null
+          genome_data?: Json
+          headline_style?: string | null
+          id?: string
+          is_public?: boolean | null
+          name: string
+          niche: string
+          offer_type?: string
+          performance_score?: number | null
+          price_point?: number | null
+          project_id?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id: string
+          uses_count?: number | null
+        }
+        Update: {
+          bonus_count?: number | null
+          conversion_style?: string | null
+          created_at?: string
+          email_style?: string | null
+          funnel_layout?: string | null
+          genome_data?: Json
+          headline_style?: string | null
+          id?: string
+          is_public?: boolean | null
+          name?: string
+          niche?: string
+          offer_type?: string
+          performance_score?: number | null
+          price_point?: number | null
+          project_id?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string
+          uses_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "launch_genomes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "launch_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       launch_intelligence: {
         Row: {
           affiliate_interest: string | null
