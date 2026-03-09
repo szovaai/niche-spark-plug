@@ -667,6 +667,17 @@ export default function WizardStep2({ productBrief, productType, result, setResu
 
           {result.proofStack && <ProofStackBuilder proofStack={result.proofStack} />}
 
+          {/* AI Client Scenario Generator */}
+          {productBrief && outcomeLock && (
+            <ScenarioGenerator
+              productTitle={productBrief.title}
+              niche={outcomeLock.audience}
+              targetAudience={outcomeLock.audience}
+              promisedResult={outcomeLock.promisedResult}
+              uniqueMechanism={productBrief.uniqueMechanism}
+            />
+          )}
+
           {/* Digital Product Asset Factory */}
           {productBrief && assets !== undefined && setAssets && (
             <AssetFactory
