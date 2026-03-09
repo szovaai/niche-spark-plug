@@ -90,6 +90,7 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
               <TabsTrigger value="emails" className="gap-1 text-xs"><Mail className="w-3 h-3" /> Emails</TabsTrigger>
               <TabsTrigger value="ads" className="gap-1 text-xs"><Megaphone className="w-3 h-3" /> Ads</TabsTrigger>
               <TabsTrigger value="posts" className="gap-1 text-xs"><MessageSquare className="w-3 h-3" /> Posts</TabsTrigger>
+              <TabsTrigger value="viral" className="gap-1 text-xs font-semibold text-orange-600"><Zap className="w-3 h-3" /> Viral Engine</TabsTrigger>
               <TabsTrigger value="pins" className="gap-1 text-xs"><Image className="w-3 h-3" /> Pins</TabsTrigger>
               <TabsTrigger value="blog" className="gap-1 text-xs"><FileText className="w-3 h-3" /> Blog</TabsTrigger>
               <TabsTrigger value="video" className="gap-1 text-xs"><Video className="w-3 h-3" /> Video</TabsTrigger>
