@@ -46,6 +46,8 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/opportunities" element={<OpportunityRadar />} />
+            <Route path="/command-center" element={<CommandCenter />} />
+            <Route path="/command-center/:projectId" element={<CommandCenter />} />
             <Route path="/genome" element={<GenomeLibrary />} />
             <Route path="/wizard" element={<LaunchWizard />} />
             <Route path="/wizard/:projectId" element={<LaunchWizard />} />
