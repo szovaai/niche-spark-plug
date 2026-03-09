@@ -1054,8 +1054,8 @@ const Index = () => {
           </motion.div>
           <motion.div {...fadeIn} className="space-y-3">
             <FAQItem
-              q="Do I need any technical skills to use DigiLaunchKit AI?"
-              a="None. If you can type and click a mouse, you can use DigiLaunchKit. The entire system is guided — it tells you what to enter at every step."
+              q="Do I need any technical skills to use LaunchStack AI?"
+              a="None. If you can type and click a mouse, you can use LaunchStack AI. The entire system is guided — it tells you what to enter at every step."
             />
             <FAQItem
               q="What kind of products can I launch with this?"
