@@ -389,7 +389,7 @@ const Index = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { step: "1", icon: MousePointerClick, title: "Enter Your Topic", desc: "Tell DigiLaunchKit your niche, audience, and product idea in plain English." },
+              { step: "1", icon: MousePointerClick, title: "Enter Your Topic", desc: "Tell LaunchStack AI your niche, audience, and product idea in plain English." },
               { step: "2", icon: Wand2, title: "AI Builds Everything", desc: "Product, sales page, bonuses, emails, affiliate kit — generated automatically." },
               { step: "3", icon: Package, title: "Export Launch Kit", desc: "Download your complete Launch-In-A-Box ZIP with every asset organized and ready." },
               { step: "4", icon: Rocket, title: "Deploy & Sell", desc: "Upload to WarriorPlus, ClickBank, or Gumroad and start taking sales tonight." },
