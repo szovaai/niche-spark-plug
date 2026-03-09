@@ -968,7 +968,7 @@ const Index = () => {
             <ShieldCheck className="w-16 h-16 text-primary mx-auto mb-6" />
             <h2 className="text-3xl md:text-4xl font-bold mb-6">The "Launch Or It's Free" Guarantee</h2>
             <p className="text-muted-foreground leading-relaxed mb-6">
-              Use DigiLaunchKit AI. Run the Launch Wizard. Generate your assets. If after using this system you don't have a complete, ready-to-publish digital product launch in your hands — or if for any reason you're not satisfied — contact us within 30 days and we'll refund every penny. No questions. No hoops. No guilt trip.
+              Use LaunchStack AI. Run the Launch Wizard. Generate your assets. If after using this system you don't have a complete, ready-to-publish digital product launch in your hands — or if for any reason you're not satisfied — contact us within 30 days and we'll refund every penny. No questions. No hoops. No guilt trip.
             </p>
             <p className="text-foreground font-semibold">
               The only way you don't get results is if you don't use it.
