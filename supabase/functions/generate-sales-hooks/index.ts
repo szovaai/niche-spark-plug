@@ -9,7 +9,8 @@ Deno.serve(async (req) => {
     const { user, error: authError } = await validateAuth(req);
     if (authError || !user) return unauthorizedResponse(authError || 'Authentication required', corsHeaders);
 
-    const { productName, mechanism, targetAudience, painPoints, price, mode } = await req.json();
+    const body = await req.json();
+    const { productName, mechanism, targetAudience, painPoints, price, mode, copyText } = body;
 
     if (!productName) {
       return new Response(JSON.stringify({ error: "Product name required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
