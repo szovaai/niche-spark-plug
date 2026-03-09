@@ -47,8 +47,8 @@ const FAQItem = ({ q, a }: { q: string; a: string }) => {
 };
 
 const getProgressText = (pct: number) => {
-  if (pct < 25) return "Discover how DigiLaunchKit works";
-  if (pct < 50) return "See what DigiLaunchKit builds for you";
+  if (pct < 25) return "Discover how LaunchStack AI works";
+  if (pct < 50) return "See what LaunchStack AI builds for you";
   if (pct < 75) return "See how the launch system works";
   return "You're almost there — see the launch price below";
 };
