@@ -371,6 +371,34 @@ export default function WizardStep2({ productBrief, productType, result, setResu
     setTimeout(() => setCopied(null), 2000);
   };
 
+  const humanizeAll = async () => {
+    if (!result || !productBrief) return;
+    setHumanizing(true);
+    const total = result.chapters.length;
+    const updatedChapters = [...result.chapters];
+    for (let i = 0; i < total; i++) {
+      try {
+        const { data, error } = await supabase.functions.invoke("humanize-chapter", {
+          body: {
+            chapter: result.chapters[i],
+            productTitle: productBrief.title,
+            uniqueMechanism: productBrief.uniqueMechanism,
+          },
+        });
+        if (error) throw error;
+        if (data) {
+          updatedChapters[i] = { ...updatedChapters[i], ...data };
+        }
+      } catch (e: any) {
+        toast.error(`Failed to humanize chapter ${i + 1}`);
+      }
+    }
+    setResult({ ...result, chapters: updatedChapters });
+    setHumanizing(false);
+    toast.success("All chapters humanized!");
+  };
+
+  const audit = result ? auditFullContent(result) : null;
   const estimatedPages = result?.chapters ? estimatePages(result.chapters, contentDepth) : 0;
 
   if (!productBrief) {
