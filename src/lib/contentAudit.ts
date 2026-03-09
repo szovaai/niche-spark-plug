@@ -354,11 +354,13 @@ export function auditFullContent(content: Step2Content): ContentAuditResult {
 
   const overall = Math.round(avgDimensions.reduce((s, d) => s + d.score, 0) / avgDimensions.length);
   const hasUnsafe = avgDimensions.some(d => d.status === "unsafe");
-  const canContinue = overall >= 50 && !hasUnsafe;
+  const canContinue = overall >= 80 && !hasUnsafe;
   const gateMessage = !canContinue
-    ? "Your product needs improvement before continuing. Fix the flagged issues below."
-    : overall < 70
-    ? "Product can proceed, but addressing weak areas will boost conversions and reduce refunds."
+    ? overall < 80
+      ? `Your product scores ${overall}/100. You need 80+ to continue. Fix the flagged issues below.`
+      : "Your product has unsafe claims that must be fixed before continuing."
+    : overall < 90
+    ? "Product passes! Improving remaining areas will boost conversions and reduce refunds."
     : undefined;
 
   return { overall, dimensions: avgDimensions, canContinue, gateMessage, coachingMessages: allCoaching };
