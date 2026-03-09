@@ -128,3 +128,6 @@ verify_jwt = false
 
 [functions.generate-sales-hooks]
 verify_jwt = false
+
+[functions.launch-intelligence]
+verify_jwt = false
