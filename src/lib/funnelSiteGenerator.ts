@@ -1,4 +1,33 @@
-import type { Step3Funnel, SalesPageSections } from "@/types/launchWizard";
+import type { Step3Funnel, SalesPageSections, Step4Marketing, AffiliateKit } from "@/types/launchWizard";
+
+export type FunnelType = "simple" | "leadmagnet-tripwire" | "warriorplus-launch" | "list-building";
+
+export interface FunnelTypeConfig {
+  id: FunnelType;
+  label: string;
+  description: string;
+  pages: string[];
+  icon: string;
+}
+
+export const FUNNEL_TYPES: FunnelTypeConfig[] = [
+  { id: "simple", label: "Simple Product Funnel", description: "Sales page → Checkout → Thank you. The fastest way to sell.", pages: ["index.html", "checkout.html", "thankyou.html"], icon: "🎯" },
+  { id: "leadmagnet-tripwire", label: "Lead Magnet + Tripwire", description: "Opt-in → Tripwire sales page → Upsell → Delivery.", pages: ["optin.html", "index.html", "upsell.html", "thankyou.html", "bonus-delivery.html"], icon: "🧲" },
+  { id: "warriorplus-launch", label: "WarriorPlus Launch Funnel", description: "Full launch: Sales → Upsell → Downsell → Bonus → Affiliate page.", pages: ["index.html", "checkout.html", "upsell.html", "downsell.html", "thankyou.html", "bonus-delivery.html", "affiliate.html"], icon: "🔥" },
+  { id: "list-building", label: "List Building Funnel", description: "Opt-in → Thank you → Nurture. Grow your email list first.", pages: ["optin.html", "thankyou.html", "bonus-delivery.html"], icon: "📧" },
+];
+
+export interface AutoresponderConfig {
+  provider: string;
+  webhookUrl?: string;
+  listId?: string;
+  tagName?: string;
+}
+
+export interface FunnelDeployConfig {
+  funnelType: FunnelType;
+  autoresponder?: AutoresponderConfig;
+}
 
 export type FunnelTemplate = "classic-im" | "minimal-creator" | "toolkit-launch";
 
