@@ -16,6 +16,7 @@ import LaunchScoreCard from "./LaunchScoreCard";
 import MechanismSelector from "./MechanismSelector";
 import AvatarBuilder from "./AvatarBuilder";
 import PricingPsychologyCard from "./PricingPsychologyCard";
+import LaunchIntelligenceAgent from "./LaunchIntelligenceAgent";
 
 import type { LaunchMode } from "@/pages/LaunchWizard";
 
