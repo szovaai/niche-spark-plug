@@ -695,7 +695,7 @@ const Index = () => {
               <CardContent className="p-6">
                 <h3 className="font-bold text-lg mb-5 flex items-center gap-2">
                   <Check className="w-5 h-5 text-primary" />
-                  With DigiLaunchKit
+                   With LaunchStack AI
                 </h3>
                 <ul className="space-y-3">
                   {[
