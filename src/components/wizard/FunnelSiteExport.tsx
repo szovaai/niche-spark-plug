@@ -4,7 +4,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Globe, Download, ExternalLink, Loader2, FileText, Mail, Gift, CreditCard, Zap, Eye, Palette, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import JSZip from "jszip";
@@ -37,9 +36,7 @@ export default function FunnelSiteExport({ funnel, productTitle, productSubtitle
   const [showPreview, setShowPreview] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
 
-  if (!funnel) return null;
-
-  const config = {
+  const config = useMemo(() => ({
     productTitle,
     productSubtitle,
     authorName,
@@ -48,13 +45,14 @@ export default function FunnelSiteExport({ funnel, productTitle, productSubtitle
     price,
     niche,
     template,
-  };
+  }), [productTitle, productSubtitle, authorName, contactEmail, paymentLink, price, niche, template]);
 
-  // Live preview HTML
   const previewHTML = useMemo(() => {
-    if (!showPreview) return "";
+    if (!showPreview || !funnel) return "";
     return generateSalesPageHTML(funnel, config);
-  }, [showPreview, funnel, template, productTitle, productSubtitle, authorName, paymentLink, price]);
+  }, [showPreview, funnel, config]);
+
+  if (!funnel) return null;
 
   const handleDownload = async () => {
     setDownloading(true);
@@ -99,28 +97,26 @@ export default function FunnelSiteExport({ funnel, productTitle, productSubtitle
     <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5">
       <CardContent className="p-6 space-y-5">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-              <Globe className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <h3 className="font-bold text-lg">Instant Funnel Site</h3>
-              <p className="text-sm text-muted-foreground">Beautiful, conversion-optimized pages — ready to deploy</p>
-            </div>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+            <Globe className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <h3 className="font-bold text-lg">Instant Funnel Site</h3>
+            <p className="text-sm text-muted-foreground">Beautiful, conversion-optimized pages — ready to deploy</p>
           </div>
         </div>
 
         {/* ⚡ Momentum Launch */}
-        <div className="p-4 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20">
+        <div className="p-4 rounded-xl bg-gradient-to-r from-accent/10 to-primary/10 border border-accent/20">
           <div className="flex items-center gap-2 mb-2">
-            <Zap className="w-5 h-5 text-amber-500" />
-            <h4 className="font-bold text-amber-600 dark:text-amber-400">Momentum Launch — Go Live in 2 Minutes</h4>
+            <Zap className="w-5 h-5 text-accent" />
+            <h4 className="font-bold text-accent">Momentum Launch — Go Live in 2 Minutes</h4>
           </div>
           <p className="text-sm text-muted-foreground mb-3">
             Download your funnel site + open Netlify Drop in one click. Drag, drop, live.
           </p>
-          <Button onClick={handleMomentumLaunch} disabled={downloading} className="gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white border-0">
+          <Button onClick={handleMomentumLaunch} disabled={downloading} className="gap-2">
             {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
             ⚡ Momentum Launch
           </Button>
@@ -128,10 +124,10 @@ export default function FunnelSiteExport({ funnel, productTitle, productSubtitle
 
         {/* Template Picker */}
         <div>
-          <Label className="text-xs font-semibold mb-2 block flex items-center gap-1.5">
+          <Label className="text-xs font-semibold mb-2 flex items-center gap-1.5">
             <Palette className="w-3.5 h-3.5" /> Choose Template
           </Label>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2">
             {FUNNEL_TEMPLATES.map(t => (
               <button
                 key={t.id}
@@ -174,19 +170,20 @@ export default function FunnelSiteExport({ funnel, productTitle, productSubtitle
             {showPreview ? "Hide Preview" : "Live Preview"}
             {showPreview ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
           </Button>
-          {showPreview && (
+          {showPreview && previewHTML && (
             <div className="rounded-xl border border-border overflow-hidden shadow-lg">
               <div className="bg-muted/50 px-3 py-1.5 flex items-center gap-2 border-b border-border">
                 <div className="flex gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-red-400/60" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-400/60" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-green-400/60" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-destructive/40" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-accent/40" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-primary/40" />
                 </div>
                 <span className="text-xs text-muted-foreground font-mono">your-product.netlify.app</span>
               </div>
               <iframe
                 srcDoc={previewHTML}
-                className="w-full h-[500px] bg-white"
+                className="w-full h-[500px]"
+                style={{ background: "#fff" }}
                 title="Sales page preview"
                 sandbox="allow-same-origin"
               />
