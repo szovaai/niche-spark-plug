@@ -491,11 +491,13 @@ export default function WizardStep2({ productBrief, productType, result, setResu
             </Button>
           </div>
 
-          {/* Content Quality Report */}
+          {/* Pre-Continue Optimization Report */}
           <ContentQualityReport
             content={result}
             onExpandChapter={(i) => expandChapter(i)}
             expandingIndex={expandingIndex}
+            onHumanize={humanizeAll}
+            humanizing={humanizing}
           />
 
           <Card>
