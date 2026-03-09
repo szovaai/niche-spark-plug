@@ -15,6 +15,8 @@ import ObjectionKiller from "./ObjectionKiller";
 import SalesPageAudit from "./SalesPageAudit";
 import SalesStyleSelector from "./SalesStyleSelector";
 import SalesPageSectionsUI from "./SalesPageSections";
+import SalesHookGenerator from "./SalesHookGenerator";
+import BelievabilityFilter from "./BelievabilityFilter";
 
 import type { LaunchMode } from "@/pages/LaunchWizard";
 
