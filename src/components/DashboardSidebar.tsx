@@ -3,20 +3,13 @@ import {
   LogOut,
   ChevronLeft,
   LayoutDashboard,
-  Rocket,
   Settings,
   Wand2,
   ShoppingBag,
-  BarChart3,
-  ClipboardList,
-  LayoutTemplate,
-  Search,
-  Brain,
   Package,
+  FileText,
+  Rocket,
   CreditCard,
-  Zap,
-  FlaskConical,
-  Globe,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
@@ -38,22 +31,12 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-const buildItems = [
+const coreItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Products", url: "/products", icon: ShoppingBag },
-  { title: "Funnels", url: "/funnels", icon: BarChart3 },
-  { title: "Marketing Assets", url: "/assets", icon: Package },
-];
-
-const launchItems = [
-  { title: "Launch Checklist", url: "/checklist", icon: ClipboardList },
-  { title: "Launch Templates", url: "/launch-templates", icon: Rocket },
-  { title: "Templates", url: "/templates", icon: LayoutTemplate },
-];
-
-const intelligenceItems = [
-  { title: "Research Agent", url: "/research-agent", icon: Brain },
-  { title: "Steal This Launch", url: "/steal", icon: Search },
+  { title: "Assets", url: "/assets", icon: Package },
+  { title: "Funnels", url: "/funnels", icon: FileText },
+  { title: "Deploy", url: "/checklist", icon: Rocket },
 ];
 
 const accountItems = [
@@ -71,46 +54,21 @@ export function DashboardSidebar() {
   const isActive = (path: string) => location.pathname === path;
   const userInitial = user?.email?.charAt(0).toUpperCase() || "U";
 
-  const renderGroup = (
-    label: string,
-    items: typeof buildItems,
-  ) => (
-    <SidebarGroup>
-      {!isCollapsed && (
-        <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-semibold px-3">
-          {label}
-        </SidebarGroupLabel>
-      )}
-      <SidebarGroupContent>
-        <SidebarMenu>
-          {items.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton
-                asChild
-                isActive={isActive(item.url)}
-                tooltip={item.title}
-              >
-                <NavLink
-                  to={item.url}
-                  className={
-                    isCollapsed
-                      ? "flex items-center justify-center"
-                      : "flex items-center gap-3"
-                  }
-                  activeClassName="bg-sidebar-accent text-sidebar-accent-foreground"
-                >
-                  <item.icon className="h-4 w-4 shrink-0" />
-                  {!isCollapsed && (
-                    <span className="truncate flex-1">{item.title}</span>
-                  )}
-                </NavLink>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-      </SidebarGroupContent>
-    </SidebarGroup>
-  );
+  const renderItems = (items: typeof coreItems) =>
+    items.map((item) => (
+      <SidebarMenuItem key={item.title}>
+        <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
+          <NavLink
+            to={item.url}
+            className={isCollapsed ? "flex items-center justify-center" : "flex items-center gap-3"}
+            activeClassName="bg-sidebar-accent text-sidebar-accent-foreground"
+          >
+            <item.icon className="h-4 w-4 shrink-0" />
+            {!isCollapsed && <span className="truncate flex-1">{item.title}</span>}
+          </NavLink>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    ));
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -121,7 +79,7 @@ export function DashboardSidebar() {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
                 <span className="text-sm font-bold text-primary-foreground">DL</span>
               </div>
-              <span className="font-bold text-lg gradient-text">DigiLaunchKit AI</span>
+              <span className="font-bold text-lg gradient-text">DigiLaunchKit</span>
             </NavLink>
           )}
           <SidebarTrigger className="ml-auto">
@@ -150,13 +108,26 @@ export function DashboardSidebar() {
 
         <SidebarSeparator className="my-1" />
 
-        {renderGroup("Build", buildItems)}
+        {/* Core launch flow */}
+        <SidebarGroup>
+          {!isCollapsed && (
+            <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-semibold px-3">
+              Launch Flow
+            </SidebarGroupLabel>
+          )}
+          <SidebarGroupContent>
+            <SidebarMenu>{renderItems(coreItems)}</SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
         <SidebarSeparator className="my-1" />
-        {renderGroup("Deploy", launchItems)}
-        <SidebarSeparator className="my-1" />
-        {renderGroup("Intelligence", intelligenceItems)}
-        <SidebarSeparator className="my-1" />
-        {renderGroup("Account", accountItems)}
+
+        {/* Account */}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>{renderItems(accountItems)}</SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter className="p-4">
@@ -165,9 +136,7 @@ export function DashboardSidebar() {
             <SidebarSeparator />
             <div className="flex items-center gap-3">
               <Avatar className="h-8 w-8 shrink-0">
-                <AvatarFallback className="bg-primary/20 text-primary text-xs">
-                  {userInitial}
-                </AvatarFallback>
+                <AvatarFallback className="bg-primary/20 text-primary text-xs">{userInitial}</AvatarFallback>
               </Avatar>
               {!isCollapsed && (
                 <div className="flex-1 min-w-0">
