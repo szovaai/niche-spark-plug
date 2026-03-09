@@ -457,7 +457,25 @@ export default function WizardStep2({ productBrief, productType, result, setResu
         </CardContent>
       </Card>
 
-      {!result && (
+      {/* Outcome Lock — must be defined before generating */}
+      <OutcomeLockCard
+        outcomeLock={outcomeLock}
+        setOutcomeLock={setOutcomeLock}
+        locked={outcomeLocked}
+        onLock={() => {
+          setOutcomeLocked(true);
+          if (!result) generate();
+        }}
+        onUnlock={() => setOutcomeLocked(false)}
+      />
+
+      {!result && !outcomeLocked && (
+        <div className="text-center py-4">
+          <p className="text-sm text-muted-foreground">Lock your outcome above to generate your product.</p>
+        </div>
+      )}
+
+      {!result && outcomeLocked && (
         <Button onClick={generate} disabled={loading} className="gap-2">
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
           Generate Full Product
