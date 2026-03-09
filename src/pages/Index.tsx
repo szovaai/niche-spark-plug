@@ -306,7 +306,7 @@ const Index = () => {
           <motion.div {...fadeIn} className="mt-12 text-center">
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-6">
               <p className="text-foreground font-bold text-lg">Most AI tools write content.</p>
-              <p className="gradient-text font-bold text-lg">DigiLaunchKit builds the entire business around it.</p>
+              <p className="gradient-text font-bold text-lg">LaunchStack AI builds the entire business around it.</p>
             </div>
           </motion.div>
         </div>
