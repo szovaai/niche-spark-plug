@@ -944,7 +944,7 @@ const Index = () => {
             <div className="border-t border-border/50 pt-6 text-center space-y-2">
               <p className="text-sm text-muted-foreground">Total</p>
               <p className="text-4xl font-black text-foreground line-through decoration-destructive/60">$885+</p>
-              <p className="text-sm text-muted-foreground font-medium">DigiLaunchKit does it automatically.</p>
+              <p className="text-sm text-muted-foreground font-medium">LaunchStack AI does it automatically.</p>
               <p className="text-sm text-muted-foreground">Today:</p>
               <p className="text-5xl font-black gradient-text">$37</p>
             </div>
