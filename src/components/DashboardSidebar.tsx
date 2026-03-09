@@ -12,6 +12,7 @@ import {
   CreditCard,
   Radar,
   Dna,
+  BarChart3,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
@@ -41,6 +42,7 @@ const coreItems = [
   { title: "Assets", url: "/assets", icon: Package },
   { title: "Funnels", url: "/funnels", icon: FileText },
   { title: "Deploy", url: "/checklist", icon: Rocket },
+  { title: "Affiliate AI", url: "/affiliate-predictor", icon: BarChart3 },
 ];
 
 const accountItems = [

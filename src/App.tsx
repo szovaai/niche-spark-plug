@@ -28,6 +28,7 @@ import StealThisLaunch from "./pages/StealThisLaunch";
 import ResearchAgent from "./pages/ResearchAgent";
 import OpportunityRadar from "./pages/OpportunityRadar";
 import GenomeLibrary from "./pages/GenomeLibrary";
+import AffiliatePredictor from "./pages/AffiliatePredictor";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -68,6 +69,7 @@ const App = () => (
             <Route path="/empire" element={<EmpireMode />} />
             <Route path="/empire/:id" element={<EmpireMode />} />
             <Route path="/micro-factory" element={<MicroFactory />} />
+            <Route path="/affiliate-predictor" element={<AffiliatePredictor />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

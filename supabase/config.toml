@@ -131,3 +131,6 @@ verify_jwt = false
 
 [functions.launch-intelligence]
 verify_jwt = false
+
+[functions.predict-affiliate-profit]
+verify_jwt = false
