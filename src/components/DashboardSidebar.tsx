@@ -6,10 +6,7 @@ import {
   Settings,
   Wand2,
   ShoppingBag,
-  Package,
-  FileText,
   Rocket,
-  CreditCard,
   Radar,
   Dna,
   BarChart3,
@@ -19,9 +16,12 @@ import {
   Target,
   Palette,
   Plug,
-  User,
   TrendingUp,
-  Megaphone,
+  PenTool,
+  Activity,
+  LineChart,
+  Users,
+  Eye,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
@@ -45,27 +45,32 @@ import {
 
 const workspaceItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Command Center", url: "/command-center", icon: Monitor },
-  { title: "Opportunities", url: "/opportunities", icon: Radar },
+  { title: "Opportunity Radar", url: "/opportunities", icon: Radar },
   { title: "My Launches", url: "/products", icon: ShoppingBag },
 ];
 
 const buildItems = [
-  { title: "Launch Wizard", url: "/wizard", icon: Wand2 },
-  { title: "Assets Library", url: "/assets", icon: Package },
-  { title: "Genome™", url: "/genome", icon: Dna },
+  { title: "Command Center", url: "/command-center", icon: Monitor },
+  { title: "Product Builder", url: "/wizard", icon: Wand2 },
+  { title: "Sales Copy Engine", url: "/sales-copy", icon: PenTool },
+  { title: "Email Engine", url: "/email-engine", icon: Mail },
+  { title: "Social Content", url: "/social-engine", icon: Share2 },
 ];
 
 const funnelItems = [
-  { title: "Funnels", url: "/funnels", icon: Target },
-  { title: "Deploy", url: "/checklist", icon: Rocket },
+  { title: "Funnel Builder", url: "/funnels", icon: Target },
+  { title: "Funnel Simulation", url: "/funnel-simulation", icon: Activity },
 ];
 
 const growthItems = [
-  { title: "Affiliate AI", url: "/affiliate-predictor", icon: BarChart3 },
+  { title: "Affiliate Center", url: "/affiliate-predictor", icon: Users },
+  { title: "Traffic Planner", url: "/traffic-planner", icon: Eye },
+  { title: "Analytics", url: "/analytics", icon: LineChart },
 ];
 
-const accountItems = [
+const systemItems = [
+  { title: "Integrations", url: "/integrations", icon: Plug },
+  { title: "Brand Kit", url: "/settings?tab=brand", icon: Palette },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
@@ -76,7 +81,10 @@ export function DashboardSidebar() {
   const { user, role, signOut } = useAuth();
   const isCollapsed = state === "collapsed";
 
-  const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + "/");
+  const isActive = (path: string) => {
+    if (path.includes("?")) return location.pathname === path.split("?")[0];
+    return location.pathname === path || location.pathname.startsWith(path + "/");
+  };
   const userInitial = user?.email?.charAt(0).toUpperCase() || "U";
 
   const renderItems = (items: typeof workspaceItems) =>
@@ -96,7 +104,7 @@ export function DashboardSidebar() {
     ));
 
   const renderGroup = (label: string, items: typeof workspaceItems) => (
-    <SidebarGroup>
+    <SidebarGroup key={label}>
       {!isCollapsed && (
         <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.15em] text-muted-foreground/50 font-semibold px-3 mb-0.5">
           {label}
@@ -110,12 +118,11 @@ export function DashboardSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border/50">
-      {/* Logo */}
       <SidebarHeader className="p-3">
         <div className="flex items-center justify-between">
           {!isCollapsed && (
             <NavLink to="/" className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-[0_0_12px_-3px_hsl(var(--primary)/0.4)]">
                 <span className="text-[11px] font-bold text-primary-foreground">LS</span>
               </div>
               <span className="font-bold text-sm tracking-tight text-foreground">LaunchStack AI</span>
@@ -128,7 +135,6 @@ export function DashboardSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="px-1">
-        {/* New Launch CTA */}
         <div className={`px-2 mb-1 ${isCollapsed ? "px-1" : ""}`}>
           <Button
             onClick={() => navigate("/wizard")}
@@ -136,7 +142,7 @@ export function DashboardSidebar() {
             size={isCollapsed ? "icon" : "sm"}
             className={`w-full gap-2 text-xs ${isCollapsed ? "justify-center" : ""}`}
           >
-            <Wand2 className="h-3.5 w-3.5 shrink-0" />
+            <Rocket className="h-3.5 w-3.5 shrink-0" />
             {!isCollapsed && <span>New Launch</span>}
           </Button>
         </div>
@@ -151,7 +157,7 @@ export function DashboardSidebar() {
         <SidebarSeparator className="my-1 opacity-20" />
         {renderGroup("Growth", growthItems)}
         <SidebarSeparator className="my-1 opacity-20" />
-        {renderGroup("Account", accountItems)}
+        {renderGroup("System", systemItems)}
       </SidebarContent>
 
       <SidebarFooter className="p-3">
