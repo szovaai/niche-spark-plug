@@ -27,6 +27,7 @@ import Templates from "./pages/Templates";
 import StealThisLaunch from "./pages/StealThisLaunch";
 import ResearchAgent from "./pages/ResearchAgent";
 import OpportunityRadar from "./pages/OpportunityRadar";
+import GenomeLibrary from "./pages/GenomeLibrary";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/opportunities" element={<OpportunityRadar />} />
+            <Route path="/genome" element={<GenomeLibrary />} />
             <Route path="/wizard" element={<LaunchWizard />} />
             <Route path="/wizard/:projectId" element={<LaunchWizard />} />
             <Route path="/launch-templates" element={<LaunchTemplates />} />

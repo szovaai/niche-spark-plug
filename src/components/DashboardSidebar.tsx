@@ -11,6 +11,7 @@ import {
   Rocket,
   CreditCard,
   Radar,
+  Dna,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
@@ -35,6 +36,7 @@ import {
 const coreItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Opportunities", url: "/opportunities", icon: Radar },
+  { title: "Genome™", url: "/genome", icon: Dna },
   { title: "Products", url: "/products", icon: ShoppingBag },
   { title: "Assets", url: "/assets", icon: Package },
   { title: "Funnels", url: "/funnels", icon: FileText },
