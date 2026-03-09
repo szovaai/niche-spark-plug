@@ -109,7 +109,7 @@ export default function OutcomeLockCard({ outcomeLock, setOutcomeLock, locked, o
         )}
 
         {locked && (
-          <div className="space-y-2">
+          <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {fields.filter(f => data[f.key]).map(({ key, label, icon: Icon }) => (
                 <div key={key} className="p-2 rounded-lg bg-secondary/30 border border-border/30">
@@ -120,6 +120,51 @@ export default function OutcomeLockCard({ outcomeLock, setOutcomeLock, locked, o
                 </div>
               ))}
             </div>
+
+            {/* Result Path Timeline */}
+            <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-3">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5" /> Expected Results Timeline
+              </h4>
+              <div className="space-y-2">
+                {data.quickWin && (
+                  <div className="flex items-start gap-3">
+                    <Badge variant="outline" className="text-[10px] shrink-0 mt-0.5 border-primary/30 text-primary">30-60 min</Badge>
+                    <p className="text-xs">{data.quickWin}</p>
+                  </div>
+                )}
+                {data.shortTermWin && (
+                  <div className="flex items-start gap-3">
+                    <Badge variant="outline" className="text-[10px] shrink-0 mt-0.5 border-primary/30 text-primary">24 hours</Badge>
+                    <p className="text-xs">{data.shortTermWin}</p>
+                  </div>
+                )}
+                {data.coreResultWindow && (
+                  <div className="flex items-start gap-3">
+                    <Badge variant="outline" className="text-[10px] shrink-0 mt-0.5 border-primary/30 text-primary">3-7 days</Badge>
+                    <p className="text-xs">{data.coreResultWindow}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Transformation Summary */}
+            <div className="rounded-lg border border-accent/20 bg-accent/5 p-4 space-y-2">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-accent flex items-center gap-1.5">
+                <ArrowRight className="w-3.5 h-3.5" /> Transformation Summary
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-semibold text-destructive/80 uppercase">Before this product</p>
+                  <p className="text-xs text-muted-foreground">{data.painPoint || "Not defined"}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-semibold text-emerald-400 uppercase">After completing this product</p>
+                  <p className="text-xs text-muted-foreground">{data.finalTransformation || "Not defined"}</p>
+                </div>
+              </div>
+            </div>
+
             <Button variant="ghost" size="sm" className="text-xs" onClick={onUnlock}>
               <Unlock className="w-3 h-3 mr-1" /> Unlock & Edit
             </Button>
