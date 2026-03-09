@@ -261,12 +261,66 @@ export function auditChapter(chapter: ChapterItem): ContentAuditResult {
     status: getStatus(proofScore),
   });
 
+  // 9) BEGINNER FRICTION
+  const FRICTION_ASSUMPTIONS = [
+    "find leads", "find prospects", "get clients", "do outreach", "reach out",
+    "set your price", "charge", "pricing", "collect payment", "get paid",
+    "deliver", "send files", "invoice", "proposal", "cold email",
+    "build a funnel", "create a landing page", "run ads",
+  ];
+  const frictionCount = countMatches(fullText, FRICTION_ASSUMPTIONS);
+  const hasExplanations = /how to|here's how|step.*by.*step|follow these/i.test(fullText);
+  let frictionScore = 100;
+  frictionScore -= frictionCount * 8;
+  if (hasExplanations) frictionScore += 20;
+  frictionScore = Math.max(0, Math.min(100, frictionScore));
+  const frictionFlagged = FRICTION_ASSUMPTIONS.filter(p => fullText.toLowerCase().includes(p));
+  if (frictionScore < 60) coaching.push("A beginner may get stuck here. Add micro-explanations for assumed knowledge like finding leads, pricing, or delivering work.");
+  dimensions.push({
+    label: "Beginner Friction", icon: "🚧", score: Math.round(frictionScore), grade: getGrade(frictionScore),
+    details: `${frictionCount} assumption(s) detected, ${hasExplanations ? "some explanations found" : "no how-to explanations"}`,
+    coaching: frictionScore >= 75 ? "Beginner-safe — assumptions are explained." : "This step assumes knowledge a beginner won't have. Add a micro-explanation for each assumption.",
+    flaggedItems: frictionFlagged.length > 0 ? frictionFlagged : undefined,
+    status: getStatus(frictionScore),
+  });
+
+  // 10) ASSET DEPTH (with minimum thresholds)
+  const promptCount = (fullText.match(/prompt/gi) || []).length;
+  const scriptCount = (fullText.match(/script/gi) || []).length;
+  const checklistCount = (chapter.checklists?.length || 0);
+  const templateCount = (chapter.templates?.length || 0);
+  const exampleAssetCount = (chapter.additionalExamples?.length || 0) + (chapter.caseStudies?.length || 0);
+  const totalAssets = assetObjCount + promptCount + scriptCount;
+  // Per-chapter minimums (scaled from total: 10 prompts / 6 chapters ≈ 2 per chapter)
+  const minPrompts = 2, minScripts = 1, minChecklists = 0.5, minTemplates = 0.5, minExamples = 0.5;
+  const metFactors = [
+    promptCount >= minPrompts, scriptCount >= minScripts, checklistCount >= minChecklists,
+    templateCount >= minTemplates, exampleAssetCount >= minExamples,
+  ].filter(Boolean).length;
+  let assetDepthScore = Math.min(100, metFactors * 20);
+  const missingAssets: string[] = [];
+  if (promptCount < minPrompts) missingAssets.push("Add more prompts");
+  if (scriptCount < minScripts) missingAssets.push("Add scripts");
+  if (checklistCount < minChecklists) missingAssets.push("Add a checklist");
+  if (templateCount < minTemplates) missingAssets.push("Add a template");
+  if (exampleAssetCount < minExamples) missingAssets.push("Add examples");
+  if (assetDepthScore < 60) coaching.push("Add more implementation assets before continuing. Minimum: prompts, scripts, checklists, templates, and examples.");
+  dimensions.push({
+    label: "Asset Depth", icon: "📦", score: Math.round(assetDepthScore), grade: getGrade(assetDepthScore),
+    details: `${totalAssets} total asset(s): ${promptCount} prompts, ${scriptCount} scripts, ${checklistCount} checklists, ${templateCount} templates, ${exampleAssetCount} examples`,
+    coaching: assetDepthScore >= 75 ? "Good asset coverage — enough done-for-you materials." : "Missing implementation assets. Add prompts, scripts, checklists, and templates.",
+    flaggedItems: missingAssets.length > 0 ? missingAssets : undefined,
+    status: getStatus(assetDepthScore),
+  });
+
   const overall = Math.round(dimensions.reduce((s, d) => s + d.score, 0) / dimensions.length);
-  const canContinue = overall >= 50 && !dimensions.some(d => d.status === "unsafe");
+  const canContinue = overall >= 80 && !dimensions.some(d => d.status === "unsafe");
   const gateMessage = !canContinue
-    ? "Your product needs improvement before continuing. Address the flagged issues below."
-    : overall < 70
-    ? "Your product can proceed, but improving flagged areas will boost conversions and reduce refunds."
+    ? overall < 80
+      ? `Your product scores ${overall}/100. You need 80+ to continue. Fix the flagged issues below.`
+      : "Your product has unsafe claims. Fix the flagged issues below."
+    : overall < 90
+    ? "Product passes! Improving remaining areas will boost conversions and reduce refunds."
     : undefined;
 
   return { overall, dimensions, canContinue, gateMessage, coachingMessages: coaching };
