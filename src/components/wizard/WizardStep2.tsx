@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
-import { Sparkles, Loader2, Copy, Check, RefreshCw, Target, BookOpen, Lightbulb, ListOrdered, CheckCircle, AlertTriangle, Pencil, Key, FileText, ChevronDown, ClipboardList, FileCode, BookMarked, Footprints, PenLine, Download } from "lucide-react";
+import { Sparkles, Loader2, Copy, Check, RefreshCw, Target, BookOpen, Lightbulb, ListOrdered, CheckCircle, AlertTriangle, Pencil, Key, FileText, ChevronDown, ClipboardList, FileCode, BookMarked, Footprints, PenLine, Download, Lock } from "lucide-react";
 import { Step1Product, Step2Content, ChapterItem, ContentDepth, ExpansionType } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -16,6 +16,8 @@ import AssetDownloadButtons from "@/components/AssetDownloadButtons";
 import ProofStackBuilder from "./ProofStackBuilder";
 import ContentQualityReport from "./ContentQualityReport";
 import AssetFactory from "./AssetFactory";
+import OutcomeLockCard, { OutcomeLock, isOutcomeLockComplete } from "./OutcomeLockCard";
+import { auditFullContent } from "@/lib/contentAudit";
 import type { ProductAssets } from "@/types/productAssets";
 
 import type { LaunchMode } from "@/pages/LaunchWizard";
@@ -231,6 +233,9 @@ export default function WizardStep2({ productBrief, productType, result, setResu
   const [writingIndex, setWritingIndex] = useState<number | null>(null);
   const [writingAll, setWritingAll] = useState(false);
   const [writeAllProgress, setWriteAllProgress] = useState(0);
+  const [outcomeLock, setOutcomeLock] = useState<OutcomeLock | null>(null);
+  const [outcomeLocked, setOutcomeLocked] = useState(false);
+  const [humanizing, setHumanizing] = useState(false);
 
   const generate = async () => {
     if (!productBrief) return;
@@ -366,6 +371,34 @@ export default function WizardStep2({ productBrief, productType, result, setResu
     setTimeout(() => setCopied(null), 2000);
   };
 
+  const humanizeAll = async () => {
+    if (!result || !productBrief) return;
+    setHumanizing(true);
+    const total = result.chapters.length;
+    const updatedChapters = [...result.chapters];
+    for (let i = 0; i < total; i++) {
+      try {
+        const { data, error } = await supabase.functions.invoke("humanize-chapter", {
+          body: {
+            chapter: result.chapters[i],
+            productTitle: productBrief.title,
+            uniqueMechanism: productBrief.uniqueMechanism,
+          },
+        });
+        if (error) throw error;
+        if (data) {
+          updatedChapters[i] = { ...updatedChapters[i], ...data };
+        }
+      } catch (e: any) {
+        toast.error(`Failed to humanize chapter ${i + 1}`);
+      }
+    }
+    setResult({ ...result, chapters: updatedChapters });
+    setHumanizing(false);
+    toast.success("All chapters humanized!");
+  };
+
+  const audit = result ? auditFullContent(result) : null;
   const estimatedPages = result?.chapters ? estimatePages(result.chapters, contentDepth) : 0;
 
   if (!productBrief) {
@@ -424,7 +457,25 @@ export default function WizardStep2({ productBrief, productType, result, setResu
         </CardContent>
       </Card>
 
-      {!result && (
+      {/* Outcome Lock — must be defined before generating */}
+      <OutcomeLockCard
+        outcomeLock={outcomeLock}
+        setOutcomeLock={setOutcomeLock}
+        locked={outcomeLocked}
+        onLock={() => {
+          setOutcomeLocked(true);
+          if (!result) generate();
+        }}
+        onUnlock={() => setOutcomeLocked(false)}
+      />
+
+      {!result && !outcomeLocked && (
+        <div className="text-center py-4">
+          <p className="text-sm text-muted-foreground">Lock your outcome above to generate your product.</p>
+        </div>
+      )}
+
+      {!result && outcomeLocked && (
         <Button onClick={generate} disabled={loading} className="gap-2">
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
           Generate Full Product
@@ -440,11 +491,13 @@ export default function WizardStep2({ productBrief, productType, result, setResu
             </Button>
           </div>
 
-          {/* Content Quality Report */}
+          {/* Pre-Continue Optimization Report */}
           <ContentQualityReport
             content={result}
             onExpandChapter={(i) => expandChapter(i)}
             expandingIndex={expandingIndex}
+            onHumanize={humanizeAll}
+            humanizing={humanizing}
           />
 
           <Card>
@@ -624,7 +677,20 @@ export default function WizardStep2({ productBrief, productType, result, setResu
             />
           )}
 
-          <Button onClick={onNext} className="gap-2">Continue to Funnel Builder</Button>
+          <Button
+            onClick={onNext}
+            disabled={audit ? !audit.canContinue : false}
+            className="gap-2"
+          >
+            {audit && !audit.canContinue ? (
+              <>
+                <Lock className="w-4 h-4" />
+                Fix Issues Before Continuing
+              </>
+            ) : (
+              "Continue to Funnel Builder"
+            )}
+          </Button>
         </div>
       )}
     </div>
