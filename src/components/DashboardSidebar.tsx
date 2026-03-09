@@ -10,6 +10,7 @@ import {
   FileText,
   Rocket,
   CreditCard,
+  Radar,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
