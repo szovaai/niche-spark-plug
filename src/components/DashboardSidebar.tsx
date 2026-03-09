@@ -1,7 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { 
-  Package, 
-  CreditCard,
+import {
   LogOut,
   ChevronLeft,
   LayoutDashboard,
@@ -14,18 +12,23 @@ import {
   LayoutTemplate,
   Search,
   Brain,
+  Package,
+  CreditCard,
+  Zap,
+  FlaskConical,
+  Globe,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -35,19 +38,25 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-const mainNavItems = [
+const buildItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Research Agent", url: "/research-agent", icon: Brain },
-  { title: "Launch Templates", url: "/launch-templates", icon: Rocket },
   { title: "Products", url: "/products", icon: ShoppingBag },
   { title: "Funnels", url: "/funnels", icon: BarChart3 },
   { title: "Marketing Assets", url: "/assets", icon: Package },
+];
+
+const launchItems = [
   { title: "Launch Checklist", url: "/checklist", icon: ClipboardList },
-  { title: "Steal This Launch", url: "/steal", icon: Search },
+  { title: "Launch Templates", url: "/launch-templates", icon: Rocket },
   { title: "Templates", url: "/templates", icon: LayoutTemplate },
 ];
 
-const secondaryNavItems = [
+const intelligenceItems = [
+  { title: "Research Agent", url: "/research-agent", icon: Brain },
+  { title: "Steal This Launch", url: "/steal", icon: Search },
+];
+
+const accountItems = [
   { title: "Pricing", url: "/pricing", icon: CreditCard },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
@@ -62,6 +71,47 @@ export function DashboardSidebar() {
   const isActive = (path: string) => location.pathname === path;
   const userInitial = user?.email?.charAt(0).toUpperCase() || "U";
 
+  const renderGroup = (
+    label: string,
+    items: typeof buildItems,
+  ) => (
+    <SidebarGroup>
+      {!isCollapsed && (
+        <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-semibold px-3">
+          {label}
+        </SidebarGroupLabel>
+      )}
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {items.map((item) => (
+            <SidebarMenuItem key={item.title}>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive(item.url)}
+                tooltip={item.title}
+              >
+                <NavLink
+                  to={item.url}
+                  className={
+                    isCollapsed
+                      ? "flex items-center justify-center"
+                      : "flex items-center gap-3"
+                  }
+                  activeClassName="bg-sidebar-accent text-sidebar-accent-foreground"
+                >
+                  <item.icon className="h-4 w-4 shrink-0" />
+                  {!isCollapsed && (
+                    <span className="truncate flex-1">{item.title}</span>
+                  )}
+                </NavLink>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  );
+
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="p-4">
@@ -75,21 +125,21 @@ export function DashboardSidebar() {
             </NavLink>
           )}
           <SidebarTrigger className="ml-auto">
-            <ChevronLeft className={`h-4 w-4 transition-transform ${isCollapsed ? 'rotate-180' : ''}`} />
+            <ChevronLeft className={`h-4 w-4 transition-transform ${isCollapsed ? "rotate-180" : ""}`} />
           </SidebarTrigger>
         </div>
       </SidebarHeader>
 
       <SidebarContent>
-        {/* AI Launch Wizard CTA */}
+        {/* Primary CTA */}
         <SidebarGroup>
           <SidebarGroupContent>
-            <div className={`px-2 ${isCollapsed ? 'px-1' : ''}`}>
+            <div className={`px-2 ${isCollapsed ? "px-1" : ""}`}>
               <Button
                 onClick={() => navigate("/wizard")}
                 variant="hero"
                 size={isCollapsed ? "icon" : "default"}
-                className={`w-full gap-2 ${isCollapsed ? 'justify-center' : ''}`}
+                className={`w-full gap-2 ${isCollapsed ? "justify-center" : ""}`}
               >
                 <Wand2 className="h-4 w-4 shrink-0" />
                 {!isCollapsed && <span>New Launch</span>}
@@ -98,69 +148,15 @@ export function DashboardSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarSeparator className="my-2" />
+        <SidebarSeparator className="my-1" />
 
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {mainNavItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.url)}
-                    tooltip={item.title}
-                  >
-                    <NavLink
-                      to={item.url}
-                      className={
-                        isCollapsed
-                          ? "flex items-center justify-center"
-                          : "flex items-center gap-3"
-                      }
-                      activeClassName="bg-sidebar-accent text-sidebar-accent-foreground"
-                    >
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      {!isCollapsed && (
-                        <span className="truncate flex-1">{item.title}</span>
-                      )}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarSeparator />
-
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {secondaryNavItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.url)}
-                    tooltip={item.title}
-                  >
-                    <NavLink
-                      to={item.url}
-                      className={
-                        isCollapsed
-                          ? "flex items-center justify-center"
-                          : "flex items-center gap-3"
-                      }
-                      activeClassName="bg-sidebar-accent text-sidebar-accent-foreground"
-                    >
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      {!isCollapsed && <span className="truncate">{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {renderGroup("Build", buildItems)}
+        <SidebarSeparator className="my-1" />
+        {renderGroup("Deploy", launchItems)}
+        <SidebarSeparator className="my-1" />
+        {renderGroup("Intelligence", intelligenceItems)}
+        <SidebarSeparator className="my-1" />
+        {renderGroup("Account", accountItems)}
       </SidebarContent>
 
       <SidebarFooter className="p-4">
@@ -176,9 +172,7 @@ export function DashboardSidebar() {
               {!isCollapsed && (
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{user.email}</p>
-                  <p className="text-xs text-muted-foreground capitalize">
-                    {role} Plan
-                  </p>
+                  <p className="text-xs text-muted-foreground capitalize">{role} Plan</p>
                 </div>
               )}
             </div>
