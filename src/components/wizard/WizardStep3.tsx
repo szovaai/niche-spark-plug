@@ -15,6 +15,8 @@ import ObjectionKiller from "./ObjectionKiller";
 import SalesPageAudit from "./SalesPageAudit";
 import SalesStyleSelector from "./SalesStyleSelector";
 import SalesPageSectionsUI from "./SalesPageSections";
+import SalesHookGenerator from "./SalesHookGenerator";
+import BelievabilityFilter from "./BelievabilityFilter";
 
 import type { LaunchMode } from "@/pages/LaunchWizard";
 
@@ -259,6 +261,22 @@ export default function WizardStep3({ productBrief, productContent, result, setR
 
           {result.objections && result.objections.length > 0 && (
             <ObjectionKiller objections={result.objections} />
+          )}
+
+          {/* Sales Hook Generator */}
+          <SalesHookGenerator
+            productName={productBrief.title}
+            mechanism={productBrief.uniqueMechanism}
+            painPoints={productBrief.painPoints}
+            price={price}
+          />
+
+          {/* Believability Filter */}
+          {result.salesPage && typeof result.salesPage === "string" && (
+            <BelievabilityFilter
+              copyText={result.salesPage}
+              productName={productBrief.title}
+            />
           )}
 
           {result.salesPage && typeof result.salesPage === "string" && (
