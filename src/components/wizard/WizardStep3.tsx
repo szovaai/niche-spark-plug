@@ -291,6 +291,14 @@ export default function WizardStep3({ productBrief, productContent, result, setR
             />
           )}
 
+          {/* Funnel Simulation Map */}
+          <FunnelSimulationMap
+            price={price}
+            upsellPrice={price ? Math.round(price * 2.5) : 47}
+            hasOptIn={!!result.optInPage}
+            hasUpsell={!!result.upsellOffer}
+          />
+
           {/* Funnel Injection Engine */}
           <FunnelInjectionEngine
             funnel={result}
