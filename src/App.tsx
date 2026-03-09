@@ -30,6 +30,13 @@ import OpportunityRadar from "./pages/OpportunityRadar";
 import GenomeLibrary from "./pages/GenomeLibrary";
 import AffiliatePredictor from "./pages/AffiliatePredictor";
 import CommandCenter from "./pages/CommandCenter";
+import SalesCopyEngine from "./pages/SalesCopyEngine";
+import EmailEngine from "./pages/EmailEngine";
+import SocialEngine from "./pages/SocialEngine";
+import FunnelSimulation from "./pages/FunnelSimulation";
+import TrafficPlanner from "./pages/TrafficPlanner";
+import Analytics from "./pages/Analytics";
+import Integrations from "./pages/Integrations";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -51,11 +58,19 @@ const App = () => (
             <Route path="/genome" element={<GenomeLibrary />} />
             <Route path="/wizard" element={<LaunchWizard />} />
             <Route path="/wizard/:projectId" element={<LaunchWizard />} />
+            <Route path="/sales-copy" element={<SalesCopyEngine />} />
+            <Route path="/email-engine" element={<EmailEngine />} />
+            <Route path="/social-engine" element={<SocialEngine />} />
             <Route path="/launch-templates" element={<LaunchTemplates />} />
             <Route path="/products" element={<Products />} />
             <Route path="/funnels" element={<Funnels />} />
+            <Route path="/funnel-simulation" element={<FunnelSimulation />} />
             <Route path="/assets" element={<MarketingAssets />} />
             <Route path="/checklist" element={<LaunchChecklist />} />
+            <Route path="/affiliate-predictor" element={<AffiliatePredictor />} />
+            <Route path="/traffic-planner" element={<TrafficPlanner />} />
+            <Route path="/analytics" element={<Analytics />} />
+            <Route path="/integrations" element={<Integrations />} />
             <Route path="/steal" element={<StealThisLaunch />} />
             <Route path="/research-agent" element={<ResearchAgent />} />
             <Route path="/templates" element={<Templates />} />
@@ -72,7 +87,6 @@ const App = () => (
             <Route path="/empire" element={<EmpireMode />} />
             <Route path="/empire/:id" element={<EmpireMode />} />
             <Route path="/micro-factory" element={<MicroFactory />} />
-            <Route path="/affiliate-predictor" element={<AffiliatePredictor />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
