@@ -72,6 +72,7 @@ const App = () => (
             <Route path="/traffic-planner" element={<TrafficPlanner />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/integrations" element={<Integrations />} />
+            <Route path="/agent-hub" element={<AgentHub />} />
             <Route path="/steal" element={<StealThisLaunch />} />
             <Route path="/research-agent" element={<ResearchAgent />} />
             <Route path="/templates" element={<Templates />} />
