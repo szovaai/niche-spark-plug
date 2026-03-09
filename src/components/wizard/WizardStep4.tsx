@@ -191,6 +191,11 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
               </div>
             </TabsContent>
 
+            {/* === Viral Engine Tab === */}
+            <TabsContent value="viral">
+              <ViralContentEngine productBrief={productBrief} productContent={productContent} funnelCopy={funnelCopy} />
+            </TabsContent>
+
             {/* === Pins Tab === */}
             <TabsContent value="pins">
               <div className="grid gap-3 md:grid-cols-2">
