@@ -18,6 +18,7 @@ import SalesPageSectionsUI from "./SalesPageSections";
 import SalesHookGenerator from "./SalesHookGenerator";
 import BelievabilityFilter from "./BelievabilityFilter";
 import FunnelInjectionEngine from "./FunnelInjectionEngine";
+import FunnelSimulationMap from "./FunnelSimulationMap";
 
 import type { LaunchMode } from "@/pages/LaunchWizard";
 
@@ -289,6 +290,14 @@ export default function WizardStep3({ productBrief, productContent, result, setR
               price={price}
             />
           )}
+
+          {/* Funnel Simulation Map */}
+          <FunnelSimulationMap
+            price={price}
+            upsellPrice={price ? Math.round(price * 2.5) : 47}
+            hasOptIn={!!result.optInPage}
+            hasUpsell={!!result.upsellOffer}
+          />
 
           {/* Funnel Injection Engine */}
           <FunnelInjectionEngine
