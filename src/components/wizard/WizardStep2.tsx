@@ -17,6 +17,7 @@ import ProofStackBuilder from "./ProofStackBuilder";
 import ContentQualityReport from "./ContentQualityReport";
 import AssetFactory from "./AssetFactory";
 import OutcomeLockCard, { OutcomeLock, isOutcomeLockComplete } from "./OutcomeLockCard";
+import ScenarioGenerator from "./ScenarioGenerator";
 import { auditFullContent } from "@/lib/contentAudit";
 import type { ProductAssets } from "@/types/productAssets";
 
