@@ -267,6 +267,32 @@ const LaunchWizard = () => {
         if (data) setExistingProjectId(data.id);
         toast.success("Project saved!");
       }
+
+      // Auto-save Product DNA to Intelligence Agent
+      try {
+        const savedProjectId = existingProjectId || undefined;
+        await supabase.functions.invoke("launch-intelligence", {
+          body: {
+            mode: "save-dna",
+            projectId: savedProjectId,
+            productDNA: {
+              niche,
+              topic,
+              targetAudience,
+              productType,
+              price,
+              mechanismName: step1Result?.uniqueMechanism || null,
+              headlineStyle: step1Result?.selectedAngle || null,
+              salesStyle: (step4Funnel as any)?.salesStyle || null,
+              copyTone: "conversational",
+              platform: launchMode === "warriorplus" ? "warriorplus" : "gumroad",
+              bonusCount: step4Funnel?.offerStack?.bonuses?.length || 0,
+              blueprintTags: [niche, productType, launchMode].filter(Boolean),
+            },
+          },
+        });
+      } catch { /* non-critical */ }
+
       navigate("/products");
     } catch (e: any) {
       toast.error(e.message || "Failed to save");
