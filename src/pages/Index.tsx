@@ -1095,7 +1095,7 @@ const Index = () => {
               Pricing
             </button>
           </div>
-          <p className="text-sm text-muted-foreground">© 2025 DigiLaunchKit AI</p>
+          <p className="text-sm text-muted-foreground">© 2025 LaunchStack AI</p>
         </div>
       </footer>
 
