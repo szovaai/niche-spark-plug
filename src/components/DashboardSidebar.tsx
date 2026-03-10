@@ -119,7 +119,7 @@ export function DashboardSidebar() {
   );
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border/50">
+    <Sidebar collapsible="icon" className="border-r border-border/15 bg-sidebar/40 backdrop-blur-2xl">
       <SidebarHeader className="p-3">
         <div className="flex items-center justify-between">
           {!isCollapsed && (
