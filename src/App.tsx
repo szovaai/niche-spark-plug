@@ -67,6 +67,7 @@ const App = () => (
             <Route path="/products" element={<Products />} />
             <Route path="/funnels" element={<Funnels />} />
             <Route path="/funnel-simulation" element={<FunnelSimulation />} />
+            <Route path="/profit-map" element={<ProfitMap />} />
             <Route path="/assets" element={<MarketingAssets />} />
             <Route path="/checklist" element={<LaunchChecklist />} />
             <Route path="/affiliate-predictor" element={<AffiliatePredictor />} />

@@ -11,13 +11,17 @@ interface DashboardLayoutProps {
 
 const pageTitles: Record<string, string> = {
   "/dashboard": "Dashboard",
-  "/wizard": "AI Launch Wizard",
+  "/command-center": "Command Center",
+  "/wizard": "AI Product Builder",
+  "/steal": "Winning Launch Modeler",
+  "/funnels": "Visual Funnel Builder",
+  "/profit-map": "Profit Map",
+  "/funnel-simulation": "Launch Simulation",
+  "/settings": "Settings",
   "/products": "Products",
-  "/funnels": "Funnels",
   "/assets": "Marketing Assets",
   "/checklist": "Launch Checklist",
   "/templates": "Templates",
-  "/settings": "Settings",
   "/pricing": "Pricing",
 };
 
