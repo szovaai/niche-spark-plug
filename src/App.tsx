@@ -38,6 +38,7 @@ import TrafficPlanner from "./pages/TrafficPlanner";
 import Analytics from "./pages/Analytics";
 import Integrations from "./pages/Integrations";
 import AgentHub from "./pages/AgentHub";
+import ProfitMap from "./pages/ProfitMap";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -66,6 +67,7 @@ const App = () => (
             <Route path="/products" element={<Products />} />
             <Route path="/funnels" element={<Funnels />} />
             <Route path="/funnel-simulation" element={<FunnelSimulation />} />
+            <Route path="/profit-map" element={<ProfitMap />} />
             <Route path="/assets" element={<MarketingAssets />} />
             <Route path="/checklist" element={<LaunchChecklist />} />
             <Route path="/affiliate-predictor" element={<AffiliatePredictor />} />

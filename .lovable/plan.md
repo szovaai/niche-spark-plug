@@ -1,66 +1,53 @@
 
 
-# Plan: LaunchStack AI -- Sidebar Navigation Restructure & Module Polish
+# DigiLaunchKit AI — Refactor Plan
 
-This is a large request touching many existing modules. Most of the core modules already exist and are functional. The main gaps are:
+## What This Changes
 
-1. **Sidebar navigation** doesn't match the requested structure
-2. **No dedicated "Profit Map" page** (currently embedded in FunnelSimulation)
-3. **"Winning Launch Modeler"** exists at `/steal` but isn't in the sidebar with the right name
-4. **"Visual Funnel Builder"** exists at `/funnels` but isn't labeled correctly in nav
-5. **"Launch Intelligence"** is not a standalone sidebar item
+This is a major restructuring that repositions the app from a collection of separate tools (Empire Mode, Micro Factory, Toolkit Builder, Research, Launch) into a unified **AI Launch Engine** with one primary flow: the **AI Launch Wizard**.
 
-Everything else -- Onboarding, Outcome Lock AI, Command Center, Launch Simulation, Product Builder -- already exists and is functional.
+## Current State vs. Target State
 
-## Changes
+**Current navigation:** Dashboard, Empire Mode, Micro Factory, Research, My Toolkits, Launch
 
-### 1. Restructure Sidebar Navigation (`src/components/DashboardSidebar.tsx`)
+**New navigation:** Dashboard, AI Launch Wizard, Products, Funnels, Marketing Assets, Launch Checklist, Templates, Settings
 
-Replace the current 5-group navigation with the requested structure:
+## Implementation Status: ✅ COMPLETE
 
-```text
-LaunchStack AI
+### Phase 1: Database ✅
+- Created `launch_projects` table with JSONB fields for each wizard step
+- RLS policies: users can only CRUD their own rows
+- Auto-updated `updated_at` trigger
 
-[New Launch button]
+### Phase 2: Edge Functions ✅
+- `generate-launch-product` — product concept from niche/audience/type/topic
+- `generate-launch-content` — outline, chapters, bonuses, description
+- `generate-launch-funnel` — sales page, opt-in, thank you, bonus, checkout copy
+- `generate-launch-marketing` — 5 emails, 10 social posts, 5 pins, blog, video script
+- `generate-launch-checklist` — personalized launch roadmap
 
---- Core ---
-Dashboard           /dashboard
-Command Center      /command-center
-AI Product Builder  /wizard
+### Phase 3: AI Launch Wizard ✅
+- 5-step wizard at `/wizard` with left stepper + right content
+- "Generate Entire Launch System" button runs all 5 steps sequentially
+- All outputs saved to `launch_projects` table
 
---- Intelligence ---
-Winning Launch Modeler  /steal
-Visual Funnel Builder   /funnels
-Profit Map              /profit-map
-Launch Simulation       /funnel-simulation
+### Phase 4: Section Pages ✅
+- `/products` — list/delete launch projects
+- `/funnels` — tabbed funnel copy library
+- `/assets` — marketing asset library (emails, posts, pins, blog, video)
+- `/checklist` — interactive launch checklists with toggle
+- `/templates` — 5 pre-built niche templates
 
---- System ---
-Settings            /settings
-```
+### Phase 5: Navigation ✅
+- New sidebar: Dashboard, Products, Funnels, Marketing Assets, Launch Checklist, Templates
+- CTA button: "New Launch" → `/wizard`
+- Legacy routes preserved: `/empire`, `/micro-factory`, `/research`, `/my-toolkits`, `/launch`
 
-Remove: Opportunity Radar, AI Agent Hub, Sales Copy Engine, Email Engine, Social Content, Affiliate Center, Traffic Planner, Analytics, Integrations, Brand Kit from the main sidebar (these remain accessible via direct URL).
+### Phase 6: Dashboard ✅
+- Launch-focused: progress tracker, active projects, adapted stats
+- "Start New Launch" CTA
 
-### 2. Create Profit Map Page (`src/pages/ProfitMap.tsx`)
-
-Extract and enhance the "Profit Map" visualization into its own dedicated page:
-- Interactive sliders for Price, Traffic, Conversion Rate, Upsell Price, Upsell Conversion
-- Visual conversion funnel flow: Visitors → Leads → Buyers → Revenue
-- Real-time revenue calculations (Front End + Upsell)
-- Revenue forecast cards
-- Glassmorphism styling consistent with existing pages
-
-### 3. Add Route for Profit Map (`src/App.tsx`)
-
-Add `/profit-map` route pointing to the new ProfitMap page.
-
-### 4. Update `DashboardLayout` page titles
-
-Add entries for the new/renamed routes in the `pageTitles` map.
-
-## Technical Notes
-
-- No database changes needed
-- No new edge functions needed
-- All computation is client-side (slider-driven calculations)
-- Reuses existing glassmorphism design system (glass-surface, Card components, motion animations)
-
+### Phase 7: Branding ✅
+- Title: "DigiLaunchKit AI"
+- Hero: "Launch Your Digital Product in 60 Minutes"
+- Updated Navbar, HeroSection, index.html
