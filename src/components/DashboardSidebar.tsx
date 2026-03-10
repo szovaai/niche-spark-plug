@@ -5,24 +5,13 @@ import {
   LayoutDashboard,
   Settings,
   Wand2,
-  ShoppingBag,
   Rocket,
-  Radar,
-  Dna,
-  BarChart3,
   Monitor,
-  Mail,
-  Share2,
   Target,
-  Palette,
-  Plug,
   TrendingUp,
-  PenTool,
   Activity,
-  LineChart,
-  Users,
   Eye,
-  Bot,
+  Map,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
@@ -44,37 +33,24 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-const workspaceItems = [
+const coreItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Opportunity Radar", url: "/opportunities", icon: Radar },
-  { title: "My Launches", url: "/products", icon: ShoppingBag },
-];
-
-const buildItems = [
   { title: "Command Center", url: "/command-center", icon: Monitor },
-  { title: "AI Agent Hub", url: "/agent-hub", icon: Bot },
-  { title: "Product Builder", url: "/wizard", icon: Wand2 },
-  { title: "Sales Copy Engine", url: "/sales-copy", icon: PenTool },
-  { title: "Email Engine", url: "/email-engine", icon: Mail },
-  { title: "Social Content", url: "/social-engine", icon: Share2 },
+  { title: "AI Product Builder", url: "/wizard", icon: Wand2 },
 ];
 
-const funnelItems = [
-  { title: "Funnel Builder", url: "/funnels", icon: Target },
+const intelligenceItems = [
+  { title: "Winning Launch Modeler", url: "/steal", icon: Eye },
+  { title: "Visual Funnel Builder", url: "/funnels", icon: Target },
+  { title: "Profit Map", url: "/profit-map", icon: Map },
   { title: "Launch Simulation", url: "/funnel-simulation", icon: Activity },
 ];
 
-const growthItems = [
-  { title: "Affiliate Center", url: "/affiliate-predictor", icon: Users },
-  { title: "Traffic Planner", url: "/traffic-planner", icon: Eye },
-  { title: "Analytics", url: "/analytics", icon: LineChart },
-];
-
 const systemItems = [
-  { title: "Integrations", url: "/integrations", icon: Plug },
-  { title: "Brand Kit", url: "/settings?tab=brand", icon: Palette },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
+
+type NavItem = { title: string; url: string; icon: React.ComponentType<{ className?: string }> };
 
 export function DashboardSidebar() {
   const { state } = useSidebar();
@@ -89,7 +65,7 @@ export function DashboardSidebar() {
   };
   const userInitial = user?.email?.charAt(0).toUpperCase() || "U";
 
-  const renderItems = (items: typeof workspaceItems) =>
+  const renderItems = (items: NavItem[]) =>
     items.map((item) => (
       <SidebarMenuItem key={item.title}>
         <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
@@ -105,7 +81,7 @@ export function DashboardSidebar() {
       </SidebarMenuItem>
     ));
 
-  const renderGroup = (label: string, items: typeof workspaceItems) => (
+  const renderGroup = (label: string, items: NavItem[]) => (
     <SidebarGroup key={label}>
       {!isCollapsed && (
         <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.15em] text-muted-foreground/50 font-semibold px-3 mb-0.5">
@@ -151,13 +127,9 @@ export function DashboardSidebar() {
 
         <SidebarSeparator className="my-1.5 opacity-30" />
 
-        {renderGroup("Workspace", workspaceItems)}
+        {renderGroup("Core", coreItems)}
         <SidebarSeparator className="my-1 opacity-20" />
-        {renderGroup("Build", buildItems)}
-        <SidebarSeparator className="my-1 opacity-20" />
-        {renderGroup("Funnels", funnelItems)}
-        <SidebarSeparator className="my-1 opacity-20" />
-        {renderGroup("Growth", growthItems)}
+        {renderGroup("Intelligence", intelligenceItems)}
         <SidebarSeparator className="my-1 opacity-20" />
         {renderGroup("System", systemItems)}
       </SidebarContent>
