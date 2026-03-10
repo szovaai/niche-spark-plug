@@ -137,3 +137,6 @@ verify_jwt = false
 
 [functions.ai-agent-analyze]
 verify_jwt = false
+
+[functions.generate-outcome-lock]
+verify_jwt = false
