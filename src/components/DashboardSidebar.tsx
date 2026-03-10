@@ -61,7 +61,7 @@ const buildItems = [
 
 const funnelItems = [
   { title: "Funnel Builder", url: "/funnels", icon: Target },
-  { title: "Funnel Simulation", url: "/funnel-simulation", icon: Activity },
+  { title: "Launch Simulation", url: "/funnel-simulation", icon: Activity },
 ];
 
 const growthItems = [
