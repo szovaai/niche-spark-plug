@@ -1,53 +1,30 @@
 
 
-# DigiLaunchKit AI — Refactor Plan
+# Plan: AI-Powered Outcome Lock Auto-Fill
 
-## What This Changes
+## What We're Building
 
-This is a major restructuring that repositions the app from a collection of separate tools (Empire Mode, Micro Factory, Toolkit Builder, Research, Launch) into a unified **AI Launch Engine** with one primary flow: the **AI Launch Wizard**.
+Add a "Generate Outcome Lock with AI" button to the OutcomeLockCard that uses the product brief (title, concept, pain points, target audience) to auto-fill all 9 Outcome Lock fields via AI.
 
-## Current State vs. Target State
+## Changes
 
-**Current navigation:** Dashboard, Empire Mode, Micro Factory, Research, My Toolkits, Launch
+### 1. New Edge Function: `supabase/functions/generate-outcome-lock/index.ts`
+- Accepts `productBrief` (title, subtitle, concept, uniqueMechanism, painPoints) from the request body
+- Uses the Lovable AI gateway (`google/gemini-3-flash-preview`) with a focused prompt that generates all 9 OutcomeLock fields
+- Uses tool calling to extract structured JSON output matching the OutcomeLock interface
+- Returns the filled OutcomeLock object
+- Handles 429/402 errors properly
 
-**New navigation:** Dashboard, AI Launch Wizard, Products, Funnels, Marketing Assets, Launch Checklist, Templates, Settings
+### 2. Update `src/components/wizard/OutcomeLockCard.tsx`
+- Add new props: `productBrief` (Step1Product | null) to pass the product context
+- Add a "Generate with AI" button (Sparkles icon) in the header area, visible only when unlocked
+- On click, call the edge function, show loading state, and populate all fields via `setOutcomeLock`
+- User can then review/edit the AI-generated fields before locking
+- Toast on success/error
 
-## Implementation Status: ✅ COMPLETE
+### 3. Update `src/components/wizard/WizardStep2.tsx`
+- Pass `productBrief` prop to the OutcomeLockCard component
 
-### Phase 1: Database ✅
-- Created `launch_projects` table with JSONB fields for each wizard step
-- RLS policies: users can only CRUD their own rows
-- Auto-updated `updated_at` trigger
+### 4. Update `supabase/config.toml`
+- Register the new `generate-outcome-lock` function
 
-### Phase 2: Edge Functions ✅
-- `generate-launch-product` — product concept from niche/audience/type/topic
-- `generate-launch-content` — outline, chapters, bonuses, description
-- `generate-launch-funnel` — sales page, opt-in, thank you, bonus, checkout copy
-- `generate-launch-marketing` — 5 emails, 10 social posts, 5 pins, blog, video script
-- `generate-launch-checklist` — personalized launch roadmap
-
-### Phase 3: AI Launch Wizard ✅
-- 5-step wizard at `/wizard` with left stepper + right content
-- "Generate Entire Launch System" button runs all 5 steps sequentially
-- All outputs saved to `launch_projects` table
-
-### Phase 4: Section Pages ✅
-- `/products` — list/delete launch projects
-- `/funnels` — tabbed funnel copy library
-- `/assets` — marketing asset library (emails, posts, pins, blog, video)
-- `/checklist` — interactive launch checklists with toggle
-- `/templates` — 5 pre-built niche templates
-
-### Phase 5: Navigation ✅
-- New sidebar: Dashboard, Products, Funnels, Marketing Assets, Launch Checklist, Templates
-- CTA button: "New Launch" → `/wizard`
-- Legacy routes preserved: `/empire`, `/micro-factory`, `/research`, `/my-toolkits`, `/launch`
-
-### Phase 6: Dashboard ✅
-- Launch-focused: progress tracker, active projects, adapted stats
-- "Start New Launch" CTA
-
-### Phase 7: Branding ✅
-- Title: "DigiLaunchKit AI"
-- Hero: "Launch Your Digital Product in 60 Minutes"
-- Updated Navbar, HeroSection, index.html
