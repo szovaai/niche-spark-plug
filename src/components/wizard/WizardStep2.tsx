@@ -468,6 +468,7 @@ export default function WizardStep2({ productBrief, productType, result, setResu
           if (!result) generate();
         }}
         onUnlock={() => setOutcomeLocked(false)}
+        productBrief={productBrief}
       />
 
       {!result && !outcomeLocked && (

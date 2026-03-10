@@ -5,16 +5,19 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Lock, Unlock, Target, Clock, Zap, Trophy, Shield, ArrowRight } from "lucide-react";
+import { Lock, Unlock, Target, Clock, Zap, Trophy, Shield, ArrowRight, Sparkles, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import type { Step1Product } from "@/types/launchWizard";
 
 export interface OutcomeLock {
   audience: string;
   painPoint: string;
   promisedResult: string;
   realisticTimeframe: string;
-  quickWin: string;          // what they achieve in 30-60 min
-  shortTermWin: string;      // 24 hours
-  coreResultWindow: string;  // 3-7 days
+  quickWin: string;
+  shortTermWin: string;
+  coreResultWindow: string;
   finalTransformation: string;
   refundConditions: string;
 }
@@ -25,6 +28,7 @@ interface Props {
   locked: boolean;
   onLock: () => void;
   onUnlock: () => void;
+  productBrief?: Step1Product | null;
 }
 
 const EMPTY: OutcomeLock = {
@@ -38,12 +42,37 @@ export function isOutcomeLockComplete(lock: OutcomeLock | null): boolean {
   return !!(lock.audience && lock.painPoint && lock.promisedResult && lock.realisticTimeframe && lock.quickWin && lock.finalTransformation && lock.refundConditions);
 }
 
-export default function OutcomeLockCard({ outcomeLock, setOutcomeLock, locked, onLock, onUnlock }: Props) {
+export default function OutcomeLockCard({ outcomeLock, setOutcomeLock, locked, onLock, onUnlock, productBrief }: Props) {
   const data = outcomeLock || EMPTY;
   const complete = isOutcomeLockComplete(outcomeLock);
+  const [generating, setGenerating] = useState(false);
 
   const update = (field: keyof OutcomeLock, value: string) => {
     setOutcomeLock({ ...data, [field]: value });
+  };
+
+  const generateWithAI = async () => {
+    if (!productBrief) {
+      toast.error("Complete Step 1 first so AI has context to generate from.");
+      return;
+    }
+    setGenerating(true);
+    try {
+      const { data: fnData, error } = await supabase.functions.invoke("generate-outcome-lock", {
+        body: { productBrief },
+      });
+      if (error) throw error;
+      if (fnData?.error) throw new Error(fnData.error);
+      if (fnData?.outcomeLock) {
+        setOutcomeLock(fnData.outcomeLock);
+        toast.success("Outcome Lock generated! Review & edit before locking.");
+      }
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e.message || "Failed to generate Outcome Lock");
+    } finally {
+      setGenerating(false);
+    }
   };
 
   const fields: { key: keyof OutcomeLock; label: string; icon: typeof Target; placeholder: string; multiline?: boolean }[] = [
@@ -71,9 +100,23 @@ export default function OutcomeLockCard({ outcomeLock, setOutcomeLock, locked, o
               </p>
             </div>
           </div>
-          <Badge variant="outline" className={locked ? "text-emerald-400 border-emerald-500/30" : complete ? "text-primary border-primary/30" : "text-amber-400 border-amber-500/30"}>
-            {locked ? "Locked ✓" : complete ? "Ready to Lock" : "Incomplete"}
-          </Badge>
+          <div className="flex items-center gap-2">
+            {!locked && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 text-xs border-primary/30 text-primary hover:bg-primary/10"
+                onClick={generateWithAI}
+                disabled={generating || !productBrief}
+              >
+                {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                {generating ? "Generating…" : "Generate with AI"}
+              </Button>
+            )}
+            <Badge variant="outline" className={locked ? "text-emerald-400 border-emerald-500/30" : complete ? "text-primary border-primary/30" : "text-amber-400 border-amber-500/30"}>
+              {locked ? "Locked ✓" : complete ? "Ready to Lock" : "Incomplete"}
+            </Badge>
+          </div>
         </div>
 
         {!locked && (
@@ -121,7 +164,6 @@ export default function OutcomeLockCard({ outcomeLock, setOutcomeLock, locked, o
               ))}
             </div>
 
-            {/* Result Path Timeline */}
             <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-3">
               <h4 className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5" /> Expected Results Timeline
@@ -148,7 +190,6 @@ export default function OutcomeLockCard({ outcomeLock, setOutcomeLock, locked, o
               </div>
             </div>
 
-            {/* Transformation Summary */}
             <div className="rounded-lg border border-accent/20 bg-accent/5 p-4 space-y-2">
               <h4 className="text-xs font-bold uppercase tracking-wider text-accent flex items-center gap-1.5">
                 <ArrowRight className="w-3.5 h-3.5" /> Transformation Summary
