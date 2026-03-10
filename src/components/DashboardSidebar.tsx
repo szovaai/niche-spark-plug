@@ -42,6 +42,7 @@ const coreItems = [
 
 const intelligenceItems = [
   { title: "Winning Launch Modeler", url: "/steal", icon: Eye },
+  { title: "Opportunity Radar", url: "/opportunities", icon: Radar },
   { title: "Visual Funnel Builder", url: "/funnels", icon: Target },
   { title: "Profit Map", url: "/profit-map", icon: Map },
   { title: "Launch Simulation", url: "/funnel-simulation", icon: Activity },
