@@ -71,7 +71,7 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
           </Button>
           <Button variant="outline" size="lg" onClick={() => navigate("/steal")} className="hover:border-primary/50">
             <Rocket className="w-4 h-4" />
-            Steal a Launch
+            Launch Intelligence
           </Button>
         </motion.div>
         
