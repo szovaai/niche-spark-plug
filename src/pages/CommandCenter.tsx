@@ -613,29 +613,32 @@ export default function CommandCenter() {
                 </div>
               </GlassCard>
 
-              {/* Traffic Panel */}
+              {/* Traffic Engine */}
               <GlassCard hoverGlow="hover:shadow-[0_8px_40px_-10px_hsl(var(--chart-4)/0.12)]">
                 <div className="p-5 space-y-3">
                   <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-widest">
-                    <Eye className="h-3 w-3 text-chart-4/70" /> Traffic Plan
+                    <Eye className="h-3 w-3 text-chart-4/70" /> Traffic Engine
                   </div>
                   {project.step4_marketing ? (
                     <>
-                      <div className="space-y-2.5">
+                      <div className="space-y-2">
                         {[
-                          { source: "Email List", icon: Mail, pct: 40 },
-                          { source: "Affiliates", icon: Users, pct: 30 },
-                          { source: "Social", icon: Share2, pct: 20 },
-                          { source: "Organic", icon: Globe, pct: 10 },
-                        ].map(({ source, icon: Icon, pct }) => (
+                          { source: "TikTok / Reels", type: "Primary", icon: Share2, pct: 40, color: "bg-primary" },
+                          { source: "Pinterest", type: "Secondary", icon: Globe, pct: 25, color: "bg-chart-4" },
+                          { source: "YouTube Shorts", type: "Secondary", icon: Eye, pct: 20, color: "bg-accent" },
+                          { source: "Email List", type: "Backup", icon: Mail, pct: 15, color: "bg-chart-2" },
+                        ].map(({ source, type, icon: Icon, pct, color }) => (
                           <motion.div key={source} whileHover={{ x: 3 }}
-                            className="flex items-center gap-2.5 cursor-default">
+                            className="flex items-center gap-2.5 cursor-default p-2 rounded-lg bg-muted/3 border border-border/10 hover:border-border/20 transition-all">
                             <Icon className="h-3 w-3 text-muted-foreground/35 shrink-0" />
-                            <span className="text-[11px] flex-1">{source}</span>
+                            <div className="flex-1 min-w-0">
+                              <span className="text-[11px] font-medium block leading-none">{source}</span>
+                              <span className="text-[8px] text-muted-foreground/30 uppercase">{type}</span>
+                            </div>
                             <div className="w-16 h-1.5 rounded-full bg-muted/15 overflow-hidden">
                               <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }}
                                 transition={{ duration: 1, delay: 0.3 }}
-                                className="h-full rounded-full bg-primary/50" />
+                                className={`h-full rounded-full ${color}/50`} />
                             </div>
                             <span className="text-[10px] text-muted-foreground/35 w-7 text-right font-mono">{pct}%</span>
                           </motion.div>
