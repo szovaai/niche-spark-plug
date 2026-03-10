@@ -680,7 +680,40 @@ export default function CommandCenter() {
               </div>
             </GlassCard>
 
-            {/* Task Engine */}
+            {/* Weak Point Detector */}
+            <GlassCard className="p-4">
+              <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-widest mb-3">
+                <AlertTriangle className="h-3 w-3 text-chart-4/70" /> Risk Detector
+              </div>
+              <div className="space-y-2">
+                {(() => {
+                  const risks: { text: string; severity: "high" | "medium" | "low" }[] = [];
+                  if (!project.step3_funnel) risks.push({ text: "No sales funnel built. This is critical for conversions.", severity: "high" });
+                  if (!project.step4_marketing) risks.push({ text: "No marketing assets. You need traffic sources planned.", severity: "high" });
+                  if (project.step1_product && !project.step2_product_content) risks.push({ text: "Product idea exists but content not generated yet.", severity: "medium" });
+                  if (launchScore < 40) risks.push({ text: "Launch score is weak. Complete more steps before deploying.", severity: "high" });
+                  else if (launchScore < 70) risks.push({ text: "Launch score is moderate. Adding bonuses could increase perceived value.", severity: "medium" });
+                  if (project.step3_funnel && !(project.step3_funnel as any)?.upsellOffer) risks.push({ text: "No upsell detected. Adding a $47 OTO could boost revenue 30%+.", severity: "medium" });
+                  if (risks.length === 0) risks.push({ text: "No critical risks detected. Your launch looks solid! 🚀", severity: "low" });
+                  return risks.map((risk, i) => {
+                    const colors = {
+                      high: "border-destructive/15 bg-destructive/4 text-destructive",
+                      medium: "border-chart-4/15 bg-chart-4/4 text-chart-4",
+                      low: "border-chart-2/15 bg-chart-2/4 text-chart-2",
+                    };
+                    return (
+                      <motion.div key={i} initial={{ opacity: 0, x: -5 }} animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.08 }}
+                        className={`flex items-start gap-2 p-2.5 rounded-lg border text-[11px] leading-relaxed ${colors[risk.severity]}`}>
+                        <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5" />
+                        <span>{risk.text}</span>
+                      </motion.div>
+                    );
+                  });
+                })()}
+              </div>
+            </GlassCard>
+
             <GlassCard className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-widest">
