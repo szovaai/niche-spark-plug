@@ -38,6 +38,7 @@ import TrafficPlanner from "./pages/TrafficPlanner";
 import Analytics from "./pages/Analytics";
 import Integrations from "./pages/Integrations";
 import AgentHub from "./pages/AgentHub";
+import ProfitMap from "./pages/ProfitMap";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
