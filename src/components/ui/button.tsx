@@ -15,8 +15,8 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-secondary hover:text-secondary-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        glow: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/40 hover:shadow-primary/60 hover:shadow-xl animate-glow-pulse",
-        hero: "bg-gradient-to-r from-primary via-ocean-400 to-accent text-primary-foreground font-semibold shadow-lg shadow-primary/30 hover:shadow-accent/40 hover:shadow-xl hover:scale-105 active:scale-100",
+        glow: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_20px_-3px_hsl(var(--primary)/0.4),0_0_40px_-5px_hsl(var(--primary)/0.2)] hover:shadow-[0_0_30px_-3px_hsl(var(--primary)/0.6),0_0_60px_-5px_hsl(var(--primary)/0.3)] animate-glow-pulse",
+        hero: "bg-gradient-to-r from-primary via-primary to-accent text-primary-foreground font-semibold shadow-[0_0_25px_-5px_hsl(var(--primary)/0.4)] hover:shadow-[0_0_40px_-5px_hsl(var(--accent)/0.5)] hover:scale-[1.03] active:scale-100 transition-all duration-300",
         category: "bg-secondary/50 text-foreground border border-border/50 hover:border-primary/50 hover:bg-primary/10 data-[active=true]:border-primary data-[active=true]:bg-primary/15 data-[active=true]:text-primary data-[active=true]:shadow-lg data-[active=true]:shadow-primary/20",
       },
       size: {
