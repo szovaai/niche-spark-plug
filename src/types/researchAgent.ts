@@ -25,7 +25,7 @@ export interface OpportunityBrief {
   mechanism: string;
 }
 
-export type ResearchMode = "pain_point" | "demand_led" | "competitor_gap" | "asset_first";
+export type ResearchMode = "pain_point" | "demand_led" | "competitor_gap" | "asset_first" | "trend_hijacking";
 export type ResearchStyle = "fastest" | "warriorplus" | "listbuilding" | "recurring" | "existing_assets";
 
 export const RESEARCH_MODES = [
@@ -33,6 +33,7 @@ export const RESEARCH_MODES = [
   { value: "demand_led" as ResearchMode, label: "Demand-Led Research", icon: "📈", description: "Discover what's already selling" },
   { value: "competitor_gap" as ResearchMode, label: "Competitor Gap", icon: "🔍", description: "Find what competitors are missing" },
   { value: "asset_first" as ResearchMode, label: "Asset-First", icon: "📦", description: "Monetize what you already have" },
+  { value: "trend_hijacking" as ResearchMode, label: "Trend Hijacking", icon: "🔥", description: "Find profitable ideas from emerging trends before competitors launch" },
 ] as const;
 
 export const RESEARCH_STYLES = [

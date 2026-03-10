@@ -1,17 +1,31 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Loader2, Rocket, Brain, ArrowRight, Sparkles } from "lucide-react";
+import { Send, Loader2, Rocket, Brain, ArrowRight, Sparkles, TrendingUp } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { ResearchMessage, OpportunityBrief, ResearchMode, ResearchStyle } from "@/types/researchAgent";
 import { RESEARCH_MODES, RESEARCH_STYLES } from "@/types/researchAgent";
+
+interface OpportunityIdea {
+  title: string;
+  audience: string;
+  whyItSells: string[];
+  productFormat: string;
+  suggestedAngle: string;
+  uniqueMechanism: string;
+  monetizationScore: number;
+  recommended?: boolean;
+  trendVelocity?: number;
+  marketWindow?: string;
+}
 
 function parseOpportunityBrief(text: string): OpportunityBrief | null {
   const match = text.match(/```json\s*([\s\S]*?)```/);
@@ -25,6 +39,36 @@ function parseOpportunityBrief(text: string): OpportunityBrief | null {
 
 function stripJsonBlock(text: string): string {
   return text.replace(/```json\s*[\s\S]*?```/g, "").trim();
+}
+
+function TrendVelocityMeter({ velocity, window: marketWindow }: { velocity: number; window?: string }) {
+  const getColor = (v: number) => {
+    if (v >= 80) return "text-green-400";
+    if (v >= 60) return "text-yellow-400";
+    return "text-muted-foreground";
+  };
+  const getWindowLabel = (w?: string) => {
+    if (!w) return null;
+    const labels: Record<string, string> = {
+      "Early Growth": "🟢 Early Trend — Ideal Time To Launch",
+      "Peak": "🟡 Peak — Launch Now or Wait",
+      "Saturating": "🔴 Saturating — Find a Unique Angle",
+    };
+    return labels[w] || w;
+  };
+
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-medium text-muted-foreground">Trend Strength</span>
+        <span className={`text-sm font-bold ${getColor(velocity)}`}>{velocity}/100</span>
+      </div>
+      <Progress value={velocity} className="h-2" />
+      {marketWindow && (
+        <p className="text-xs text-muted-foreground">{getWindowLabel(marketWindow)}</p>
+      )}
+    </div>
+  );
 }
 
 export default function ResearchAgent() {
@@ -77,13 +121,17 @@ export default function ResearchAgent() {
   const selectMode = (mode: ResearchMode) => {
     setResearchMode(mode);
     const modeLabel = RESEARCH_MODES.find(m => m.value === mode)?.label || mode;
-    sendMessage(`I want to research using ${modeLabel}. Let's find a profitable product idea.`);
+    if (mode === "trend_hijacking") {
+      sendMessage(`I want to use ${modeLabel} mode. Show me the hottest emerging trends right now and identify the best product opportunities before competitors catch on.`);
+    } else {
+      sendMessage(`I want to research using ${modeLabel}. Let's find a profitable product idea.`);
+    }
   };
 
   const sendToWizard = (idea?: OpportunityBrief) => {
     const b = idea || brief;
     if (!b) return;
-    const recommended = b.ideas.find(i => i.recommended) || b.ideas[0];
+    const recommended = b.ideas.find((i: any) => i.recommended) || b.ideas[0];
     const params = new URLSearchParams({
       niche: b.niche || recommended?.title || "",
       audience: b.targetAudience || recommended?.audience || "",
@@ -98,24 +146,39 @@ export default function ResearchAgent() {
     navigate(`/wizard?${params.toString()}`);
   };
 
-  const quickReplies = [
-    "I help people with productivity",
-    "I want to sell on WarriorPlus",
-    "I have PLR products I want to monetize",
-    "I'm interested in the AI/ChatGPT niche",
-  ];
+  const quickReplies = researchMode === "trend_hijacking"
+    ? [
+        "Show me AI-related trends",
+        "What's trending in the make-money-online space?",
+        "Find trends in health and wellness",
+        "What new tools or platforms are gaining traction?",
+      ]
+    : [
+        "I help people with productivity",
+        "I want to sell on WarriorPlus",
+        "I have PLR products I want to monetize",
+        "I'm interested in the AI/ChatGPT niche",
+      ];
+
+  const isTrendMode = researchMode === "trend_hijacking";
 
   return (
     <DashboardLayout title="Launch Research Agent">
       <div className="p-4 md:p-6 max-w-4xl mx-auto flex flex-col h-[calc(100vh-4rem)]">
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary to-accent">
-            <Brain className="w-5 h-5 text-primary-foreground" />
+          <div className={`p-2.5 rounded-xl bg-gradient-to-br ${isTrendMode ? "from-orange-500 to-red-500" : "from-primary to-accent"}`}>
+            {isTrendMode ? <TrendingUp className="w-5 h-5 text-primary-foreground" /> : <Brain className="w-5 h-5 text-primary-foreground" />}
           </div>
           <div>
-            <h1 className="text-xl font-bold">Launch Research Agent</h1>
-            <p className="text-sm text-muted-foreground">Discover profitable product ideas before you build</p>
+            <h1 className="text-xl font-bold">
+              {isTrendMode ? "Trend Hijacking Mode" : "Launch Research Agent"}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {isTrendMode
+                ? "Find profitable ideas from emerging trends before competitors launch"
+                : "Discover profitable product ideas before you build"}
+            </p>
           </div>
         </div>
 
@@ -149,7 +212,7 @@ export default function ResearchAgent() {
                 {RESEARCH_MODES.map(mode => (
                   <Card
                     key={mode.value}
-                    className="cursor-pointer hover:border-primary/50 transition-colors"
+                    className={`cursor-pointer hover:border-primary/50 transition-colors ${mode.value === "trend_hijacking" ? "sm:col-span-2 border-orange-500/30 bg-gradient-to-r from-orange-500/5 to-red-500/5" : ""}`}
                     onClick={() => selectMode(mode.value)}
                   >
                     <CardContent className="p-4 flex items-start gap-3">
@@ -158,6 +221,9 @@ export default function ResearchAgent() {
                         <h3 className="font-semibold text-sm">{mode.label}</h3>
                         <p className="text-xs text-muted-foreground">{mode.description}</p>
                       </div>
+                      {mode.value === "trend_hijacking" && (
+                        <Badge variant="outline" className="ml-auto text-[10px] border-orange-500/40 text-orange-400 shrink-0">NEW</Badge>
+                      )}
                     </CardContent>
                   </Card>
                 ))}
@@ -197,7 +263,9 @@ export default function ResearchAgent() {
             <div className="flex justify-start">
               <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                <span className="text-sm text-muted-foreground">Researching...</span>
+                <span className="text-sm text-muted-foreground">
+                  {isTrendMode ? "Scanning trends..." : "Researching..."}
+                </span>
               </div>
             </div>
           )}
@@ -216,20 +284,30 @@ export default function ResearchAgent() {
           {/* Opportunity Brief */}
           {brief && (
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
-              <Card className="border-primary/40 bg-gradient-to-br from-primary/5 to-accent/5">
+              <Card className={`border-primary/40 ${isTrendMode ? "bg-gradient-to-br from-orange-500/5 to-red-500/5" : "bg-gradient-to-br from-primary/5 to-accent/5"}`}>
                 <CardContent className="p-5 space-y-4">
                   <div className="flex items-center gap-2">
-                    <Rocket className="w-5 h-5 text-primary" />
-                    <h3 className="font-bold text-lg">Opportunity Brief</h3>
+                    {isTrendMode ? <TrendingUp className="w-5 h-5 text-orange-400" /> : <Rocket className="w-5 h-5 text-primary" />}
+                    <h3 className="font-bold text-lg">
+                      {isTrendMode ? "Trend Intelligence Brief" : "Opportunity Brief"}
+                    </h3>
                   </div>
 
-                  {brief.ideas.map((idea, i) => (
+                  {(brief.ideas as OpportunityIdea[]).map((idea, i) => (
                     <div key={i} className={`p-4 rounded-lg border ${idea.recommended ? "border-primary/50 bg-primary/5" : "border-border"}`}>
                       <div className="flex items-center gap-2 mb-2">
                         <h4 className="font-semibold">{idea.title}</h4>
                         {idea.recommended && <Badge className="text-xs">⭐ Recommended</Badge>}
                         <Badge variant="outline" className="text-xs ml-auto">{idea.monetizationScore}/100</Badge>
                       </div>
+
+                      {/* Trend Velocity Meter */}
+                      {idea.trendVelocity != null && (
+                        <div className="mb-3">
+                          <TrendVelocityMeter velocity={idea.trendVelocity} window={idea.marketWindow} />
+                        </div>
+                      )}
+
                       <p className="text-sm text-muted-foreground mb-2">
                         <strong>Audience:</strong> {idea.audience}
                       </p>
@@ -248,6 +326,28 @@ export default function ResearchAgent() {
                           {idea.whyItSells.map((r, j) => <li key={j}>• {r}</li>)}
                         </ul>
                       </div>
+
+                      {/* Steal This Trend button per idea */}
+                      {isTrendMode && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="mt-3 gap-1.5 text-xs border-orange-500/40 text-orange-400 hover:bg-orange-500/10"
+                          onClick={() => {
+                            const params = new URLSearchParams({
+                              niche: brief.niche || idea.title,
+                              audience: idea.audience,
+                              topic: idea.suggestedAngle,
+                              mechanism: idea.uniqueMechanism,
+                            });
+                            if (brief.productType) params.set("productType", brief.productType);
+                            navigate(`/wizard?${params.toString()}`);
+                          }}
+                        >
+                          <Rocket className="w-3 h-3" />
+                          Steal This Trend
+                        </Button>
+                      )}
                     </div>
                   ))}
 
@@ -267,7 +367,7 @@ export default function ResearchAgent() {
         {/* Input */}
         <div className="flex gap-2 items-end border-t pt-3">
           <Textarea
-            placeholder="Type your message..."
+            placeholder={isTrendMode ? "Ask about specific trends or niches..." : "Type your message..."}
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
