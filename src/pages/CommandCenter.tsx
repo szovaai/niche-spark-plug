@@ -7,6 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -17,7 +20,8 @@ import {
   Package, FileText, Mail, Share2, ChevronRight, AlertTriangle,
   Lightbulb, Play, Wand2, Globe, Monitor, Clock,
   Shield, Star, Activity, Gauge, Bot, RefreshCw,
-  Radio, ArrowUpRight, Flame, Brain, ShieldAlert, Navigation
+  Radio, ArrowUpRight, Flame, Brain, ShieldAlert, Navigation,
+  Import, Upload
 } from "lucide-react";
 
 // --- Types ---
@@ -41,6 +45,18 @@ const PIPELINE = [
   { key: "marketing", label: "Promote", icon: Mail, check: (p: ProjectData) => !!p.step4_marketing },
   { key: "deploy", label: "Deploy", icon: Rocket, check: (p: ProjectData) => p.status === "deployed" },
 ];
+
+// --- Funnel checklist wizard step mapping ---
+const FUNNEL_WIZARD_MAP: Record<string, number> = {
+  "Offer Created": 1,
+  "Headline Written": 1,
+  "Sales Page Drafted": 4,
+  "Bonus Stack Created": 4,
+  "Upsell Created": 4,
+  "Checkout Assets Ready": 3,
+  "Email Follow-up Ready": 5,
+  "Thank You Page Ready": 4,
+};
 
 // --- Animated Number ---
 function AnimatedNumber({ value, prefix = "", suffix = "", className = "" }: { value: number; prefix?: string; suffix?: string; className?: string }) {
@@ -169,8 +185,8 @@ const DeploySequence = ({ onComplete }: { onComplete: () => void }) => {
   );
 };
 
-// --- Funnel Readiness Item ---
-function FunnelCheckItem({ label, status, delay = 0 }: { label: string; status: "complete" | "in_progress" | "missing"; delay?: number }) {
+// --- Funnel Readiness Item (with clickable navigation) ---
+function FunnelCheckItem({ label, status, delay = 0, onClick }: { label: string; status: "complete" | "in_progress" | "missing"; delay?: number; onClick?: () => void }) {
   const colors = {
     complete: "border-chart-2/15 bg-chart-2/4",
     in_progress: "border-chart-4/15 bg-chart-4/4",
@@ -181,18 +197,25 @@ function FunnelCheckItem({ label, status, delay = 0 }: { label: string; status: 
     in_progress: <div className="h-3.5 w-3.5 rounded-full border-2 border-chart-4 border-t-transparent animate-spin shrink-0" />,
     missing: <Circle className="h-3.5 w-3.5 text-muted-foreground/20 shrink-0" />,
   };
+  const isClickable = status !== "complete" && !!onClick;
   return (
     <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay }}
-      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border transition-all ${colors[status]}`}>
+      onClick={isClickable ? onClick : undefined}
+      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border transition-all ${colors[status]} ${isClickable ? "cursor-pointer hover:border-primary/30 hover:bg-primary/5 group" : ""}`}>
       {icons[status]}
       <span className={`text-[11px] font-medium ${status === "missing" ? "text-muted-foreground/40" : "text-foreground/80"}`}>{label}</span>
-      <Badge variant="outline" className={`ml-auto text-[8px] h-4 px-1.5 ${
-        status === "complete" ? "border-chart-2/20 text-chart-2" :
-        status === "in_progress" ? "border-chart-4/20 text-chart-4" :
-        "border-border/15 text-muted-foreground/30"
-      }`}>
-        {status === "complete" ? "Done" : status === "in_progress" ? "In Progress" : "Missing"}
-      </Badge>
+      {isClickable && (
+        <ArrowRight className="h-3 w-3 text-primary/40 opacity-0 group-hover:opacity-100 transition-opacity ml-auto shrink-0" />
+      )}
+      {!isClickable && (
+        <Badge variant="outline" className={`ml-auto text-[8px] h-4 px-1.5 ${
+          status === "complete" ? "border-chart-2/20 text-chart-2" :
+          status === "in_progress" ? "border-chart-4/20 text-chart-4" :
+          "border-border/15 text-muted-foreground/30"
+        }`}>
+          {status === "complete" ? "Done" : status === "in_progress" ? "In Progress" : "Missing"}
+        </Badge>
+      )}
     </motion.div>
   );
 }
@@ -209,6 +232,17 @@ export default function CommandCenter() {
   const [scenario, setScenario] = useState<ScenarioMode>("standard");
   const [agentInsights, setAgentInsights] = useState<Array<{ text: string; type: "success" | "warning" | "info"; agentName?: string }>>([]);
   const [agentLoading, setAgentLoading] = useState(false);
+
+  // Rotating recommendations
+  const [activeActionIdx, setActiveActionIdx] = useState(0);
+
+  // Import modal
+  const [importOpen, setImportOpen] = useState(false);
+  const [importIdea, setImportIdea] = useState("");
+  const [importNiche, setImportNiche] = useState("");
+  const [importAudience, setImportAudience] = useState("");
+  const [importPrice, setImportPrice] = useState("");
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     if (user) fetchProjects();
@@ -253,6 +287,35 @@ export default function CommandCenter() {
       }
     } catch (e: any) { toast.error("Agent analysis failed"); }
     finally { setAgentLoading(false); }
+  };
+
+  // Import Product Idea
+  const handleImport = async () => {
+    if (!user || !importIdea.trim()) return;
+    setImporting(true);
+    try {
+      const { data, error } = await supabase.from("launch_projects").insert({
+        user_id: user.id,
+        name: importIdea.slice(0, 80) || "Imported Idea",
+        niche: importNiche || null,
+        target_audience: importAudience || null,
+        step1_product: {
+          title: importIdea.slice(0, 80),
+          concept: importIdea,
+          price: importPrice ? Number(importPrice) : 17,
+        },
+        current_step: 1,
+      }).select().single();
+      if (error) throw error;
+      toast.success("Product idea imported!");
+      setImportOpen(false);
+      setImportIdea(""); setImportNiche(""); setImportAudience(""); setImportPrice("");
+      navigate(`/command-center/${data.id}`);
+    } catch (e: any) {
+      toast.error("Failed to import: " + e.message);
+    } finally {
+      setImporting(false);
+    }
   };
 
   // --- Computed ---
@@ -365,17 +428,49 @@ export default function CommandCenter() {
     return r.slice(0, 6);
   }, [project, launchScore, trafficScore]);
 
-  // Next Best Action
-  const nextBestAction = useMemo(() => {
-    if (!project) return null;
-    if (!project.step1_product) return { text: "Generate your product idea to begin building your launch.", cta: "Generate Product", action: () => navigate("/wizard") };
-    if (!project.step2_product_content) return { text: "Build your product content — the core asset buyers will receive.", cta: "Build Content", action: () => navigate(`/wizard/${project.id}`) };
-    if (!project.step3_funnel) return { text: "Create your sales funnel to start converting visitors into buyers.", cta: "Build Funnel", action: () => navigate(`/wizard/${project.id}`) };
-    if (!project.step4_marketing) return { text: "Generate marketing assets — emails, social posts, and affiliate swipes.", cta: "Generate Marketing", action: () => navigate(`/wizard/${project.id}`) };
+  // --- Rotating Next Best Actions ---
+  const rotatingActions = useMemo(() => {
+    if (!project) return [];
+    const actions: { text: string; cta: string; action: () => void }[] = [];
+
+    if (!project.step1_product) {
+      actions.push({ text: "Generate your product idea to begin building your launch.", cta: "Generate Product", action: () => navigate("/wizard") });
+    }
+    if (!project.step2_product_content) {
+      actions.push({ text: "Build your product content — the core asset buyers will receive.", cta: "Build Content", action: () => navigate(`/wizard/${project.id}`) });
+    }
+    if (!project.step3_funnel) {
+      actions.push({ text: "Create your sales funnel to start converting visitors into buyers.", cta: "Build Funnel", action: () => navigate(`/wizard/${project.id}`) });
+    }
+    if (!project.step4_marketing) {
+      actions.push({ text: "Generate marketing assets — emails, social posts, and affiliate swipes.", cta: "Generate Marketing", action: () => navigate(`/wizard/${project.id}`) });
+    }
     const p3 = project.step3_funnel as any;
-    if (!p3?.upsellOffer) return { text: "Add a 'Done-For-You Bonus Pack' to improve conversions and affiliate appeal.", cta: "Generate Bonus Pack", action: () => navigate(`/wizard/${project.id}`) };
-    return { text: "All systems ready. Review and deploy your launch! 🚀", cta: "Deploy Launch", action: () => handleDeploy() };
+    if (p3 && !p3.upsellOffer) {
+      actions.push({ text: "Add a 'Done-For-You Bonus Pack' to improve conversions and affiliate appeal.", cta: "Generate Bonus Pack", action: () => navigate(`/wizard/${project.id}`) });
+    }
+
+    // Always add these contextual suggestions
+    actions.push({ text: "Visualize your funnel flow and find revenue leaks with the Funnel Builder.", cta: "Open Funnel Builder", action: () => navigate("/funnels") });
+    actions.push({ text: "Run a launch simulation to predict revenue under different scenarios.", cta: "Run Simulation", action: () => navigate("/funnel-simulation") });
+    actions.push({ text: "Check the Opportunity Radar for trending niches and competitor gaps.", cta: "Scan Opportunities", action: () => navigate("/opportunities") });
+
+    if (actions.length === 0) {
+      actions.push({ text: "All systems ready. Review and deploy your launch! 🚀", cta: "Deploy Launch", action: () => handleDeploy() });
+    }
+    return actions;
   }, [project]);
+
+  // Auto-rotate every 8 seconds
+  useEffect(() => {
+    if (rotatingActions.length <= 1) return;
+    const timer = setInterval(() => {
+      setActiveActionIdx(prev => (prev + 1) % rotatingActions.length);
+    }, 8000);
+    return () => clearInterval(timer);
+  }, [rotatingActions.length]);
+
+  const currentAction = rotatingActions[activeActionIdx % Math.max(rotatingActions.length, 1)] || null;
 
   // Estimated time to launch
   const estimatedTime = useMemo(() => {
@@ -446,11 +541,46 @@ export default function CommandCenter() {
             <Button onClick={() => navigate("/wizard")} className="gap-2 shadow-[0_0_25px_-5px_hsl(var(--primary)/0.4)]">
               <Rocket className="h-4 w-4" /> Start New Launch
             </Button>
+            <Button variant="outline" onClick={() => setImportOpen(true)} className="gap-2">
+              <Upload className="h-4 w-4" /> Import Product Idea
+            </Button>
             <Button variant="outline" onClick={() => navigate("/research-agent")} className="gap-2">
               <Brain className="h-4 w-4" /> Run AI Research
             </Button>
           </div>
         </div>
+
+        {/* Import Modal */}
+        <Dialog open={importOpen} onOpenChange={setImportOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><Upload className="h-5 w-5 text-primary" /> Import Product Idea</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground/60 uppercase mb-1 block">Product Idea / Description *</label>
+                <Textarea placeholder="Describe your product idea, offer concept, or paste an existing description..." value={importIdea} onChange={e => setImportIdea(e.target.value)} rows={4} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground/60 uppercase mb-1 block">Niche</label>
+                  <Input placeholder="e.g. Weight Loss" value={importNiche} onChange={e => setImportNiche(e.target.value)} />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground/60 uppercase mb-1 block">Target Audience</label>
+                  <Input placeholder="e.g. Busy Moms" value={importAudience} onChange={e => setImportAudience(e.target.value)} />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground/60 uppercase mb-1 block">Price Point ($)</label>
+                <Input type="number" placeholder="17" value={importPrice} onChange={e => setImportPrice(e.target.value)} />
+              </div>
+              <Button onClick={handleImport} disabled={!importIdea.trim() || importing} className="w-full gap-2">
+                <Zap className="h-4 w-4" /> {importing ? "Importing..." : "Import & Build"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </DashboardLayout>
     );
   }
@@ -667,7 +797,7 @@ export default function CommandCenter() {
 
             {/* Row 2: Funnel Readiness + Traffic Activation */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {/* Panel 3: Funnel Readiness */}
+              {/* Panel 3: Funnel Readiness — now clickable */}
               <GlassCard className="p-5" glow="hover:shadow-[0_8px_40px_-10px_hsl(var(--accent)/0.15)]">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-widest">
@@ -678,7 +808,13 @@ export default function CommandCenter() {
                 <Progress value={funnelCompletion} className="h-1 mb-3" />
                 <div className="space-y-1.5 max-h-[280px] overflow-y-auto pr-1">
                   {funnelChecklist.map((item, i) => (
-                    <FunnelCheckItem key={item.label} label={item.label} status={item.status} delay={i * 0.05} />
+                    <FunnelCheckItem
+                      key={item.label}
+                      label={item.label}
+                      status={item.status}
+                      delay={i * 0.05}
+                      onClick={item.status !== "complete" ? () => navigate(`/wizard/${project.id}?step=${FUNNEL_WIZARD_MAP[item.label] || 1}`) : undefined}
+                    />
                   ))}
                 </div>
               </GlassCard>
@@ -725,7 +861,7 @@ export default function CommandCenter() {
                   const badges = { high: "High", medium: "Medium", low: "Low" };
                   return (
                     <motion.div key={i} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
-                      className={`flex items-start gap-2 p-3 rounded-lg border ${colors[risk.severity]}`}>
+                      className={`flex items-start gap-2 p-3 rounded-lg border ${colors[risk.severity]} ${risk.severity === "high" ? "animate-pulse" : ""}`}>
                       <AlertTriangle className={`h-3.5 w-3.5 shrink-0 mt-0.5 ${textColors[risk.severity]}`} />
                       <div className="flex-1 min-w-0">
                         <span className={`text-[11px] leading-relaxed ${textColors[risk.severity]}`}>{risk.text}</span>
@@ -837,23 +973,44 @@ export default function CommandCenter() {
               </div>
             </GlassCard>
 
-            {/* Panel 7: Next Best Action */}
-            {nextBestAction && (
+            {/* Panel 7: Rotating Next Best Action */}
+            {currentAction && (
               <GlassCard className="p-5 border-accent/10">
-                <div className="flex items-center gap-1.5 text-[10px] font-semibold text-accent/60 uppercase tracking-widest mb-3">
-                  <Brain className="h-3 w-3" /> Next Best Action
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-1.5 text-[10px] font-semibold text-accent/60 uppercase tracking-widest">
+                    <Brain className="h-3 w-3" /> Next Best Action
+                  </div>
+                  {/* Dot indicators */}
+                  {rotatingActions.length > 1 && (
+                    <div className="flex items-center gap-1">
+                      {rotatingActions.map((_, i) => (
+                        <button key={i} onClick={() => setActiveActionIdx(i)}
+                          className={`w-1.5 h-1.5 rounded-full transition-all ${i === activeActionIdx % rotatingActions.length ? "bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.5)]" : "bg-muted-foreground/20"}`} />
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <div className="p-4 rounded-lg bg-gradient-to-br from-primary/5 to-accent/5 border border-primary/10 mb-3">
-                  <p className="text-sm text-foreground/80 leading-relaxed">{nextBestAction.text}</p>
-                </div>
-                <div className="flex gap-2">
-                  <Button size="sm" onClick={nextBestAction.action} className="flex-1 gap-1.5 text-xs h-9 shadow-[0_0_20px_-5px_hsl(var(--primary)/0.3)]">
-                    <Zap className="h-3 w-3" /> {nextBestAction.cta}
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => navigate("/funnel-simulation")} className="text-xs h-9 gap-1">
-                    <BarChart3 className="h-3 w-3" /> Simulate
-                  </Button>
-                </div>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeActionIdx % rotatingActions.length}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="p-4 rounded-lg bg-gradient-to-br from-primary/5 to-accent/5 border border-primary/10 mb-3">
+                      <p className="text-sm text-foreground/80 leading-relaxed">{currentAction.text}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={currentAction.action} className="flex-1 gap-1.5 text-xs h-9 shadow-[0_0_20px_-5px_hsl(var(--primary)/0.3)]">
+                        <Zap className="h-3 w-3" /> {currentAction.cta}
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => navigate("/funnels")} className="text-xs h-9 gap-1">
+                        <Target className="h-3 w-3" /> Funnel
+                      </Button>
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
               </GlassCard>
             )}
 
@@ -902,6 +1059,10 @@ export default function CommandCenter() {
                   <Wand2 className="h-3 w-3" /> Continue Building
                 </Button>
                 <Button variant="outline" size="sm" className="w-full justify-start gap-2 text-xs h-8 border-border/15 hover:border-primary/20"
+                  onClick={() => navigate("/funnels")}>
+                  <Target className="h-3 w-3" /> Visual Funnel Builder
+                </Button>
+                <Button variant="outline" size="sm" className="w-full justify-start gap-2 text-xs h-8 border-border/15 hover:border-primary/20"
                   onClick={() => navigate("/funnel-simulation")}>
                   <BarChart3 className="h-3 w-3" /> Launch Simulation
                 </Button>
@@ -932,6 +1093,7 @@ export default function CommandCenter() {
                   { keys: "G → D", label: "Dashboard" },
                   { keys: "G → C", label: "Command Center" },
                   { keys: "G → W", label: "Wizard" },
+                  { keys: "G → F", label: "Funnel Builder" },
                 ].map(s => (
                   <div key={s.keys} className="flex items-center gap-2">
                     <kbd className="text-[9px] font-mono bg-muted/10 border border-border/15 rounded px-1.5 py-0.5 text-muted-foreground/40">{s.keys}</kbd>
@@ -943,6 +1105,38 @@ export default function CommandCenter() {
           </div>
         </div>
       </div>
+
+      {/* Import Modal (accessible from header too) */}
+      <Dialog open={importOpen} onOpenChange={setImportOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Upload className="h-5 w-5 text-primary" /> Import Product Idea</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground/60 uppercase mb-1 block">Product Idea / Description *</label>
+              <Textarea placeholder="Describe your product idea, offer concept, or paste an existing description..." value={importIdea} onChange={e => setImportIdea(e.target.value)} rows={4} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground/60 uppercase mb-1 block">Niche</label>
+                <Input placeholder="e.g. Weight Loss" value={importNiche} onChange={e => setImportNiche(e.target.value)} />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground/60 uppercase mb-1 block">Target Audience</label>
+                <Input placeholder="e.g. Busy Moms" value={importAudience} onChange={e => setImportAudience(e.target.value)} />
+              </div>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground/60 uppercase mb-1 block">Price Point ($)</label>
+              <Input type="number" placeholder="17" value={importPrice} onChange={e => setImportPrice(e.target.value)} />
+            </div>
+            <Button onClick={handleImport} disabled={!importIdea.trim() || importing} className="w-full gap-2">
+              <Zap className="h-4 w-4" /> {importing ? "Importing..." : "Import & Build"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
