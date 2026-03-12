@@ -233,6 +233,7 @@ export default function CommandCenter() {
   const [scenario, setScenario] = useState<ScenarioMode>("standard");
   const [agentInsights, setAgentInsights] = useState<Array<{ text: string; type: "success" | "warning" | "info"; agentName?: string }>>([]);
   const [agentLoading, setAgentLoading] = useState(false);
+  const [liveMetrics, setLiveMetrics] = useState<any[]>([]);
 
   // Rotating recommendations
   const [activeActionIdx, setActiveActionIdx] = useState(0);
