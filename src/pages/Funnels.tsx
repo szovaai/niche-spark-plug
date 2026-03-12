@@ -274,7 +274,10 @@ export default function Funnels() {
                     <h1 className="text-base font-bold">{(activeProject.step1_product as any)?.title || activeProject.name}</h1>
                   )}
                 </div>
-                <p className="text-[11px] text-muted-foreground/40">Visual funnel flow with conversion simulation</p>
+                <p className="text-[11px] text-muted-foreground/40">
+                  Visual funnel flow with conversion simulation
+                  {liveMetrics.length > 0 && <Badge className="ml-2 text-[8px] h-4 bg-chart-2/10 text-chart-2 border-chart-2/20">🟢 Live Data Active</Badge>}
+                </p>
               </div>
             </div>
             <div className="flex gap-2">
