@@ -266,7 +266,7 @@ export default function Funnels() {
                 <div className="flex items-center gap-2">
                   {projects.length > 1 ? (
                     <select value={activeProject.id}
-                      onChange={e => { const p = projects.find((x: any) => x.id === e.target.value); if (p) { setActiveProject(p); initConversions(p); }}}
+                      onChange={e => { const p = projects.find((x: any) => x.id === e.target.value); if (p) { setActiveProject(p); initConversions(p); fetchLiveMetrics(p.id); }}}
                       className="text-base font-bold bg-transparent border-none text-foreground focus:outline-none cursor-pointer max-w-[280px] truncate">
                       {projects.map((p: any) => <option key={p.id} value={p.id} className="bg-card text-foreground">{(p.step1_product as any)?.title || p.name}</option>)}
                     </select>
