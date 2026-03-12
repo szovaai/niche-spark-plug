@@ -112,6 +112,8 @@ function GlassCard({ children, className = "" }: { children: React.ReactNode; cl
 export default function Funnels() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const linkedProjectId = searchParams.get("project");
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeProject, setActiveProject] = useState<any>(null);
@@ -119,6 +121,7 @@ export default function Funnels() {
   const [initialVisitors, setInitialVisitors] = useState(1000);
   const [fePrice, setFePrice] = useState(17);
   const [upsellPrice, setUpsellPrice] = useState(37);
+  const [liveMetrics, setLiveMetrics] = useState<any[]>([]);
 
   useEffect(() => {
     if (user) fetchProjects();
