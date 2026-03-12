@@ -23,6 +23,7 @@ import {
   Radio, ArrowUpRight, Flame, Brain, ShieldAlert, Navigation,
   Import, Upload
 } from "lucide-react";
+import LiveMetricsPanel from "@/components/command-center/LiveMetricsPanel";
 
 // --- Types ---
 interface ProjectData {
