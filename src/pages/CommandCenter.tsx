@@ -799,8 +799,10 @@ export default function CommandCenter() {
               {/* Panel 5: Revenue Projection */}
               <GlassCard className="p-5" glow="hover:shadow-[0_8px_40px_-10px_hsl(var(--chart-2)/0.18)]">
                 <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-widest mb-4">
-                  <DollarSign className="h-3 w-3 text-chart-2/70" /> Revenue Projection
-                  <Badge variant="outline" className="ml-auto text-[8px] h-4 px-1.5 capitalize border-primary/20 text-primary">{scenario}</Badge>
+                  <DollarSign className="h-3 w-3 text-chart-2/70" /> Revenue {hasLiveData ? "Actual" : "Projection"}
+                  <Badge variant="outline" className={`ml-auto text-[8px] h-4 px-1.5 capitalize ${hasLiveData ? "border-chart-2/30 text-chart-2 bg-chart-2/5" : "border-primary/20 text-primary"}`}>
+                    {hasLiveData ? "🟢 Live" : scenario}
+                  </Badge>
                 </div>
                 <div className="grid grid-cols-2 gap-2 mb-3">
                   {[
