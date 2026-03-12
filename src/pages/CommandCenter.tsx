@@ -349,7 +349,39 @@ export default function CommandCenter() {
 
   const scenarioMultipliers = { conservative: { conv: 0.02, visitors: 500 }, standard: { conv: 0.035, visitors: 1000 }, aggressive: { conv: 0.06, visitors: 3000 } };
 
+  // Use live metrics if available, otherwise use scenario assumptions
+  const hasLiveData = liveMetrics.length > 0;
+  const liveAggregates = useMemo(() => {
+    if (!hasLiveData) return null;
+    return liveMetrics.reduce((acc, m) => ({
+      visitors: acc.visitors + m.visitors,
+      sales: acc.sales + m.sales,
+      revenue: acc.revenue + Number(m.revenue),
+      refunds: acc.refunds + m.refunds,
+      upsellRevenue: acc.upsellRevenue + Number(m.upsell_revenue),
+    }), { visitors: 0, sales: 0, revenue: 0, refunds: 0, upsellRevenue: 0 });
+  }, [liveMetrics, hasLiveData]);
+
   const projections = useMemo(() => {
+    // If we have live data, use real metrics
+    if (hasLiveData && liveAggregates) {
+      const realConv = liveAggregates.visitors > 0 ? liveAggregates.sales / liveAggregates.visitors : 0;
+      const affiliateRate = 0.5;
+      const grossRevenue = liveAggregates.revenue;
+      const affiliatePayout = Math.round(grossRevenue * affiliateRate);
+      const netRevenue = grossRevenue - affiliatePayout - liveAggregates.refunds * fePrice;
+      const totalRevenue = Math.round(netRevenue + liveAggregates.upsellRevenue);
+      const breakEvenVisitors = realConv > 0 ? Math.ceil(1 / (realConv * fePrice * (1 - affiliateRate))) : 9999;
+      return {
+        visitors: liveAggregates.visitors, convRate: realConv,
+        grossSales: liveAggregates.sales, grossRevenue: Math.round(grossRevenue),
+        affiliatePayout, refunds: liveAggregates.refunds * fePrice,
+        netRevenue: Math.round(netRevenue), upsellRevenue: Math.round(liveAggregates.upsellRevenue),
+        totalRevenue, breakEvenVisitors,
+        upsellPrice: fePrice > 20 ? fePrice * 2.2 : 37,
+        isLive: true,
+      };
+    }
     const m = scenarioMultipliers[scenario];
     const affiliateRate = 0.5;
     const refundRate = 0.05;
@@ -364,8 +396,8 @@ export default function CommandCenter() {
     const upsellRevenue = Math.round(grossSales * upsellTakeRate * upsellPrice);
     const totalRevenue = netRevenue + upsellRevenue;
     const breakEvenVisitors = Math.ceil(1 / (m.conv * fePrice * (1 - affiliateRate) * (1 - refundRate)));
-    return { visitors: m.visitors, convRate: m.conv, grossSales, grossRevenue, affiliatePayout, refunds, netRevenue, upsellRevenue, totalRevenue, breakEvenVisitors, upsellPrice };
-  }, [fePrice, scenario]);
+    return { visitors: m.visitors, convRate: m.conv, grossSales, grossRevenue, affiliatePayout, refunds, netRevenue, upsellRevenue, totalRevenue, breakEvenVisitors, upsellPrice, isLive: false };
+  }, [fePrice, scenario, hasLiveData, liveAggregates]);
 
   // Demand / competition / scores
   const demandScore = useMemo(() => project?.step1_product ? (launchScore >= 60 ? 88 : 72) : 0, [project, launchScore]);
