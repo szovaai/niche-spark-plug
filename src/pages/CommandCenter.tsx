@@ -1025,6 +1025,17 @@ export default function CommandCenter() {
               </div>
             </GlassCard>
 
+            {/* Live Metrics Panel */}
+            {user && (
+              <GlassCard className="p-5 border-chart-2/10">
+                <LiveMetricsPanel
+                  projectId={project.id}
+                  userId={user.id}
+                  onMetricsLoaded={setLiveMetrics}
+                />
+              </GlassCard>
+            )}
+
             {/* Panel 7: Rotating Next Best Action */}
             {currentAction && (
               <GlassCard className="p-5 border-accent/10">
@@ -1057,7 +1068,7 @@ export default function CommandCenter() {
                       <Button size="sm" onClick={currentAction.action} className="flex-1 gap-1.5 text-xs h-9 shadow-[0_0_20px_-5px_hsl(var(--primary)/0.3)]">
                         <Zap className="h-3 w-3" /> {currentAction.cta}
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => navigate("/funnels")} className="text-xs h-9 gap-1">
+                      <Button variant="outline" size="sm" onClick={() => navigate(`/funnels?project=${project.id}`)} className="text-xs h-9 gap-1">
                         <Target className="h-3 w-3" /> Funnel
                       </Button>
                     </div>
