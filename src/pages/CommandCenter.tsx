@@ -879,7 +879,7 @@ export default function CommandCenter() {
               </GlassCard>
             </div>
 
-            {/* Panel 6: Risk Radar */}
+            {/* Panel 6: Risk Radar — animated transitions */}
             <GlassCard className="p-5" glow="hover:shadow-[0_8px_40px_-10px_hsl(var(--destructive)/0.1)]">
               <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-widest mb-3">
                 <ShieldAlert className="h-3 w-3 text-destructive/70" /> Risk Radar
@@ -894,9 +894,25 @@ export default function CommandCenter() {
                   const textColors = { high: "text-destructive", medium: "text-chart-4", low: "text-chart-2" };
                   const badges = { high: "High", medium: "Medium", low: "Low" };
                   return (
-                    <motion.div key={i} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
-                      className={`flex items-start gap-2 p-3 rounded-lg border ${colors[risk.severity]} ${risk.severity === "high" ? "animate-pulse" : ""}`}>
-                      <AlertTriangle className={`h-3.5 w-3.5 shrink-0 mt-0.5 ${textColors[risk.severity]}`} />
+                    <motion.div key={i}
+                      initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      transition={{ delay: i * 0.08, type: "spring", stiffness: 300, damping: 25 }}
+                      whileHover={{ scale: 1.02, x: 3 }}
+                      className={`flex items-start gap-2 p-3 rounded-lg border ${colors[risk.severity]} relative overflow-hidden`}>
+                      {/* Pulse glow for high severity */}
+                      {risk.severity === "high" && (
+                        <motion.div
+                          className="absolute inset-0 rounded-lg bg-destructive/5"
+                          animate={{ opacity: [0, 0.15, 0] }}
+                          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                        />
+                      )}
+                      <motion.div
+                        animate={risk.severity === "high" ? { rotate: [0, -5, 5, -5, 0] } : {}}
+                        transition={{ duration: 0.6, repeat: risk.severity === "high" ? Infinity : 0, repeatDelay: 3 }}>
+                        <AlertTriangle className={`h-3.5 w-3.5 shrink-0 mt-0.5 ${textColors[risk.severity]}`} />
+                      </motion.div>
                       <div className="flex-1 min-w-0">
                         <span className={`text-[11px] leading-relaxed ${textColors[risk.severity]}`}>{risk.text}</span>
                       </div>
