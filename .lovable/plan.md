@@ -1,53 +1,74 @@
 
 
-# DigiLaunchKit AI — Refactor Plan
+# Plan: Complete Remaining Features — Funnel Builder, Command Center Polish, Import Flow
 
-## What This Changes
+## Overview
 
-This is a major restructuring that repositions the app from a collection of separate tools (Empire Mode, Micro Factory, Toolkit Builder, Research, Launch) into a unified **AI Launch Engine** with one primary flow: the **AI Launch Wizard**.
+Four deliverables to finish all mentioned-but-not-built items:
 
-## Current State vs. Target State
+1. **Funnel Readiness → Wizard Navigation** — Make each checklist item in the Command Center clickable, navigating to the correct wizard step
+2. **Visual Funnel Builder** — Replace the current Funnels page with a node-based funnel flow visualization (Traffic → Opt-in → Sales → Checkout → Upsell → Thank You) with conversion assumptions per node
+3. **Rotating AI Recommendations** — Auto-cycle the Next Best Action panel every 8 seconds through multiple suggestions
+4. **Import Product Idea** — Add an "Import Product Idea" flow from the Command Center empty state
 
-**Current navigation:** Dashboard, Empire Mode, Micro Factory, Research, My Toolkits, Launch
+---
 
-**New navigation:** Dashboard, AI Launch Wizard, Products, Funnels, Marketing Assets, Launch Checklist, Templates, Settings
+## 1. Funnel Readiness → Wizard Navigation
 
-## Implementation Status: ✅ COMPLETE
+**File:** `src/pages/CommandCenter.tsx`
 
-### Phase 1: Database ✅
-- Created `launch_projects` table with JSONB fields for each wizard step
-- RLS policies: users can only CRUD their own rows
-- Auto-updated `updated_at` trigger
+- Add a `wizardStep` property to each funnel checklist item mapping to the correct wizard step number (e.g., "Offer Created" → step 1, "Sales Page Drafted" → step 2, "Email Follow-up Ready" → step 4)
+- Make `FunnelCheckItem` accept an `onClick` prop
+- Incomplete items become clickable, navigating to `/wizard/{projectId}?step={stepNumber}`
+- Complete items stay static (no click needed)
+- Add a subtle hover effect + arrow icon on clickable items
 
-### Phase 2: Edge Functions ✅
-- `generate-launch-product` — product concept from niche/audience/type/topic
-- `generate-launch-content` — outline, chapters, bonuses, description
-- `generate-launch-funnel` — sales page, opt-in, thank you, bonus, checkout copy
-- `generate-launch-marketing` — 5 emails, 10 social posts, 5 pins, blog, video script
-- `generate-launch-checklist` — personalized launch roadmap
+## 2. Visual Funnel Builder Page
 
-### Phase 3: AI Launch Wizard ✅
-- 5-step wizard at `/wizard` with left stepper + right content
-- "Generate Entire Launch System" button runs all 5 steps sequentially
-- All outputs saved to `launch_projects` table
+**File:** `src/pages/Funnels.tsx` (rewrite)
 
-### Phase 4: Section Pages ✅
-- `/products` — list/delete launch projects
-- `/funnels` — tabbed funnel copy library
-- `/assets` — marketing asset library (emails, posts, pins, blog, video)
-- `/checklist` — interactive launch checklists with toggle
-- `/templates` — 5 pre-built niche templates
+Replace the current "Funnel Copy Library" with a proper Visual Funnel Builder:
 
-### Phase 5: Navigation ✅
-- New sidebar: Dashboard, Products, Funnels, Marketing Assets, Launch Checklist, Templates
-- CTA button: "New Launch" → `/wizard`
-- Legacy routes preserved: `/empire`, `/micro-factory`, `/research`, `/my-toolkits`, `/launch`
+- **Node-based flow visualization** using SVG connections between funnel stages:
+  - Traffic Source → Opt-in Page → Sales Page → Checkout → Upsell → Thank You
+- Each node shows:
+  - Stage name + icon
+  - Status (Ready / Not Ready) based on the active project's data
+  - Conversion assumption (editable via slider: e.g., 40% opt-in, 3% sales, 25% upsell)
+  - Estimated visitors reaching that node (calculated from upstream)
+- **Revenue calculation** flows through the funnel showing drop-off at each stage
+- **Weak Point Detector** — highlights the node with the biggest revenue leak
+- Click any node → navigate to the relevant wizard step or open the copy preview
+- **Funnel Templates** — 3 preset blueprints (Simple Sales Page, Full IM Funnel, Webinar Funnel) that set conversion assumptions
+- Pull project data from `launch_projects` table (same pattern as Command Center)
+- Glassmorphism styling consistent with Command Center
 
-### Phase 6: Dashboard ✅
-- Launch-focused: progress tracker, active projects, adapted stats
-- "Start New Launch" CTA
+## 3. Rotating AI Recommendations
 
-### Phase 7: Branding ✅
-- Title: "DigiLaunchKit AI"
-- Hero: "Launch Your Digital Product in 60 Minutes"
-- Updated Navbar, HeroSection, index.html
+**File:** `src/pages/CommandCenter.tsx`
+
+- Create a `rotatingActions` array with 4-5 contextual suggestions based on project state
+- Add a `useEffect` timer that cycles `activeActionIndex` every 8 seconds
+- Animate transitions with `AnimatePresence` fade/slide
+- Each suggestion has: text, CTA label, and navigation action
+- Manual dots/indicators to let user click between suggestions
+
+## 4. Import Product Idea Flow
+
+**File:** `src/pages/CommandCenter.tsx`
+
+- Add "Import Product Idea" button to the empty state (already has placeholder text)
+- On click, show a Dialog with:
+  - Text area for pasting a product idea / description
+  - Optional fields: niche, target audience, price point
+  - "Import & Build" button that creates a new `launch_projects` row with the imported data as `step1_product`
+  - After creation, navigate to `/command-center/{newProjectId}`
+
+---
+
+## Technical Notes
+
+- No database migrations needed — all features use existing `launch_projects` table
+- No new edge functions — all computation is client-side
+- The Visual Funnel Builder is the biggest piece (~400 lines); everything else is incremental additions to existing files
+
