@@ -23,6 +23,7 @@ import {
   Radio, ArrowUpRight, Flame, Brain, ShieldAlert, Navigation,
   Import, Upload
 } from "lucide-react";
+import LiveMetricsPanel from "@/components/command-center/LiveMetricsPanel";
 
 // --- Types ---
 interface ProjectData {
@@ -232,6 +233,7 @@ export default function CommandCenter() {
   const [scenario, setScenario] = useState<ScenarioMode>("standard");
   const [agentInsights, setAgentInsights] = useState<Array<{ text: string; type: "success" | "warning" | "info"; agentName?: string }>>([]);
   const [agentLoading, setAgentLoading] = useState(false);
+  const [liveMetrics, setLiveMetrics] = useState<any[]>([]);
 
   // Rotating recommendations
   const [activeActionIdx, setActiveActionIdx] = useState(0);
@@ -347,7 +349,39 @@ export default function CommandCenter() {
 
   const scenarioMultipliers = { conservative: { conv: 0.02, visitors: 500 }, standard: { conv: 0.035, visitors: 1000 }, aggressive: { conv: 0.06, visitors: 3000 } };
 
+  // Use live metrics if available, otherwise use scenario assumptions
+  const hasLiveData = liveMetrics.length > 0;
+  const liveAggregates = useMemo(() => {
+    if (!hasLiveData) return null;
+    return liveMetrics.reduce((acc, m) => ({
+      visitors: acc.visitors + m.visitors,
+      sales: acc.sales + m.sales,
+      revenue: acc.revenue + Number(m.revenue),
+      refunds: acc.refunds + m.refunds,
+      upsellRevenue: acc.upsellRevenue + Number(m.upsell_revenue),
+    }), { visitors: 0, sales: 0, revenue: 0, refunds: 0, upsellRevenue: 0 });
+  }, [liveMetrics, hasLiveData]);
+
   const projections = useMemo(() => {
+    // If we have live data, use real metrics
+    if (hasLiveData && liveAggregates) {
+      const realConv = liveAggregates.visitors > 0 ? liveAggregates.sales / liveAggregates.visitors : 0;
+      const affiliateRate = 0.5;
+      const grossRevenue = liveAggregates.revenue;
+      const affiliatePayout = Math.round(grossRevenue * affiliateRate);
+      const netRevenue = grossRevenue - affiliatePayout - liveAggregates.refunds * fePrice;
+      const totalRevenue = Math.round(netRevenue + liveAggregates.upsellRevenue);
+      const breakEvenVisitors = realConv > 0 ? Math.ceil(1 / (realConv * fePrice * (1 - affiliateRate))) : 9999;
+      return {
+        visitors: liveAggregates.visitors, convRate: realConv,
+        grossSales: liveAggregates.sales, grossRevenue: Math.round(grossRevenue),
+        affiliatePayout, refunds: liveAggregates.refunds * fePrice,
+        netRevenue: Math.round(netRevenue), upsellRevenue: Math.round(liveAggregates.upsellRevenue),
+        totalRevenue, breakEvenVisitors,
+        upsellPrice: fePrice > 20 ? fePrice * 2.2 : 37,
+        isLive: true,
+      };
+    }
     const m = scenarioMultipliers[scenario];
     const affiliateRate = 0.5;
     const refundRate = 0.05;
@@ -362,8 +396,8 @@ export default function CommandCenter() {
     const upsellRevenue = Math.round(grossSales * upsellTakeRate * upsellPrice);
     const totalRevenue = netRevenue + upsellRevenue;
     const breakEvenVisitors = Math.ceil(1 / (m.conv * fePrice * (1 - affiliateRate) * (1 - refundRate)));
-    return { visitors: m.visitors, convRate: m.conv, grossSales, grossRevenue, affiliatePayout, refunds, netRevenue, upsellRevenue, totalRevenue, breakEvenVisitors, upsellPrice };
-  }, [fePrice, scenario]);
+    return { visitors: m.visitors, convRate: m.conv, grossSales, grossRevenue, affiliatePayout, refunds, netRevenue, upsellRevenue, totalRevenue, breakEvenVisitors, upsellPrice, isLive: false };
+  }, [fePrice, scenario, hasLiveData, liveAggregates]);
 
   // Demand / competition / scores
   const demandScore = useMemo(() => project?.step1_product ? (launchScore >= 60 ? 88 : 72) : 0, [project, launchScore]);
@@ -765,8 +799,10 @@ export default function CommandCenter() {
               {/* Panel 5: Revenue Projection */}
               <GlassCard className="p-5" glow="hover:shadow-[0_8px_40px_-10px_hsl(var(--chart-2)/0.18)]">
                 <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-widest mb-4">
-                  <DollarSign className="h-3 w-3 text-chart-2/70" /> Revenue Projection
-                  <Badge variant="outline" className="ml-auto text-[8px] h-4 px-1.5 capitalize border-primary/20 text-primary">{scenario}</Badge>
+                  <DollarSign className="h-3 w-3 text-chart-2/70" /> Revenue {hasLiveData ? "Actual" : "Projection"}
+                  <Badge variant="outline" className={`ml-auto text-[8px] h-4 px-1.5 capitalize ${hasLiveData ? "border-chart-2/30 text-chart-2 bg-chart-2/5" : "border-primary/20 text-primary"}`}>
+                    {hasLiveData ? "🟢 Live" : scenario}
+                  </Badge>
                 </div>
                 <div className="grid grid-cols-2 gap-2 mb-3">
                   {[
@@ -845,7 +881,7 @@ export default function CommandCenter() {
               </GlassCard>
             </div>
 
-            {/* Panel 6: Risk Radar */}
+            {/* Panel 6: Risk Radar — animated transitions */}
             <GlassCard className="p-5" glow="hover:shadow-[0_8px_40px_-10px_hsl(var(--destructive)/0.1)]">
               <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-widest mb-3">
                 <ShieldAlert className="h-3 w-3 text-destructive/70" /> Risk Radar
@@ -860,9 +896,25 @@ export default function CommandCenter() {
                   const textColors = { high: "text-destructive", medium: "text-chart-4", low: "text-chart-2" };
                   const badges = { high: "High", medium: "Medium", low: "Low" };
                   return (
-                    <motion.div key={i} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
-                      className={`flex items-start gap-2 p-3 rounded-lg border ${colors[risk.severity]} ${risk.severity === "high" ? "animate-pulse" : ""}`}>
-                      <AlertTriangle className={`h-3.5 w-3.5 shrink-0 mt-0.5 ${textColors[risk.severity]}`} />
+                    <motion.div key={i}
+                      initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      transition={{ delay: i * 0.08, type: "spring", stiffness: 300, damping: 25 }}
+                      whileHover={{ scale: 1.02, x: 3 }}
+                      className={`flex items-start gap-2 p-3 rounded-lg border ${colors[risk.severity]} relative overflow-hidden`}>
+                      {/* Pulse glow for high severity */}
+                      {risk.severity === "high" && (
+                        <motion.div
+                          className="absolute inset-0 rounded-lg bg-destructive/5"
+                          animate={{ opacity: [0, 0.15, 0] }}
+                          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                        />
+                      )}
+                      <motion.div
+                        animate={risk.severity === "high" ? { rotate: [0, -5, 5, -5, 0] } : {}}
+                        transition={{ duration: 0.6, repeat: risk.severity === "high" ? Infinity : 0, repeatDelay: 3 }}>
+                        <AlertTriangle className={`h-3.5 w-3.5 shrink-0 mt-0.5 ${textColors[risk.severity]}`} />
+                      </motion.div>
                       <div className="flex-1 min-w-0">
                         <span className={`text-[11px] leading-relaxed ${textColors[risk.severity]}`}>{risk.text}</span>
                       </div>
@@ -973,6 +1025,17 @@ export default function CommandCenter() {
               </div>
             </GlassCard>
 
+            {/* Live Metrics Panel */}
+            {user && (
+              <GlassCard className="p-5 border-chart-2/10">
+                <LiveMetricsPanel
+                  projectId={project.id}
+                  userId={user.id}
+                  onMetricsLoaded={setLiveMetrics}
+                />
+              </GlassCard>
+            )}
+
             {/* Panel 7: Rotating Next Best Action */}
             {currentAction && (
               <GlassCard className="p-5 border-accent/10">
@@ -1005,7 +1068,7 @@ export default function CommandCenter() {
                       <Button size="sm" onClick={currentAction.action} className="flex-1 gap-1.5 text-xs h-9 shadow-[0_0_20px_-5px_hsl(var(--primary)/0.3)]">
                         <Zap className="h-3 w-3" /> {currentAction.cta}
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => navigate("/funnels")} className="text-xs h-9 gap-1">
+                      <Button variant="outline" size="sm" onClick={() => navigate(`/funnels?project=${project.id}`)} className="text-xs h-9 gap-1">
                         <Target className="h-3 w-3" /> Funnel
                       </Button>
                     </div>

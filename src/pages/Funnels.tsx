@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -112,6 +112,8 @@ function GlassCard({ children, className = "" }: { children: React.ReactNode; cl
 export default function Funnels() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const linkedProjectId = searchParams.get("project");
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeProject, setActiveProject] = useState<any>(null);
@@ -119,6 +121,7 @@ export default function Funnels() {
   const [initialVisitors, setInitialVisitors] = useState(1000);
   const [fePrice, setFePrice] = useState(17);
   const [upsellPrice, setUpsellPrice] = useState(37);
+  const [liveMetrics, setLiveMetrics] = useState<any[]>([]);
 
   useEffect(() => {
     if (user) fetchProjects();
@@ -129,11 +132,35 @@ export default function Funnels() {
     const { data } = await supabase.from("launch_projects").select("*").order("updated_at", { ascending: false });
     const all = data || [];
     setProjects(all);
-    if (all.length > 0) {
-      setActiveProject(all[0]);
-      initConversions(all[0]);
+    // If linked from Command Center, select that project
+    const target = linkedProjectId ? all.find((p: any) => p.id === linkedProjectId) : null;
+    const selected = target || all[0] || null;
+    if (selected) {
+      setActiveProject(selected);
+      initConversions(selected);
+      fetchLiveMetrics(selected.id);
     }
     setLoading(false);
+  };
+
+  const fetchLiveMetrics = async (projId: string) => {
+    const { data } = await supabase.from("launch_metrics").select("*").eq("project_id", projId).order("date", { ascending: false }).limit(30) as any;
+    const rows = data || [];
+    setLiveMetrics(rows);
+    // Override conversions with real data if available
+    if (rows.length > 0) {
+      const totals = rows.reduce((acc: any, m: any) => ({
+        visitors: acc.visitors + m.visitors,
+        optins: acc.optins + m.optins,
+        sales: acc.sales + m.sales,
+      }), { visitors: 0, optins: 0, sales: 0 });
+      if (totals.visitors > 0 && totals.optins > 0) {
+        setConversions(prev => ({ ...prev, optin: Math.round((totals.optins / totals.visitors) * 100) }));
+      }
+      if (totals.optins > 0 && totals.sales > 0) {
+        setConversions(prev => ({ ...prev, sales: Math.round((totals.sales / totals.optins) * 100) }));
+      }
+    }
   };
 
   const initConversions = (proj: any) => {
@@ -239,7 +266,7 @@ export default function Funnels() {
                 <div className="flex items-center gap-2">
                   {projects.length > 1 ? (
                     <select value={activeProject.id}
-                      onChange={e => { const p = projects.find((x: any) => x.id === e.target.value); if (p) { setActiveProject(p); initConversions(p); }}}
+                      onChange={e => { const p = projects.find((x: any) => x.id === e.target.value); if (p) { setActiveProject(p); initConversions(p); fetchLiveMetrics(p.id); }}}
                       className="text-base font-bold bg-transparent border-none text-foreground focus:outline-none cursor-pointer max-w-[280px] truncate">
                       {projects.map((p: any) => <option key={p.id} value={p.id} className="bg-card text-foreground">{(p.step1_product as any)?.title || p.name}</option>)}
                     </select>
@@ -247,7 +274,10 @@ export default function Funnels() {
                     <h1 className="text-base font-bold">{(activeProject.step1_product as any)?.title || activeProject.name}</h1>
                   )}
                 </div>
-                <p className="text-[11px] text-muted-foreground/40">Visual funnel flow with conversion simulation</p>
+                <p className="text-[11px] text-muted-foreground/40">
+                  Visual funnel flow with conversion simulation
+                  {liveMetrics.length > 0 && <Badge className="ml-2 text-[8px] h-4 bg-chart-2/10 text-chart-2 border-chart-2/20">🟢 Live Data Active</Badge>}
+                </p>
               </div>
             </div>
             <div className="flex gap-2">

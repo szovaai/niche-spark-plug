@@ -393,6 +393,74 @@ export type Database = {
           },
         ]
       }
+      launch_metrics: {
+        Row: {
+          affiliate_clicks: number
+          created_at: string
+          date: string
+          email_clicks: number
+          email_opens: number
+          id: string
+          notes: string | null
+          optins: number
+          project_id: string
+          refunds: number
+          revenue: number
+          sales: number
+          updated_at: string
+          upsell_revenue: number
+          upsell_sales: number
+          user_id: string
+          visitors: number
+        }
+        Insert: {
+          affiliate_clicks?: number
+          created_at?: string
+          date?: string
+          email_clicks?: number
+          email_opens?: number
+          id?: string
+          notes?: string | null
+          optins?: number
+          project_id: string
+          refunds?: number
+          revenue?: number
+          sales?: number
+          updated_at?: string
+          upsell_revenue?: number
+          upsell_sales?: number
+          user_id: string
+          visitors?: number
+        }
+        Update: {
+          affiliate_clicks?: number
+          created_at?: string
+          date?: string
+          email_clicks?: number
+          email_opens?: number
+          id?: string
+          notes?: string | null
+          optins?: number
+          project_id?: string
+          refunds?: number
+          revenue?: number
+          sales?: number
+          updated_at?: string
+          upsell_revenue?: number
+          upsell_sales?: number
+          user_id?: string
+          visitors?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "launch_metrics_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "launch_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       launch_packs: {
         Row: {
           category: string
