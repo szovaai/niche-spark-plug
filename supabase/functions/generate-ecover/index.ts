@@ -46,7 +46,10 @@ OUTPUT: A single 400-600 word prompt ready for image generation. No headers or e
 
 interface EcoverRequest {
   title?: string;
+  subtitle?: string;
   productTitle?: string;
+  productConcept?: string;
+  uniqueMechanism?: string;
   niche?: string;
   targetAudience?: string;
   selectedComponents?: string[];
@@ -71,6 +74,9 @@ serve(async (req) => {
 
     const body = await req.json() as EcoverRequest;
     const title = body.title || body.productTitle || "Digital Product";
+    const subtitle = body.subtitle || "";
+    const productConcept = body.productConcept || "";
+    const uniqueMechanism = body.uniqueMechanism || "";
     const niche = body.niche || "digital products";
     const selectedComponents = body.selectedComponents || ['guide'];
     const depthMode = body.depthMode || 'stacked';
@@ -99,7 +105,11 @@ serve(async (req) => {
       const componentDescs = validComponents.map(c => `${COMPONENT_VISUALS[c].name}: ${COMPONENT_VISUALS[c].promptFragment}`);
 
       const enhancedParams = [
-        `Product: "${title}" (${niche} niche)`,
+        `Product Title: "${title}"`,
+        subtitle ? `Subtitle: "${subtitle}"` : '',
+        `Niche: ${niche}`,
+        productConcept ? `Product Description: ${productConcept}` : '',
+        uniqueMechanism ? `Unique Selling Point: ${uniqueMechanism}` : '',
         body.designColors ? `Color Palette: ${body.designColors}` : '',
         body.designTypography ? `Typography: ${body.designTypography}` : '',
         body.designMood ? `Visual Mood: ${body.designMood}` : '',
@@ -110,6 +120,7 @@ serve(async (req) => {
         `Components (${validComponents.length} items — ONLY THESE): ${componentDescs.join('; ')}`,
         `Depth: ${depthMode === 'stacked' ? 'layered 3D with depth variation, 25° perspective angles, individual drop shadows' : 'flat minimal arrangement'}`,
         `REQUIRED EFFECTS: 3D perspective at 25° angle, soft drop shadows beneath each item, light reflection on glossy surfaces, background gradient, professional product photography lighting from top-left`,
+        `CRITICAL: The cover text MUST say "${title}"${subtitle ? ` with subtitle "${subtitle}"` : ''}. The imagery must reflect the ${niche} niche and the product concept.`,
       ].filter(Boolean).join('\n');
 
       // STAGE 1: AI writes custom prompt
