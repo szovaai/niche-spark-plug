@@ -35,21 +35,21 @@ import {
 } from "@/components/ui/sidebar";
 
 const coreItems = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Command Center", url: "/command-center", icon: Monitor },
-  { title: "AI Product Builder", url: "/wizard", icon: Wand2 },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, tip: "Your home base — stats, projects & daily tasks" },
+  { title: "Command Center", url: "/command-center", icon: Monitor, tip: "Live metrics & real-time launch performance" },
+  { title: "AI Product Builder", url: "/wizard", icon: Wand2, tip: "Create a complete product + funnel in 60 min" },
 ];
 
 const intelligenceItems = [
-  { title: "Winning Launch Modeler", url: "/steal", icon: Eye },
-  { title: "Opportunity Radar", url: "/opportunities", icon: Radar },
-  { title: "Visual Funnel Builder", url: "/funnels", icon: Target },
-  { title: "Profit Map", url: "/profit-map", icon: Map },
-  { title: "Launch Simulation", url: "/funnel-simulation", icon: Activity },
+  { title: "Winning Launch Modeler", url: "/steal", icon: Eye, tip: "Analyze top sellers & clone their strategies" },
+  { title: "Opportunity Radar", url: "/opportunities", icon: Radar, tip: "AI scans for emerging niches & market gaps" },
+  { title: "Visual Funnel Builder", url: "/funnels", icon: Target, tip: "Build sales funnels with drag & drop" },
+  { title: "Profit Map", url: "/profit-map", icon: Map, tip: "Revenue projections & pricing optimization" },
+  { title: "Launch Simulation", url: "/funnel-simulation", icon: Activity, tip: "Simulate launch scenarios before going live" },
 ];
 
 const systemItems = [
-  { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Settings", url: "/settings", icon: Settings, tip: "Account, brand kit & integrations" },
 ];
 
 type NavItem = { title: string; url: string; icon: React.ComponentType<{ className?: string }> };
