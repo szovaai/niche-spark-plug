@@ -188,7 +188,7 @@ serve(async (req) => {
     console.log("eCover generated successfully");
 
     return new Response(JSON.stringify({
-      imageUrl: `data:image/png;base64,${imageBase64}`,
+      imageUrl: imageUrl,
       componentsRendered: validComponents,
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
