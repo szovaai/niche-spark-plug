@@ -22,6 +22,8 @@ import VoiceToneSelector, { WritingVoice, getVoicePromptDirective } from "./Voic
 import OutlineEditor from "./OutlineEditor";
 import ContentPreviewModal from "./ContentPreviewModal";
 import ReadabilityMeter from "./ReadabilityMeter";
+import ContentRewriter from "./ContentRewriter";
+import ContentGrader from "./ContentGrader";
 import { auditFullContent } from "@/lib/contentAudit";
 import type { ProductAssets } from "@/types/productAssets";
 
