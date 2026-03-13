@@ -99,12 +99,14 @@ export default function WizardStep3Graphics({ productBrief, niche, result, setRe
       const { data, error } = await supabase.functions.invoke("generate-ecover", {
         body: {
           title: productBrief.title,
+          subtitle: productBrief.subtitle,
+          productConcept: productBrief.concept,
+          uniqueMechanism: productBrief.uniqueMechanism,
           niche,
           targetAudience: productBrief.painPoints?.join(", "),
           selectedComponents: tierConfig.components,
           stylePreset: designStyle,
           depthMode: "stacked",
-          // Enhanced params
           designStyle: styleConfig.id,
           designColors: styleConfig.colors,
           designTypography: styleConfig.typography,

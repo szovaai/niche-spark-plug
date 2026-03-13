@@ -71,6 +71,9 @@ serve(async (req) => {
 
     const body = await req.json() as EcoverRequest;
     const title = body.title || body.productTitle || "Digital Product";
+    const subtitle = body.subtitle || "";
+    const productConcept = body.productConcept || "";
+    const uniqueMechanism = body.uniqueMechanism || "";
     const niche = body.niche || "digital products";
     const selectedComponents = body.selectedComponents || ['guide'];
     const depthMode = body.depthMode || 'stacked';
