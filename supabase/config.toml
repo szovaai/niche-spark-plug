@@ -140,3 +140,15 @@ verify_jwt = false
 
 [functions.generate-outcome-lock]
 verify_jwt = false
+
+[functions.rewrite-content]
+verify_jwt = false
+
+[functions.grade-content]
+verify_jwt = false
+
+[functions.generate-daily-briefing]
+verify_jwt = false
+
+[functions.humanize-chapter]
+verify_jwt = false
