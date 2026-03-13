@@ -464,6 +464,9 @@ export default function WizardStep2({ productBrief, productType, result, setResu
         </CardContent>
       </Card>
 
+      {/* Writing Voice Selector */}
+      <VoiceToneSelector value={writingVoice} onChange={setWritingVoice} disabled={loading} />
+
       {/* Outcome Lock — must be defined before generating */}
       <OutcomeLockCard
         outcomeLock={outcomeLock}
