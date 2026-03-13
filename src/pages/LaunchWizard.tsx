@@ -225,7 +225,9 @@ const LaunchWizard = () => {
 
       toast.success("🚀 Your entire launch system is ready!");
     } catch (e: any) {
-      toast.error(e.message || "Generation failed");
+      const stepName = ["", "Product Concept", "Product Content", "Graphics", "Funnel Copy", "Marketing Assets", "Launch Checklist"][genModalStep] || "Unknown";
+      console.error(`Generate All failed at step ${genModalStep} (${stepName}):`, e);
+      toast.error(`Step ${genModalStep} (${stepName}) failed: ${e.message || "Unknown error"}`);
     } finally {
       setGeneratingAll(false);
       setTimeout(() => { setGenModalStep(0); setGenModalCompleted([]); }, 3000);
