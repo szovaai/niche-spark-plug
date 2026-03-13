@@ -190,7 +190,7 @@ export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMa
             <PublishSalesPageButton
               projectId={currentProjectId}
               projectName={productBrief?.title || "My Product"}
-              salesPageHtml={funnelData?.salesPageHtml || funnelData?.salesPage || ""}
+              salesPageHtml={funnelData?.salesPage || ""}
               salesPageData={funnelData}
             />
           )}
@@ -200,11 +200,11 @@ export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMa
             product={{
               title: productBrief?.title,
               subtitle: productBrief?.subtitle,
-              description: productBrief?.description,
-              bullets: productBrief?.bullets || [],
+              description: productBrief?.concept,
+              bullets: productBrief?.painPoints || [],
               price: price,
               niche: niche,
-              targetAudience: productBrief?.targetAudience,
+              targetAudience: contentData?.description,
             }}
           />
 
