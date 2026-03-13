@@ -46,7 +46,10 @@ OUTPUT: A single 400-600 word prompt ready for image generation. No headers or e
 
 interface EcoverRequest {
   title?: string;
+  subtitle?: string;
   productTitle?: string;
+  productConcept?: string;
+  uniqueMechanism?: string;
   niche?: string;
   targetAudience?: string;
   selectedComponents?: string[];
