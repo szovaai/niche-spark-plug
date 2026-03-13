@@ -34,6 +34,7 @@ interface Props {
   productType?: string;
   launchMode?: LaunchMode;
   graphicsData?: Step3Graphics | null;
+  projectId?: string;
 }
 
 export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMarketing, result, setResult, onSave, userId, funnelData, contentData, marketingData, assets, price, niche, productType, launchMode, graphicsData }: Props) {
