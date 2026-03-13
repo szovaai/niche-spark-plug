@@ -42,6 +42,7 @@ import AgentHub from "./pages/AgentHub";
 import ProfitMap from "./pages/ProfitMap";
 import NotFound from "./pages/NotFound";
 import PublicSalesPage from "./pages/PublicSalesPage";
+import TemplatesMarketplace from "./pages/TemplatesMarketplace";
 
 const queryClient = new QueryClient();
 
