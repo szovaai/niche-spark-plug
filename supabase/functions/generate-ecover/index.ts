@@ -82,8 +82,7 @@ serve(async (req) => {
     const depthMode = body.depthMode || 'stacked';
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!LOVABLE_API_KEY || !OPENAI_API_KEY) throw new Error("Required API keys not configured");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     const validComponents = selectedComponents.filter(c => COMPONENT_VISUALS[c]);
     if (validComponents.length === 0) {
@@ -154,28 +153,42 @@ serve(async (req) => {
       if (!customPrompt) throw new Error("No prompt generated");
     }
 
-    // STAGE 2: Generate image with GPT-Image-1
-    console.log("Stage 2: Image generation...");
-    const imageResponse = await fetch("https://api.openai.com/v1/images/generations", {
+    // STAGE 2: Generate image with Gemini Image model
+    console.log("Stage 2: Image generation via Lovable AI...");
+    const imageResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      headers: { "Authorization": `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "gpt-image-1", prompt: customPrompt, n: 1, size: "1536x1024", quality: "high" })
+      headers: { "Authorization": `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "google/gemini-3-pro-image-preview",
+        messages: [{ role: "user", content: customPrompt }],
+        modalities: ["image", "text"]
+      })
     });
 
     if (!imageResponse.ok) {
       const err = await imageResponse.text();
       console.error("Image API error:", imageResponse.status, err);
+      if (imageResponse.status === 429) {
+        return new Response(JSON.stringify({ error: "Rate limit reached. Please wait a moment and try again." }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" }
+        });
+      }
+      if (imageResponse.status === 402) {
+        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits to continue." }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" }
+        });
+      }
       throw new Error(`Image generation failed: ${imageResponse.status}`);
     }
 
     const imageData = await imageResponse.json();
-    const imageBase64 = imageData.data?.[0]?.b64_json;
-    if (!imageBase64) throw new Error("No image in response");
+    const imageUrl = imageData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    if (!imageUrl) throw new Error("No image in response");
 
     console.log("eCover generated successfully");
 
     return new Response(JSON.stringify({
-      imageUrl: `data:image/png;base64,${imageBase64}`,
+      imageUrl: imageUrl,
       componentsRendered: validComponents,
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
