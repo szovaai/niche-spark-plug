@@ -82,13 +82,16 @@ const LaunchWizard = () => {
       };
 
       if (existingProjectId) {
-        await supabase.from("launch_projects").update(projectData).eq("id", existingProjectId);
+        const { error } = await supabase.from("launch_projects").update(projectData).eq("id", existingProjectId);
+        if (error) console.error("Autosave update error:", error.message, error.details, error.hint);
       } else {
         const { data, error } = await supabase.from("launch_projects")
           .insert({ ...projectData, user_id: user.id })
           .select("id")
           .single();
-        if (!error && data) {
+        if (error) {
+          console.error("Autosave insert error:", error.message, error.details, error.hint);
+        } else if (data) {
           setExistingProjectId(data.id);
         }
       }
@@ -222,7 +225,9 @@ const LaunchWizard = () => {
 
       toast.success("🚀 Your entire launch system is ready!");
     } catch (e: any) {
-      toast.error(e.message || "Generation failed");
+      const stepName = ["", "Product Concept", "Product Content", "Graphics", "Funnel Copy", "Marketing Assets", "Launch Checklist"][genModalStep] || "Unknown";
+      console.error(`Generate All failed at step ${genModalStep} (${stepName}):`, e);
+      toast.error(`Step ${genModalStep} (${stepName}) failed: ${e.message || "Unknown error"}`);
     } finally {
       setGeneratingAll(false);
       setTimeout(() => { setGenModalStep(0); setGenModalCompleted([]); }, 3000);
