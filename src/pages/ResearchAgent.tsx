@@ -80,6 +80,7 @@ export default function ResearchAgent() {
   const [researchMode, setResearchMode] = useState<ResearchMode | null>(null);
   const [researchStyle, setResearchStyle] = useState<ResearchStyle | null>(null);
   const [brief, setBrief] = useState<OpportunityBrief | null>(null);
+  const [buildingIdeaIdx, setBuildingIdeaIdx] = useState<number | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -128,22 +129,55 @@ export default function ResearchAgent() {
     }
   };
 
-  const sendToWizard = (idea?: OpportunityBrief) => {
-    const b = idea || brief;
-    if (!b) return;
-    const recommended = b.ideas.find((i: any) => i.recommended) || b.ideas[0];
-    const params = new URLSearchParams({
-      niche: b.niche || recommended?.title || "",
-      audience: b.targetAudience || recommended?.audience || "",
-      topic: b.topic || recommended?.suggestedAngle || "",
-    });
-    if (recommended?.uniqueMechanism) {
-      params.set("mechanism", recommended.uniqueMechanism);
+  const buildFromIdea = async (idea: OpportunityIdea, ideaIndex: number) => {
+    if (!user) {
+      toast.error("Please sign in to create a project");
+      return;
     }
-    if (b.productType) {
-      params.set("productType", b.productType);
+
+    setBuildingIdeaIdx(ideaIndex);
+
+    try {
+      const { data, error } = await supabase
+        .from("launch_projects")
+        .insert({
+          user_id: user.id,
+          name: idea.title,
+          niche: brief?.niche || idea.title,
+          target_audience: idea.audience,
+          product_type: brief?.productType || idea.productFormat?.split(/[+,]/)[0]?.trim() || "ebook",
+          topic: brief?.topic || idea.suggestedAngle,
+          step1_product: {
+            title: idea.title,
+            uniqueMechanism: idea.uniqueMechanism,
+            campaignAngle: idea.suggestedAngle,
+            whyItSells: idea.whyItSells,
+            productFormat: idea.productFormat,
+            monetizationScore: idea.monetizationScore,
+          },
+        })
+        .select("id")
+        .single();
+
+      if (error) throw error;
+
+      toast.success("Project created — opening Launch Wizard...");
+      navigate(`/wizard/${data.id}`);
+    } catch (e: any) {
+      toast.error(e.message || "Failed to create project");
+    } finally {
+      setBuildingIdeaIdx(null);
     }
-    navigate(`/wizard?${params.toString()}`);
+  };
+
+  const sendToWizard = () => {
+    if (!brief) return;
+    const recommended = (brief.ideas as OpportunityIdea[]).find(i => i.recommended);
+    const idx = recommended
+      ? (brief.ideas as OpportunityIdea[]).indexOf(recommended)
+      : 0;
+    const idea = (brief.ideas as OpportunityIdea[])[idx];
+    buildFromIdea(idea, idx);
   };
 
   const quickReplies = researchMode === "trend_hijacking"
@@ -327,33 +361,32 @@ export default function ResearchAgent() {
                         </ul>
                       </div>
 
-                      {/* Steal This Trend button per idea */}
-                      {isTrendMode && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="mt-3 gap-1.5 text-xs border-orange-500/40 text-orange-400 hover:bg-orange-500/10"
-                          onClick={() => {
-                            const params = new URLSearchParams({
-                              niche: brief.niche || idea.title,
-                              audience: idea.audience,
-                              topic: idea.suggestedAngle,
-                              mechanism: idea.uniqueMechanism,
-                            });
-                            if (brief.productType) params.set("productType", brief.productType);
-                            navigate(`/wizard?${params.toString()}`);
-                          }}
-                        >
+                      {/* Build This Product button — all modes */}
+                      <Button
+                        size="sm"
+                        variant={isTrendMode ? "outline" : "default"}
+                        className={`mt-3 gap-1.5 text-xs ${isTrendMode ? "border-orange-500/40 text-orange-400 hover:bg-orange-500/10" : ""}`}
+                        disabled={buildingIdeaIdx !== null}
+                        onClick={() => buildFromIdea(idea, i)}
+                      >
+                        {buildingIdeaIdx === i ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
                           <Rocket className="w-3 h-3" />
-                          Steal This Trend
-                        </Button>
-                      )}
+                        )}
+                        {isTrendMode ? "Steal This Trend" : "Build This Product"}
+                        <ArrowRight className="w-3 h-3" />
+                      </Button>
                     </div>
                   ))}
 
-                  <Button onClick={() => sendToWizard()} variant="hero" className="w-full gap-2">
-                    <Rocket className="w-4 h-4" />
-                    Send to Launch Wizard
+                  <Button onClick={sendToWizard} variant="hero" className="w-full gap-2" disabled={buildingIdeaIdx !== null}>
+                    {buildingIdeaIdx !== null ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Rocket className="w-4 h-4" />
+                    )}
+                    Launch Recommended Idea
                     <ArrowRight className="w-4 h-4" />
                   </Button>
                 </CardContent>
