@@ -611,6 +611,7 @@ export default function WizardStep2({ productBrief, productType, result, setResu
                             </div>
                           </div>
                           <ReadabilityMeter text={ch.fullContent} />
+                          <ContentGrader text={ch.fullContent} productTitle={productBrief?.title} targetAudience={undefined} />
                           <ScrollArea className="max-h-[400px] rounded-lg border border-border/50 bg-background/50 p-4">
                             <div className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{ch.fullContent}</div>
                           </ScrollArea>
