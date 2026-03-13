@@ -690,15 +690,21 @@ export default function WizardStep2({ productBrief, productType, result, setResu
             />
           )}
 
+          {audit && !audit.canContinue && (
+            <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs">
+              <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+              <span>{audit.gateMessage || `Score is ${audit.overall}/100. Aim for 80+ for best results.`}</span>
+            </div>
+          )}
           <Button
             onClick={onNext}
-            disabled={audit ? !audit.canContinue : false}
+            variant={audit && !audit.canContinue ? "outline" : "default"}
             className="gap-2"
           >
             {audit && !audit.canContinue ? (
               <>
-                <Lock className="w-4 h-4" />
-                Fix Issues Before Continuing
+                <AlertTriangle className="w-4 h-4" />
+                Continue Anyway ({audit.overall}/100)
               </>
             ) : (
               "Continue to Funnel Builder"
