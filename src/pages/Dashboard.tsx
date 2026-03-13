@@ -31,6 +31,7 @@ import ProductFactoryCard from "@/components/momentum/ProductFactoryCard";
 import RevenueGoalWidget from "@/components/RevenueGoalWidget";
 import GettingStartedChecklist from "@/components/GettingStartedChecklist";
 import ReferralWidget from "@/components/ReferralWidget";
+import DailyBriefing from "@/components/DailyBriefing";
 
 const Dashboard = () => {
   const { user } = useAuth();
