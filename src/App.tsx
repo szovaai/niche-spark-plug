@@ -41,6 +41,7 @@ import Integrations from "./pages/Integrations";
 import AgentHub from "./pages/AgentHub";
 import ProfitMap from "./pages/ProfitMap";
 import NotFound from "./pages/NotFound";
+import PublicSalesPage from "./pages/PublicSalesPage";
 
 const queryClient = new QueryClient();
 
