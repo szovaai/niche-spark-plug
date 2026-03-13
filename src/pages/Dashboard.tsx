@@ -121,6 +121,9 @@ const Dashboard = () => {
           />
         )}
 
+        {/* AI Daily Briefing */}
+        {user && !loading && stats.products > 0 && <DailyBriefing />}
+
         {/* Research Agent CTA */}
         <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.08 }}>
           <Tooltip>
