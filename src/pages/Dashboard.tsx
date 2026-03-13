@@ -31,6 +31,7 @@ import ProductFactoryCard from "@/components/momentum/ProductFactoryCard";
 import RevenueGoalWidget from "@/components/RevenueGoalWidget";
 import GettingStartedChecklist from "@/components/GettingStartedChecklist";
 import ReferralWidget from "@/components/ReferralWidget";
+import DailyBriefing from "@/components/DailyBriefing";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -119,6 +120,9 @@ const Dashboard = () => {
             hasAssets={stats.assets > 0}
           />
         )}
+
+        {/* AI Daily Briefing */}
+        {user && !loading && stats.products > 0 && <DailyBriefing />}
 
         {/* Research Agent CTA */}
         <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.08 }}>

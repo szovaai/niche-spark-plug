@@ -13,6 +13,7 @@ import {
   Eye,
   Map,
   Radar,
+  Layout,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
@@ -49,6 +50,7 @@ const intelligenceItems = [
 ];
 
 const systemItems = [
+  { title: "Launch Templates", url: "/templates-marketplace", icon: Layout, tip: "Pre-built launch blueprints to get started fast" },
   { title: "Settings", url: "/settings", icon: Settings, tip: "Account, brand kit & integrations" },
 ];
 

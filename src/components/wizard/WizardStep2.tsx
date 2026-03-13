@@ -22,6 +22,8 @@ import VoiceToneSelector, { WritingVoice, getVoicePromptDirective } from "./Voic
 import OutlineEditor from "./OutlineEditor";
 import ContentPreviewModal from "./ContentPreviewModal";
 import ReadabilityMeter from "./ReadabilityMeter";
+import ContentRewriter from "./ContentRewriter";
+import ContentGrader from "./ContentGrader";
 import { auditFullContent } from "@/lib/contentAudit";
 import type { ProductAssets } from "@/types/productAssets";
 
@@ -609,6 +611,7 @@ export default function WizardStep2({ productBrief, productType, result, setResu
                             </div>
                           </div>
                           <ReadabilityMeter text={ch.fullContent} />
+                          <ContentGrader text={ch.fullContent} productTitle={productBrief?.title} targetAudience={undefined} />
                           <ScrollArea className="max-h-[400px] rounded-lg border border-border/50 bg-background/50 p-4">
                             <div className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{ch.fullContent}</div>
                           </ScrollArea>
@@ -619,6 +622,15 @@ export default function WizardStep2({ productBrief, productType, result, setResu
                         <Button variant="ghost" size="sm" onClick={() => copyText(`${ch.title}\n\n${ch.summary}\n\n${ch.keyPoints?.join("\n")}`, `ch-${i}`)} className="gap-1 text-xs">
                           {copied === `ch-${i}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />} Copy All
                         </Button>
+                        <ContentRewriter
+                          text={ch.fullContent || `${ch.title}\n\n${ch.summary}\n\n${ch.keyPoints?.join("\n")}`}
+                          onApply={(newText) => {
+                            const updatedChapters = [...result.chapters];
+                            updatedChapters[i] = { ...updatedChapters[i], fullContent: newText };
+                            setResult({ ...result, chapters: updatedChapters });
+                          }}
+                          context={{ productTitle: productBrief?.title, uniqueMechanism: productBrief?.uniqueMechanism }}
+                        />
                         <Button variant="default" size="sm" className="gap-1 text-xs" disabled={writingIndex === i || writingAll} onClick={() => writeFullChapter(i)}>
                           {writingIndex === i ? <Loader2 className="w-3 h-3 animate-spin" /> : <PenLine className="w-3 h-3" />}
                           {ch.fullContent ? "Rewrite" : "Write Full Content"}

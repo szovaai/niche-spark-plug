@@ -622,6 +622,45 @@ export type Database = {
         }
         Relationships: []
       }
+      launch_templates: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          id: string
+          is_active: boolean
+          name: string
+          preview_image: string | null
+          rating: number | null
+          template_data: Json
+          uses_count: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description: string
+          id?: string
+          is_active?: boolean
+          name: string
+          preview_image?: string | null
+          rating?: number | null
+          template_data?: Json
+          uses_count?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          preview_image?: string | null
+          rating?: number | null
+          template_data?: Json
+          uses_count?: number
+        }
+        Relationships: []
+      }
       micro_products: {
         Row: {
           config: Json
@@ -901,6 +940,44 @@ export type Database = {
         }
         Relationships: []
       }
+      project_versions: {
+        Row: {
+          created_at: string
+          id: string
+          label: string | null
+          project_id: string
+          step_data: Json
+          user_id: string
+          version_number: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label?: string | null
+          project_id: string
+          step_data?: Json
+          user_id: string
+          version_number?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string | null
+          project_id?: string
+          step_data?: Json
+          user_id?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_versions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "launch_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       published_pages: {
         Row: {
           created_at: string
@@ -1034,6 +1111,76 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      review_comments: {
+        Row: {
+          comment_text: string
+          created_at: string
+          id: string
+          reviewer_name: string
+          section_key: string
+          session_id: string
+        }
+        Insert: {
+          comment_text: string
+          created_at?: string
+          id?: string
+          reviewer_name?: string
+          section_key: string
+          session_id: string
+        }
+        Update: {
+          comment_text?: string
+          created_at?: string
+          id?: string
+          reviewer_name?: string
+          section_key?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_comments_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "review_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          project_id: string
+          share_token: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          project_id: string
+          share_token: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          project_id?: string
+          share_token?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_sessions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "launch_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       saved_niches: {
         Row: {

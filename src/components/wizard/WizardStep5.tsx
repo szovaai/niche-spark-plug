@@ -13,6 +13,9 @@ import LaunchMultiplier from "./LaunchMultiplier";
 import type { ProductAssets } from "@/types/productAssets";
 import PublishSalesPageButton from "@/components/PublishSalesPageButton";
 import PlatformExport from "@/components/PlatformExport";
+import ExportHub from "@/components/wizard/ExportHub";
+import VersionHistory from "@/components/wizard/VersionHistory";
+import CollaborativeReview from "@/components/CollaborativeReview";
 
 import type { LaunchMode } from "@/pages/LaunchWizard";
 
@@ -207,6 +210,41 @@ export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMa
               targetAudience: contentData?.description,
             }}
           />
+
+          {/* Multi-Format Export Hub */}
+          <ExportHub
+            product={productBrief}
+            content={contentData}
+            funnel={funnelData}
+            marketing={marketingData}
+            productTitle={productBrief?.title}
+          />
+
+          {/* Version History */}
+          {currentProjectId && userId && (
+            <VersionHistory
+              projectId={currentProjectId}
+              userId={userId}
+              currentData={{
+                step1_product: productBrief,
+                step2_product_content: contentData,
+                step3_funnel: funnelData,
+                step4_marketing: marketingData,
+                step5_checklist: result,
+              }}
+              onRestore={(data) => {
+                toast.success("Version restored! Refresh to see changes.");
+              }}
+            />
+          )}
+
+          {/* Collaborative Review */}
+          {currentProjectId && userId && (
+            <CollaborativeReview
+              projectId={currentProjectId}
+              userId={userId}
+            />
+          )}
 
           <Button onClick={onSave} variant="hero" className="gap-2 w-full">
             Save Launch Project
