@@ -94,6 +94,7 @@ const App = () => (
             <Route path="/empire/:id" element={<EmpireMode />} />
             <Route path="/micro-factory" element={<MicroFactory />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/p/:slug" element={<PublicSalesPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <MobileBottomNav />
