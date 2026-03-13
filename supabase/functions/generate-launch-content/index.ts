@@ -203,7 +203,16 @@ WARRIORPLUS MODE — CRITICAL OVERRIDES:
 - Description must open with a bold claim and close with urgency
 - Tone: fast, bold, no-fluff — like a top seller's product, not a textbook` : "";
 
-    const prompt = `Generate a complete product outline AND a proof/credibility stack for a digital product.${avatarContext}
+    const VOICE_DIRECTIVES: Record<string, string> = {
+      mentor: "WRITING VOICE: Friendly Mentor — Warm, encouraging, like a coach. Use 'Here\\'s the cool part', 'Quick win incoming'. Conversational with contractions.",
+      authority: "WRITING VOICE: Authority Expert — Confident expertise. Reference experience. 'In my experience', 'What most miss is'. Assertive, backed by specifics.",
+      "data-driven": "WRITING VOICE: Data-Driven — Lead with numbers and research. 'Studies show', 'The data reveals', '73% of users report'. Precise yet readable.",
+      storyteller: "WRITING VOICE: Storyteller — Open sections with mini-stories. Use names, emotions, before/after. 'Picture this', 'Imagine waking up to'. Create momentum.",
+      "no-nonsense": "WRITING VOICE: No-Nonsense — Ultra-direct. Short sentences. Commands: 'Do this.', 'Stop that.', 'Open your laptop now.' Every paragraph = action or result.",
+    };
+    const voiceDirective = writingVoice && VOICE_DIRECTIVES[writingVoice] ? `\n\n${VOICE_DIRECTIVES[writingVoice]}` : "";
+
+    const prompt = `Generate a complete product outline AND a proof/credibility stack for a digital product.${avatarContext}${voiceDirective}
 
 Product: ${productBrief.title}
 Subtitle: ${productBrief.subtitle}
