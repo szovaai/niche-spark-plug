@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,8 @@ import FunnelSiteExport from "./FunnelSiteExport";
 import LaunchBoxExportButton from "./LaunchBoxExportButton";
 import LaunchMultiplier from "./LaunchMultiplier";
 import type { ProductAssets } from "@/types/productAssets";
+import PublishSalesPageButton from "@/components/PublishSalesPageButton";
+import PlatformExport from "@/components/PlatformExport";
 
 import type { LaunchMode } from "@/pages/LaunchWizard";
 
@@ -32,9 +34,12 @@ interface Props {
   productType?: string;
   launchMode?: LaunchMode;
   graphicsData?: Step3Graphics | null;
+  projectId?: string;
 }
 
-export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMarketing, result, setResult, onSave, userId, funnelData, contentData, marketingData, assets, price, niche, productType, launchMode, graphicsData }: Props) {
+export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMarketing, result, setResult, onSave, userId, funnelData, contentData, marketingData, assets, price, niche, productType, launchMode, graphicsData, projectId: propProjectId }: Props) {
+  const { projectId: paramProjectId } = useParams();
+  const currentProjectId = propProjectId || paramProjectId;
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -177,6 +182,29 @@ export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMa
             onSelectVariation={(newTopic, newTitle) => {
               navigate(`/wizard?niche=${encodeURIComponent(niche || "")}&topic=${encodeURIComponent(newTopic)}&productType=${encodeURIComponent(productType || "ebook")}`);
               toast.success(`Starting new launch: ${newTitle}`);
+            }}
+          />
+
+          {/* Publish Sales Page */}
+          {currentProjectId && (
+            <PublishSalesPageButton
+              projectId={currentProjectId}
+              projectName={productBrief?.title || "My Product"}
+              salesPageHtml={funnelData?.salesPage || ""}
+              salesPageData={funnelData}
+            />
+          )}
+
+          {/* Platform Export */}
+          <PlatformExport
+            product={{
+              title: productBrief?.title,
+              subtitle: productBrief?.subtitle,
+              description: productBrief?.concept,
+              bullets: productBrief?.painPoints || [],
+              price: price,
+              niche: niche,
+              targetAudience: contentData?.description,
             }}
           />
 

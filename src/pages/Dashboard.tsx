@@ -30,6 +30,7 @@ import LaunchJourney from "@/components/momentum/LaunchJourney";
 import ProductFactoryCard from "@/components/momentum/ProductFactoryCard";
 import RevenueGoalWidget from "@/components/RevenueGoalWidget";
 import GettingStartedChecklist from "@/components/GettingStartedChecklist";
+import ReferralWidget from "@/components/ReferralWidget";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -285,7 +286,7 @@ const Dashboard = () => {
         </motion.div>
 
         {/* Revenue Goal + Scorecard + Audit */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.33 }}>
             <RevenueGoalWidget />
           </motion.div>
@@ -294,6 +295,9 @@ const Dashboard = () => {
               <ProductScorecard project={latestProject} />
             </motion.div>
           )}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.37 }}>
+            <ReferralWidget />
+          </motion.div>
         </div>
 
         {latestProject && (
