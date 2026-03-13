@@ -330,16 +330,65 @@ export default function CommandCenter() {
     return p1?.title || p1?.productTitle || project.name || "Untitled";
   }, [project]);
 
-  const launchScore = useMemo(() => {
-    if (!project) return 0;
-    let s = 0;
-    if (project.step1_product) s += 20;
-    if (project.step2_product_content) s += 15;
-    if (project.step2_assets && Object.keys(project.step2_assets).length > 1) s += 15;
-    if (project.step3_funnel) s += 20;
-    if (project.step4_marketing) s += 20;
-    if (project.step5_checklist) s += 10;
-    return s;
+  // --- Granular weighted launch score ---
+  const { launchScore, scoreBoosters } = useMemo(() => {
+    if (!project) return { launchScore: 0, scoreBoosters: [] as { label: string; points: number }[] };
+    const p1 = project.step1_product as any;
+    const p2 = project.step2_product_content as any;
+    const p3 = project.step3_funnel as any;
+    const p4 = project.step4_marketing as any;
+    const p5 = project.step5_checklist as any;
+    const assets = project.step2_assets as any;
+
+    let score = 0;
+    const missing: { label: string; points: number }[] = [];
+
+    // Product name & tagline (8 pts)
+    if (p1?.title && p1?.subtitle) score += 8;
+    else missing.push({ label: "Add product name & tagline", points: 8 });
+
+    // Campaign angle selected (7 pts)
+    if (p1?.selectedAngle) score += 7;
+    else missing.push({ label: "Select a campaign angle", points: 7 });
+
+    // Unique mechanism defined (5 pts)
+    if (p1?.uniqueMechanism) score += 5;
+    else missing.push({ label: "Define unique mechanism", points: 5 });
+
+    // Product outline with chapters (20 pts)
+    if (p2?.chapters?.length >= 3) score += 20;
+    else if (p2?.chapters?.length > 0) { score += 10; missing.push({ label: "Add more chapters to outline (3+ needed)", points: 10 }); }
+    else missing.push({ label: "Generate product outline with chapters", points: 20 });
+
+    // Product description (5 pts)
+    if (p2?.description) score += 5;
+    else missing.push({ label: "Generate product description", points: 5 });
+
+    // Bonus stack (10 pts)
+    if (p2?.bonuses?.length > 0) score += 10;
+    else missing.push({ label: "Add bonus stack items", points: 10 });
+
+    // Proof & credibility stack (15 pts)
+    if (p2?.proofStack && (p2.proofStack.testimonialTemplates?.length > 0 || p2.proofStack.beforeAfterTable?.length > 0)) score += 15;
+    else missing.push({ label: "Build proof & credibility stack", points: 15 });
+
+    // Sales page / funnel copy (10 pts)
+    if (p3?.salesPage || p3?.salesPageSections) score += 10;
+    else missing.push({ label: "Generate sales page copy", points: 10 });
+
+    // OTO / upsell offer (5 pts)
+    if (p3?.upsellOffer || p3?.orderBump) score += 5;
+    else missing.push({ label: "Define OTO / upsell pricing", points: 5 });
+
+    // Email sequences (5 pts)
+    if (p4?.emails?.length > 0) score += 5;
+    else missing.push({ label: "Create email follow-up sequence", points: 5 });
+
+    // Marketing assets (5 pts)
+    if (p4?.socialPosts?.length > 0 || p4?.adCopy?.length > 0) score += 5;
+    else missing.push({ label: "Generate social/ad copy", points: 5 });
+
+    return { launchScore: Math.min(score, 100), scoreBoosters: missing };
   }, [project]);
 
   const fePrice = useMemo(() => {
