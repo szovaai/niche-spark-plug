@@ -92,8 +92,8 @@ const LaunchWizard = () => {
           setExistingProjectId(data.id);
         }
       }
-    } catch {
-      // Silent fail for autosave
+    } catch (err: any) {
+      console.error("Autosave error:", err?.message || err);
     } finally {
       isSavingRef.current = false;
     }
