@@ -241,6 +241,8 @@ export default function WizardStep2({ productBrief, productType, result, setResu
   const [outcomeLock, setOutcomeLock] = useState<OutcomeLock | null>(null);
   const [outcomeLocked, setOutcomeLocked] = useState(false);
   const [humanizing, setHumanizing] = useState(false);
+  const [writingVoice, setWritingVoice] = useState<WritingVoice>("mentor");
+  const [previewChapter, setPreviewChapter] = useState<{ index: number; title: string; content: string } | null>(null);
 
   const generate = async () => {
     if (!productBrief) return;
