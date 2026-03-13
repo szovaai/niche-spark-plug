@@ -4,6 +4,7 @@ import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { Separator } from "@/components/ui/separator";
 import { useLocation } from "react-router-dom";
 import QuickActionsDialog from "@/components/QuickActionsDialog";
+import PageTransition from "@/components/PageTransition";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -53,8 +54,10 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
           </header>
           
           {/* Main Content */}
-          <main className="flex-1 relative">
-            {children}
+          <main className="flex-1 relative pb-16 md:pb-0">
+            <PageTransition>
+              {children}
+            </PageTransition>
           </main>
           <QuickActionsDialog />
         </SidebarInset>

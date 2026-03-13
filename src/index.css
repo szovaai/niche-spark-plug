@@ -303,3 +303,15 @@
 *::-webkit-scrollbar-thumb:hover {
   background: hsl(220 40% 18%);
 }
+
+/* Safe area for mobile bottom nav */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Smooth press effect for mobile */
+@media (max-width: 767px) {
+  .active\:scale-95:active {
+    transform: scale(0.95);
+  }
+}
