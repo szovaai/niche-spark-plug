@@ -185,6 +185,29 @@ export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMa
             }}
           />
 
+          {/* Publish Sales Page */}
+          {currentProjectId && (
+            <PublishSalesPageButton
+              projectId={currentProjectId}
+              projectName={productBrief?.title || "My Product"}
+              salesPageHtml={funnelData?.salesPageHtml || funnelData?.salesPage || ""}
+              salesPageData={funnelData}
+            />
+          )}
+
+          {/* Platform Export */}
+          <PlatformExport
+            product={{
+              title: productBrief?.title,
+              subtitle: productBrief?.subtitle,
+              description: productBrief?.description,
+              bullets: productBrief?.bullets || [],
+              price: price,
+              niche: niche,
+              targetAudience: productBrief?.targetAudience,
+            }}
+          />
+
           <Button onClick={onSave} variant="hero" className="gap-2 w-full">
             Save Launch Project
           </Button>
