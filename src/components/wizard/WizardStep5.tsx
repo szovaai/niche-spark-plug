@@ -211,6 +211,41 @@ export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMa
             }}
           />
 
+          {/* Multi-Format Export Hub */}
+          <ExportHub
+            product={productBrief}
+            content={contentData}
+            funnel={funnelData}
+            marketing={marketingData}
+            productTitle={productBrief?.title}
+          />
+
+          {/* Version History */}
+          {currentProjectId && userId && (
+            <VersionHistory
+              projectId={currentProjectId}
+              userId={userId}
+              currentData={{
+                step1_product: productBrief,
+                step2_product_content: contentData,
+                step3_funnel: funnelData,
+                step4_marketing: marketingData,
+                step5_checklist: result,
+              }}
+              onRestore={(data) => {
+                toast.success("Version restored! Refresh to see changes.");
+              }}
+            />
+          )}
+
+          {/* Collaborative Review */}
+          {currentProjectId && userId && (
+            <CollaborativeReview
+              projectId={currentProjectId}
+              userId={userId}
+            />
+          )}
+
           <Button onClick={onSave} variant="hero" className="gap-2 w-full">
             Save Launch Project
           </Button>
