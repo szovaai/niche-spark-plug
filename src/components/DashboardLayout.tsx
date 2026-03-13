@@ -54,8 +54,10 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
           </header>
           
           {/* Main Content */}
-          <main className="flex-1 relative">
-            {children}
+          <main className="flex-1 relative pb-16 md:pb-0">
+            <PageTransition>
+              {children}
+            </PageTransition>
           </main>
           <QuickActionsDialog />
         </SidebarInset>
