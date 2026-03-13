@@ -511,6 +511,12 @@ export default function WizardStep2({ productBrief, productType, result, setResu
             humanizing={humanizing}
           />
 
+          {/* Outline Editor — reorder/edit chapters before writing */}
+          <OutlineEditor
+            chapters={result.chapters}
+            onUpdate={(updated) => setResult({ ...result, chapters: updated })}
+          />
+
           <Card>
             <CardContent className="p-6 space-y-4">
               <div className="flex items-center justify-between flex-wrap gap-2">
