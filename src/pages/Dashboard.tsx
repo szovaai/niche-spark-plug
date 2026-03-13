@@ -15,6 +15,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import RevenueProjector from "@/components/wizard/RevenueProjector";
 import LaunchDNACard from "@/components/wizard/LaunchDNACard";
 import ProductScorecard from "@/components/wizard/ProductScorecard";
@@ -24,6 +29,7 @@ import AILaunchCoach from "@/components/momentum/AILaunchCoach";
 import LaunchJourney from "@/components/momentum/LaunchJourney";
 import ProductFactoryCard from "@/components/momentum/ProductFactoryCard";
 import RevenueGoalWidget from "@/components/RevenueGoalWidget";
+import GettingStartedChecklist from "@/components/GettingStartedChecklist";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -86,65 +92,99 @@ const Dashboard = () => {
           <p className="text-muted-foreground flex items-center gap-2">
             {format(new Date(), "EEEE, MMMM d")}
             {stats.streak > 0 && (
-              <span className="flex items-center gap-1 text-accent">
-                <Flame className="w-4 h-4" />{stats.streak} day streak
-              </span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="flex items-center gap-1 text-accent cursor-help">
+                    <Flame className="w-4 h-4" />{stats.streak} day streak
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs">You've been active {stats.streak} days in a row. Keep it up to unlock streak badges!</p>
+                </TooltipContent>
+              </Tooltip>
             )}
+          </p>
+          {/* Keyboard shortcut hint */}
+          <p className="text-xs text-muted-foreground/50 mt-1">
+            Press <kbd className="px-1.5 py-0.5 rounded bg-secondary text-[10px] font-mono border border-border/50">⌘K</kbd> to quick-navigate anywhere
           </p>
         </motion.div>
 
+        {/* Getting Started Checklist (new users) */}
+        {!loading && (
+          <GettingStartedChecklist
+            hasProjects={stats.products > 0}
+            hasFunnels={stats.funnels > 0}
+            hasAssets={stats.assets > 0}
+          />
+        )}
+
         {/* Research Agent CTA */}
         <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.08 }}>
-          <Card className="relative overflow-hidden border-accent/30 bg-gradient-to-br from-accent/10 via-primary/5 to-transparent">
-            <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-accent to-primary shrink-0">
-                    <Sparkles className="w-6 h-6 text-white" />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Card className="relative overflow-hidden border-accent/30 bg-gradient-to-br from-accent/10 via-primary/5 to-transparent cursor-pointer" onClick={() => navigate("/research-agent")}>
+                <CardContent className="p-6">
+                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 rounded-xl bg-gradient-to-br from-accent to-primary shrink-0">
+                        <Sparkles className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg">Find a Profitable Topic First</h3>
+                        <p className="text-sm text-muted-foreground max-w-md">
+                          Talk to the AI Research Agent and discover what to launch before building your funnel.
+                        </p>
+                      </div>
+                    </div>
+                    <Button onClick={(e) => { e.stopPropagation(); navigate("/research-agent"); }} variant="outline" className="gap-2 shrink-0 border-accent/40 hover:bg-accent/10">
+                      <Sparkles className="w-4 h-4" />
+                      Start Research Chat
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
                   </div>
-                  <div>
-                    <h3 className="font-bold text-lg">Find a Profitable Topic First</h3>
-                    <p className="text-sm text-muted-foreground max-w-md">
-                      Talk to the AI Research Agent and discover what to launch before building your funnel.
-                    </p>
-                  </div>
-                </div>
-                <Button onClick={() => navigate("/research-agent")} variant="outline" className="gap-2 shrink-0 border-accent/40 hover:bg-accent/10">
-                  <Sparkles className="w-4 h-4" />
-                  Start Research Chat
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              <p className="text-xs">AI-powered niche research — find profitable topics in minutes</p>
+            </TooltipContent>
+          </Tooltip>
         </motion.div>
 
         {/* 🚀 Launch Tonight CTA */}
         <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}>
-          <Card className="relative overflow-hidden border-primary/40 bg-gradient-to-br from-primary/15 via-accent/10 to-primary/5 shadow-lg shadow-primary/10">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-primary/25 to-transparent rounded-bl-full" />
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-accent/20 to-transparent rounded-tr-full" />
-            <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-primary to-accent shrink-0 animate-pulse">
-                    <Rocket className="w-6 h-6 text-white" />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Card className="relative overflow-hidden border-primary/40 bg-gradient-to-br from-primary/15 via-accent/10 to-primary/5 shadow-lg shadow-primary/10">
+                <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-primary/25 to-transparent rounded-bl-full" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-accent/20 to-transparent rounded-tr-full" />
+                <CardContent className="p-6">
+                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 rounded-xl bg-gradient-to-br from-primary to-accent shrink-0 animate-pulse">
+                        <Rocket className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-xl">🚀 Launch Tonight</h3>
+                        <p className="text-sm text-muted-foreground max-w-md">
+                          Generate your complete product, funnel, emails & affiliate kit in 60 minutes.
+                        </p>
+                      </div>
+                    </div>
+                    <Button onClick={() => navigate("/wizard")} variant="hero" size="lg" className="gap-2 shrink-0">
+                      <Rocket className="w-4 h-4" />
+                      Launch Tonight
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
                   </div>
-                  <div>
-                    <h3 className="font-bold text-xl">🚀 Launch Tonight</h3>
-                    <p className="text-sm text-muted-foreground max-w-md">
-                      Generate your complete product, funnel, emails & affiliate kit in 60 minutes.
-                    </p>
-                  </div>
-                </div>
-                <Button onClick={() => navigate("/wizard")} variant="hero" size="lg" className="gap-2 shrink-0">
-                  <Rocket className="w-4 h-4" />
-                  Launch Tonight
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              <p className="text-xs">AI generates product, sales page, funnel, emails & marketing in one click</p>
+            </TooltipContent>
+          </Tooltip>
         </motion.div>
 
         {/* Launch DNA Card */}
@@ -159,17 +199,12 @@ const Dashboard = () => {
 
         {/* ===== MOMENTUM ENGINE ===== */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Launch Journey (vertical progress) */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
             <LaunchJourney project={latestProject} />
           </motion.div>
-
-          {/* Daily Tasks */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}>
             <DailyLaunchTasks project={latestProject} />
           </motion.div>
-
-          {/* AI Coach */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.21 }}>
             <AILaunchCoach project={latestProject} />
           </motion.div>
@@ -184,10 +219,10 @@ const Dashboard = () => {
             Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)
           ) : (
             <>
-              <StatCard icon={Package} label="Products Created" value={stats.products} color="text-primary" delay={0} />
-              <StatCard icon={BarChart3} label="Funnels Built" value={stats.funnels} color="text-green-500" delay={0.1} />
-              <StatCard icon={Sparkles} label="Assets Generated" value={stats.assets} color="text-accent" delay={0.2} />
-              <StatCard icon={Flame} label="Current Streak" value={`${stats.streak} days`} color="text-orange-500" delay={0.3} />
+              <StatCard icon={Package} label="Products Created" value={stats.products} color="text-primary" delay={0} tooltip="Total products you've generated with the AI Product Builder." />
+              <StatCard icon={BarChart3} label="Funnels Built" value={stats.funnels} color="text-green-500" delay={0.1} tooltip="Sales funnels with landing pages, upsells & checkout flows." />
+              <StatCard icon={Sparkles} label="Assets Generated" value={stats.assets} color="text-accent" delay={0.2} tooltip="Marketing assets: email sequences, social posts, affiliate kits." />
+              <StatCard icon={Flame} label="Current Streak" value={`${stats.streak} days`} color="text-orange-500" delay={0.3} tooltip="Consecutive days you've been active. Build habits, earn badges!" />
             </>
           )}
         </div>
@@ -221,10 +256,26 @@ const Dashboard = () => {
                         <p className="text-sm font-medium truncate">{p.name}</p>
                         <p className="text-xs text-muted-foreground">{p.niche} · Step {p.current_step}/5</p>
                       </div>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={(e) => { e.stopPropagation(); cloneProject(p); }} title="Clone project">
-                        <Copy className="w-3.5 h-3.5" />
-                      </Button>
-                      <Badge variant={p.status === "complete" ? "default" : "secondary"} className="text-xs">{p.status}</Badge>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={(e) => { e.stopPropagation(); cloneProject(p); }}>
+                            <Copy className="w-3.5 h-3.5" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="text-xs">Clone this project to create a variant</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge variant={p.status === "complete" ? "default" : "secondary"} className="text-xs cursor-help">
+                            {p.status}
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="text-xs">{p.status === "complete" ? "Ready to launch!" : `In progress — step ${p.current_step} of 5`}</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                   ))}
                 </div>
@@ -285,23 +336,31 @@ interface StatCardProps {
   value: string | number;
   color: string;
   delay: number;
+  tooltip: string;
 }
 
-const StatCard = ({ icon: Icon, label, value, color, delay }: StatCardProps) => (
+const StatCard = ({ icon: Icon, label, value, color, delay, tooltip }: StatCardProps) => (
   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay }}>
-    <Card className="hover:border-primary/30 transition-colors">
-      <CardContent className="p-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-secondary">
-            <Icon className={`w-5 h-5 ${color}`} />
-          </div>
-          <div>
-            <p className="text-2xl font-bold">{value}</p>
-            <p className="text-xs text-muted-foreground">{label}</p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Card className="hover:border-primary/30 transition-colors cursor-help">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-secondary">
+                <Icon className={`w-5 h-5 ${color}`} />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{value}</p>
+                <p className="text-xs text-muted-foreground">{label}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p className="text-xs max-w-[200px]">{tooltip}</p>
+      </TooltipContent>
+    </Tooltip>
   </motion.div>
 );
 

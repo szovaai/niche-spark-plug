@@ -3,6 +3,7 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/s
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { Separator } from "@/components/ui/separator";
 import { useLocation } from "react-router-dom";
+import QuickActionsDialog from "@/components/QuickActionsDialog";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -55,6 +56,7 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
           <main className="flex-1 relative">
             {children}
           </main>
+          <QuickActionsDialog />
         </SidebarInset>
       </div>
     </SidebarProvider>
