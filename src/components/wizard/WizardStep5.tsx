@@ -37,7 +37,9 @@ interface Props {
   projectId?: string;
 }
 
-export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMarketing, result, setResult, onSave, userId, funnelData, contentData, marketingData, assets, price, niche, productType, launchMode, graphicsData }: Props) {
+export default function WizardStep5({ productBrief, hasContent, hasFunnel, hasMarketing, result, setResult, onSave, userId, funnelData, contentData, marketingData, assets, price, niche, productType, launchMode, graphicsData, projectId: propProjectId }: Props) {
+  const { projectId: paramProjectId } = useParams();
+  const currentProjectId = propProjectId || paramProjectId;
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
