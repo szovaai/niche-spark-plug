@@ -58,6 +58,27 @@ const LaunchWizard = () => {
     if (projectId && user) loadProject(projectId);
   }, [projectId, user]);
 
+  // Truncate large JSONB fields to prevent payload size errors
+  const truncateForSave = (data: any): any => {
+    if (!data) return data;
+    try {
+      const json = JSON.stringify(data);
+      // If payload > 4MB, strip fullContent from chapters
+      if (json.length > 4_000_000 && data.chapters) {
+        return {
+          ...data,
+          chapters: data.chapters.map((ch: any) => ({
+            ...ch,
+            fullContent: ch.fullContent ? ch.fullContent.substring(0, 20_000) : undefined,
+          })),
+        };
+      }
+      return data;
+    } catch {
+      return data;
+    }
+  };
+
   const autosave = useCallback(async () => {
     if (!user || isSavingRef.current) return;
     if (!step1Result && !niche.trim()) return;
@@ -71,7 +92,7 @@ const LaunchWizard = () => {
         product_type: productType || null,
         topic: topic || null,
         step1_product: step1Result as any,
-        step2_product_content: step2Result as any,
+        step2_product_content: truncateForSave(step2Result) as any,
         step2_assets: (Object.keys(step2Assets).length > 0 ? step2Assets : null) as any,
         step3_funnel: step4Funnel as any,
         step4_marketing: step5Marketing as any,
@@ -83,7 +104,10 @@ const LaunchWizard = () => {
 
       if (existingProjectId) {
         const { error } = await supabase.from("launch_projects").update(projectData).eq("id", existingProjectId);
-        if (error) console.error("Autosave update error:", error.message, error.details, error.hint);
+        if (error) {
+          console.error("Autosave update error:", error.message, error.details, error.hint);
+          toast.warning("Auto-save failed — your work is still in memory. Try saving manually.", { duration: 4000 });
+        }
       } else {
         const { data, error } = await supabase.from("launch_projects")
           .insert({ ...projectData, user_id: user.id })
@@ -91,6 +115,7 @@ const LaunchWizard = () => {
           .single();
         if (error) {
           console.error("Autosave insert error:", error.message, error.details, error.hint);
+          toast.warning("Auto-save failed — your work is still in memory.", { duration: 4000 });
         } else if (data) {
           setExistingProjectId(data.id);
         }
