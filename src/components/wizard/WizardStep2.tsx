@@ -630,7 +630,6 @@ export default function WizardStep2({ productBrief, productType, result, setResu
                           }}
                           context={{ productTitle: productBrief?.title, uniqueMechanism: productBrief?.uniqueMechanism }}
                         />
-                        </Button>
                         <Button variant="default" size="sm" className="gap-1 text-xs" disabled={writingIndex === i || writingAll} onClick={() => writeFullChapter(i)}>
                           {writingIndex === i ? <Loader2 className="w-3 h-3 animate-spin" /> : <PenLine className="w-3 h-3" />}
                           {ch.fullContent ? "Rewrite" : "Write Full Content"}
