@@ -621,6 +621,16 @@ export default function WizardStep2({ productBrief, productType, result, setResu
                         <Button variant="ghost" size="sm" onClick={() => copyText(`${ch.title}\n\n${ch.summary}\n\n${ch.keyPoints?.join("\n")}`, `ch-${i}`)} className="gap-1 text-xs">
                           {copied === `ch-${i}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />} Copy All
                         </Button>
+                        <ContentRewriter
+                          text={ch.fullContent || `${ch.title}\n\n${ch.summary}\n\n${ch.keyPoints?.join("\n")}`}
+                          onApply={(newText) => {
+                            const updatedChapters = [...result.chapters];
+                            updatedChapters[i] = { ...updatedChapters[i], fullContent: newText };
+                            setResult({ ...result, chapters: updatedChapters });
+                          }}
+                          context={{ productTitle: productBrief?.title, uniqueMechanism: productBrief?.uniqueMechanism }}
+                        />
+                        </Button>
                         <Button variant="default" size="sm" className="gap-1 text-xs" disabled={writingIndex === i || writingAll} onClick={() => writeFullChapter(i)}>
                           {writingIndex === i ? <Loader2 className="w-3 h-3 animate-spin" /> : <PenLine className="w-3 h-3" />}
                           {ch.fullContent ? "Rewrite" : "Write Full Content"}
