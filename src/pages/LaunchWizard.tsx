@@ -249,6 +249,8 @@ const LaunchWizard = () => {
       setGenModalCompleted(prev => [...prev, 6]);
 
       toast.success("🚀 Your entire launch system is ready!");
+      // Force immediate save after Generate All completes
+      setTimeout(() => autosave(), 500);
     } catch (e: any) {
       const stepName = ["", "Product Concept", "Product Content", "Graphics", "Funnel Copy", "Marketing Assets", "Launch Checklist"][genModalStep] || "Unknown";
       console.error(`Generate All failed at step ${genModalStep} (${stepName}):`, e);

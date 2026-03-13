@@ -219,7 +219,7 @@ ${body}
 }
 
 export function generateSalesPageHTML(funnel: Step3Funnel, config: FunnelSiteConfig): string {
-  const s = funnel.salesPageSections;
+  const s = funnel.salesPageSections || {} as Partial<SalesPageSections>;
   const price = config.price || 17;
   const payLink = config.paymentLink || "#checkout";
   const template = config.template || "classic-im";
