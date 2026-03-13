@@ -791,6 +791,15 @@ export default function WizardStep2({ productBrief, productType, result, setResu
           </Button>
         </div>
       )}
+
+      {/* Content Preview Modal */}
+      <ContentPreviewModal
+        open={!!previewChapter}
+        onClose={() => setPreviewChapter(null)}
+        title={previewChapter?.title || ""}
+        content={previewChapter?.content || ""}
+        chapterNumber={previewChapter ? previewChapter.index + 1 : undefined}
+      />
     </div>
   );
 }
