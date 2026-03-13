@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
-import { Sparkles, Loader2, Copy, Check, RefreshCw, Target, BookOpen, Lightbulb, ListOrdered, CheckCircle, AlertTriangle, Pencil, Key, FileText, ChevronDown, ClipboardList, FileCode, BookMarked, Footprints, PenLine, Download, Lock } from "lucide-react";
+import { Sparkles, Loader2, Copy, Check, RefreshCw, Target, BookOpen, Lightbulb, ListOrdered, CheckCircle, AlertTriangle, Pencil, Key, FileText, ChevronDown, ClipboardList, FileCode, BookMarked, Footprints, PenLine, Download, Lock, Eye } from "lucide-react";
 import { Step1Product, Step2Content, ChapterItem, ContentDepth, ExpansionType } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -18,6 +18,10 @@ import ContentQualityReport from "./ContentQualityReport";
 import AssetFactory from "./AssetFactory";
 import OutcomeLockCard, { OutcomeLock, isOutcomeLockComplete } from "./OutcomeLockCard";
 import ScenarioGenerator from "./ScenarioGenerator";
+import VoiceToneSelector, { WritingVoice, getVoicePromptDirective } from "./VoiceToneSelector";
+import OutlineEditor from "./OutlineEditor";
+import ContentPreviewModal from "./ContentPreviewModal";
+import ReadabilityMeter from "./ReadabilityMeter";
 import { auditFullContent } from "@/lib/contentAudit";
 import type { ProductAssets } from "@/types/productAssets";
 
@@ -237,13 +241,15 @@ export default function WizardStep2({ productBrief, productType, result, setResu
   const [outcomeLock, setOutcomeLock] = useState<OutcomeLock | null>(null);
   const [outcomeLocked, setOutcomeLocked] = useState(false);
   const [humanizing, setHumanizing] = useState(false);
+  const [writingVoice, setWritingVoice] = useState<WritingVoice>("mentor");
+  const [previewChapter, setPreviewChapter] = useState<{ index: number; title: string; content: string } | null>(null);
 
   const generate = async () => {
     if (!productBrief) return;
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-launch-content", {
-        body: { productBrief, productType, userId, launchMode, contentDepth },
+        body: { productBrief, productType, userId, launchMode, contentDepth, writingVoice },
       });
       if (error) throw error;
       setResult(data);
@@ -458,6 +464,9 @@ export default function WizardStep2({ productBrief, productType, result, setResu
         </CardContent>
       </Card>
 
+      {/* Writing Voice Selector */}
+      <VoiceToneSelector value={writingVoice} onChange={setWritingVoice} disabled={loading} />
+
       {/* Outcome Lock — must be defined before generating */}
       <OutcomeLockCard
         outcomeLock={outcomeLock}
@@ -500,6 +509,12 @@ export default function WizardStep2({ productBrief, productType, result, setResu
             expandingIndex={expandingIndex}
             onHumanize={humanizeAll}
             humanizing={humanizing}
+          />
+
+          {/* Outline Editor — reorder/edit chapters before writing */}
+          <OutlineEditor
+            chapters={result.chapters}
+            onUpdate={(updated) => setResult({ ...result, chapters: updated })}
           />
 
           <Card>
@@ -574,6 +589,9 @@ export default function WizardStep2({ productBrief, productType, result, setResu
                               <PenLine className="w-3 h-3" /> Full Chapter Content
                             </p>
                             <div className="flex items-center gap-1">
+                              <Button variant="ghost" size="sm" className="h-6 px-2 text-xs gap-1" onClick={() => setPreviewChapter({ index: i, title: ch.title, content: ch.fullContent! })}>
+                                <Eye className="w-3 h-3" /> Preview
+                              </Button>
                               <Button variant="ghost" size="sm" className="h-6 px-2 text-xs gap-1" onClick={() => copyText(ch.fullContent!, `full-${i}`)}>
                                 {copied === `full-${i}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />} Copy
                               </Button>
@@ -590,6 +608,7 @@ export default function WizardStep2({ productBrief, productType, result, setResu
                               </Button>
                             </div>
                           </div>
+                          <ReadabilityMeter text={ch.fullContent} />
                           <ScrollArea className="max-h-[400px] rounded-lg border border-border/50 bg-background/50 p-4">
                             <div className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{ch.fullContent}</div>
                           </ScrollArea>
@@ -772,6 +791,15 @@ export default function WizardStep2({ productBrief, productType, result, setResu
           </Button>
         </div>
       )}
+
+      {/* Content Preview Modal */}
+      <ContentPreviewModal
+        open={!!previewChapter}
+        onClose={() => setPreviewChapter(null)}
+        title={previewChapter?.title || ""}
+        content={previewChapter?.content || ""}
+        chapterNumber={previewChapter ? previewChapter.index + 1 : undefined}
+      />
     </div>
   );
 }
