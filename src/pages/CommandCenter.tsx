@@ -721,16 +721,64 @@ export default function CommandCenter() {
 
         {/* ═══════════════ 4 HERO METRIC CARDS ═══════════════ */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Launch Score — with Score Booster tooltip */}
+          <HoverCard openDelay={200}>
+            <HoverCardTrigger asChild>
+              <div>
+                <GlassCard className={`p-5 cursor-pointer ${launchScore >= 80 ? "shadow-[0_0_30px_-8px_hsl(var(--chart-2)/0.4)]" : launchScore >= 70 ? "shadow-[0_0_30px_-8px_hsl(var(--chart-2)/0.3)]" : ""}`}>
+                  <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-widest mb-3">
+                    <Gauge className="h-3 w-3 text-primary/60" /> Launch Score
+                    {scoreBoosters.length > 0 && <span className="ml-auto text-[8px] text-chart-4 font-bold">⚡ Hover for tips</span>}
+                  </div>
+                  <div className="flex items-baseline gap-1">
+                    <AnimatedNumber value={launchScore} className={`text-3xl font-black ${launchScore >= 80 ? "text-chart-2" : launchScore >= 40 ? "text-chart-4" : "text-destructive"}`} />
+                    <span className="text-sm text-muted-foreground/30 font-bold">/100</span>
+                  </div>
+                  <div className="mt-2">
+                    <div className="h-1.5 rounded-full bg-muted/20 overflow-hidden">
+                      <motion.div
+                        className={`h-full rounded-full transition-colors ${launchScore >= 80 ? "bg-chart-2" : launchScore >= 50 ? "bg-chart-4" : "bg-destructive"}`}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${launchScore}%` }}
+                        transition={{ duration: 1, ease: "easeOut" }}
+                      />
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground/40 mt-1">{launchConfidence} Confidence</p>
+                </GlassCard>
+              </div>
+            </HoverCardTrigger>
+            <HoverCardContent side="bottom" align="start" className="w-72 p-0 bg-card/95 backdrop-blur-xl border-border/30">
+              <div className="p-3 border-b border-border/20">
+                <p className="text-xs font-bold flex items-center gap-1.5">
+                  <Zap className="h-3 w-3 text-chart-4" /> Score Booster
+                </p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">
+                  {scoreBoosters.length > 0
+                    ? `Complete these to reach ${Math.min(launchScore + scoreBoosters.reduce((a, b) => a + b.points, 0), 100)}+`
+                    : "All sections complete! 🎉"}
+                </p>
+              </div>
+              {scoreBoosters.length > 0 ? (
+                <div className="p-2 space-y-1 max-h-48 overflow-y-auto">
+                  {scoreBoosters.slice(0, 6).map((b, i) => (
+                    <div key={i} className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-md hover:bg-muted/10 transition-colors">
+                      <span className="text-[10px] text-muted-foreground leading-tight">{b.label}</span>
+                      <Badge variant="outline" className="text-[9px] h-4 px-1.5 shrink-0 border-chart-2/30 text-chart-2">+{b.points}</Badge>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-4 text-center">
+                  <CheckCircle2 className="h-6 w-6 text-chart-2 mx-auto mb-1" />
+                  <p className="text-xs text-chart-2 font-semibold">Launch Ready!</p>
+                </div>
+              )}
+            </HoverCardContent>
+          </HoverCard>
+
+          {/* Other 3 hero cards */}
           {[
-            {
-              label: "Launch Score",
-              value: launchScore,
-              suffix: "/100",
-              sub: launchConfidence + " Confidence",
-              icon: Gauge,
-              color: launchScore >= 70 ? "text-chart-2" : launchScore >= 40 ? "text-chart-4" : "text-destructive",
-              glow: launchScore >= 70 ? "shadow-[0_0_30px_-8px_hsl(var(--chart-2)/0.3)]" : "",
-            },
             {
               label: "Projected Revenue",
               value: projections.totalRevenue,
@@ -758,7 +806,7 @@ export default function CommandCenter() {
               color: trafficScore >= 60 ? "text-chart-2" : "text-chart-4",
               glow: "",
             },
-          ].map((metric, i) => (
+          ].map((metric) => (
             <GlassCard key={metric.label} className={`p-5 ${metric.glow}`}>
               <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-widest mb-3">
                 <metric.icon className="h-3 w-3 text-primary/60" /> {metric.label}
