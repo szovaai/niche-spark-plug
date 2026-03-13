@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
-import { Sparkles, Loader2, Copy, Check, RefreshCw, Target, BookOpen, Lightbulb, ListOrdered, CheckCircle, AlertTriangle, Pencil, Key, FileText, ChevronDown, ClipboardList, FileCode, BookMarked, Footprints, PenLine, Download, Lock } from "lucide-react";
+import { Sparkles, Loader2, Copy, Check, RefreshCw, Target, BookOpen, Lightbulb, ListOrdered, CheckCircle, AlertTriangle, Pencil, Key, FileText, ChevronDown, ClipboardList, FileCode, BookMarked, Footprints, PenLine, Download, Lock, Eye } from "lucide-react";
 import { Step1Product, Step2Content, ChapterItem, ContentDepth, ExpansionType } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
