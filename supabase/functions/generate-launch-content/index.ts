@@ -177,7 +177,7 @@ Return ONLY valid JSON:
     ]);
     if (!valid) return validationErrorResponse(valError!, corsHeaders);
 
-    const { productBrief, productType, buyerAvatar, launchMode, contentDepth } = data;
+    const { productBrief, productType, buyerAvatar, launchMode, contentDepth, writingVoice } = data;
     const depth = contentDepth || "standard";
     const depthConfig = DEPTH_CHAPTER_COUNTS[depth] || DEPTH_CHAPTER_COUNTS.standard;
 
