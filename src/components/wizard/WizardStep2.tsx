@@ -690,6 +690,66 @@ export default function WizardStep2({ productBrief, productType, result, setResu
             />
           )}
 
+          {/* Boost Score Button */}
+          {audit && audit.overall < 80 && (
+            <Card className="border-primary/30 bg-gradient-to-r from-primary/5 to-accent/5">
+              <CardContent className="p-4 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold">Score: {audit.overall}/100 — needs 80+ to pass</p>
+                  <p className="text-xs text-muted-foreground">Auto-enrich all chapters with prompts, scripts, time markers, and examples to hit 80+</p>
+                </div>
+                <Button
+                  size="sm"
+                  className="gap-1.5 shrink-0"
+                  disabled={expandingIndex !== null || writingAll}
+                  onClick={async () => {
+                    if (!result || !productBrief) return;
+                    setWritingAll(true);
+                    setWriteAllProgress(0);
+                    const total = result.chapters.length;
+                    const coachingMessages = audit.coachingMessages;
+                    
+                    for (let i = 0; i < total; i++) {
+                      setWritingIndex(i);
+                      try {
+                        // Add missing assets based on coaching
+                        const chapter = result.chapters[i];
+                        const chapterAudit = auditFullContent({ ...result, chapters: [chapter] });
+                        const weakDims = chapterAudit.dimensions.filter(d => d.score < 70).map(d => d.label);
+                        
+                        if (weakDims.length > 0) {
+                          // Determine what expansions are needed
+                          const expansions: string[] = [];
+                          if (weakDims.some(d => d.includes("Proof") || d.includes("Believability"))) expansions.push("caseStudy");
+                          if (weakDims.some(d => d.includes("Actionability") || d.includes("Asset"))) expansions.push("template", "checklist");
+                          if (weakDims.some(d => d.includes("Example") || d.includes("Execution"))) expansions.push("realExample");
+                          
+                          for (const expType of expansions.slice(0, 2)) {
+                            try {
+                              await expandChapter(i, expType as any);
+                            } catch { /* continue */ }
+                          }
+                        }
+                        
+                        // Write full content if missing
+                        if (!chapter.fullContent) {
+                          await writeFullChapter(i);
+                        }
+                      } catch { /* continue */ }
+                      setWriteAllProgress(((i + 1) / total) * 100);
+                    }
+                    setWritingIndex(null);
+                    setWritingAll(false);
+                    toast.success("Score boost complete! Check your updated score.");
+                  }}
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Boost to 80+
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
           {audit && !audit.canContinue && (
             <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs">
               <AlertTriangle className="w-3.5 h-3.5 shrink-0" />

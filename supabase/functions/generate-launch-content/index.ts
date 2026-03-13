@@ -68,6 +68,9 @@ Write 1,500-2,500 words of ACTUAL CHAPTER CONTENT in markdown format. Structure 
    - Include "Here's exactly what to do" sections with copy-paste scripts/templates where relevant
    - Add "Pro Tip:" callouts for insider knowledge
    - Reference the ${pb?.uniqueMechanism || "core system"} naturally throughout
+   - Include at least 2 time markers: "within 60 minutes", "by day 3", "same day", "today"
+   - Include at least 1 before/after transformation: "You'll go from [pain] to [result]"
+   - Include at least 1 copy-paste prompt or script: "Here's the exact prompt/script:"
 
 3. REAL-WORLD EXAMPLE (1-2 paragraphs)
    - A detailed scenario showing someone applying this chapter's teaching
@@ -87,7 +90,8 @@ WRITING RULES:
 - Write in a warm, direct, conversational tone — like a mentor talking to a friend
 - Short paragraphs (2-3 sentences max)
 - Use "you" and "your" — speak directly to the reader
-- NO corporate buzzwords: leverage, optimize, elevate, harness, dive into, journey
+- Use contractions: you'll, don't, can't, won't, here's, that's, it's
+- NO corporate buzzwords: leverage, optimize, elevate, harness, dive into, journey, furthermore, moreover, additionally, comprehensive guide, in today's digital landscape, navigate the complexities
 - Include specific examples with numbers, not generic advice
 - Make every paragraph either teach something, show an example, or tell them what to do
 - This should feel like premium content someone would pay $47+ for
@@ -186,6 +190,18 @@ Return ONLY valid JSON:
       ? `\nBUYER AVATAR — Write for this specific person:\nName: ${(buyerAvatar as any).personaName}\nFrustration: ${(buyerAvatar as any).dailyFrustration}\nDesires: ${(buyerAvatar as any).desires?.join(", ")}\nPain Points: ${(buyerAvatar as any).painPoints?.join(", ")}\nLanguage: ${(buyerAvatar as any).languageTheyUse?.join(", ")}`
       : '';
 
+    const wpOverrides = launchMode === "warriorplus" ? `
+
+WARRIORPLUS MODE — CRITICAL OVERRIDES:
+- Each chapter must be SHORT and TACTICAL — more bullets, fewer paragraphs
+- Cut all theory — every section must be "do this, then this, get this result"
+- Chapter titles must be action-verb-first: "Deploy...", "Launch...", "Activate...", "Install..."
+- Action steps must be completable in 10-15 minutes each — NO multi-day projects
+- Real examples must include specific dollar amounts and timeframes under 30 days
+- Bonuses must sound like standalone products: "The $97 [Name] — yours FREE"
+- Description must open with a bold claim and close with urgency
+- Tone: fast, bold, no-fluff — like a top seller's product, not a textbook` : "";
+
     const prompt = `Generate a complete product outline AND a proof/credibility stack for a digital product.${avatarContext}
 
 Product: ${productBrief.title}
@@ -210,13 +226,13 @@ Return ONLY valid JSON:
       "hook": "2-3 paragraph opening that grabs attention with a relatable scenario or surprising fact",
       "coreConcept": "The core idea explained simply — use an analogy if possible",
       "actionPlan": [
-        { "step": "Step 1", "action": "Specific concrete action", "why": "Why this matters for results" },
-        { "step": "Step 2", "action": "Specific concrete action", "why": "Why this matters for results" },
-        { "step": "Step 3", "action": "Specific concrete action", "why": "Why this matters for results" }
+        { "step": "Step 1", "action": "Specific concrete action starting with a verb", "why": "Why this matters for results" },
+        { "step": "Step 2", "action": "Specific concrete action starting with a verb", "why": "Why this matters for results" },
+        { "step": "Step 3", "action": "Specific concrete action starting with a verb", "why": "Why this matters for results" }
       ],
-      "realExample": "A detailed real-world example with specific numbers, names, and outcomes — not generic",
+      "realExample": "A detailed real-world example with specific numbers ($X in Y days), a first name, and clear before/after — not generic",
       "commonMistakes": ["Common mistake 1 with why it fails", "Common mistake 2 with why it fails"],
-      "actionStep": "One specific thing they can do RIGHT NOW in the next 10 minutes",
+      "actionStep": "One specific thing they can do RIGHT NOW in the next 10 minutes — starts with a verb",
       "moduleSummary": ["Key takeaway 1", "Key takeaway 2", "Key takeaway 3"]
     }
   ],
@@ -238,11 +254,11 @@ Return ONLY valid JSON:
     "credibilityBuilder": "2-3 paragraphs of honest credibility copy for someone who may not have testimonials yet.",
     "earningsDisclaimer": "FTC-compliant earnings/results disclaimer customized to this product type.",
     "quickWinsList": [
-      "Specific tangible outcome #1",
-      "Specific tangible outcome #2",
-      "Specific tangible outcome #3",
-      "Specific tangible outcome #4",
-      "Specific tangible outcome #5"
+      "Specific tangible outcome #1 with number and timeframe",
+      "Specific tangible outcome #2 with number and timeframe",
+      "Specific tangible outcome #3 with number and timeframe",
+      "Specific tangible outcome #4 with number and timeframe",
+      "Specific tangible outcome #5 with number and timeframe"
     ]
   }
 }
@@ -251,23 +267,20 @@ RULES:
 - Generate ${depthConfig.min}-${depthConfig.max} chapters, each building on the previous one
 - Every chapter MUST include moduleGoal, hook, coreConcept, actionPlan (3-5 steps), realExample, commonMistakes (2-3), actionStep, and moduleSummary (3 bullets)
 - Each actionPlan step must have a specific, concrete action — not "learn about X" but "open [tool], click [button], paste [template]"
+- Each actionPlan step MUST start with a concrete action verb: Open, Create, Write, Set up, Configure, Click, Paste, Send, Upload, Download, Record, Schedule, Launch, Publish, Submit, Fill in, Sign up, Navigate, Select
 - Each realExample must include specific numbers, timeframes, or names — not "a student got results" but "Sarah K. used this template and generated $847 in her first 14 days"
+- EVERY chapter MUST include at least 2 time markers in hook/summary/realExample like "within 60 minutes", "by day 3", "in the first hour", "same day", "today", "this week"
+- EVERY chapter MUST include at least 1 transformation marker using before/after language like "You'll go from [pain state] to [desired state]"
+- EVERY chapter MUST mention at least 1 prompt, script, or template that the reader can copy-paste in the coreConcept or hook
+- EVERY realExample must include a dollar amount AND a timeframe (e.g., "$347 in 9 days", "3 clients in 2 weeks")
+- EVERY actionStep must be completable in 10-15 minutes and start with an action verb
 - Bonuses must be named products with clear value
 - Reference the unique mechanism "${productBrief.uniqueMechanism}" throughout
-- Write in a warm, direct, conversational tone
+- Write in a warm, direct, conversational tone — use contractions (you'll, don't, can't, here's)
+- AVOID these AI-sounding phrases: "in today's digital landscape", "leverage", "harness the power", "dive into", "comprehensive guide", "navigate the complexities", "elevate your", "unlock your", "empower yourself", "furthermore", "moreover", "additionally"
 - Generate exactly 5 testimonial templates
 - Generate 5-7 before/after rows
-- Quick wins must be SPECIFIC and TANGIBLE${launchMode === "warriorplus" ? `
-
-WARRIORPLUS MODE — CRITICAL OVERRIDES:
-- Each chapter must be SHORT and TACTICAL — more bullets, fewer paragraphs
-- Cut all theory — every section must be "do this, then this, get this result"
-- Chapter titles must be action-verb-first: "Deploy...", "Launch...", "Activate...", "Install..."
-- Action steps must be completable in 10-15 minutes each — NO multi-day projects
-- Real examples must include specific dollar amounts and timeframes under 30 days
-- Bonuses must sound like standalone products: "The $97 [Name] — yours FREE"
-- Description must open with a bold claim and close with urgency
-- Tone: fast, bold, no-fluff — like a top seller's product, not a textbook` : ""}`;
+- Quick wins must be SPECIFIC and TANGIBLE with numbers and timeframes${wpOverrides}`;
 
     const { content, model } = await callTieredAI([
       { role: "system", content: MASTER_SYSTEM_PROMPT },

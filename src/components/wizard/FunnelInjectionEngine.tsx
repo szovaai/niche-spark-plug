@@ -105,9 +105,35 @@ export default function FunnelInjectionEngine({ funnel, marketing, productTitle,
   const doDownload = async (openNetlify = false) => {
     setDownloading(true);
     try {
-      const files = generateFunnelSite(funnel, config, funnelType, marketing?.affiliateKit);
+      // Validate funnel data before generating
+      if (!funnel.salesPage && !funnel.salesPageSections) {
+        toast.error("Funnel copy is incomplete — generate funnel copy first (Step 4).");
+        setDownloading(false);
+        return;
+      }
+
+      // Ensure salesPageSections has safe defaults
+      const safeFunnel: Step3Funnel = {
+        ...funnel,
+        salesPageSections: funnel.salesPageSections || {} as any,
+        salesPage: funnel.salesPage || "",
+        thankYouPage: funnel.thankYouPage || "Check your email for instant access.",
+        optInPage: funnel.optInPage || "",
+        bonusPage: funnel.bonusPage || "",
+        upsellOffer: funnel.upsellOffer || "",
+        checkoutCopy: funnel.checkoutCopy || "",
+        orderBump: funnel.orderBump || "",
+      };
+
+      const files = generateFunnelSite(safeFunnel, config, funnelType, marketing?.affiliateKit);
       const zip = new JSZip();
-      Object.entries(files).forEach(([name, content]) => zip.file(name, content));
+      Object.entries(files).forEach(([name, content]) => {
+        try {
+          zip.file(name, content);
+        } catch (fileErr) {
+          console.warn(`Skipped file ${name}:`, fileErr);
+        }
+      });
       const blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } });
       const safeName = productTitle.replace(/[^a-zA-Z0-9\s-]/g, "").replace(/\s+/g, "-").toLowerCase().substring(0, 40);
       saveAs(blob, `${safeName}-funnel.zip`);
@@ -117,7 +143,7 @@ export default function FunnelInjectionEngine({ funnel, marketing, productTitle,
       }
     } catch (err: any) {
       console.error("Funnel download error:", err);
-      toast.error(err?.message || "Failed to generate funnel");
+      toast.error(err?.message || "Failed to generate funnel. Check that funnel copy was generated.");
     } finally {
       setDownloading(false);
     }
