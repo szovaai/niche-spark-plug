@@ -1,38 +1,53 @@
 
 
-# Plan: Connect Research Agent to AI Launch Wizard
+# DigiLaunchKit AI — Refactor Plan
 
-## Problem
-The Research Agent generates Opportunity Briefs with product ideas, but the connection to the Launch Wizard is weak:
-1. Non-trend-mode ideas lack per-idea "Build This" buttons
-2. Clicking "Send to Launch Wizard" only passes query params — no project is created, so the user starts from scratch
-3. No visual feedback that a project was created from research
+## What This Changes
 
-## Solution
+This is a major restructuring that repositions the app from a collection of separate tools (Empire Mode, Micro Factory, Toolkit Builder, Research, Launch) into a unified **AI Launch Engine** with one primary flow: the **AI Launch Wizard**.
 
-### 1. Per-Idea "Build This Product" Buttons (All Modes)
-**File:** `src/pages/ResearchAgent.tsx`
+## Current State vs. Target State
 
-- Add a "Build This Product" button to every idea card (not just trend mode)
-- Each button creates a `launch_projects` row directly from that specific idea's data (title, audience, angle, mechanism, format)
-- After creation, navigate to `/wizard/{newProjectId}` so the user lands on a saved, pre-populated project
+**Current navigation:** Dashboard, Empire Mode, Micro Factory, Research, My Toolkits, Launch
 
-### 2. Direct Project Creation from Research
-**File:** `src/pages/ResearchAgent.tsx`
+**New navigation:** Dashboard, AI Launch Wizard, Products, Funnels, Marketing Assets, Launch Checklist, Templates, Settings
 
-- New `buildFromIdea(idea, brief)` async function that:
-  1. Inserts a `launch_projects` row with `user_id`, `name` (idea title), `niche`, `target_audience`, `product_type`, `topic`, and pre-fills `step1_product` with a partial object containing the idea's angle, mechanism, and "why it sells" data
-  2. Navigates to `/wizard/{newId}` on success
-- Replace the current `sendToWizard` (query-param approach) with this direct creation
-- The global "Send to Launch Wizard" button uses the recommended idea
+## Implementation Status: ✅ COMPLETE
 
-### 3. Visual Enhancement
-- Loading state on the "Build This Product" button while project is being created
-- Toast confirmation: "Project created — opening Launch Wizard..."
-- Add a subtle "→ Launch Wizard" breadcrumb trail so users know where they're going
+### Phase 1: Database ✅
+- Created `launch_projects` table with JSONB fields for each wizard step
+- RLS policies: users can only CRUD their own rows
+- Auto-updated `updated_at` trigger
 
-### Technical Details
-- Uses existing `launch_projects` table — no migrations needed
-- `step1_product` JSONB will be pre-seeded with: `{ title: idea.title, uniqueMechanism: idea.uniqueMechanism, campaignAngle: idea.suggestedAngle, whyItSells: idea.whyItSells }`
-- The LaunchWizard's `loadProject` already reads all these fields, so the wizard will show pre-filled data immediately
+### Phase 2: Edge Functions ✅
+- `generate-launch-product` — product concept from niche/audience/type/topic
+- `generate-launch-content` — outline, chapters, bonuses, description
+- `generate-launch-funnel` — sales page, opt-in, thank you, bonus, checkout copy
+- `generate-launch-marketing` — 5 emails, 10 social posts, 5 pins, blog, video script
+- `generate-launch-checklist` — personalized launch roadmap
 
+### Phase 3: AI Launch Wizard ✅
+- 5-step wizard at `/wizard` with left stepper + right content
+- "Generate Entire Launch System" button runs all 5 steps sequentially
+- All outputs saved to `launch_projects` table
+
+### Phase 4: Section Pages ✅
+- `/products` — list/delete launch projects
+- `/funnels` — tabbed funnel copy library
+- `/assets` — marketing asset library (emails, posts, pins, blog, video)
+- `/checklist` — interactive launch checklists with toggle
+- `/templates` — 5 pre-built niche templates
+
+### Phase 5: Navigation ✅
+- New sidebar: Dashboard, Products, Funnels, Marketing Assets, Launch Checklist, Templates
+- CTA button: "New Launch" → `/wizard`
+- Legacy routes preserved: `/empire`, `/micro-factory`, `/research`, `/my-toolkits`, `/launch`
+
+### Phase 6: Dashboard ✅
+- Launch-focused: progress tracker, active projects, adapted stats
+- "Start New Launch" CTA
+
+### Phase 7: Branding ✅
+- Title: "DigiLaunchKit AI"
+- Hero: "Launch Your Digital Product in 60 Minutes"
+- Updated Navbar, HeroSection, index.html
