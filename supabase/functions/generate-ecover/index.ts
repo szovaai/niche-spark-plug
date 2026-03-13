@@ -82,8 +82,7 @@ serve(async (req) => {
     const depthMode = body.depthMode || 'stacked';
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!LOVABLE_API_KEY || !OPENAI_API_KEY) throw new Error("Required API keys not configured");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     const validComponents = selectedComponents.filter(c => COMPONENT_VISUALS[c]);
     if (validComponents.length === 0) {
