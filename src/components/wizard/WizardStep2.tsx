@@ -249,7 +249,7 @@ export default function WizardStep2({ productBrief, productType, result, setResu
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-launch-content", {
-        body: { productBrief, productType, userId, launchMode, contentDepth },
+        body: { productBrief, productType, userId, launchMode, contentDepth, writingVoice },
       });
       if (error) throw error;
       setResult(data);
