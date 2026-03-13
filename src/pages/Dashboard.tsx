@@ -30,6 +30,7 @@ import LaunchJourney from "@/components/momentum/LaunchJourney";
 import ProductFactoryCard from "@/components/momentum/ProductFactoryCard";
 import RevenueGoalWidget from "@/components/RevenueGoalWidget";
 import GettingStartedChecklist from "@/components/GettingStartedChecklist";
+import ReferralWidget from "@/components/ReferralWidget";
 
 const Dashboard = () => {
   const { user } = useAuth();
