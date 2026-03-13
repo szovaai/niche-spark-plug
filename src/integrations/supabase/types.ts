@@ -901,6 +901,107 @@ export type Database = {
         }
         Relationships: []
       }
+      published_pages: {
+        Row: {
+          created_at: string
+          id: string
+          is_published: boolean
+          page_data: Json | null
+          page_html: string | null
+          page_title: string
+          project_id: string | null
+          slug: string
+          updated_at: string
+          user_id: string
+          views: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          page_data?: Json | null
+          page_html?: string | null
+          page_title?: string
+          project_id?: string | null
+          slug: string
+          updated_at?: string
+          user_id: string
+          views?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          page_data?: Json | null
+          page_html?: string | null
+          page_title?: string
+          project_id?: string | null
+          slug?: string
+          updated_at?: string
+          user_id?: string
+          views?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "published_pages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "launch_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referral_codes: {
+        Row: {
+          clicks: number
+          code: string
+          created_at: string
+          id: string
+          signups: number
+          user_id: string
+        }
+        Insert: {
+          clicks?: number
+          code: string
+          created_at?: string
+          id?: string
+          signups?: number
+          user_id: string
+        }
+        Update: {
+          clicks?: number
+          code?: string
+          created_at?: string
+          id?: string
+          signups?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      referral_signups: {
+        Row: {
+          created_at: string
+          id: string
+          referral_code: string
+          referred_user_id: string | null
+          referrer_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          referral_code: string
+          referred_user_id?: string | null
+          referrer_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          referral_code?: string
+          referred_user_id?: string | null
+          referrer_id?: string
+        }
+        Relationships: []
+      }
       revenue_goals: {
         Row: {
           created_at: string
@@ -1412,6 +1513,7 @@ export type Database = {
         Returns: boolean
       }
       increment_genome_uses: { Args: { genome_id: string }; Returns: undefined }
+      increment_page_views: { Args: { page_slug: string }; Returns: undefined }
       increment_search_count: { Args: { p_user_id: string }; Returns: Json }
       increment_view_count: { Args: { p_user_id: string }; Returns: Json }
     }
