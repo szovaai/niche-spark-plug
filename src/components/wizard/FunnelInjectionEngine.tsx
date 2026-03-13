@@ -115,8 +115,9 @@ export default function FunnelInjectionEngine({ funnel, marketing, productTitle,
       if (openNetlify) {
         setTimeout(() => window.open("https://app.netlify.com/drop", "_blank"), 500);
       }
-    } catch {
-      toast.error("Failed to generate funnel");
+    } catch (err: any) {
+      console.error("Funnel download error:", err);
+      toast.error(err?.message || "Failed to generate funnel");
     } finally {
       setDownloading(false);
     }
