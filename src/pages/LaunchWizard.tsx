@@ -82,13 +82,16 @@ const LaunchWizard = () => {
       };
 
       if (existingProjectId) {
-        await supabase.from("launch_projects").update(projectData).eq("id", existingProjectId);
+        const { error } = await supabase.from("launch_projects").update(projectData).eq("id", existingProjectId);
+        if (error) console.error("Autosave update error:", error.message, error.details, error.hint);
       } else {
         const { data, error } = await supabase.from("launch_projects")
           .insert({ ...projectData, user_id: user.id })
           .select("id")
           .single();
-        if (!error && data) {
+        if (error) {
+          console.error("Autosave insert error:", error.message, error.details, error.hint);
+        } else if (data) {
           setExistingProjectId(data.id);
         }
       }
