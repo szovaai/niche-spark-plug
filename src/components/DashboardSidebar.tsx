@@ -70,7 +70,7 @@ export function DashboardSidebar() {
   const renderItems = (items: NavItem[]) =>
     items.map((item) => (
       <SidebarMenuItem key={item.title}>
-        <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
+        <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.tip}>
           <NavLink
             to={item.url}
             className={isCollapsed ? "flex items-center justify-center" : "flex items-center gap-3"}

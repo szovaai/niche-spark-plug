@@ -56,6 +56,7 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
           <main className="flex-1 relative">
             {children}
           </main>
+          <QuickActionsDialog />
         </SidebarInset>
       </div>
     </SidebarProvider>
