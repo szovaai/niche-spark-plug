@@ -173,6 +173,7 @@ Return ONLY valid JSON:
       { field: 'buyerAvatar', type: 'object', maxLength: 10000 },
       { field: 'launchMode', type: 'string', maxLength: 20 },
       { field: 'contentDepth', type: 'string', maxLength: 20 },
+      { field: 'writingVoice', type: 'string', maxLength: 50 },
     ]);
     if (!valid) return validationErrorResponse(valError!, corsHeaders);
 
