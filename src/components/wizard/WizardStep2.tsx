@@ -589,6 +589,9 @@ export default function WizardStep2({ productBrief, productType, result, setResu
                               <PenLine className="w-3 h-3" /> Full Chapter Content
                             </p>
                             <div className="flex items-center gap-1">
+                              <Button variant="ghost" size="sm" className="h-6 px-2 text-xs gap-1" onClick={() => setPreviewChapter({ index: i, title: ch.title, content: ch.fullContent! })}>
+                                <Eye className="w-3 h-3" /> Preview
+                              </Button>
                               <Button variant="ghost" size="sm" className="h-6 px-2 text-xs gap-1" onClick={() => copyText(ch.fullContent!, `full-${i}`)}>
                                 {copied === `full-${i}` ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />} Copy
                               </Button>
@@ -605,6 +608,7 @@ export default function WizardStep2({ productBrief, productType, result, setResu
                               </Button>
                             </div>
                           </div>
+                          <ReadabilityMeter text={ch.fullContent} />
                           <ScrollArea className="max-h-[400px] rounded-lg border border-border/50 bg-background/50 p-4">
                             <div className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{ch.fullContent}</div>
                           </ScrollArea>
