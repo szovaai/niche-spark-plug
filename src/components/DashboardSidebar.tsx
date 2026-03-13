@@ -52,7 +52,7 @@ const systemItems = [
   { title: "Settings", url: "/settings", icon: Settings, tip: "Account, brand kit & integrations" },
 ];
 
-type NavItem = { title: string; url: string; icon: React.ComponentType<{ className?: string }> };
+type NavItem = { title: string; url: string; icon: React.ComponentType<{ className?: string }>; tip: string };
 
 export function DashboardSidebar() {
   const { state } = useSidebar();
