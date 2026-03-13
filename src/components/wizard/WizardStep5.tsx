@@ -13,6 +13,9 @@ import LaunchMultiplier from "./LaunchMultiplier";
 import type { ProductAssets } from "@/types/productAssets";
 import PublishSalesPageButton from "@/components/PublishSalesPageButton";
 import PlatformExport from "@/components/PlatformExport";
+import ExportHub from "@/components/wizard/ExportHub";
+import VersionHistory from "@/components/wizard/VersionHistory";
+import CollaborativeReview from "@/components/CollaborativeReview";
 
 import type { LaunchMode } from "@/pages/LaunchWizard";
 
