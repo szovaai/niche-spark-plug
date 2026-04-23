@@ -111,6 +111,12 @@ export default function ContentQualityReport({ content, assets, onExpandChapter,
                 </div>
               </div>
               <div className="flex items-center gap-3">
+                {overallDelta !== null && overallDelta !== 0 && (
+                  <Badge className={`text-[10px] gap-1 animate-pulse ${overallDelta > 0 ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" : "bg-amber-500/20 text-amber-300 border-amber-500/30"}`}>
+                    {overallDelta > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                    {overallDelta > 0 ? "+" : ""}{overallDelta} pts
+                  </Badge>
+                )}
                 <div className="flex flex-col items-end gap-0.5">
                   <span className={`text-2xl font-black tabular-nums ${overallColor}`}>{audit.overall}</span>
                   <span className="text-[10px] text-muted-foreground uppercase tracking-wider">/ 100</span>
