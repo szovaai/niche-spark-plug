@@ -6,14 +6,16 @@ import {
   Settings,
   Wand2,
   Rocket,
-  Monitor,
   Target,
-  TrendingUp,
   Activity,
   Eye,
   Map,
   Radar,
   Layout,
+  Store,
+  Megaphone,
+  Copy as CopyIcon,
+  Bookmark,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
@@ -36,21 +38,27 @@ import {
 } from "@/components/ui/sidebar";
 
 const coreItems = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, tip: "Your home base — stats, projects & daily tasks" },
-  { title: "Command Center", url: "/command-center", icon: Monitor, tip: "Live metrics & real-time launch performance" },
-  { title: "AI Product Builder", url: "/wizard", icon: Wand2, tip: "Create a complete product + funnel in 60 min" },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, tip: "Your home base" },
+  { title: "Profit Radar AI", url: "/opportunities", icon: Radar, tip: "Discover problems people pay to solve" },
+  { title: "Saved Projects", url: "/saved-projects", icon: Bookmark, tip: "Your launch pipeline" },
+];
+
+const buildItems = [
+  { title: "Product Builder", url: "/wizard", icon: Wand2, tip: "Create a complete product + funnel" },
+  { title: "Funnel Builder", url: "/funnels", icon: Target, tip: "Build sales funnels with drag & drop" },
+  { title: "Shopify Launch", url: "/shopify-launch", icon: Store, tip: "Generate Shopify store assets" },
+  { title: "Ad Lab", url: "/ad-lab", icon: Megaphone, tip: "TikTok / FB / Pinterest / Google ads" },
 ];
 
 const intelligenceItems = [
-  { title: "Winning Launch Modeler", url: "/steal", icon: Eye, tip: "Analyze top sellers & clone their strategies" },
-  { title: "Opportunity Radar", url: "/opportunities", icon: Radar, tip: "AI scans for emerging niches & market gaps" },
-  { title: "Visual Funnel Builder", url: "/funnels", icon: Target, tip: "Build sales funnels with drag & drop" },
-  { title: "Profit Map", url: "/profit-map", icon: Map, tip: "Revenue projections & pricing optimization" },
-  { title: "Launch Simulation", url: "/funnel-simulation", icon: Activity, tip: "Simulate launch scenarios before going live" },
+  { title: "Clone Competitor", url: "/clone-competitor", icon: CopyIcon, tip: "Reverse-engineer winning offers" },
+  { title: "Winning Launch Modeler", url: "/steal", icon: Eye, tip: "Analyze top sellers" },
+  { title: "Profit Map", url: "/profit-map", icon: Map, tip: "Revenue projections & pricing" },
+  { title: "Launch Simulation", url: "/funnel-simulation", icon: Activity, tip: "Simulate launch scenarios" },
 ];
 
 const systemItems = [
-  { title: "Launch Templates", url: "/templates-marketplace", icon: Layout, tip: "Pre-built launch blueprints to get started fast" },
+  { title: "Launch Templates", url: "/templates-marketplace", icon: Layout, tip: "Pre-built blueprints" },
   { title: "Settings", url: "/settings", icon: Settings, tip: "Account, brand kit & integrations" },
 ];
 
@@ -132,6 +140,8 @@ export function DashboardSidebar() {
         <SidebarSeparator className="my-1.5 opacity-30" />
 
         {renderGroup("Core", coreItems)}
+        <SidebarSeparator className="my-1 opacity-20" />
+        {renderGroup("Build", buildItems)}
         <SidebarSeparator className="my-1 opacity-20" />
         {renderGroup("Intelligence", intelligenceItems)}
         <SidebarSeparator className="my-1 opacity-20" />

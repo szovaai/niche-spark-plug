@@ -28,6 +28,11 @@ import Templates from "./pages/Templates";
 import StealThisLaunch from "./pages/StealThisLaunch";
 import ResearchAgent from "./pages/ResearchAgent";
 import OpportunityRadar from "./pages/OpportunityRadar";
+import ProfitRadar from "./pages/ProfitRadar";
+import ShopifyLaunch from "./pages/ShopifyLaunch";
+import AdLab from "./pages/AdLab";
+import CloneCompetitor from "./pages/CloneCompetitor";
+import SavedProjects from "./pages/SavedProjects";
 import GenomeLibrary from "./pages/GenomeLibrary";
 import AffiliatePredictor from "./pages/AffiliatePredictor";
 import CommandCenter from "./pages/CommandCenter";
@@ -57,7 +62,12 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/opportunities" element={<OpportunityRadar />} />
+            <Route path="/opportunities" element={<ProfitRadar />} />
+            <Route path="/opportunities-legacy" element={<OpportunityRadar />} />
+            <Route path="/shopify-launch" element={<ShopifyLaunch />} />
+            <Route path="/ad-lab" element={<AdLab />} />
+            <Route path="/clone-competitor" element={<CloneCompetitor />} />
+            <Route path="/saved-projects" element={<SavedProjects />} />
             <Route path="/command-center" element={<CommandCenter />} />
             <Route path="/command-center/:projectId" element={<CommandCenter />} />
             <Route path="/genome" element={<GenomeLibrary />} />
