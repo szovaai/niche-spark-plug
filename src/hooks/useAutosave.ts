@@ -65,10 +65,11 @@ export function useAutosave({
             .select("id")
             .single();
           if (error) throw error;
-          if (inserted?.id) {
-            setRecordId?.(inserted.id);
-            recordIdRef.current = inserted.id;
-            onSaved?.(inserted.id);
+          const newId = (inserted as any)?.id as string | undefined;
+          if (newId) {
+            setRecordId?.(newId);
+            recordIdRef.current = newId;
+            onSaved?.(newId);
           }
         }
         lastSerialized.current = serialized;
