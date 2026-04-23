@@ -5,8 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sparkles, Loader2, RefreshCw, Download, Image, Package, Monitor, BookOpen, Wrench, DollarSign, Palette, Type, Layout, Zap } from "lucide-react";
+import { Sparkles, Loader2, RefreshCw, Download, Image, Package, Monitor, BookOpen, Wrench, DollarSign, Palette, Type, Layout, Zap, TextCursorInput } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Switch } from "@/components/ui/switch";
 import type { Step1Product, Step3Graphics } from "@/types/launchWizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -82,6 +83,17 @@ export default function WizardStep3Graphics({ productBrief, niche, result, setRe
   const [generating, setGenerating] = useState(false);
   const [generateProgress, setGenerateProgress] = useState(0);
   const [launchGraphics, setLaunchGraphics] = useState<GraphicOutput[]>([]);
+  const [includeSubtitle, setIncludeSubtitle] = useState(false);
+  const [includeSideLabels, setIncludeSideLabels] = useState(false);
+
+  const shortenCoverTitle = (raw: string): string => {
+    if (!raw) return "";
+    const beforeColon = raw.split(/[:—–-]/)[0].trim() || raw.trim();
+    const words = beforeColon.split(/\s+/).slice(0, 8);
+    return words.join(" ");
+  };
+  const coverTitle = shortenCoverTitle(productBrief?.title || "");
+  const coverSubtitle = includeSubtitle ? (productBrief?.subtitle || "").slice(0, 80) : "";
 
   const getStyleConfig = () => DESIGN_STYLES.find(s => s.id === designStyle)!;
   const getLayoutConfig = () => SCENE_LAYOUTS.find(l => l.id === sceneLayout)!;
@@ -98,8 +110,8 @@ export default function WizardStep3Graphics({ productBrief, niche, result, setRe
 
       const { data, error } = await supabase.functions.invoke("generate-ecover", {
         body: {
-          title: productBrief.title,
-          subtitle: productBrief.subtitle,
+          title: coverTitle || productBrief.title,
+          subtitle: coverSubtitle,
           productConcept: productBrief.concept,
           uniqueMechanism: productBrief.uniqueMechanism,
           niche,
@@ -114,6 +126,9 @@ export default function WizardStep3Graphics({ productBrief, niche, result, setRe
           sceneLayout: layoutConfig.prompt,
           headlineFormula: formula?.template,
           priceTier: tierConfig.label,
+          includeSubtitle,
+          includeSideLabels,
+          maxCoverWords: 8,
           customPromptOverride,
         },
       });
@@ -146,13 +161,16 @@ export default function WizardStep3Graphics({ productBrief, niche, result, setRe
     const outputs: GraphicOutput[] = [];
     const styleConfig = getStyleConfig();
 
+    const titleForOverlay = coverTitle || productBrief.title;
+    const spellingGuard = `All on-image text MUST be sharply legible, correctly spelled English with no truncated, partial, or invented words.`;
+
     const prompts: { type: string; label: string; override: string }[] = [
       { type: "bundle", label: "Product Bundle", override: "" },
-      { type: "hero", label: "Hero Banner", override: `Create a wide hero banner (16:9) for "${productBrief.title}". Show the product bundle spread across frame. Large bold title text "${productBrief.title}" overlaid. Colors: ${styleConfig.colors}. Mood: ${styleConfig.mood}. Professional sales page header graphic.` },
-      { type: "ad1", label: "Ad Creative — Pain", override: `Square ad creative (1:1) for "${productBrief.title}". Show the product with dramatic lighting. Text overlay: "Struggling with ${productBrief.painPoints?.[0] || 'getting results'}?" at top, product bundle center, "$${productBrief.launchScore?.estimatedPriceCeiling || 17}" price badge. Colors: ${styleConfig.colors}. Bold ${styleConfig.typography}.` },
-      { type: "ad2", label: "Ad Creative — Proof", override: `Square ad creative (1:1) for "${productBrief.title}". Product bundle with "BESTSELLER" badge. 5-star rating graphic. Text: "Join 1,000+ creators who launched in 60 minutes." Clean professional layout. Colors: ${styleConfig.colors}. ${styleConfig.mood}.` },
-      { type: "ad3", label: "Ad Creative — Urgency", override: `Square ad creative (1:1) for "${productBrief.title}". Product bundle with red "LIMITED TIME" banner. Countdown-style urgency graphic. Text: "Launch Price Ends Soon." Bold and urgent. Colors: ${styleConfig.colors} with red accents.` },
-      { type: "thumbnail", label: "Product Thumbnail", override: `Small square thumbnail graphic for "${productBrief.title}". Compact product bundle, bold readable title, simple clean layout optimized for marketplace listings. Colors: ${styleConfig.colors}.` },
+      { type: "hero", label: "Hero Banner", override: `Create a wide hero banner (16:9) for "${titleForOverlay}". Show the product bundle spread across frame. Large bold title text "${titleForOverlay}" overlaid — render ONLY this exact title, no subtitle or tagline. Colors: ${styleConfig.colors}. Mood: ${styleConfig.mood}. Professional sales page header graphic. ${spellingGuard}` },
+      { type: "ad1", label: "Ad Creative — Pain", override: `Square ad creative (1:1) for "${titleForOverlay}". Show the product with dramatic lighting. Text overlay: "Struggling with ${productBrief.painPoints?.[0] || 'getting results'}?" at top, product bundle center, "$${productBrief.launchScore?.estimatedPriceCeiling || 17}" price badge. Colors: ${styleConfig.colors}. Bold ${styleConfig.typography}. ${spellingGuard}` },
+      { type: "ad2", label: "Ad Creative — Proof", override: `Square ad creative (1:1) for "${titleForOverlay}". Product bundle with "BESTSELLER" badge. 5-star rating graphic. Text: "Join 1,000+ creators who launched in 60 minutes." Clean professional layout. Colors: ${styleConfig.colors}. ${styleConfig.mood}. ${spellingGuard}` },
+      { type: "ad3", label: "Ad Creative — Urgency", override: `Square ad creative (1:1) for "${titleForOverlay}". Product bundle with red "LIMITED TIME" banner. Countdown-style urgency graphic. Text: "Launch Price Ends Soon." Bold and urgent. Colors: ${styleConfig.colors} with red accents. ${spellingGuard}` },
+      { type: "thumbnail", label: "Product Thumbnail", override: `Small square thumbnail graphic for "${titleForOverlay}". Compact product bundle, bold readable title (render ONLY "${titleForOverlay}", no tagline), simple clean layout optimized for marketplace listings. Colors: ${styleConfig.colors}. ${spellingGuard}` },
     ];
 
     for (let i = 0; i < prompts.length; i++) {
@@ -292,6 +310,40 @@ export default function WizardStep3Graphics({ productBrief, niche, result, setRe
               </button>
             ))}
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Cover Text Controls */}
+      <Card className="border-accent/20">
+        <CardContent className="p-4 space-y-4">
+          <div className="flex items-center gap-2">
+            <TextCursorInput className="w-4 h-4 text-accent" />
+            <h3 className="text-sm font-semibold">Cover Text</h3>
+            <span className="text-xs text-muted-foreground">— Cleaner covers prevent garbled AI text</span>
+          </div>
+
+          <div className="flex items-center justify-between gap-4 p-3 rounded-lg border border-border/50">
+            <div className="space-y-0.5">
+              <Label htmlFor="tagline-toggle" className="text-sm font-medium cursor-pointer">Tagline on cover</Label>
+              <p className="text-xs text-muted-foreground">Off renders the title only — recommended for crisp typography.</p>
+            </div>
+            <Switch id="tagline-toggle" checked={includeSubtitle} onCheckedChange={setIncludeSubtitle} />
+          </div>
+
+          <div className="flex items-center justify-between gap-4 p-3 rounded-lg border border-border/50">
+            <div className="space-y-0.5">
+              <Label htmlFor="labels-toggle" className="text-sm font-medium cursor-pointer">Labels on side assets</Label>
+              <p className="text-xs text-muted-foreground">Off shows blank workbook/template covers (no garbled text).</p>
+            </div>
+            <Switch id="labels-toggle" checked={includeSideLabels} onCheckedChange={setIncludeSideLabels} />
+          </div>
+
+          {coverTitle && (
+            <div className="text-xs text-muted-foreground p-2 rounded bg-secondary/40 border border-border/30">
+              Cover will read: <span className="font-semibold text-foreground">"{coverTitle}"</span>
+              {coverSubtitle && <span className="block mt-0.5">Subtitle: <span className="text-foreground">"{coverSubtitle}"</span></span>}
+            </div>
+          )}
         </CardContent>
       </Card>
 

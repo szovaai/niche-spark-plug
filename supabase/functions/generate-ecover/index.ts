@@ -7,13 +7,23 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const COMPONENT_VISUALS: Record<string, { name: string; promptFragment: string }> = {
-  guide: { name: "Main Guide / Ebook", promptFragment: "A premium 3D hardcover book with matte finish, product title visible on spine and front cover, realistic paper thickness, slight shadow beneath" },
-  worksheet: { name: "Workbook / Worksheet Pack", promptFragment: "Spiral-bound workbook with 3-5 stacked worksheet pages, grid lines visible, professional header, clipboard backing with realistic depth" },
-  checklist: { name: "Checklist", promptFragment: "Single clean checklist page with 5-7 visible checkmarks, bold header at top, minimal text blocks, clean design" },
-  resourceList: { name: "Cheat Sheet / Resource List", promptFragment: "Laminated-style card with icon bullets, compact professional layout, bold header, glossy finish" },
-  templates: { name: "Template Pack", promptFragment: "Layered swipe-file sheets with header bars, visible depth between sheets, branded folder behind" },
-  quiz: { name: "Prompt Library", promptFragment: "Card-style document showing numbered prompt list format, clean modern design, bold category headers" },
+const COMPONENT_VISUALS: Record<string, { name: string; promptFragment: (withLabels: boolean) => string }> = {
+  guide: { name: "Main Guide / Ebook", promptFragment: () => "A premium 3D hardcover book with matte finish, realistic paper thickness, slight shadow beneath" },
+  worksheet: { name: "Workbook / Worksheet Pack", promptFragment: (withLabels) => withLabels
+    ? "Spiral-bound workbook with 3-5 stacked worksheet pages, grid lines visible, header reading exactly 'WORKBOOK', clipboard backing with realistic depth"
+    : "Spiral-bound workbook with 3-5 stacked blank worksheet pages, subtle grid lines, NO TEXT, NO HEADERS, NO LABELS visible, clipboard backing with realistic depth" },
+  checklist: { name: "Checklist", promptFragment: (withLabels) => withLabels
+    ? "Single clean checklist page with 5-7 visible checkmarks, header reading exactly 'CHECKLIST', minimal text blocks, clean design"
+    : "Single clean page with 5-7 visible checkmark marks (no words next to them), NO HEADER TEXT, NO LABELS, minimal clean design" },
+  resourceList: { name: "Cheat Sheet / Resource List", promptFragment: (withLabels) => withLabels
+    ? "Laminated-style card with icon bullets, header reading exactly 'BONUS', compact professional layout, glossy finish"
+    : "Laminated-style card with icon bullets only, NO TEXT, NO HEADERS, NO LABELS, compact professional layout, glossy finish" },
+  templates: { name: "Template Pack", promptFragment: (withLabels) => withLabels
+    ? "Layered swipe-file sheets with header bars reading exactly 'TEMPLATE', visible depth between sheets, branded folder behind"
+    : "Layered blank swipe-file sheets, NO TEXT, NO HEADERS, NO LABELS, visible depth between sheets, plain folder behind" },
+  quiz: { name: "Prompt Library", promptFragment: (withLabels) => withLabels
+    ? "Card-style document with header reading exactly 'SWIPE FILE', clean modern design"
+    : "Card-style document showing abstract numbered rows, NO TEXT, NO HEADERS, NO LABELS, clean modern design" },
 };
 
 const NICHE_KEYWORDS: Record<string, string[]> = {
@@ -63,6 +73,9 @@ interface EcoverRequest {
   headlineFormula?: string;
   priceTier?: string;
   customPromptOverride?: string;
+  includeSubtitle?: boolean;
+  includeSideLabels?: boolean;
+  maxCoverWords?: number;
 }
 
 serve(async (req) => {
@@ -73,8 +86,13 @@ serve(async (req) => {
     if (authError || !user) return unauthorizedResponse(authError || 'Authentication required', corsHeaders);
 
     const body = await req.json() as EcoverRequest;
-    const title = body.title || body.productTitle || "Digital Product";
-    const subtitle = body.subtitle || "";
+    const includeSubtitle = body.includeSubtitle ?? false;
+    const includeSideLabels = body.includeSideLabels ?? false;
+    const maxCoverWords = body.maxCoverWords ?? 8;
+    const rawTitle = body.title || body.productTitle || "Digital Product";
+    // Hard cap title words for legibility
+    const title = rawTitle.split(/\s+/).slice(0, maxCoverWords).join(" ");
+    const subtitle = includeSubtitle ? (body.subtitle || "").slice(0, 80) : "";
     const productConcept = body.productConcept || "";
     const uniqueMechanism = body.uniqueMechanism || "";
     const niche = body.niche || "digital products";
@@ -101,11 +119,19 @@ serve(async (req) => {
     } else {
       // Build enhanced prompt with design style engine
       const nicheCategory = detectNiche(niche, title);
-      const componentDescs = validComponents.map(c => `${COMPONENT_VISUALS[c].name}: ${COMPONENT_VISUALS[c].promptFragment}`);
+      const componentDescs = validComponents.map(c => `${COMPONENT_VISUALS[c].name}: ${COMPONENT_VISUALS[c].promptFragment(includeSideLabels)}`);
+
+      const labelRule = includeSideLabels
+        ? `Side prop labels may ONLY display these EXACT words, spelled correctly: WORKBOOK, CHECKLIST, TEMPLATE, SWIPE FILE, BONUS. Do NOT invent, abbreviate, or truncate any other words.`
+        : `Side props (workbook, checklist, templates, etc.) MUST be rendered with NO TEXT, NO HEADERS, NO LABELS, NO WORDS — completely blank covers. Do not invent any words on side items.`;
+
+      const titleRule = includeSubtitle && subtitle
+        ? `RENDER ONLY the title "${title}" with subtitle "${subtitle}" on the main book cover — no body paragraph, no extra tagline.`
+        : `RENDER ONLY the title text "${title}" on the main book cover. Do NOT render a subtitle, tagline, body paragraph, or any descriptive sentence. The cover must contain ONLY the title and a small author/brand mark.`;
 
       const enhancedParams = [
         `Product Title: "${title}"`,
-        subtitle ? `Subtitle: "${subtitle}"` : '',
+        includeSubtitle && subtitle ? `Subtitle: "${subtitle}"` : '',
         `Niche: ${niche}`,
         productConcept ? `Product Description: ${productConcept}` : '',
         uniqueMechanism ? `Unique Selling Point: ${uniqueMechanism}` : '',
@@ -113,13 +139,14 @@ serve(async (req) => {
         body.designTypography ? `Typography: ${body.designTypography}` : '',
         body.designMood ? `Visual Mood: ${body.designMood}` : '',
         body.sceneLayout ? `Scene Layout: ${body.sceneLayout}` : '',
-        body.headlineFormula ? `Cover Text Formula: ${body.headlineFormula}` : '',
         body.priceTier ? `Price Tier Aesthetic: ${body.priceTier} product (match perceived value)` : '',
         `Target Audience: ${body.targetAudience || 'general audience'}`,
         `Components (${validComponents.length} items — ONLY THESE): ${componentDescs.join('; ')}`,
         `Depth: ${depthMode === 'stacked' ? 'layered 3D with depth variation, 25° perspective angles, individual drop shadows' : 'flat minimal arrangement'}`,
         `REQUIRED EFFECTS: 3D perspective at 25° angle, soft drop shadows beneath each item, light reflection on glossy surfaces, background gradient, professional product photography lighting from top-left`,
-        `CRITICAL: The cover text MUST say "${title}"${subtitle ? ` with subtitle "${subtitle}"` : ''}. The imagery must reflect the ${niche} niche and the product concept.`,
+        `TYPOGRAPHY RULE: All rendered text must be sharply legible, correctly spelled English. NO partial words, NO truncated text, NO placeholder lorem ipsum, NO fake brand names, NO invented words.`,
+        titleRule,
+        labelRule,
       ].filter(Boolean).join('\n');
 
       // STAGE 1: AI writes custom prompt
