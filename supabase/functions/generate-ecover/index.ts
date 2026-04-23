@@ -42,17 +42,18 @@ function detectNiche(niche: string, title: string): string {
   return 'default';
 }
 
-const PROMPT_WRITER_SYSTEM = `You are a premium eCover design director with 15+ years creating high-ticket digital product mockups. Write ultra-high-quality image generation prompts for photorealistic digital product bundle mockups.
+const PROMPT_WRITER_SYSTEM = `You are a premium eCover design director with 15+ years creating high-ticket digital product mockups. Write ultra-high-quality image generation prompts for photorealistic, RICHLY DETAILED digital product bundle mockups.
 
 CRITICAL RULES:
 1. ONLY include the EXACT components specified — NO extras, NO duplicates.
-2. Composition: hero book centered front, supporting items fanned tightly behind it in a tight arc, items overlapping the hero by ~10% so the bundle reads as ONE cohesive stack (NOT floating separately).
-3. Must look like $297-$997 premium product photography (3D, 25° tilt, soft contact shadows, rim light, subtle bloom).
-4. TYPOGRAPHY ON THE HERO COVER: Render the EXACT title text given, fully contained inside the cover with generous safe margins (≥10% padding on every side). Title MUST NOT overflow, MUST NOT clip, MUST NOT continue off the edge. If the title is long, scale it down — never crop. Use 1-3 lines max, perfectly balanced.
-5. Spell every visible word correctly. NO partial words, NO truncated text, NO lorem ipsum, NO invented words on side props.
-6. Background: subtle dark studio gradient with soft vignette. Tight floor shadow under the entire bundle.
+2. Composition: hero book centered front; supporting items fanned tightly behind in a tight arc, overlapping the hero by 15–20%; a second depth row with 1–2 peeking items (folder edge, index card, tab); 1–2 styling accessories (fountain pen, brass paperclip, folded kraft band) for editorial feel; bundle fills 80–85% of the frame (tight crop); ONE unified soft contact shadow under the entire stack.
+3. Must look like $297–$997 premium product photography (3D, 25° tilt, soft contact shadows, rim light, subtle bloom). Cinematic studio background: navy-to-charcoal radial gradient centered behind the hero with subtle vignette, faint reflective floor under the bundle, soft rim light from upper-left, gentle bloom on glossy edges.
+4. TYPOGRAPHY ON THE HERO COVER: Render the EXACT title text given, fully contained inside the cover with generous safe margins (≥10% padding on every side). Title MUST NOT overflow, MUST NOT clip, MUST NOT continue off the edge. If long, scale down — never crop. 1–3 balanced lines max.
+5. HERO COVER LAYOUT (non-text design fills dead space): thin decorative eyebrow band at top in the accent color, bold title block centered occupying 55–65% of the cover height, ornamental divider line under the title, small brand monogram circle bottom-center, subtle background texture (paper grain or soft geometric pattern). NO extra words beyond the title.
+6. Spell every visible word correctly. NO partial words, NO truncated text, NO lorem ipsum, NO invented words on side props.
+7. Side props must be richly detailed but blank: fill-in lines, icon glyphs, ornamental corners, dotted dividers, color swatches, wireframe boxes, percent rings, numbered badges — never words.
 
-OUTPUT: A single 400-600 word prompt ready for image generation. No headers or explanations.`;
+OUTPUT: A single 500–750 word prompt ready for image generation. No headers or explanations.`;
 
 interface EcoverRequest {
   title?: string;
