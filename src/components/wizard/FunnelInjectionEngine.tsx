@@ -36,7 +36,6 @@ interface Props {
 const PAYMENT_PROVIDERS = [
   { value: "stripe", label: "Stripe Payment Link" },
   { value: "paypal", label: "PayPal Checkout" },
-  { value: "warriorplus", label: "WarriorPlus Buy Button" },
   { value: "gumroad", label: "Gumroad Link" },
   { value: "thrivecart", label: "ThriveCart" },
   { value: "systemeio", label: "Systeme.io" },

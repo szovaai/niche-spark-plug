@@ -55,9 +55,9 @@ const PricingSuggester = ({ niche, components, onPriceSelected }: PricingSuggest
   const tiers = getPricingTiers();
   
   const profitEstimates = (price: number) => {
-    const warriorPlusFee = 0.10; // 10% marketplace fee
+    const marketplaceFee = 0.10; // 10% marketplace fee
     const paymentFee = 0.05; // ~5% payment processing
-    const netPerSale = price * (1 - warriorPlusFee - paymentFee);
+    const netPerSale = price * (1 - marketplaceFee - paymentFee);
     
     return {
       netPerSale: netPerSale.toFixed(2),
@@ -116,7 +116,7 @@ const PricingSuggester = ({ niche, components, onPriceSelected }: PricingSuggest
                     <Info className="w-3 h-3 text-muted-foreground" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>After WarriorPlus (10%) + payment fees (5%)</p>
+                    <p>After marketplace (10%) + payment fees (5%)</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>

@@ -47,7 +47,7 @@ const BLUEPRINT_LIBRARY = [
   { id: "lead-magnet",  label: "Lead Magnet Funnel",  pages: ["traffic","optin","email","sales","checkout","thankyou","delivery"], emoji: "📧" },
   { id: "simple",       label: "Simple Product",       pages: ["traffic","sales","checkout","upsell","thankyou","delivery"], emoji: "🎯" },
   { id: "affiliate",    label: "Affiliate Launch",     pages: ["traffic","sales","checkout","thankyou","delivery","affiliate"], emoji: "🤝" },
-  { id: "full-launch",  label: "Full WarriorPlus",     pages: ["traffic","optin","email","sales","checkout","upsell","downsell","thankyou","delivery","affiliate"], emoji: "🚀" },
+  { id: "full-launch",  label: "Full Launch Funnel",   pages: ["traffic","optin","email","sales","checkout","upsell","downsell","thankyou","delivery","affiliate"], emoji: "🚀" },
 ];
 
 /* ------------------------------------------------------------------ */

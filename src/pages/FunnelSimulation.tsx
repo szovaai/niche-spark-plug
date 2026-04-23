@@ -155,7 +155,7 @@ function ScoreBreakdown({ label, value }: { label: string; value: number }) {
 }
 
 const trafficSources = [
-  { value: "warriorplus", label: "WarriorPlus Affiliates", avgConv: 5 },
+  { value: "warriorplus", label: "Affiliate Network Traffic", avgConv: 5 },
   { value: "organic", label: "Organic Traffic", avgConv: 2 },
   { value: "pinterest", label: "Pinterest", avgConv: 2.5 },
   { value: "tiktok", label: "TikTok", avgConv: 1.5 },
@@ -233,7 +233,7 @@ export default function FunnelSimulation() {
     if (price <= 17) tips.push({ text: `$${price} is a strong impulse buy price. Great for first-time buyers.`, type: "success" });
     if (price > 47) tips.push({ text: "Higher price points need stronger proof and bonuses. Make sure your sales page converts.", type: "warning" });
     if (upsellRate < 20) tips.push({ text: `Adding a one-time-offer countdown could boost your ${upsellRate}% upsell rate to 25-30%.`, type: "tip" });
-    if (affiliateCommission < 50) tips.push({ text: "Raising affiliate commission to 50%+ attracts more WarriorPlus affiliates.", type: "tip" });
+    if (affiliateCommission < 50) tips.push({ text: "Raising affiliate commission to 50%+ attracts more affiliates from networks like ClickBank and Gumroad.", type: "tip" });
     if (affiliateCommission >= 50) tips.push({ text: "50%+ commission makes your offer attractive to affiliate marketers.", type: "success" });
     if (refundRate > 10) tips.push({ text: "Refund rate above 10% signals offer-market mismatch. Strengthen your delivery.", type: "warning" });
     if (epc >= 1) tips.push({ text: `Your EPC of $${epc.toFixed(2)} is competitive for affiliate recruitment.`, type: "success" });

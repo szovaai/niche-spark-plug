@@ -518,7 +518,7 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
                             <Target className="w-4 h-4 text-primary" /> Top Affiliate Niches to Target
                           </h4>
                           <p className="text-xs text-muted-foreground mt-1">
-                            These are the niches where you'll find affiliates who promote similar products. Search WarriorPlus for top sellers in these categories.
+                            These are the niches where you'll find affiliates who promote similar products. Search affiliate networks like ClickBank, JVZoo, Gumroad, or PartnerStack for top sellers in these categories.
                           </p>
                         </div>
 
@@ -543,7 +543,7 @@ export default function WizardStep4({ productBrief, productContent, funnelCopy, 
                           <CardContent className="p-5">
                             <h4 className="font-semibold text-sm mb-3">💡 How to Find Affiliates</h4>
                             <ol className="space-y-2 text-sm text-muted-foreground">
-                              <li className="flex gap-2"><span className="font-bold text-foreground">1.</span> Go to WarriorPlus → Affiliates → Find Affiliates</li>
+                              <li className="flex gap-2"><span className="font-bold text-foreground">1.</span> Browse affiliate networks (ClickBank, JVZoo, Gumroad, PartnerStack) → Find Affiliates</li>
                               <li className="flex gap-2"><span className="font-bold text-foreground">2.</span> Search for products in the niches listed above</li>
                               <li className="flex gap-2"><span className="font-bold text-foreground">3.</span> Look at the top affiliates on the leaderboard</li>
                               <li className="flex gap-2"><span className="font-bold text-foreground">4.</span> Send them your Outreach Email (from the Outreach tab)</li>

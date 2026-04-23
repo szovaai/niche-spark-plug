@@ -73,7 +73,7 @@ Generate 8 opportunities. For EACH opportunity return JSON with:
 - "score": weighted /100 = round(demand*2.5 + pain*2 + competition*1.5 + emotion*1.5 + ad_potential*1.5 + upsell*1)
 - "hooks": array of 5 short ad hook lines
 - "suggested_price": one of 17, 27, 37, 47
-- "platform": one of "Shopify", "Gumroad", "Etsy", "WarriorPlus"
+- "platform": one of "Shopify", "Gumroad", "Etsy", "Digital Marketplace"
 - "target_audience": specific buyer (1 sentence)
 - "pain_analysis": 2-sentence emotional frustration summary
 - "upsell_ideas": array of 3 short upsell concepts

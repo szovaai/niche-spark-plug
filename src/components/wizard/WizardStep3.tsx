@@ -112,7 +112,7 @@ export default function WizardStep3({ productBrief, productContent, result, setR
         <div className="space-y-4">
           <div className="flex items-center gap-2 flex-wrap">
             <Badge variant="outline" className="text-xs">
-              {salesStyle === "warriorplus" ? "WarriorPlus Style" : salesStyle === "longform" ? "Long-Form" : salesStyle === "vsl" ? "VSL Script" : "Short Page"}
+              {salesStyle === "warriorplus" ? "High-Converting Style" : salesStyle === "longform" ? "Long-Form" : salesStyle === "vsl" ? "VSL Script" : "Short Page"}
             </Badge>
             <Button variant="outline" size="sm" onClick={generate} disabled={loading} className="gap-1">
               {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}

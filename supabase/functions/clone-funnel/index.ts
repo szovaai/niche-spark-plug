@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
     const userTier = await getUserTier(userId);
 
     const toneDirective: Record<string, string> = {
-      warriorplus: "Write in aggressive WarriorPlus style: urgency, scarcity, value stacking, pattern interrupts, bold claims, countdown energy.",
+      warriorplus: "Write in high-energy direct-response style: urgency, scarcity, value stacking, pattern interrupts, bold claims, countdown energy.",
       authority: "Write in authority style: expert positioning, data-backed claims, professional tone, proof-heavy.",
       friendly: "Write in friendly conversational style: approachable, encouraging, like a helpful mentor.",
       bold: "Write in bold disruptive style: big claims, pattern interrupts, challenging assumptions, provocative hooks.",
