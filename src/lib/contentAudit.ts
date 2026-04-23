@@ -386,11 +386,11 @@ export function auditFullContent(content: Step2Content, assets?: ProductAssets):
     const uniqueFlagged = [...new Set(allFlagged)];
     const ref = chapterAudits[0].dimensions[i];
 
-    // Asset Depth gets a real-time boost from Factory outputs
+    // Asset Depth gets a real-time boost from Factory outputs (monotonic — never drops below avg)
     if (ref.label === "Asset Depth") {
-      // 7 standalone bundle types × ~14pts each = up to ~100 bonus when all generated
-      const factoryBonus = Math.min(70, tally.presentTypes * 12 + Math.min(30, (tally.worksheets + tally.cheatsheets + tally.prompts + tally.templates + tally.bonuses + tally.cases) * 1.5));
-      const boostedScore = Math.min(100, avgScore + factoryBonus);
+      const densityCount = tally.worksheets + tally.cheatsheets + tally.prompts + tally.templates + tally.bonuses + tally.cases + tally.scripts + tally.checklists;
+      const factoryFloor = Math.min(100, tally.presentTypes * 14 + densityCount * 2);
+      const boostedScore = Math.max(avgScore, factoryFloor);
       const factoryParts: string[] = [];
       if (tally.worksheets) factoryParts.push(`${tally.worksheets} worksheets`);
       if (tally.cheatsheets) factoryParts.push(`${tally.cheatsheets} cheat sheets`);
