@@ -407,7 +407,9 @@ export default function WizardStep2({ productBrief, productType, result, setResu
     toast.success("All chapters humanized!");
   };
 
-  const audit = result ? auditFullContent(result, assets) : null;
+  const prevAuditDimsRef = useRef<DimensionScore[] | undefined>(undefined);
+  const audit = result ? auditFullContentWithBest(result, assets, prevAuditDimsRef.current) : null;
+  if (audit) prevAuditDimsRef.current = audit.dimensions;
   const estimatedPages = result?.chapters ? estimatePages(result.chapters, contentDepth) : 0;
 
   if (!productBrief) {
