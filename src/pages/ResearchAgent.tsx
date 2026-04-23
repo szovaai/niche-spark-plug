@@ -189,7 +189,7 @@ export default function ResearchAgent() {
       ]
     : [
         "I help people with productivity",
-        "I want to sell on WarriorPlus",
+        "I want to sell digital products online",
         "I have PLR products I want to monetize",
         "I'm interested in the AI/ChatGPT niche",
       ];

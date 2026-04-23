@@ -34,6 +34,8 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const keyword = (body.keyword || "").toString().trim().slice(0, 120);
     const mode = (body.mode || "buyer_problems").toString();
+    const targetNiche = (body.targetNiche || "").toString().trim().slice(0, 120);
+    const targetKeywords = Array.isArray(body.targetKeywords) ? body.targetKeywords.slice(0, 10).map((k: any) => String(k).slice(0, 60)) : [];
     const modeGuide = MODE_GUIDANCE[mode] || MODE_GUIDANCE.buyer_problems;
 
     // Cache check
@@ -57,9 +59,13 @@ serve(async (req) => {
       });
     }
 
+    const nicheDirective = targetNiche && targetNiche.toLowerCase() !== "all"
+      ? `\n\nNICHE FOCUS: Focus EXCLUSIVELY on the "${targetNiche}" niche. Every opportunity returned must serve this audience.${targetKeywords.length ? ` Related keywords/themes: ${targetKeywords.join(", ")}.` : ""}`
+      : "";
+
     const systemPrompt = `You are a buyer-pain intelligence engine for digital product creators. You blend signals from Google autocomplete, Reddit complaints, Quora questions, TikTok comments, Etsy demand, and Pinterest trends to surface real, monetizable buyer problems.
 
-${modeGuide}
+${modeGuide}${nicheDirective}
 
 Generate 8 opportunities. For EACH opportunity return JSON with:
 - "title": punchy product name (e.g. "Menopause Belly Fat Reset")
@@ -73,7 +79,7 @@ Generate 8 opportunities. For EACH opportunity return JSON with:
 - "score": weighted /100 = round(demand*2.5 + pain*2 + competition*1.5 + emotion*1.5 + ad_potential*1.5 + upsell*1)
 - "hooks": array of 5 short ad hook lines
 - "suggested_price": one of 17, 27, 37, 47
-- "platform": one of "Shopify", "Gumroad", "Etsy", "WarriorPlus"
+- "platform": one of "Shopify", "Gumroad", "Etsy", "Digital Marketplace"
 - "target_audience": specific buyer (1 sentence)
 - "pain_analysis": 2-sentence emotional frustration summary
 - "upsell_ideas": array of 3 short upsell concepts

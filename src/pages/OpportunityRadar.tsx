@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   Radar, TrendingUp, Zap, ArrowRight, RefreshCw, Sparkles,
-  Target, DollarSign, Users, Flame, Wand2, Filter, X
+  Target, DollarSign, Users, Flame, Wand2, Filter, X, ChevronsUpDown, Check,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,10 +13,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList,
+} from "@/components/ui/command";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { RESEARCH_NICHES, NICHES_BY_CATEGORY, NICHE_CATEGORIES, type ResearchNiche } from "@/data/researchNiches";
+import { cn } from "@/lib/utils";
 
 interface Opportunity {
   title: string;
@@ -326,6 +332,22 @@ const OpportunityRadar = () => {
   const [difficulty, setDifficulty] = useState("all");
   const [profitLevel, setProfitLevel] = useState("all");
   const [selected, setSelected] = useState<string | null>(null);
+  const [selectedNicheId, setSelectedNicheId] = useState<string>(() => {
+    if (typeof window === "undefined") return "all";
+    return localStorage.getItem("radar:selectedNicheId") || "all";
+  });
+  const [nichePickerOpen, setNichePickerOpen] = useState(false);
+
+  const selectedNiche: ResearchNiche | null = useMemo(
+    () => RESEARCH_NICHES.find(n => n.id === selectedNicheId) || null,
+    [selectedNicheId]
+  );
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("radar:selectedNicheId", selectedNicheId);
+    }
+  }, [selectedNicheId]);
 
   const fetchOpportunities = async () => {
     if (!user) {
@@ -336,7 +358,11 @@ const OpportunityRadar = () => {
     setSelected(null);
     try {
       const { data, error } = await supabase.functions.invoke("opportunity-radar", {
-        body: { category },
+        body: {
+          category,
+          targetNiche: selectedNiche?.label || "all",
+          targetKeywords: selectedNiche?.keywords || [],
+        },
       });
       if (error) throw error;
       setOpportunities(data.opportunities || []);
@@ -390,6 +416,93 @@ const OpportunityRadar = () => {
           </div>
         </motion.div>
 
+        {/* Niche picker */}
+        <Card className="bg-card/60 backdrop-blur-lg border-border/50">
+          <CardContent className="p-4 space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <div className="space-y-0.5">
+                <p className="text-sm font-semibold flex items-center gap-2">
+                  <Target className="w-4 h-4 text-primary" />
+                  Pick a Niche to Research
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Focus the radar on a specific market — or leave blank for a broad scan.
+                </p>
+              </div>
+              {selectedNiche && (
+                <Badge variant="secondary" className="gap-1.5 pl-2 pr-1 py-1">
+                  <span>{selectedNiche.emoji}</span>
+                  <span className="text-xs font-medium">{selectedNiche.label}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-5 w-5 ml-0.5"
+                    onClick={() => setSelectedNicheId("all")}
+                    aria-label="Clear niche"
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                </Badge>
+              )}
+            </div>
+
+            <Popover open={nichePickerOpen} onOpenChange={setNichePickerOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={nichePickerOpen}
+                  className="w-full justify-between"
+                >
+                  {selectedNiche ? (
+                    <span className="flex items-center gap-2 truncate">
+                      <span>{selectedNiche.emoji}</span>
+                      <span className="truncate">{selectedNiche.label}</span>
+                      <span className="text-xs text-muted-foreground hidden sm:inline">— {selectedNiche.category}</span>
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">All niches (broad market scan)</span>
+                  )}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Search niches..." />
+                  <CommandList className="max-h-[320px]">
+                    <CommandEmpty>No niche found.</CommandEmpty>
+                    <CommandGroup heading="General">
+                      <CommandItem
+                        value="all-niches"
+                        onSelect={() => { setSelectedNicheId("all"); setNichePickerOpen(false); }}
+                      >
+                        <Check className={cn("mr-2 h-4 w-4", selectedNicheId === "all" ? "opacity-100" : "opacity-0")} />
+                        🌐 All niches (broad scan)
+                      </CommandItem>
+                    </CommandGroup>
+                    {NICHE_CATEGORIES.map(cat => (
+                      <CommandGroup key={cat} heading={cat}>
+                        {NICHES_BY_CATEGORY[cat]?.map(n => (
+                          <CommandItem
+                            key={n.id}
+                            value={`${n.label} ${n.category} ${n.keywords.join(" ")}`}
+                            onSelect={() => { setSelectedNicheId(n.id); setNichePickerOpen(false); }}
+                          >
+                            <Check className={cn("mr-2 h-4 w-4", selectedNicheId === n.id ? "opacity-100" : "opacity-0")} />
+                            <span className="mr-2">{n.emoji}</span>
+                            <span className="flex-1">{n.label}</span>
+                            <span className="text-xs text-muted-foreground hidden sm:inline ml-2 truncate">{n.description}</span>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    ))}
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </CardContent>
+        </Card>
+
         {/* Controls */}
         <Card className="bg-card/60 backdrop-blur-lg border-border/50">
           <CardContent className="p-4">
@@ -429,7 +542,7 @@ const OpportunityRadar = () => {
               </div>
               <Button onClick={fetchOpportunities} disabled={loading} className="gap-2 shrink-0">
                 {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Radar className="w-4 h-4" />}
-                {loading ? "Scanning..." : opportunities.length > 0 ? "Rescan" : "Scan Market"}
+                {loading ? "Scanning..." : opportunities.length > 0 ? "Rescan" : selectedNiche ? `Scan ${selectedNiche.label} Niche` : "Scan Market"}
               </Button>
             </div>
           </CardContent>
@@ -462,7 +575,7 @@ const OpportunityRadar = () => {
             </p>
             <Button onClick={fetchOpportunities} size="lg" className="gap-2">
               <Sparkles className="w-4 h-4" />
-              Scan Market Now
+              {selectedNiche ? `Scan ${selectedNiche.label} Niche` : "Scan Market Now"}
             </Button>
           </motion.div>
         )}

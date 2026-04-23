@@ -10,7 +10,7 @@ interface Props {
 }
 
 const STYLES: { value: SalesStyle; label: string; desc: string; icon: React.ElementType }[] = [
-  { value: "warriorplus", label: "WarriorPlus Style", desc: "Urgency, scarcity, pattern interrupts, value stacking", icon: Zap },
+  { value: "warriorplus", label: "High-Converting Sales Style", desc: "Urgency, scarcity, pattern interrupts, value stacking", icon: Zap },
   { value: "longform", label: "Long-Form Copy", desc: "Classic Dan Kennedy letter — story-driven, fascinations", icon: FileText },
   { value: "vsl", label: "VSL Script", desc: "Teleprompter-ready video sales letter with timing cues", icon: Video },
   { value: "short", label: "Short Landing Page", desc: "Hero + mechanism + stack + CTA — no fluff", icon: Layout },

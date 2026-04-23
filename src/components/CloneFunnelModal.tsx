@@ -18,7 +18,7 @@ interface CloneFunnelModalProps {
 }
 
 const TONES = [
-  { value: "warriorplus", label: "WarriorPlus", desc: "Urgency, scarcity, value stacking" },
+  { value: "warriorplus", label: "High-Energy", desc: "Urgency, scarcity, value stacking" },
   { value: "authority", label: "Authority", desc: "Expert positioning, proof-heavy" },
   { value: "friendly", label: "Friendly", desc: "Conversational, approachable" },
   { value: "bold", label: "Bold", desc: "Big claims, pattern interrupts" },

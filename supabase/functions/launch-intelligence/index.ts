@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
         bonus_count: productDNA.bonusCount || 0,
         hooks_used: productDNA.hooksUsed || [],
         copy_tone: productDNA.copyTone,
-        platform: productDNA.platform || "warriorplus",
+        platform: productDNA.platform || "digital",
         blueprint_tags: productDNA.blueprintTags || [],
       });
 
