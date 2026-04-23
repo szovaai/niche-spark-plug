@@ -450,6 +450,41 @@ export function auditFullContent(content: Step2Content, assets?: ProductAssets):
   return { overall, dimensions: avgDimensions, canContinue, gateMessage, coachingMessages: allCoaching };
 }
 
+// ─── Best-ever floor variant: prevents per-dimension regressions ────────────
+export function auditFullContentWithBest(
+  content: Step2Content,
+  assets?: ProductAssets,
+  prevDimensions?: DimensionScore[],
+): ContentAuditResult {
+  const current = auditFullContent(content, assets);
+  if (!prevDimensions || prevDimensions.length === 0) return current;
+
+  const flooredDims = current.dimensions.map((dim) => {
+    const prev = prevDimensions.find((p) => p.label === dim.label);
+    if (!prev || prev.score <= dim.score) return dim;
+    // Keep the higher previous score as a floor
+    return {
+      ...dim,
+      score: prev.score,
+      grade: getGrade(prev.score),
+      status: getStatus(prev.score),
+    };
+  });
+
+  const overall = Math.round(flooredDims.reduce((s, d) => s + d.score, 0) / flooredDims.length);
+  const hasUnsafe = flooredDims.some((d) => d.status === "unsafe");
+  const canContinue = overall >= 80 && !hasUnsafe;
+  const gateMessage = !canContinue
+    ? overall < 80
+      ? `Your product scores ${overall}/100. You need 80+ to continue. Fix the flagged issues below.`
+      : "Your product has unsafe claims that must be fixed before continuing."
+    : overall < 90
+    ? "Product passes! Improving remaining areas will boost conversions and reduce refunds."
+    : undefined;
+
+  return { overall, dimensions: flooredDims, canContinue, gateMessage, coachingMessages: current.coachingMessages };
+}
+
 // ─── Sales page audit (unchanged) ───────────────────────────────────────────
 export interface ConversionElement {
   name: string;
