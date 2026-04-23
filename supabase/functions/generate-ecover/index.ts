@@ -127,25 +127,28 @@ serve(async (req) => {
         : `Side props (workbook, checklist, templates, etc.) MUST be rendered with NO TEXT, NO HEADERS, NO LABELS, NO WORDS — completely blank covers. Do not invent any words on side items.`;
 
       const titleRule = includeSubtitle && subtitle
-        ? `RENDER ONLY the title "${title}" with subtitle "${subtitle}" on the main book cover — no body paragraph, no extra tagline.`
-        : `RENDER ONLY the title text "${title}" on the main book cover. Do NOT render a subtitle, tagline, body paragraph, or any descriptive sentence. The cover must contain ONLY the title and a small author/brand mark.`;
+        ? `RENDER ONLY the title "${title}" with subtitle "${subtitle}" on the main book cover — no body paragraph, no extra tagline. Title and subtitle MUST fit fully inside the cover with ≥10% safe margin on every side. Scale the type down if needed; NEVER let any letter clip or run off the edge.`
+        : `RENDER ONLY the title text "${title}" on the main book cover. Do NOT render a subtitle, tagline, body paragraph, or any descriptive sentence. The cover must contain ONLY the title and a small author/brand mark. Title MUST fit fully inside the cover with ≥10% safe margin on every side, broken across 1-3 balanced lines. Scale the type down if needed; NEVER let any letter clip, hyphenate, or run off the edge.`;
+
+      const compositionRule = `COMPOSITION: One cohesive bundle, NOT scattered objects. Hero book centered front; supporting items fanned tightly behind in a tight arc, each overlapping the hero by 8-12%. All items share one tight floor shadow. Tight crop (item edges should reach close to image bounds). No empty floating gaps between items.`;
 
       const enhancedParams = [
-        `Product Title: "${title}"`,
+        `Product Title (render this EXACT text on the cover, nothing else): "${title}"`,
         includeSubtitle && subtitle ? `Subtitle: "${subtitle}"` : '',
         `Niche: ${niche}`,
-        productConcept ? `Product Description: ${productConcept}` : '',
-        uniqueMechanism ? `Unique Selling Point: ${uniqueMechanism}` : '',
+        productConcept ? `Product Description (for visual mood ONLY — do NOT render this text): ${productConcept}` : '',
+        uniqueMechanism ? `Unique Selling Point (visual mood ONLY — do NOT render): ${uniqueMechanism}` : '',
         body.designColors ? `Color Palette: ${body.designColors}` : '',
         body.designTypography ? `Typography: ${body.designTypography}` : '',
         body.designMood ? `Visual Mood: ${body.designMood}` : '',
         body.sceneLayout ? `Scene Layout: ${body.sceneLayout}` : '',
         body.priceTier ? `Price Tier Aesthetic: ${body.priceTier} product (match perceived value)` : '',
         `Target Audience: ${body.targetAudience || 'general audience'}`,
-        `Components (${validComponents.length} items — ONLY THESE): ${componentDescs.join('; ')}`,
-        `Depth: ${depthMode === 'stacked' ? 'layered 3D with depth variation, 25° perspective angles, individual drop shadows' : 'flat minimal arrangement'}`,
-        `REQUIRED EFFECTS: 3D perspective at 25° angle, soft drop shadows beneath each item, light reflection on glossy surfaces, background gradient, professional product photography lighting from top-left`,
-        `TYPOGRAPHY RULE: All rendered text must be sharply legible, correctly spelled English. NO partial words, NO truncated text, NO placeholder lorem ipsum, NO fake brand names, NO invented words.`,
+        `Components (${validComponents.length} items — ONLY THESE, no duplicates, no extras): ${componentDescs.join('; ')}`,
+        `Depth: ${depthMode === 'stacked' ? 'layered 3D with depth variation, 25° perspective angles, unified soft shadow' : 'flat minimal arrangement'}`,
+        compositionRule,
+        `REQUIRED EFFECTS: 3D perspective at 25° angle, soft contact shadow under the bundle, light reflection on glossy surfaces, dark studio gradient background with subtle vignette, lighting from top-left, gentle rim light.`,
+        `TYPOGRAPHY RULE: All rendered text must be sharply legible, correctly spelled English. NO partial words, NO truncated text, NO clipping at edges, NO placeholder lorem ipsum, NO fake brand names, NO invented words.`,
         titleRule,
         labelRule,
       ].filter(Boolean).join('\n');
