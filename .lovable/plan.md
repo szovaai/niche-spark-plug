@@ -1,45 +1,54 @@
 
 
-## Fix: Score Drops After Generating Assets / Expanding Chapters
+## Fix Cover Text Quality: Drop the Tagline + Sharpen Spelling
 
-### Root cause
+Two clear options the user can toggle in **Product Launch Graphics** (Step 3). Defaults to the cleaner look (no tagline, hero text only).
 
-The Content Quality score (the big number in the report) is the average of 10 per-chapter dimensions. Asset Depth correctly climbs as Factory assets are generated, but the other 9 dimensions are computed from each chapter's text — so any time a chapter is **regenerated, expanded, "Fixed", or fully written** by the AI, the new text can score lower on Human Readability, Outcome Specificity, Step-by-Step Execution, etc., dragging the overall down even while Asset Depth went up.
+### What changes
 
-There are also two smaller issues amplifying the effect:
+**1. New "Cover Text" control card** in `src/components/wizard/WizardStep3Graphics.tsx`, right above the Generate buttons:
 
-1. **No floor on regenerated chapters.** When `Fix Ch N`, `Write Full Chapter`, or `expandChapter` returns prose that happens to score worse than the original, we silently overwrite the better version with the worse one.
-2. **Asset Depth bonus formula has a soft cap that can shrink relative to noise.** The `min(70, presentTypes * 12 + min(30, count * 1.5))` cap means once you pass ~6 asset bundles you stop gaining ground, so a small dip in another dimension shows up immediately as an overall drop.
-3. **Delta chip only shows positives.** When the score dips, the user sees no explanation — just a smaller number.
+- **Tagline on cover**: Toggle (default **OFF**)
+  - OFF → only the **Title** is rendered on the main book; no subtitle, no body paragraph, no labels on side props.
+  - ON → Title + short subtitle (auto-trimmed to ≤ 80 chars, no body paragraph).
+- **Side asset labels**: Toggle (default **OFF**)
+  - OFF → side workbook / swipe file / checklist / template props render as clean blank covers (no garbled "WORKBO"/"MEXOON" text).
+  - ON → labels render but only from a fixed clean word list (`WORKBOOK`, `CHECKLIST`, `TEMPLATE`, `SWIPE FILE`, `BONUS`).
 
-### Plan
+**2. Pass the toggles to the edge function**
 
-**1. `src/lib/contentAudit.ts` — make Asset Depth monotonic and clarify the math**
-- Remove the inner `min(30, …)` clamp on the density bonus so each new asset bundle produces visible movement up to 100.
-- Change formula to: `boostedScore = max(avgScore, min(100, presentTypes * 14 + densityCount * 2))`. Using `max` against `avgScore` ensures Asset Depth never drops just because chapters were rewritten with different inline asset words.
-- Add a new helper `auditFullContentWithBest(content, assets, prevDimensions?)` that, when called with the previous audit's per-dimension scores, takes `Math.max(currentDim, prevDim)` for the **same chapter index + dimension**. This gives the audit a "best-ever" floor across regenerations so a worse rewrite cannot pull a dimension below its previous best.
-- Keep `auditFullContent` unchanged for callers that want raw scoring.
+Extend the `generate-ecover` body with:
+```ts
+includeSubtitle: boolean;     // default false
+includeSideLabels: boolean;   // default false  
+maxCoverWords: 8;             // hard cap on hero title rendering
+```
 
-**2. `src/components/wizard/ContentQualityReport.tsx` — track overall delta + show drops too**
-- Track previous `audit.overall` in a ref alongside the existing `prevAssetDepth`.
-- When overall changes, render a small chip next to the big number: green `+N pts` if up, amber `-N pts` if down. Auto-dismiss after 3s.
-- Pass `prevDimensions` from the ref into a new `auditFullContent` call (using the "best-ever" floor) so the visible score never regresses just from a noisy regeneration.
+**3. Tighten the prompt** in `supabase/functions/generate-ecover/index.ts`:
 
-**3. `src/components/wizard/WizardStep2.tsx` — guard against regressions on chapter-level AI ops**
-- After `Fix Ch`, `expandChapter`, `Write Full Chapter`, and `Humanize` operations finish, compare the new chapter's individual audit against the previous chapter's individual audit. If overall per-chapter score drops by more than 5 points, show a small inline toast: "New version scored lower — kept previous version" and **revert** that single chapter's content. Add a "Use new version anyway" button on the toast.
-- Pass `prevDimensions` (stored in a ref) into both `<ContentQualityReport assets={assets} />` and the local `auditFullContent` call that gates the Continue button so they stay in sync.
+- When `includeSubtitle === false`: strip subtitle from `enhancedParams`, remove the "with subtitle …" clause, and add an explicit instruction:
+  > `RENDER ONLY the title text "<TITLE>" on the main book cover. Do NOT render a subtitle, tagline, body paragraph, or any descriptive sentence. The cover must contain ONLY the title and small author/brand mark.`
+- When `includeSideLabels === false`: replace the current per-component prompt fragments (which currently say things like `"'Worksheets' header label visible"`) with **label-free** variants:
+  > `"3-5 stacked blank worksheet pages with subtle grid lines, NO TEXT, NO HEADERS, NO LABELS visible"`
+- When `includeSideLabels === true`: restrict labels to the fixed word list above and forbid invented words. Add: `Side props may ONLY display these exact words: WORKBOOK, CHECKLIST, TEMPLATE, SWIPE FILE, BONUS. Do not invent or abbreviate any other words. Spell every visible word correctly.`
+- Add a global typography rule: `All rendered text must be sharply legible, correctly spelled English. No partial words, no truncated text, no placeholder lorem ipsum, no fake brand names.`
 
-**4. UX clarity**
-- In `ContentQualityReport`, when overall dips, surface a one-line note under the score: "A recent rewrite scored lower on [dimension] — original version kept." This makes the behavior predictable.
-- Asset Depth chip continues to show `+N pts` when factory assets are added.
+**4. Auto-shorten the title for cover rendering**
+
+In `WizardStep3Graphics.tsx`, derive a `coverTitle` for the bundle/hero/thumbnail that strips any text after the first colon **and** caps at 8 words (e.g. `"The $1,000 Debt Erase Blueprint: Add $1,000 to Your Bank Account in 30 Days—Not Debt Payments"` → `"The $1,000 Debt Erase Blueprint"`). The full original title is still stored in the project; only the cover render uses the short form. Show a small preview chip under the toggle: *"Cover will read: The $1,000 Debt Erase Blueprint"* so the user knows what will appear.
+
+**5. Re-generate buttons unchanged**
+
+Existing **Generate Product Bundle** and **Generate All Launch Graphics** buttons just pick up the new toggles automatically — no extra clicks required.
 
 ### Files touched
-- **Edit** `src/lib/contentAudit.ts` — new monotonic Asset Depth math + `auditFullContentWithBest` helper.
-- **Edit** `src/components/wizard/ContentQualityReport.tsx` — overall delta chip (up + down), best-ever floor, regression note.
-- **Edit** `src/components/wizard/WizardStep2.tsx` — per-chapter regression guard with revert + override toast; pass `prevDimensions` ref.
+
+- **Edit** `src/components/wizard/WizardStep3Graphics.tsx` — add Cover Text card with two toggles, derive `coverTitle`, pass `includeSubtitle` / `includeSideLabels` / short title to all `generateGraphic` calls (single + ad overrides).
+- **Edit** `supabase/functions/generate-ecover/index.ts` — accept the new flags, swap the per-component prompt fragments for label-free variants when off, add strict spelling + word-list rules, drop subtitle from prompt when off.
 
 ### Out of scope
-- No changes to the `generate-product-assets` or `generate-launch-content` edge functions.
-- No changes to other wizard steps or the boost-score system.
-- No DB or schema changes.
+
+- No changes to other wizard steps, asset factory, or autosave.
+- No new edge function — same `generate-ecover` endpoint.
+- No DB schema changes.
 
