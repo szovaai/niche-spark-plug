@@ -416,6 +416,93 @@ const OpportunityRadar = () => {
           </div>
         </motion.div>
 
+        {/* Niche picker */}
+        <Card className="bg-card/60 backdrop-blur-lg border-border/50">
+          <CardContent className="p-4 space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <div className="space-y-0.5">
+                <p className="text-sm font-semibold flex items-center gap-2">
+                  <Target className="w-4 h-4 text-primary" />
+                  Pick a Niche to Research
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Focus the radar on a specific market — or leave blank for a broad scan.
+                </p>
+              </div>
+              {selectedNiche && (
+                <Badge variant="secondary" className="gap-1.5 pl-2 pr-1 py-1">
+                  <span>{selectedNiche.emoji}</span>
+                  <span className="text-xs font-medium">{selectedNiche.label}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-5 w-5 ml-0.5"
+                    onClick={() => setSelectedNicheId("all")}
+                    aria-label="Clear niche"
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                </Badge>
+              )}
+            </div>
+
+            <Popover open={nichePickerOpen} onOpenChange={setNichePickerOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={nichePickerOpen}
+                  className="w-full justify-between"
+                >
+                  {selectedNiche ? (
+                    <span className="flex items-center gap-2 truncate">
+                      <span>{selectedNiche.emoji}</span>
+                      <span className="truncate">{selectedNiche.label}</span>
+                      <span className="text-xs text-muted-foreground hidden sm:inline">— {selectedNiche.category}</span>
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">All niches (broad market scan)</span>
+                  )}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Search niches..." />
+                  <CommandList className="max-h-[320px]">
+                    <CommandEmpty>No niche found.</CommandEmpty>
+                    <CommandGroup heading="General">
+                      <CommandItem
+                        value="all-niches"
+                        onSelect={() => { setSelectedNicheId("all"); setNichePickerOpen(false); }}
+                      >
+                        <Check className={cn("mr-2 h-4 w-4", selectedNicheId === "all" ? "opacity-100" : "opacity-0")} />
+                        🌐 All niches (broad scan)
+                      </CommandItem>
+                    </CommandGroup>
+                    {NICHE_CATEGORIES.map(cat => (
+                      <CommandGroup key={cat} heading={cat}>
+                        {NICHES_BY_CATEGORY[cat]?.map(n => (
+                          <CommandItem
+                            key={n.id}
+                            value={`${n.label} ${n.category} ${n.keywords.join(" ")}`}
+                            onSelect={() => { setSelectedNicheId(n.id); setNichePickerOpen(false); }}
+                          >
+                            <Check className={cn("mr-2 h-4 w-4", selectedNicheId === n.id ? "opacity-100" : "opacity-0")} />
+                            <span className="mr-2">{n.emoji}</span>
+                            <span className="flex-1">{n.label}</span>
+                            <span className="text-xs text-muted-foreground hidden sm:inline ml-2 truncate">{n.description}</span>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    ))}
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </CardContent>
+        </Card>
+
         {/* Controls */}
         <Card className="bg-card/60 backdrop-blur-lg border-border/50">
           <CardContent className="p-4">
@@ -455,7 +542,7 @@ const OpportunityRadar = () => {
               </div>
               <Button onClick={fetchOpportunities} disabled={loading} className="gap-2 shrink-0">
                 {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Radar className="w-4 h-4" />}
-                {loading ? "Scanning..." : opportunities.length > 0 ? "Rescan" : "Scan Market"}
+                {loading ? "Scanning..." : opportunities.length > 0 ? "Rescan" : selectedNiche ? `Scan ${selectedNiche.label} Niche` : "Scan Market"}
               </Button>
             </div>
           </CardContent>
