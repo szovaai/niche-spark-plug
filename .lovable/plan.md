@@ -1,69 +1,39 @@
 
 
-# Strip WarriorPlus Branding + Add Niche Dropdown for Research
+# Fix Mushed Metric Labels + Dashboard Page
 
-Two parts: (1) remove WarriorPlus references throughout the app and replace with mainstream/neutral language, (2) add a curated niche dropdown selector (PDF Trend App style) on the Opportunity Radar so users can pick a niche to research instead of doing a blind market scan.
+Two targeted fixes:
 
----
+## 1. Fix mushed-together metric labels on opportunity cards
 
-## 1. Remove WarriorPlus Branding (Mainstream Pivot)
+In `src/components/radar/OpportunityCard.tsx`, the 5-column metric strip (DEMAND / COMP / ADS / EMOTION / UPSELL) has labels overflowing into each other because each column is too narrow for the uppercase text and there's no horizontal breathing room.
 
-Replace all WarriorPlus-specific copy, labels, fees, and platform options with neutral, mainstream-marketplace language. Affected surfaces:
+Changes to the `Metric` block + its container:
+- Switch the metric strip from a tight 5-column grid to a layout with proper column gaps and per-cell padding so labels don't collide.
+- Shrink the label font slightly (`text-[9px]`), tighten letter-spacing, and add `whitespace-nowrap` + `truncate` so each label stays on one line within its cell.
+- Shorten label copy where it visibly overflows: "Emotion" → "Emo", "Upsell" → "Up", "Demand" → "Dem", "Ads" stays, "Comp" stays. This keeps all 5 readable at the current card width.
+- Add a subtle vertical divider between cells so values group correctly with their label visually.
+- Increase vertical padding inside the strip so labels and numbers aren't cramped.
 
-**UI components & pages**
-- `src/components/wizard/SalesStyleSelector.tsx` — rename "WarriorPlus Style" option to "High-Converting Sales Style" (keep underlying `warriorplus` enum value to avoid breaking saved projects, but relabel UI + description without the platform name).
-- `src/components/CloneFunnelModal.tsx` — relabel the `warriorplus` tone option to "High-Energy" with a generic urgency/scarcity description.
-- `src/components/wizard/FunnelInjectionEngine.tsx` — remove "WarriorPlus Buy Button" payment option from the dropdown; keep Stripe, PayPal, Gumroad, ThriveCart.
-- `src/components/wizard/FunnelSimulationMap.tsx` — rename "Full WarriorPlus" funnel preset to "Full Launch Funnel".
-- `src/components/wizard/WizardStep3.tsx` — replace the `"WarriorPlus Style"` badge label with "High-Converting Style".
-- `src/components/wizard/WizardStep4.tsx` — rewrite the affiliate-finding instructions to reference generic affiliate marketplaces ("affiliate networks like ClickBank, JVZoo, Gumroad, or PartnerStack") instead of WarriorPlus specifically.
-- `src/pages/FunnelSimulation.tsx` — rename the "WarriorPlus Affiliates" traffic source to "Affiliate Network Traffic"; update default state value label.
-- `src/pages/ResearchAgent.tsx` — replace the example chip "I want to sell on WarriorPlus" with "I want to sell digital products online".
-- `src/components/PricingSuggester.tsx` — rename the `warriorPlusFee` variable to `marketplaceFee`, relabel the tooltip to "After marketplace (10%) + payment fees (5%)".
+Result: each metric is clearly separated and readable on the card width shown in the screenshot.
 
-**Edge functions (copy strings only — keep enum keys for data compatibility)**
-- `supabase/functions/clone-funnel/index.ts` — rewrite the `warriorplus` tone directive to remove the platform name; keep the key.
-- `supabase/functions/opportunity-radar/index.ts` — drop "WarriorPlus" from the `platform` enum returned by AI; keep Shopify, Gumroad, Etsy, plus add "Digital Marketplace".
-- `supabase/functions/launch-intelligence/index.ts` — change default `platform` fallback string from `"warriorplus"` to `"digital"`.
+## 2. Fix the Dashboard sidebar entry showing old discovery content
 
-**Master copy prompts**
-- `supabase/functions/_shared/copyPrompts.ts` — rewrite the marketplace-context paragraph to remove WarriorPlus/ClickBank/JVZoo name-drops; replace with "digital product marketplaces and direct-response buyers" framing. Keep all the tonal rules intact.
+The sidebar's "Dashboard" link routes to `/dashboard` correctly, but the Dashboard page itself currently renders legacy discovery-style widgets (DailyBriefing, GettingStartedChecklist, old project list cards) that feel like the old Discover page rather than a true home base for the new Profit Radar / PDF Empire flow.
 
-**Branding copy**
-- Search the codebase for any remaining user-facing strings containing "WarriorPlus" in pages/components and convert each to a neutral phrase (e.g. "marketplace", "affiliate network", "digital product launch").
+Changes to `src/pages/Dashboard.tsx`:
+- Replace the legacy hero/cards layout with a focused "home base" layout aligned with the new Profit Radar product:
+  - Top: welcome header with the user's name and a primary CTA "Open Profit Radar" → `/opportunities`, plus a secondary "New Launch" → `/wizard`.
+  - Stats row: 4 compact KPI cards (Products built, Funnels generated, Marketing assets, Streak days) using the existing `stats` data already fetched.
+  - Recent projects section: clean list of the 5 most recent `launch_projects` with Continue / Clone actions (keeps the existing `cloneProject` logic).
+  - Quick links row: 4 tiles to Profit Radar, Product Builder, Funnel Builder, Saved Projects.
+- Remove the discovery-flavored widgets that no longer fit the mainstream PDF Empire positioning: `DailyBriefing`, `GettingStartedChecklist`, `LaunchJourney`, `ProductFactoryCard`, `AILaunchCoach`, `ReferralWidget`, `RevenueGoalWidget`, `RevenueProjector`, `LaunchDNACard`, `ProductScorecard`, `PreLaunchAudit`, `DailyLaunchTasks`. (These components stay in the codebase for use elsewhere — only removed from the Dashboard page.)
+- Keep `DashboardLayout` wrapper so the sidebar/header remain consistent.
 
-**Migration filename comment**
-- Existing `20251231085743_*.sql` migration has `-- WarriorPlus Toolkit Edition` comment — leave the migration file untouched (already executed) but no further references in new code.
+Result: clicking "Dashboard" in the sidebar now lands on a clean home base centered on Profit Radar + recent launches, not the old discovery layout.
 
----
-
-## 2. Niche Dropdown Selector on Opportunity Radar
-
-Add a curated niche picker above the "Scan Market" button so users can target a specific niche before scanning, similar to PDF Trend App's category browser.
-
-**Niche library**
-- Create `src/data/researchNiches.ts` exporting a curated list of ~30 mainstream digital-product niches grouped by category. Each entry: `{ id, label, category, emoji, description, keywords[] }`. Categories: Health & Wellness, Finance & Money, Productivity, Parenting, Education, Business & Marketing, Hobbies & Crafts, Spirituality, Pets, Relationships, AI & Tech, Self-Development.
-
-**UI changes — `src/pages/OpportunityRadar.tsx`**
-- Add a `selectedNiche` state (default `"all"`).
-- Add a prominent searchable niche selector above the existing category/difficulty/profit filter row, using a Combobox-style dropdown (shadcn `Popover` + `Command`) so users can scroll, search, and pick from grouped niches.
-- Show the selected niche as a chip with a clear-X button.
-- Pass the chosen niche label + keywords to `fetchOpportunities` → forward to the `opportunity-radar` edge function as `targetNiche`.
-- When a specific niche is selected, change the empty-state CTA label from "Scan Market" to `Scan {NicheLabel} Niche`.
-
-**Edge function — `supabase/functions/opportunity-radar/index.ts`**
-- Accept new optional `targetNiche` param.
-- When provided, inject a directive into the AI prompt: "Focus exclusively on the '<niche>' niche. All opportunities returned must serve this audience." Keep current generic behaviour when `targetNiche` is `"all"` or omitted.
-
-**Optional polish**
-- Persist last-selected niche in `localStorage` so returning users see their previous focus.
-- Wire the same selector visually into the Discover page header for parity, but scoped to filter `nicheSnapshots` by category match (single-file change, low risk).
-
----
-
-## Out of Scope
-
-- No database schema changes (existing `warriorplus` enum values in saved projects remain valid; only labels change).
-- No changes to Pricing, Auth, Logo, or Sidebar layout.
-- No removal of the `SalesStyle` type's `"warriorplus"` key — preserved for backwards compatibility with stored launch projects.
+## Out of scope
+- No route changes (`/dashboard` already maps to `Dashboard`).
+- No sidebar restructuring.
+- No changes to Profit Radar itself beyond the OpportunityCard metric strip.
 
