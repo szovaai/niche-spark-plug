@@ -575,7 +575,7 @@ const OpportunityRadar = () => {
             </p>
             <Button onClick={fetchOpportunities} size="lg" className="gap-2">
               <Sparkles className="w-4 h-4" />
-              Scan Market Now
+              {selectedNiche ? `Scan ${selectedNiche.label} Niche` : "Scan Market Now"}
             </Button>
           </motion.div>
         )}
