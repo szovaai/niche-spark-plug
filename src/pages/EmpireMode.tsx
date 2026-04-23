@@ -18,6 +18,7 @@ import { Step3ProductPack } from "@/components/empire/Step3ProductPack";
 import { Step4GumroadLaunch } from "@/components/empire/Step4GumroadLaunch";
 import { Step5ContentEngine } from "@/components/empire/Step5ContentEngine";
 import { Step6Automation } from "@/components/empire/Step6Automation";
+import { useAutosave } from "@/hooks/useAutosave";
 
 const stepIcons = {
   Target, Palette, Package, Store, Video, Rocket

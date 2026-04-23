@@ -10,6 +10,7 @@ import StepSelectType from "@/components/micro-factory/StepSelectType";
 import StepDefineNiche from "@/components/micro-factory/StepDefineNiche";
 import StepCustomize from "@/components/micro-factory/StepCustomize";
 import StepResults from "@/components/micro-factory/StepResults";
+import { useAutosave } from "@/hooks/useAutosave";
 
 const STEPS = ["Product Type", "Niche & Audience", "Customize", "Results"];
 
