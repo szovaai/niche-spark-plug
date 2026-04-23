@@ -10,20 +10,20 @@ const corsHeaders = {
 const COMPONENT_VISUALS: Record<string, { name: string; promptFragment: (withLabels: boolean) => string }> = {
   guide: { name: "Main Guide / Ebook", promptFragment: () => "A premium 3D hardcover book with matte finish, realistic paper thickness, slight shadow beneath" },
   worksheet: { name: "Workbook / Worksheet Pack", promptFragment: (withLabels) => withLabels
-    ? "Spiral-bound workbook with 3-5 stacked worksheet pages, grid lines visible, header reading exactly 'WORKBOOK', clipboard backing with realistic depth"
-    : "Spiral-bound workbook with 3-5 stacked blank worksheet pages, subtle grid lines, NO TEXT, NO HEADERS, NO LABELS visible, clipboard backing with realistic depth" },
+    ? "Spiral-bound workbook with 3-5 stacked pages, fill-in lines, small bar-chart sketch in a corner, tiny circular icon glyphs, ornamental corner flourishes, header reading exactly 'WORKBOOK', clipboard backing with realistic depth, premium matte cardstock"
+    : "Spiral-bound workbook with 3-5 stacked pages showing fill-in lines, small bar-chart sketch, tiny circular icon glyphs in corners, decorative corner ornaments, NO TEXT, NO HEADERS, NO LABELS, NO WORDS, clipboard backing with realistic depth, premium matte cardstock — richly designed and detailed" },
   checklist: { name: "Checklist", promptFragment: (withLabels) => withLabels
-    ? "Single clean checklist page with 5-7 visible checkmarks, header reading exactly 'CHECKLIST', minimal text blocks, clean design"
-    : "Single clean page with 5-7 visible checkmark marks (no words next to them), NO HEADER TEXT, NO LABELS, minimal clean design" },
+    ? "Clean checklist page with 6-8 checkmarks beside short horizontal placeholder bars, a star icon, a percent ring graphic, decorative divider line, ornamental border, header reading exactly 'CHECKLIST', glossy laminated finish"
+    : "Clean page with 6-8 checkmark icons beside short horizontal placeholder bars, a star icon, a percent ring graphic, decorative divider line, ornamental border, NO TEXT, NO HEADERS, NO LABELS, NO WORDS, glossy laminated finish — richly designed and detailed" },
   resourceList: { name: "Cheat Sheet / Resource List", promptFragment: (withLabels) => withLabels
-    ? "Laminated-style card with icon bullets, header reading exactly 'BONUS', compact professional layout, glossy finish"
-    : "Laminated-style card with icon bullets only, NO TEXT, NO HEADERS, NO LABELS, compact professional layout, glossy finish" },
+    ? "Laminated card with icon bullets (link, bookmark, gear, envelope glyphs), thin divider lines, a small QR-style square graphic, gold accent corners, header reading exactly 'BONUS', compact professional layout, glossy finish"
+    : "Laminated card with icon bullets (link, bookmark, gear, envelope glyphs only), thin divider lines, a small QR-style square graphic, gold accent corners, compact professional layout, glossy finish, NO TEXT, NO HEADERS, NO LABELS, NO WORDS — richly designed and detailed" },
   templates: { name: "Template Pack", promptFragment: (withLabels) => withLabels
-    ? "Layered swipe-file sheets with header bars reading exactly 'TEMPLATE', visible depth between sheets, branded folder behind"
-    : "Layered blank swipe-file sheets, NO TEXT, NO HEADERS, NO LABELS, visible depth between sheets, plain folder behind" },
+    ? "Layered swipe-file sheets with wireframe boxes, grid placeholders, small color swatch row, dotted dividers, header bars reading exactly 'TEMPLATE', visible depth between sheets, branded kraft folder behind with band"
+    : "Layered swipe-file sheets showing wireframe boxes, grid placeholders, small color swatch row, dotted dividers, visible depth between sheets, kraft folder behind with band, NO TEXT, NO HEADERS, NO LABELS, NO WORDS — richly designed and detailed" },
   quiz: { name: "Prompt Library", promptFragment: (withLabels) => withLabels
-    ? "Card-style document with header reading exactly 'SWIPE FILE', clean modern design"
-    : "Card-style document showing abstract numbered rows, NO TEXT, NO HEADERS, NO LABELS, clean modern design" },
+    ? "Card-style document with numbered circle badges, short bar placeholders, dotted dividers, small icon glyph row, subtle accent stripe, header reading exactly 'SWIPE FILE', clean modern design"
+    : "Card-style document with numbered circle badges, short bar placeholders, dotted dividers, small icon glyph row, subtle accent stripe, clean modern design, NO TEXT, NO HEADERS, NO LABELS, NO WORDS — richly designed and detailed" },
 };
 
 const NICHE_KEYWORDS: Record<string, string[]> = {

@@ -1,54 +1,52 @@
+## Premium eProduct Bundle Visual Upgrade
 
+Edit `supabase/functions/generate-ecover/index.ts` only, then redeploy `generate-ecover`. Goal: richer, denser, more designed-looking bundle mockups without breaking the existing strict typography/spelling rules.
 
-## Fix Cover Text Quality: Drop the Tagline + Sharpen Spelling
+### 1. Detailed, label-free side props (`COMPONENT_VISUALS`)
+Rewrite each component's `promptFragment(false)` so blank props look richly designed instead of empty. Strict no-text rule unchanged — only visual texture is added.
 
-Two clear options the user can toggle in **Product Launch Graphics** (Step 3). Defaults to the cleaner look (no tagline, hero text only).
+- **Workbook**: spiral binding, fill-in lines, small bar-chart sketch, tiny circular icon glyphs, ornamental corners, matte cardstock — NO words
+- **Checklist**: 6–8 checkmarks beside short placeholder bars, star icon, percent ring graphic, decorative divider, ornamental border — NO words
+- **Resource list**: laminated card with link/bookmark/gear/envelope glyphs, divider lines, small QR-style square, gold accent corners — NO words
+- **Templates**: layered sheets with wireframe boxes, grid placeholders, color swatch row, dotted dividers, kraft folder + band — NO words
+- **Prompt library / quiz**: numbered circle badges, short bar placeholders, dotted dividers, icon glyph row, accent stripe — NO words
 
-### What changes
+The label-on variants stay restricted to the existing 5-word safelist (WORKBOOK, CHECKLIST, TEMPLATE, SWIPE FILE, BONUS).
 
-**1. New "Cover Text" control card** in `src/components/wizard/WizardStep3Graphics.tsx`, right above the Generate buttons:
+### 2. Hero cover — non-text design structure
+Add a `heroLayoutRule` in the prompt builder telling the image model to fill dead space with non-text design elements:
+- Thin decorative eyebrow band at top in the accent color
+- Bold title block centered, occupying 55–65% of the cover height
+- Ornamental divider line under the title
+- Small brand monogram circle bottom-center
+- Subtle background texture (paper grain or soft geometric pattern)
 
-- **Tagline on cover**: Toggle (default **OFF**)
-  - OFF → only the **Title** is rendered on the main book; no subtitle, no body paragraph, no labels on side props.
-  - ON → Title + short subtitle (auto-trimmed to ≤ 80 chars, no body paragraph).
-- **Side asset labels**: Toggle (default **OFF**)
-  - OFF → side workbook / swipe file / checklist / template props render as clean blank covers (no garbled "WORKBO"/"MEXOON" text).
-  - ON → labels render but only from a fixed clean word list (`WORKBOOK`, `CHECKLIST`, `TEMPLATE`, `SWIPE FILE`, `BONUS`).
+Existing strict typography rules and 6-word title cap stay exactly as they are.
 
-**2. Pass the toggles to the edge function**
+### 3. Denser, richer composition (`compositionRule` rewrite)
+- Hero ~55% of frame width
+- Supporting items fan tighter — overlap **15–20%** (was 8–12%)
+- Add a second depth row with 1–2 peeking items (folder edge, index card, tab)
+- Add 1–2 styling accessories (fountain pen, brass paperclip, folded kraft band) for editorial feel
+- Bundle fills **80–85% of the frame** (tight crop)
+- One unified soft contact shadow under the entire stack
 
-Extend the `generate-ecover` body with:
-```ts
-includeSubtitle: boolean;     // default false
-includeSideLabels: boolean;   // default false  
-maxCoverWords: 8;             // hard cap on hero title rendering
-```
+### 4. Cinematic studio background
+Upgrade the background instruction inside `REQUIRED EFFECTS`:
+- Navy-to-charcoal radial gradient centered behind hero with subtle vignette
+- Faint reflective floor under the bundle
+- Soft rim light from upper-left, gentle bloom on glossy edges
 
-**3. Tighten the prompt** in `supabase/functions/generate-ecover/index.ts`:
-
-- When `includeSubtitle === false`: strip subtitle from `enhancedParams`, remove the "with subtitle …" clause, and add an explicit instruction:
-  > `RENDER ONLY the title text "<TITLE>" on the main book cover. Do NOT render a subtitle, tagline, body paragraph, or any descriptive sentence. The cover must contain ONLY the title and small author/brand mark.`
-- When `includeSideLabels === false`: replace the current per-component prompt fragments (which currently say things like `"'Worksheets' header label visible"`) with **label-free** variants:
-  > `"3-5 stacked blank worksheet pages with subtle grid lines, NO TEXT, NO HEADERS, NO LABELS visible"`
-- When `includeSideLabels === true`: restrict labels to the fixed word list above and forbid invented words. Add: `Side props may ONLY display these exact words: WORKBOOK, CHECKLIST, TEMPLATE, SWIPE FILE, BONUS. Do not invent or abbreviate any other words. Spell every visible word correctly.`
-- Add a global typography rule: `All rendered text must be sharply legible, correctly spelled English. No partial words, no truncated text, no placeholder lorem ipsum, no fake brand names.`
-
-**4. Auto-shorten the title for cover rendering**
-
-In `WizardStep3Graphics.tsx`, derive a `coverTitle` for the bundle/hero/thumbnail that strips any text after the first colon **and** caps at 8 words (e.g. `"The $1,000 Debt Erase Blueprint: Add $1,000 to Your Bank Account in 30 Days—Not Debt Payments"` → `"The $1,000 Debt Erase Blueprint"`). The full original title is still stored in the project; only the cover render uses the short form. Show a small preview chip under the toggle: *"Cover will read: The $1,000 Debt Erase Blueprint"* so the user knows what will appear.
-
-**5. Re-generate buttons unchanged**
-
-Existing **Generate Product Bundle** and **Generate All Launch Graphics** buttons just pick up the new toggles automatically — no extra clicks required.
+### 5. Prompt budget bump
+`PROMPT_WRITER_SYSTEM`: raise output target from 400–600 → 500–750 words so the new detail rules survive into the final image prompt.
 
 ### Files touched
-
-- **Edit** `src/components/wizard/WizardStep3Graphics.tsx` — add Cover Text card with two toggles, derive `coverTitle`, pass `includeSubtitle` / `includeSideLabels` / short title to all `generateGraphic` calls (single + ad overrides).
-- **Edit** `supabase/functions/generate-ecover/index.ts` — accept the new flags, swap the per-component prompt fragments for label-free variants when off, add strict spelling + word-list rules, drop subtitle from prompt when off.
+- `supabase/functions/generate-ecover/index.ts` (only)
 
 ### Out of scope
+- No UI changes (Step 3 wizard already passes the right flags)
+- No new toggles, no schema changes, no other edge functions
+- Existing strict typography/spelling rules and 6-word title cap unchanged
 
-- No changes to other wizard steps, asset factory, or autosave.
-- No new edge function — same `generate-ecover` endpoint.
-- No DB schema changes.
-
+### After edit
+Redeploy `generate-ecover` so the next "Generate Product Bundle" click in Step 3 uses the upgraded prompt.
