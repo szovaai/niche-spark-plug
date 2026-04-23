@@ -88,11 +88,12 @@ serve(async (req) => {
     const body = await req.json() as EcoverRequest;
     const includeSubtitle = body.includeSubtitle ?? false;
     const includeSideLabels = body.includeSideLabels ?? false;
-    const maxCoverWords = body.maxCoverWords ?? 8;
+    const maxCoverWords = body.maxCoverWords ?? 6;
     const rawTitle = body.title || body.productTitle || "Digital Product";
-    // Hard cap title words for legibility
-    const title = rawTitle.split(/\s+/).slice(0, maxCoverWords).join(" ");
-    const subtitle = includeSubtitle ? (body.subtitle || "").slice(0, 80) : "";
+    // Strip anything after a colon or em-dash, then hard cap word count for legibility
+    const beforeBreak = rawTitle.split(/[:—–]/)[0].trim() || rawTitle.trim();
+    const title = beforeBreak.split(/\s+/).slice(0, maxCoverWords).join(" ");
+    const subtitle = includeSubtitle ? (body.subtitle || "").slice(0, 60) : "";
     const productConcept = body.productConcept || "";
     const uniqueMechanism = body.uniqueMechanism || "";
     const niche = body.niche || "digital products";
