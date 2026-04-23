@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   Radar, TrendingUp, Zap, ArrowRight, RefreshCw, Sparkles,
-  Target, DollarSign, Users, Flame, Wand2, Filter, X
+  Target, DollarSign, Users, Flame, Wand2, Filter, X, ChevronsUpDown, Check,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,10 +13,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList,
+} from "@/components/ui/command";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { RESEARCH_NICHES, NICHES_BY_CATEGORY, NICHE_CATEGORIES, type ResearchNiche } from "@/data/researchNiches";
+import { cn } from "@/lib/utils";
 
 interface Opportunity {
   title: string;
@@ -326,6 +332,22 @@ const OpportunityRadar = () => {
   const [difficulty, setDifficulty] = useState("all");
   const [profitLevel, setProfitLevel] = useState("all");
   const [selected, setSelected] = useState<string | null>(null);
+  const [selectedNicheId, setSelectedNicheId] = useState<string>(() => {
+    if (typeof window === "undefined") return "all";
+    return localStorage.getItem("radar:selectedNicheId") || "all";
+  });
+  const [nichePickerOpen, setNichePickerOpen] = useState(false);
+
+  const selectedNiche: ResearchNiche | null = useMemo(
+    () => RESEARCH_NICHES.find(n => n.id === selectedNicheId) || null,
+    [selectedNicheId]
+  );
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("radar:selectedNicheId", selectedNicheId);
+    }
+  }, [selectedNicheId]);
 
   const fetchOpportunities = async () => {
     if (!user) {
@@ -336,7 +358,11 @@ const OpportunityRadar = () => {
     setSelected(null);
     try {
       const { data, error } = await supabase.functions.invoke("opportunity-radar", {
-        body: { category },
+        body: {
+          category,
+          targetNiche: selectedNiche?.label || "all",
+          targetKeywords: selectedNiche?.keywords || [],
+        },
       });
       if (error) throw error;
       setOpportunities(data.opportunities || []);
