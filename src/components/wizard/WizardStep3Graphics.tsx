@@ -310,6 +310,40 @@ export default function WizardStep3Graphics({ productBrief, niche, result, setRe
         </CardContent>
       </Card>
 
+      {/* Cover Text Controls */}
+      <Card className="border-accent/20">
+        <CardContent className="p-4 space-y-4">
+          <div className="flex items-center gap-2">
+            <TextCursorInput className="w-4 h-4 text-accent" />
+            <h3 className="text-sm font-semibold">Cover Text</h3>
+            <span className="text-xs text-muted-foreground">— Cleaner covers prevent garbled AI text</span>
+          </div>
+
+          <div className="flex items-center justify-between gap-4 p-3 rounded-lg border border-border/50">
+            <div className="space-y-0.5">
+              <Label htmlFor="tagline-toggle" className="text-sm font-medium cursor-pointer">Tagline on cover</Label>
+              <p className="text-xs text-muted-foreground">Off renders the title only — recommended for crisp typography.</p>
+            </div>
+            <Switch id="tagline-toggle" checked={includeSubtitle} onCheckedChange={setIncludeSubtitle} />
+          </div>
+
+          <div className="flex items-center justify-between gap-4 p-3 rounded-lg border border-border/50">
+            <div className="space-y-0.5">
+              <Label htmlFor="labels-toggle" className="text-sm font-medium cursor-pointer">Labels on side assets</Label>
+              <p className="text-xs text-muted-foreground">Off shows blank workbook/template covers (no garbled text).</p>
+            </div>
+            <Switch id="labels-toggle" checked={includeSideLabels} onCheckedChange={setIncludeSideLabels} />
+          </div>
+
+          {coverTitle && (
+            <div className="text-xs text-muted-foreground p-2 rounded bg-secondary/40 border border-border/30">
+              Cover will read: <span className="font-semibold text-foreground">"{coverTitle}"</span>
+              {coverSubtitle && <span className="block mt-0.5">Subtitle: <span className="text-foreground">"{coverSubtitle}"</span></span>}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Generate Buttons */}
       <div className="flex flex-wrap gap-3">
         <Button onClick={generateSingleBundle} disabled={generating || !!loading} variant="outline" className="gap-2">
