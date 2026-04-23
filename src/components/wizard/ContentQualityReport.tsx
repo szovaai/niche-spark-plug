@@ -1,15 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Progress } from "@/components/ui/progress";
-import { ChevronDown, AlertTriangle, CheckCircle, ShieldAlert, Sparkles, Loader2, Zap, Lock, MessageSquareWarning } from "lucide-react";
-import { ContentAuditResult, auditFullContent, DimensionScore } from "@/lib/contentAudit";
+import { ChevronDown, AlertTriangle, CheckCircle, ShieldAlert, Sparkles, Loader2, Zap, Lock, MessageSquareWarning, TrendingUp } from "lucide-react";
+import { ContentAuditResult, auditFullContent, DimensionScore, tallyFactoryAssets } from "@/lib/contentAudit";
 import { Step2Content } from "@/types/launchWizard";
+import type { ProductAssets } from "@/types/productAssets";
 
 interface Props {
   content: Step2Content;
+  assets?: ProductAssets;
   onExpandChapter?: (chapterIndex: number) => void;
   expandingIndex?: number | null;
   onHumanize?: () => void;
@@ -23,12 +25,36 @@ const statusConfig: Record<DimensionScore["status"], { color: string; label: str
   unsafe: { color: "text-destructive border-destructive/30 bg-destructive/10", label: "Unsafe / Risky", icon: ShieldAlert },
 };
 
-const overallBarColor = (score: number) =>
-  score >= 75 ? "bg-emerald-500" : score >= 50 ? "bg-amber-500" : "bg-destructive";
+const ASSET_CHIPS: { key: keyof ProductAssets; label: string; emoji: string }[] = [
+  { key: "workbook", label: "Workbook", emoji: "📘" },
+  { key: "cheatsheet", label: "Cheatsheet", emoji: "⚡" },
+  { key: "toolkit", label: "Toolkit", emoji: "🧰" },
+  { key: "templates", label: "Templates", emoji: "📝" },
+  { key: "promptPack", label: "Prompts", emoji: "💬" },
+  { key: "bonusGuides", label: "Bonuses", emoji: "🎁" },
+  { key: "caseStudies", label: "Cases", emoji: "📈" },
+];
 
-export default function ContentQualityReport({ content, onExpandChapter, expandingIndex, onHumanize, humanizing }: Props) {
+export default function ContentQualityReport({ content, assets, onExpandChapter, expandingIndex, onHumanize, humanizing }: Props) {
   const [open, setOpen] = useState(true);
-  const audit = auditFullContent(content);
+  const audit = auditFullContent(content, assets);
+  const assetDepthDim = audit.dimensions.find(d => d.label === "Asset Depth");
+
+  // Animated +N pts delta when Asset Depth jumps after generation
+  const prevAssetDepth = useRef<number | null>(null);
+  const [delta, setDelta] = useState<number | null>(null);
+  useEffect(() => {
+    if (!assetDepthDim) return;
+    const current = assetDepthDim.score;
+    if (prevAssetDepth.current !== null && current > prevAssetDepth.current) {
+      const diff = current - prevAssetDepth.current;
+      setDelta(diff);
+      const t = setTimeout(() => setDelta(null), 3000);
+      prevAssetDepth.current = current;
+      return () => clearTimeout(t);
+    }
+    prevAssetDepth.current = current;
+  }, [assetDepthDim?.score]);
 
   if (audit.dimensions.length === 0) return null;
 
@@ -96,6 +122,12 @@ export default function ContentQualityReport({ content, onExpandChapter, expandi
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-muted-foreground tabular-nums">{dim.score}/100</span>
+                        {dim.label === "Asset Depth" && delta && delta > 0 && (
+                          <Badge className="text-[10px] bg-emerald-500/20 text-emerald-300 border-emerald-500/30 animate-pulse gap-1">
+                            <TrendingUp className="w-3 h-3" />
+                            +{delta} pts
+                          </Badge>
+                        )}
                         <Badge variant="outline" className={`text-[10px] ${cfg.color}`}>
                           <StatusIcon className="w-3 h-3 mr-1" />
                           {cfg.label}
@@ -104,6 +136,25 @@ export default function ContentQualityReport({ content, onExpandChapter, expandi
                     </div>
                     <Progress value={dim.score} className="h-1.5" />
                     <p className="text-xs text-muted-foreground">{dim.details}</p>
+                    {/* Asset Factory chips on Asset Depth row */}
+                    {dim.label === "Asset Depth" && (
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {ASSET_CHIPS.map(chip => {
+                          const present = !!assets?.[chip.key];
+                          return (
+                            <Badge
+                              key={chip.key}
+                              variant="outline"
+                              className={`text-[10px] gap-1 ${present ? "bg-accent/15 text-accent border-accent/30" : "text-muted-foreground/50 border-border/40"}`}
+                            >
+                              <span>{chip.emoji}</span>
+                              {chip.label}
+                              {present && <CheckCircle className="w-2.5 h-2.5" />}
+                            </Badge>
+                          );
+                        })}
+                      </div>
+                    )}
                     {/* Coaching message */}
                     {dim.status !== "pass" && (
                       <p className="text-xs font-medium text-amber-300/90 flex items-start gap-1.5">

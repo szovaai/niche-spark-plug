@@ -1,4 +1,5 @@
 import { ChapterItem, Step2Content } from "@/types/launchWizard";
+import type { ProductAssets } from "@/types/productAssets";
 
 // ─── Word & phrase lists ────────────────────────────────────────────────────
 const VAGUE_PHRASES = [
@@ -326,8 +327,50 @@ export function auditChapter(chapter: ChapterItem): ContentAuditResult {
   return { overall, dimensions, canContinue, gateMessage, coachingMessages: coaching };
 }
 
+// ─── Factory asset tally ────────────────────────────────────────────────────
+export interface FactoryAssetTally {
+  worksheets: number;
+  cheatsheets: number;
+  scripts: number;
+  templates: number;
+  checklists: number;
+  prompts: number;
+  bonuses: number;
+  cases: number;
+  multiplierFormats: number;
+  presentTypes: number; // distinct asset bundle types generated
+}
+
+export function tallyFactoryAssets(assets?: ProductAssets): FactoryAssetTally {
+  const t: FactoryAssetTally = {
+    worksheets: 0, cheatsheets: 0, scripts: 0, templates: 0, checklists: 0,
+    prompts: 0, bonuses: 0, cases: 0, multiplierFormats: 0, presentTypes: 0,
+  };
+  if (!assets) return t;
+  if (assets.workbook?.worksheets?.length) { t.worksheets += assets.workbook.worksheets.length; t.presentTypes++; }
+  if (assets.cheatsheet?.sheets?.length) { t.cheatsheets += assets.cheatsheet.sheets.length; t.presentTypes++; }
+  if (assets.toolkit?.tools?.length) {
+    t.presentTypes++;
+    assets.toolkit.tools.forEach(tool => {
+      if (tool.type === "script") t.scripts++;
+      else if (tool.type === "template") t.templates++;
+      else if (tool.type === "checklist") t.checklists++;
+      else if (tool.type === "swipeFile") t.templates++;
+    });
+  }
+  if (assets.templates?.templates?.length) { t.templates += assets.templates.templates.length; t.presentTypes++; }
+  if (assets.promptPack?.categories?.length) {
+    t.presentTypes++;
+    assets.promptPack.categories.forEach(c => { t.prompts += c.prompts?.length || 0; });
+  }
+  if (assets.bonusGuides?.bonuses?.length) { t.bonuses += assets.bonusGuides.bonuses.length; t.presentTypes++; }
+  if (assets.caseStudies?.caseStudies?.length) { t.cases += assets.caseStudies.caseStudies.length; t.presentTypes++; }
+  if (assets.multiplier?.formats?.length) { t.multiplierFormats += assets.multiplier.formats.length; t.presentTypes++; }
+  return t;
+}
+
 // ─── Full content audit (averages across chapters) ──────────────────────────
-export function auditFullContent(content: Step2Content): ContentAuditResult {
+export function auditFullContent(content: Step2Content, assets?: ProductAssets): ContentAuditResult {
   if (!content.chapters || content.chapters.length === 0) {
     return { overall: 0, dimensions: [], canContinue: false, gateMessage: "Generate content first.", coachingMessages: [] };
   }
@@ -335,11 +378,52 @@ export function auditFullContent(content: Step2Content): ContentAuditResult {
   const chapterAudits = content.chapters.map(auditChapter);
   const allCoaching = [...new Set(chapterAudits.flatMap(a => a.coachingMessages))];
 
+  const tally = tallyFactoryAssets(assets);
+
   const avgDimensions: DimensionScore[] = chapterAudits[0].dimensions.map((_, i) => {
     const avgScore = Math.round(chapterAudits.reduce((s, a) => s + a.dimensions[i].score, 0) / chapterAudits.length);
     const allFlagged = chapterAudits.flatMap(a => a.dimensions[i].flaggedItems || []);
     const uniqueFlagged = [...new Set(allFlagged)];
     const ref = chapterAudits[0].dimensions[i];
+
+    // Asset Depth gets a real-time boost from Factory outputs
+    if (ref.label === "Asset Depth") {
+      // 7 standalone bundle types × ~14pts each = up to ~100 bonus when all generated
+      const factoryBonus = Math.min(70, tally.presentTypes * 12 + Math.min(30, (tally.worksheets + tally.cheatsheets + tally.prompts + tally.templates + tally.bonuses + tally.cases) * 1.5));
+      const boostedScore = Math.min(100, avgScore + factoryBonus);
+      const factoryParts: string[] = [];
+      if (tally.worksheets) factoryParts.push(`${tally.worksheets} worksheets`);
+      if (tally.cheatsheets) factoryParts.push(`${tally.cheatsheets} cheat sheets`);
+      if (tally.prompts) factoryParts.push(`${tally.prompts} prompts`);
+      if (tally.templates) factoryParts.push(`${tally.templates} templates`);
+      if (tally.scripts) factoryParts.push(`${tally.scripts} scripts`);
+      if (tally.checklists) factoryParts.push(`${tally.checklists} checklists`);
+      if (tally.bonuses) factoryParts.push(`${tally.bonuses} bonuses`);
+      if (tally.cases) factoryParts.push(`${tally.cases} case studies`);
+      if (tally.multiplierFormats) factoryParts.push(`${tally.multiplierFormats} multiplier formats`);
+      const factorySuffix = factoryParts.length ? ` · Factory: ${factoryParts.join(", ")}` : " · No Asset Factory outputs yet";
+      const stillMissing: string[] = [];
+      if (!assets?.workbook) stillMissing.push("Generate Workbook");
+      if (!assets?.cheatsheet) stillMissing.push("Generate Cheat Sheets");
+      if (!assets?.toolkit) stillMissing.push("Generate Toolkit");
+      if (!assets?.templates) stillMissing.push("Generate Templates");
+      if (!assets?.promptPack) stillMissing.push("Generate Prompt Pack");
+      if (!assets?.bonusGuides) stillMissing.push("Generate Bonuses");
+      if (!assets?.caseStudies) stillMissing.push("Generate Case Studies");
+      return {
+        label: ref.label,
+        icon: ref.icon,
+        score: boostedScore,
+        grade: getGrade(boostedScore),
+        details: `Avg across ${chapterAudits.length} chapters${factorySuffix}`,
+        coaching: boostedScore >= 75
+          ? "Strong asset depth — chapters and Factory outputs combined."
+          : "Generate more standalone assets in the Digital Product Asset Factory below to boost this score.",
+        flaggedItems: stillMissing.length > 0 && boostedScore < 90 ? stillMissing : undefined,
+        status: getStatus(boostedScore),
+      };
+    }
+
     return {
       label: ref.label,
       icon: ref.icon,
