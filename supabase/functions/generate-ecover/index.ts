@@ -73,6 +73,9 @@ interface EcoverRequest {
   headlineFormula?: string;
   priceTier?: string;
   customPromptOverride?: string;
+  includeSubtitle?: boolean;
+  includeSideLabels?: boolean;
+  maxCoverWords?: number;
 }
 
 serve(async (req) => {
