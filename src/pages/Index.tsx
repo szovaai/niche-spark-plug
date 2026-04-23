@@ -47,7 +47,7 @@ const FAQItem = ({ q, a }: { q: string; a: string }) => {
 };
 
 const getProgressText = (pct: number) => {
-  if (pct < 25) return "Discover how LaunchStack AI works";
+  if (pct < 25) return "Discover how PDF Empire AI works";
   if (pct < 50) return "Meet your AI launch team";
   if (pct < 75) return "See the Command Center in action";
   return "You're almost there — see the launch price below";
@@ -121,7 +121,7 @@ const Index = () => {
           </motion.h1>
 
           <motion.p {...fadeIn} transition={{ delay: 0.2 }} className="text-lg md:text-xl text-muted-foreground mb-6 max-w-2xl mx-auto leading-relaxed">
-            LaunchStack AI deploys 10 specialized AI agents that research your market, build your product, write your sales copy, design your funnel, generate your emails, and launch your business — all from one Command Center.
+            PDF Empire AI deploys 10 specialized AI agents that research your market, build your product, write your sales copy, design your funnel, generate your emails, and launch your business — all from one Command Center.
           </motion.p>
 
           <motion.div {...fadeIn} transition={{ delay: 0.25 }} className="flex flex-col items-center gap-1 mb-8">
@@ -211,7 +211,7 @@ const Index = () => {
           <motion.div {...fadeIn} className="mt-10 text-center">
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-6">
               <p className="text-foreground font-bold text-lg">Most AI tools give you a chatbot.</p>
-              <p className="gradient-text font-bold text-lg">LaunchStack AI gives you a team.</p>
+              <p className="gradient-text font-bold text-lg">PDF Empire AI gives you a team.</p>
             </div>
           </motion.div>
         </div>
@@ -302,7 +302,7 @@ const Index = () => {
 
           <motion.div {...fadeIn} className="text-center">
             <p className="text-foreground font-semibold text-lg">What if you had an entire AI team handling every part of the launch?</p>
-            <p className="text-muted-foreground text-sm mt-2">That's exactly what LaunchStack AI does.</p>
+            <p className="text-muted-foreground text-sm mt-2">That's exactly what PDF Empire AI does.</p>
           </motion.div>
         </div>
       </section>
@@ -323,7 +323,7 @@ const Index = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { step: "1", icon: MousePointerClick, title: "Brief Your Agents", desc: "Tell LaunchStack AI your niche and audience. The Opportunity Agent scores your idea and validates demand before you build." },
+              { step: "1", icon: MousePointerClick, title: "Brief Your Agents", desc: "Tell PDF Empire AI your niche and audience. The Opportunity Agent scores your idea and validates demand before you build." },
               { step: "2", icon: Bot, title: "Agents Build Everything", desc: "Product Architect designs your offer. Copy Architect writes your sales page. Email Agent creates your sequence. All simultaneously." },
               { step: "3", icon: Monitor, title: "Review In Command Center", desc: "See every asset, metric, and agent recommendation in your real-time Command Center. Fix weaknesses with one click." },
               { step: "4", icon: Rocket, title: "Deploy & Sell", desc: "Hit Deploy Launch. Watch the animation sequence. Your product, funnel, emails, and affiliate kit go live." },
@@ -470,7 +470,7 @@ const Index = () => {
                 </div>
               ))}
             </div>
-            <p className="text-foreground font-semibold text-center text-lg">LaunchStack AI doesn't give you a chatbot. It gives you a coordinated team of specialists.</p>
+            <p className="text-foreground font-semibold text-center text-lg">PDF Empire AI doesn't give you a chatbot. It gives you a coordinated team of specialists.</p>
           </motion.div>
         </div>
       </section>
@@ -486,7 +486,7 @@ const Index = () => {
               <span className="text-sm gradient-text font-medium">Introducing</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              <span className="gradient-text glow-text">LaunchStack AI</span>
+              <span className="gradient-text glow-text">PDF Empire AI</span>
             </h2>
             <p className="text-lg text-muted-foreground mb-4">
               The World's First AI Launch Operating System With A Built-In Agent Team
@@ -598,7 +598,7 @@ const Index = () => {
           </motion.div>
           <motion.div {...fadeIn}>
             <p className="text-muted-foreground leading-relaxed mb-6">
-              Paste any WarriorPlus, ClickBank, Gumroad, or Etsy product URL into LaunchStack AI. Your agents will:
+              Paste any WarriorPlus, ClickBank, Gumroad, or Etsy product URL into PDF Empire AI. Your agents will:
             </p>
             <div className="space-y-3 mb-6">
               {[
@@ -666,7 +666,7 @@ const Index = () => {
         <div className="max-w-4xl mx-auto">
           <motion.div {...fadeIn} className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">What This Replaces</h2>
-            <p className="text-muted-foreground">See why creators are switching to LaunchStack AI.</p>
+            <p className="text-muted-foreground">See why creators are switching to PDF Empire AI.</p>
           </motion.div>
 
           <motion.div {...fadeIn} className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -674,7 +674,7 @@ const Index = () => {
               <CardContent className="p-6">
                 <h3 className="font-bold text-lg mb-5 flex items-center gap-2">
                   <X className="w-5 h-5 text-destructive" />
-                  Without LaunchStack AI
+                  Without PDF Empire AI
                 </h3>
                 <ul className="space-y-3">
                   {[
@@ -760,7 +760,7 @@ const Index = () => {
                   {[
                     "You're looking for a magic button that requires zero effort",
                     "You don't believe in digital products as a business model",
-                    "You want to sell junk — LaunchStack AI helps you build real offers for real markets",
+                    "You want to sell junk — PDF Empire AI helps you build real offers for real markets",
                   ].map((item, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
                       <X className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
@@ -785,11 +785,11 @@ const Index = () => {
               Most AI tools are general-purpose chatbots. When you try to use them for a digital product launch, you get disconnected, generic pieces that still require a skilled marketer to assemble.
             </p>
             <p className="text-muted-foreground leading-relaxed mb-6">
-              LaunchStack AI was built from the ground up for <strong className="text-foreground">one thing: launching digital products.</strong> Every agent, every prompt, every framework was engineered specifically for the WarriorPlus/ClickBank/Gumroad ecosystem.
+              PDF Empire AI was built from the ground up for <strong className="text-foreground">one thing: launching digital products.</strong> Every agent, every prompt, every framework was engineered specifically for the WarriorPlus/ClickBank/Gumroad ecosystem.
             </p>
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-5 text-center">
               <p className="text-foreground font-semibold">Other tools give you a chatbot.</p>
-              <p className="gradient-text font-bold text-lg mt-1">LaunchStack AI gives you a coordinated launch team with a Command Center.</p>
+              <p className="gradient-text font-bold text-lg mt-1">PDF Empire AI gives you a coordinated launch team with a Command Center.</p>
             </div>
           </motion.div>
         </div>
@@ -805,7 +805,7 @@ const Index = () => {
               <Trophy className="w-4 h-4 text-primary" />
               <span className="text-sm gradient-text font-medium">Complete Platform</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-8">The Full LaunchStack AI Platform</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-8">The Full PDF Empire AI Platform</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg mx-auto text-left">
               {[
                 "Launch Command Center",
@@ -864,7 +864,7 @@ const Index = () => {
               <h3 className="font-bold text-lg">BYOK: Control Your AI Costs</h3>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
-              Connect your own OpenAI, Anthropic (Claude), or DeepSeek API keys and use LaunchStack AI at your own cost structure, with no middleman markup.
+              Connect your own OpenAI, Anthropic (Claude), or DeepSeek API keys and use PDF Empire AI at your own cost structure, with no middleman markup.
             </p>
             <p className="text-sm text-muted-foreground">
               For power users and agencies, run at scale without worrying about platform limits. For everyone else, the app works out of the box with no API key required.
@@ -929,7 +929,7 @@ const Index = () => {
             <div className="border-t border-border/50 pt-6 text-center space-y-2">
               <p className="text-sm text-muted-foreground">Total</p>
               <p className="text-4xl font-black text-foreground line-through decoration-destructive/60">$1,385+</p>
-              <p className="text-sm text-muted-foreground font-medium">LaunchStack AI's agent team does it automatically.</p>
+              <p className="text-sm text-muted-foreground font-medium">PDF Empire AI's agent team does it automatically.</p>
               <p className="text-sm text-muted-foreground">Today:</p>
               <p className="text-5xl font-black gradient-text">$37</p>
             </div>
@@ -953,7 +953,7 @@ const Index = () => {
             <ShieldCheck className="w-16 h-16 text-primary mx-auto mb-6" />
             <h2 className="text-3xl md:text-4xl font-bold mb-6">The "Launch Or It's Free" Guarantee</h2>
             <p className="text-muted-foreground leading-relaxed mb-6">
-              Use LaunchStack AI. Activate your agents. Let them build your launch. If after using this system you don't have a complete, ready-to-publish digital product launch in your hands — or if for any reason you're not satisfied — contact us within 30 days and we'll refund every penny. No questions. No hoops. No guilt trip.
+              Use PDF Empire AI. Activate your agents. Let them build your launch. If after using this system you don't have a complete, ready-to-publish digital product launch in your hands — or if for any reason you're not satisfied — contact us within 30 days and we'll refund every penny. No questions. No hoops. No guilt trip.
             </p>
             <p className="text-foreground font-semibold">
               The only way you don't get results is if you don't use it.
@@ -983,7 +983,7 @@ const Index = () => {
               ))}
             </div>
             <p className="text-muted-foreground leading-relaxed mb-4">
-              LaunchStack AI replaces all of that with a team of 10 AI agents and a real-time Command Center.
+              PDF Empire AI replaces all of that with a team of 10 AI agents and a real-time Command Center.
             </p>
             <p className="text-muted-foreground leading-relaxed mb-8">
               Today, during this launch window, you can get access for a one-time investment that is a fraction of what a single freelancer would charge for a single asset.
@@ -1046,8 +1046,8 @@ const Index = () => {
               a="They're 10 specialized AI systems built into the platform — each one handles a different part of your launch. The Opportunity Agent finds ideas. The Product Architect builds your product. The Copy Architect writes your sales page. They all coordinate through the Command Center so nothing falls through the cracks."
             />
             <FAQItem
-              q="Do I need any technical skills to use LaunchStack AI?"
-              a="None. If you can type and click a mouse, you can use LaunchStack AI. The agents do the work — you review and approve in the Command Center."
+              q="Do I need any technical skills to use PDF Empire AI?"
+              a="None. If you can type and click a mouse, you can use PDF Empire AI. The agents do the work — you review and approve in the Command Center."
             />
             <FAQItem
               q="What kind of products can I launch with this?"
@@ -1055,7 +1055,7 @@ const Index = () => {
             />
             <FAQItem
               q="How is this different from ChatGPT or other AI tools?"
-              a="ChatGPT is a general-purpose chatbot. LaunchStack AI is a coordinated team of 10 specialized agents with a Command Center. Each agent has a specific job — research, product design, copywriting, funnel architecture, simulation, affiliate optimization. They work together on your project simultaneously. That's the difference between a Swiss Army knife and a launch department."
+              a="ChatGPT is a general-purpose chatbot. PDF Empire AI is a coordinated team of 10 specialized agents with a Command Center. Each agent has a specific job — research, product design, copywriting, funnel architecture, simulation, affiliate optimization. They work together on your project simultaneously. That's the difference between a Swiss Army knife and a launch department."
             />
             <FAQItem
               q="What's the Command Center?"
@@ -1063,7 +1063,7 @@ const Index = () => {
             />
             <FAQItem
               q="Does this actually work for complete beginners?"
-              a="Yes. In fact, beginners often get more from LaunchStack AI than experienced marketers because the agents handle the parts that trip beginners up — writing copy, building funnels, structuring offers. You focus on your idea. They handle the execution."
+              a="Yes. In fact, beginners often get more from PDF Empire AI than experienced marketers because the agents handle the parts that trip beginners up — writing copy, building funnels, structuring offers. You focus on your idea. They handle the execution."
             />
             <FAQItem
               q="Is there a monthly fee?"
@@ -1078,7 +1078,7 @@ const Index = () => {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <span className="font-bold flex items-center gap-2">
             <Zap className="w-5 h-5 text-primary" />
-            LaunchStack AI
+            PDF Empire AI
           </span>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
             <button onClick={() => navigate("/command-center")} className="hover:text-foreground transition-colors">
@@ -1091,7 +1091,7 @@ const Index = () => {
               Pricing
             </button>
           </div>
-          <p className="text-sm text-muted-foreground">© 2025 LaunchStack AI</p>
+          <p className="text-sm text-muted-foreground">© 2025 PDF Empire AI</p>
         </div>
       </footer>
 
@@ -1104,7 +1104,7 @@ const Index = () => {
         >
           <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
             <div className="hidden sm:block">
-              <p className="text-sm font-bold text-foreground">LaunchStack AI</p>
+              <p className="text-sm font-bold text-foreground">PDF Empire AI</p>
               <p className="text-xs text-muted-foreground">10 AI Agents. One Command Center. Complete Launch System.</p>
             </div>
             <div className="flex items-center gap-4 w-full sm:w-auto justify-center sm:justify-end">

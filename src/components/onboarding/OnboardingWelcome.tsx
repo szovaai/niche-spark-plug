@@ -25,7 +25,7 @@ const OnboardingWelcome = ({ onStart, onExplore }: Props) => (
 
     <div className="space-y-3">
       <h1 className="text-4xl font-bold text-foreground">
-        Welcome to <span className="gradient-text">LaunchStack AI</span>
+        Welcome to <span className="gradient-text">PDF Empire AI</span>
       </h1>
       <p className="text-lg text-muted-foreground max-w-md mx-auto leading-relaxed">
         Build and launch your first digital product in minutes — not weeks.
