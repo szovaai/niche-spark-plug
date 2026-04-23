@@ -41,7 +41,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between px-4 md:px-6 py-3 rounded-2xl bg-black border border-border/40 shadow-lg">
           {/* Logo */}
           <button onClick={() => handleNavigate("/")} className="flex items-center gap-2">
-            <img src={logo} alt="PDF Empire AI" className="h-10 w-10 object-contain drop-shadow-[0_0_12px_hsl(var(--primary)/0.5)]" />
+            <img src={logo} alt="PDF Empire AI" className="h-14 w-14 object-contain drop-shadow-[0_0_12px_hsl(var(--primary)/0.5)]" />
           </button>
           
           {/* Auth Section + Mobile Menu */}

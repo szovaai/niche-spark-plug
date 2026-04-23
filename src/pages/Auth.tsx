@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Zap, Mail, Lock, User, ArrowRight, Loader2, ArrowLeft } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Loader2, ArrowLeft } from "lucide-react";
+import logo from "@/assets/logo.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
@@ -134,13 +135,8 @@ const Auth = () => {
       >
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30">
-              <Zap className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <span className="text-2xl font-bold">
-              Digi<span className="gradient-text">Stream</span>
-            </span>
+          <div className="inline-flex items-center justify-center mb-4">
+            <img src={logo} alt="PDF Empire AI" className="h-32 w-32 object-contain drop-shadow-[0_0_20px_hsl(var(--primary)/0.5)]" />
           </div>
           <h1 className="text-2xl font-bold mb-2">{getHeading()}</h1>
           <p className="text-muted-foreground">{getSubheading()}</p>
