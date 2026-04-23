@@ -40,11 +40,9 @@ const Navbar = () => {
         <div className="flex items-center justify-between px-4 md:px-6 py-3 rounded-2xl glass-card">
           {/* Logo */}
           <button onClick={() => handleNavigate("/")} className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30">
-              <Zap className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold">
-              Launch<span className="gradient-text">Stack</span>
+            <img src="/logo.png" alt="PDF Empire AI" className="h-10 w-10 object-contain drop-shadow-[0_0_12px_hsl(var(--primary)/0.5)]" />
+            <span className="text-xl font-bold hidden sm:inline">
+              PDF <span className="gradient-text">Empire</span>
               <span className="text-xs text-muted-foreground ml-1">AI</span>
             </span>
           </button>

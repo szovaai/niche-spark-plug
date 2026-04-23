@@ -112,10 +112,8 @@ export function DashboardSidebar() {
         <div className="flex items-center justify-between">
           {!isCollapsed && (
             <NavLink to="/" className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-[0_0_12px_-3px_hsl(var(--primary)/0.4)]">
-                <span className="text-[11px] font-bold text-primary-foreground">LS</span>
-              </div>
-              <span className="font-bold text-sm tracking-tight text-foreground">LaunchStack AI</span>
+              <img src="/logo.png" alt="PDF Empire AI" className="h-8 w-8 object-contain drop-shadow-[0_0_10px_hsl(var(--primary)/0.5)]" />
+              <span className="font-bold text-sm tracking-tight text-foreground">PDF Empire AI</span>
             </NavLink>
           )}
           <SidebarTrigger className="ml-auto">
