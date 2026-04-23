@@ -161,13 +161,16 @@ export default function WizardStep3Graphics({ productBrief, niche, result, setRe
     const outputs: GraphicOutput[] = [];
     const styleConfig = getStyleConfig();
 
+    const titleForOverlay = coverTitle || productBrief.title;
+    const spellingGuard = `All on-image text MUST be sharply legible, correctly spelled English with no truncated, partial, or invented words.`;
+
     const prompts: { type: string; label: string; override: string }[] = [
       { type: "bundle", label: "Product Bundle", override: "" },
-      { type: "hero", label: "Hero Banner", override: `Create a wide hero banner (16:9) for "${productBrief.title}". Show the product bundle spread across frame. Large bold title text "${productBrief.title}" overlaid. Colors: ${styleConfig.colors}. Mood: ${styleConfig.mood}. Professional sales page header graphic.` },
-      { type: "ad1", label: "Ad Creative — Pain", override: `Square ad creative (1:1) for "${productBrief.title}". Show the product with dramatic lighting. Text overlay: "Struggling with ${productBrief.painPoints?.[0] || 'getting results'}?" at top, product bundle center, "$${productBrief.launchScore?.estimatedPriceCeiling || 17}" price badge. Colors: ${styleConfig.colors}. Bold ${styleConfig.typography}.` },
-      { type: "ad2", label: "Ad Creative — Proof", override: `Square ad creative (1:1) for "${productBrief.title}". Product bundle with "BESTSELLER" badge. 5-star rating graphic. Text: "Join 1,000+ creators who launched in 60 minutes." Clean professional layout. Colors: ${styleConfig.colors}. ${styleConfig.mood}.` },
-      { type: "ad3", label: "Ad Creative — Urgency", override: `Square ad creative (1:1) for "${productBrief.title}". Product bundle with red "LIMITED TIME" banner. Countdown-style urgency graphic. Text: "Launch Price Ends Soon." Bold and urgent. Colors: ${styleConfig.colors} with red accents.` },
-      { type: "thumbnail", label: "Product Thumbnail", override: `Small square thumbnail graphic for "${productBrief.title}". Compact product bundle, bold readable title, simple clean layout optimized for marketplace listings. Colors: ${styleConfig.colors}.` },
+      { type: "hero", label: "Hero Banner", override: `Create a wide hero banner (16:9) for "${titleForOverlay}". Show the product bundle spread across frame. Large bold title text "${titleForOverlay}" overlaid — render ONLY this exact title, no subtitle or tagline. Colors: ${styleConfig.colors}. Mood: ${styleConfig.mood}. Professional sales page header graphic. ${spellingGuard}` },
+      { type: "ad1", label: "Ad Creative — Pain", override: `Square ad creative (1:1) for "${titleForOverlay}". Show the product with dramatic lighting. Text overlay: "Struggling with ${productBrief.painPoints?.[0] || 'getting results'}?" at top, product bundle center, "$${productBrief.launchScore?.estimatedPriceCeiling || 17}" price badge. Colors: ${styleConfig.colors}. Bold ${styleConfig.typography}. ${spellingGuard}` },
+      { type: "ad2", label: "Ad Creative — Proof", override: `Square ad creative (1:1) for "${titleForOverlay}". Product bundle with "BESTSELLER" badge. 5-star rating graphic. Text: "Join 1,000+ creators who launched in 60 minutes." Clean professional layout. Colors: ${styleConfig.colors}. ${styleConfig.mood}. ${spellingGuard}` },
+      { type: "ad3", label: "Ad Creative — Urgency", override: `Square ad creative (1:1) for "${titleForOverlay}". Product bundle with red "LIMITED TIME" banner. Countdown-style urgency graphic. Text: "Launch Price Ends Soon." Bold and urgent. Colors: ${styleConfig.colors} with red accents. ${spellingGuard}` },
+      { type: "thumbnail", label: "Product Thumbnail", override: `Small square thumbnail graphic for "${titleForOverlay}". Compact product bundle, bold readable title (render ONLY "${titleForOverlay}", no tagline), simple clean layout optimized for marketplace listings. Colors: ${styleConfig.colors}. ${spellingGuard}` },
     ];
 
     for (let i = 0; i < prompts.length; i++) {
