@@ -21,6 +21,7 @@ import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import logo from "@/assets/logo.png";
 import {
   Sidebar,
   SidebarContent,
@@ -112,7 +113,7 @@ export function DashboardSidebar() {
         <div className="flex items-center justify-between">
           {!isCollapsed && (
             <NavLink to="/" className="flex items-center gap-2.5">
-              <img src="/logo.png" alt="PDF Empire AI" className="h-9 w-9 object-contain drop-shadow-[0_0_10px_hsl(var(--primary)/0.5)]" />
+              <img src={logo} alt="PDF Empire AI" className="h-9 w-9 object-contain drop-shadow-[0_0_10px_hsl(var(--primary)/0.5)]" />
             </NavLink>
           )}
           <SidebarTrigger className="ml-auto">
