@@ -1,39 +1,31 @@
 
 
-# Fix Mushed Metric Labels + Dashboard Page
+## Add "Let AI Decide" option to Mechanism Selector
 
-Two targeted fixes:
+Add a special card at the top of the mechanism grid in `src/components/wizard/MechanismSelector.tsx` that lets the user delegate the choice to the AI instead of picking one of the 8 mechanism cards manually.
 
-## 1. Fix mushed-together metric labels on opportunity cards
+### Changes to `src/components/wizard/MechanismSelector.tsx`
 
-In `src/components/radar/OpportunityCard.tsx`, the 5-column metric strip (DEMAND / COMP / ADS / EMOTION / UPSELL) has labels overflowing into each other because each column is too narrow for the uppercase text and there's no horizontal breathing room.
+1. **Add a new "Let AI Decide" card** rendered before the mapped `mechs.map(...)` cards.
+   - Distinct visual style: gradient border (accent → primary), Sparkles icon, "Recommended" badge.
+   - Title: "Let AI Decide"
+   - Tagline: "Pick the highest-converting mechanism for me"
+   - Description: short copy explaining the AI will analyze the niche, audience, and angle scores to lock in the strongest framework automatically.
+   - Selectable like the other cards (shows the same Check indicator when active).
 
-Changes to the `Metric` block + its container:
-- Switch the metric strip from a tight 5-column grid to a layout with proper column gaps and per-cell padding so labels don't collide.
-- Shrink the label font slightly (`text-[9px]`), tighten letter-spacing, and add `whitespace-nowrap` + `truncate` so each label stays on one line within its cell.
-- Shorten label copy where it visibly overflows: "Emotion" → "Emo", "Upsell" → "Up", "Demand" → "Dem", "Ads" stays, "Comp" stays. This keeps all 5 readable at the current card width.
-- Add a subtle vertical divider between cells so values group correctly with their label visually.
-- Increase vertical padding inside the strip so labels and numbers aren't cramped.
+2. **Selection logic** — when clicked:
+   - Score each mechanism using available signals (formula diversity, presence of `whyItWorks`, length/specificity of tagline+description). If `launchScore.angleScores` are not available here, fall back to a deterministic ranking: prioritize mechanisms whose `formula` is `Number`, `Timeframe`, or `Acronym` (highest-converting in direct response), then by description length.
+   - Pick the top-scored mechanism and call the existing `onSelect(mech)` with it.
+   - Mark internal state `aiPicked = true` so the AI Decide card shows the Check, and add a small "AI picked: {name}" hint line under the card grid.
+   - Show a toast: `AI selected "{name}" — {reason}` (e.g. "highest-converting Timeframe formula for your niche").
 
-Result: each metric is clearly separated and readable on the card width shown in the screenshot.
+3. **Visual treatment**
+   - The AI card spans the same grid cell size as the other mechanism cards (no layout shift).
+   - When AI-picked, also visually highlight the chosen underlying mechanism card with a small "AI Pick" mini-badge so the user can see which one was selected and still override it manually by clicking another card.
 
-## 2. Fix the Dashboard sidebar entry showing old discovery content
+4. **No prop changes required** — the parent (`WizardStep1.tsx`) already passes `onSelect` and the mechanism list. No edge function changes needed; this is a client-side smart selection layered on top of the existing mechanisms array.
 
-The sidebar's "Dashboard" link routes to `/dashboard` correctly, but the Dashboard page itself currently renders legacy discovery-style widgets (DailyBriefing, GettingStartedChecklist, old project list cards) that feel like the old Discover page rather than a true home base for the new Profit Radar / PDF Empire flow.
-
-Changes to `src/pages/Dashboard.tsx`:
-- Replace the legacy hero/cards layout with a focused "home base" layout aligned with the new Profit Radar product:
-  - Top: welcome header with the user's name and a primary CTA "Open Profit Radar" → `/opportunities`, plus a secondary "New Launch" → `/wizard`.
-  - Stats row: 4 compact KPI cards (Products built, Funnels generated, Marketing assets, Streak days) using the existing `stats` data already fetched.
-  - Recent projects section: clean list of the 5 most recent `launch_projects` with Continue / Clone actions (keeps the existing `cloneProject` logic).
-  - Quick links row: 4 tiles to Profit Radar, Product Builder, Funnel Builder, Saved Projects.
-- Remove the discovery-flavored widgets that no longer fit the mainstream PDF Empire positioning: `DailyBriefing`, `GettingStartedChecklist`, `LaunchJourney`, `ProductFactoryCard`, `AILaunchCoach`, `ReferralWidget`, `RevenueGoalWidget`, `RevenueProjector`, `LaunchDNACard`, `ProductScorecard`, `PreLaunchAudit`, `DailyLaunchTasks`. (These components stay in the codebase for use elsewhere — only removed from the Dashboard page.)
-- Keep `DashboardLayout` wrapper so the sidebar/header remain consistent.
-
-Result: clicking "Dashboard" in the sidebar now lands on a clean home base centered on Profit Radar + recent launches, not the old discovery layout.
-
-## Out of scope
-- No route changes (`/dashboard` already maps to `Dashboard`).
-- No sidebar restructuring.
-- No changes to Profit Radar itself beyond the OpportunityCard metric strip.
+### Out of scope
+- No new edge function call (avoids extra AI cost; uses existing generated mechanisms).
+- No changes to `WizardStep1.tsx`, types, or other wizard steps.
 
