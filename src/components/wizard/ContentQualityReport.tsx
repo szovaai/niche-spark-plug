@@ -4,8 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Progress } from "@/components/ui/progress";
-import { ChevronDown, AlertTriangle, CheckCircle, ShieldAlert, Sparkles, Loader2, Zap, Lock, MessageSquareWarning, TrendingUp } from "lucide-react";
-import { ContentAuditResult, auditFullContent, DimensionScore, tallyFactoryAssets } from "@/lib/contentAudit";
+import { ChevronDown, AlertTriangle, CheckCircle, ShieldAlert, Sparkles, Loader2, Zap, Lock, MessageSquareWarning, TrendingUp, TrendingDown } from "lucide-react";
+import { ContentAuditResult, auditFullContentWithBest, DimensionScore, tallyFactoryAssets } from "@/lib/contentAudit";
 import { Step2Content } from "@/types/launchWizard";
 import type { ProductAssets } from "@/types/productAssets";
 
