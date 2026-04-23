@@ -1,71 +1,44 @@
 
 
-## Universal Autosave + Unified "All Projects" View
+## Make Asset Depth React to Generated Product Assets in Real Time
 
-Two parts: (1) extend the 2-second debounced autosave already used by Launch Wizard to **Empire Mode**, **Micro Factory**, and **Toolkit Builder** so nothing is ever lost; (2) upgrade the `Saved Projects` page into a unified hub that lists **every build type** in one place.
+Right now, the **Asset Depth** dimension in the Content Quality Report only counts assets baked into chapters (worksheets, templates, checklists, additional examples) plus regex matches for the words "prompt" / "script". The standalone **Digital Product Asset Factory** outputs (workbook, cheatsheet, toolkit, templates, promptPack, bonusGuides, caseStudies, multiplier) are **not** factored in — so generating them never moves the score. This plan fixes that and makes the score recompute live as each asset finishes generating.
 
----
+### What changes
 
-### Part 1 — Reusable autosave hook
+1. **Teach `auditFullContent` about `ProductAssets`** (`src/lib/contentAudit.ts`)
+   - Add an optional second arg: `auditFullContent(content, assets?)`.
+   - In the Asset Depth calculation, add bonus credit for each generated asset bundle:
+     - `workbook` → +1 prompt-equivalent per worksheet
+     - `cheatsheet` → +1 checklist-equivalent per sheet
+     - `toolkit` → counts toward scripts/templates/checklists by tool `type`
+     - `templates` → +1 template per item
+     - `promptPack` → +1 prompt per item across all categories
+     - `bonusGuides` → +1 example per bonus
+     - `caseStudies` → +1 example per case study
+     - `multiplier` → small completeness bump (caps the score)
+   - Re-derive `metFactors` so once the user has a full Asset Factory bundle, Asset Depth reaches 100.
+   - Update the `details` string to show both per-chapter and Factory totals (e.g., `"6 worksheets, 4 cheat sheets, 12 prompts, 3 templates from Asset Factory"`).
+   - Keep the per-chapter minimums as a floor so chapters still have to ship some inline assets.
 
-**Add** `src/hooks/useAutosave.ts` — generic 2s-debounced upsert hook modeled on the existing `LaunchWizard` autosave:
+2. **Pass `assets` into the report** (`src/components/wizard/ContentQualityReport.tsx` + `WizardStep2.tsx`)
+   - Add `assets?: ProductAssets` prop to `ContentQualityReport` and forward it to `auditFullContent`.
+   - In `WizardStep2.tsx`, pass the existing `assets` state into both `<ContentQualityReport assets={assets} />` and the in-page `audit` constant (line ~410) so the same numbers drive the gate logic that controls the "Continue" button.
 
-```ts
-useAutosave({
-  table: "empire_projects" | "micro_products" | "toolkits" | "launch_projects",
-  recordId: string | null,
-  setRecordId: (id: string) => void,
-  userId: string | undefined,
-  data: Record<string, any>,
-  enabled: boolean,           // skip on empty drafts
-  onError?: (e) => void,
-});
-```
+3. **Real-time recompute on asset generation**
+   - The audit is already pure and runs every render. By including `assets` in the prop chain, every `setAssets(...)` call inside `AssetFactory` (after a single generate or a "Generate All" pass) automatically re-renders `ContentQualityReport`, recalculates Asset Depth, and updates the overall score and pill colors.
+   - Add a subtle animated `+N pts` chip (reuse the same pattern from `LaunchScoreCard`'s boost delta) next to the Asset Depth row: stash the previous Asset Depth score in a ref; when it jumps after generation, flash the delta for ~3 seconds.
 
-- Debounces 2s on any `data` change.
-- First save = `insert + select id`, subsequent = `update where id`.
-- Silent success; toasts a soft warning only on failure (matches existing pattern).
-- Skips while a save is in-flight (ref guard).
-
-### Part 2 — Wire autosave into the three builders
-
-1. **`src/pages/EmpireMode.tsx`** — call `useAutosave({ table: "empire_projects", … })` with the current step state (`step1_*` through `step6_*`, `current_step`, `name`). Remove ad-hoc save buttons or leave them as "Save now" wrappers around the hook's `flush()`.
-2. **`src/pages/MicroFactory.tsx`** — autosave to `micro_products` (`niche_topic`, `product_type`, `target_audience`, `problem_statement`, `config`, `generated_content`, `product_title`, `status`).
-3. **`src/pages/CreateToolkit.tsx`** — replace the existing manual `toolkits.update`/`insert` block (lines ~450) with the hook so every keystroke autosaves. Keep the existing `localStorage` draft as a safety net.
-
-No schema changes — every target table already has `updated_at` defaults and matching RLS.
-
-### Part 3 — Unified "All Projects" hub
-
-**Edit** `src/pages/SavedProjects.tsx` (route `/saved-projects`) to fetch and display **all four build types** in parallel:
-
-- `launch_projects` → "Launch" pill, opens `/wizard/:id`
-- `empire_projects` → "Empire" pill, opens `/empire?id=:id`
-- `micro_products` → "Micro" pill, opens `/micro-factory?id=:id`
-- `toolkits` → "Toolkit" pill, opens `/toolkit/builder/:id`
-
-Each row shows: type pill, name/title, niche, lifecycle status, progress %, "Updated X ago", **Open** + **Delete** buttons. Add a top filter bar with chips: **All / Launches / Empire / Micro / Toolkits** and a search input that filters by name/niche client-side.
-
-Sort all results by `updated_at desc` after merging. Skeleton loaders while any source is pending.
-
-### Part 4 — Sidebar relabel
-
-In `src/components/DashboardSidebar.tsx`, rename the "Saved Projects" link to **"All Projects"** to match the broader scope. No route change.
-
----
+4. **Visual polish in the Asset Depth row**
+   - When assets are generated, render small icon chips under the Asset Depth dimension (📘 Workbook · ⚡ Cheatsheet · 🧰 Toolkit · 📝 Templates · 💬 Prompts · 🎁 Bonuses · 📈 Cases) — filled when present, dim when missing — so the user sees exactly which Factory outputs are still missing.
 
 ### Files touched
-
-- **Add** `src/hooks/useAutosave.ts`
-- **Edit** `src/pages/EmpireMode.tsx` (wire hook)
-- **Edit** `src/pages/MicroFactory.tsx` (wire hook)
-- **Edit** `src/pages/CreateToolkit.tsx` (replace manual save with hook)
-- **Edit** `src/pages/SavedProjects.tsx` (multi-source aggregation + filters)
-- **Edit** `src/components/DashboardSidebar.tsx` (label only)
+- **Edit** `src/lib/contentAudit.ts` — new optional `assets` arg, expanded Asset Depth math, richer details string.
+- **Edit** `src/components/wizard/ContentQualityReport.tsx` — accept + forward `assets`, render delta chip and asset chips on the Asset Depth row.
+- **Edit** `src/components/wizard/WizardStep2.tsx` — pass `assets` into `ContentQualityReport` and the local `auditFullContent` call so the gate uses the same enriched score.
 
 ### Out of scope
-
-- No DB schema changes.
-- No changes to the existing Launch Wizard autosave (already works).
-- No cross-type project merging — each build type stays in its own table and opens in its native editor.
+- No changes to `AssetFactory` itself or to the `generate-product-assets` edge function.
+- No new edge functions or DB schema changes.
+- No changes to other dimensions in the audit (Specificity, Readability, etc.).
 
