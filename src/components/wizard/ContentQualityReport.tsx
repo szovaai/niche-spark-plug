@@ -37,7 +37,8 @@ const ASSET_CHIPS: { key: keyof ProductAssets; label: string; emoji: string }[] 
 
 export default function ContentQualityReport({ content, assets, onExpandChapter, expandingIndex, onHumanize, humanizing }: Props) {
   const [open, setOpen] = useState(true);
-  const audit = auditFullContent(content, assets);
+  const prevDimsRef = useRef<DimensionScore[] | undefined>(undefined);
+  const audit = auditFullContentWithBest(content, assets, prevDimsRef.current);
   const assetDepthDim = audit.dimensions.find(d => d.label === "Asset Depth");
 
   // Animated +N pts delta when Asset Depth jumps after generation
@@ -55,6 +56,25 @@ export default function ContentQualityReport({ content, assets, onExpandChapter,
     }
     prevAssetDepth.current = current;
   }, [assetDepthDim?.score]);
+
+  // Track overall delta (up + down)
+  const prevOverall = useRef<number | null>(null);
+  const [overallDelta, setOverallDelta] = useState<number | null>(null);
+  useEffect(() => {
+    const current = audit.overall;
+    if (prevOverall.current !== null && current !== prevOverall.current) {
+      setOverallDelta(current - prevOverall.current);
+      const t = setTimeout(() => setOverallDelta(null), 3000);
+      prevOverall.current = current;
+      return () => clearTimeout(t);
+    }
+    prevOverall.current = current;
+  }, [audit.overall]);
+
+  // Update best-ever dimensions ref AFTER render so next pass uses new floor
+  useEffect(() => {
+    prevDimsRef.current = audit.dimensions;
+  });
 
   if (audit.dimensions.length === 0) return null;
 
