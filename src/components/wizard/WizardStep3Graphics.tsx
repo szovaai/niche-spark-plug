@@ -83,6 +83,17 @@ export default function WizardStep3Graphics({ productBrief, niche, result, setRe
   const [generating, setGenerating] = useState(false);
   const [generateProgress, setGenerateProgress] = useState(0);
   const [launchGraphics, setLaunchGraphics] = useState<GraphicOutput[]>([]);
+  const [includeSubtitle, setIncludeSubtitle] = useState(false);
+  const [includeSideLabels, setIncludeSideLabels] = useState(false);
+
+  const shortenCoverTitle = (raw: string): string => {
+    if (!raw) return "";
+    const beforeColon = raw.split(/[:—–-]/)[0].trim() || raw.trim();
+    const words = beforeColon.split(/\s+/).slice(0, 8);
+    return words.join(" ");
+  };
+  const coverTitle = shortenCoverTitle(productBrief?.title || "");
+  const coverSubtitle = includeSubtitle ? (productBrief?.subtitle || "").slice(0, 80) : "";
 
   const getStyleConfig = () => DESIGN_STYLES.find(s => s.id === designStyle)!;
   const getLayoutConfig = () => SCENE_LAYOUTS.find(l => l.id === sceneLayout)!;
