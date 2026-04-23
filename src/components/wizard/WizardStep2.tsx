@@ -507,6 +507,7 @@ export default function WizardStep2({ productBrief, productType, result, setResu
           {/* Pre-Continue Optimization Report */}
           <ContentQualityReport
             content={result}
+            assets={assets}
             onExpandChapter={(i) => expandChapter(i)}
             expandingIndex={expandingIndex}
             onHumanize={humanizeAll}
