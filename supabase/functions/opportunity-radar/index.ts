@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { validateAuth } from "../_shared/auth.ts";
 import { callTieredAI, getUserTier } from "../_shared/tieredAI.ts";
 
@@ -7,55 +8,124 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const MODE_GUIDANCE: Record<string, string> = {
+  buyer_problems: "Focus on raw, urgent buyer pains people complain about online (Reddit/Quora/TikTok comments).",
+  paid_ad_ready: "Focus on emotional, scroll-stopping pains that perform on Facebook/TikTok paid ads.",
+  shopify_winners: "Focus on physical-feeling digital products that fit Shopify stores (guides, programs, templates).",
+  etsy_trends: "Focus on printables, planners, journals, templates that sell on Etsy.",
+  printables: "Focus exclusively on printable PDF products (planners, trackers, worksheets).",
+  evergreen: "Focus on stable, year-round demand niches (health, money, relationships, pets).",
+  fast_launch: "Focus on opportunities that can be launched in under 7 days with minimal assets.",
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const user = await validateAuth(req);
-    const userTier = await getUserTier(user.id);
-    const { category } = await req.json();
+    const auth = await validateAuth(req);
+    if (auth.error || !auth.user) {
+      return new Response(JSON.stringify({ error: auth.error || "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    const systemPrompt = `You are a digital product market intelligence engine. Generate 6 trending digital product opportunities that are currently in high demand in the MMO/make-money-online and digital product creator space.
+    const userTier = await getUserTier(auth.user.id);
+    const body = await req.json().catch(() => ({}));
+    const keyword = (body.keyword || "").toString().trim().slice(0, 120);
+    const mode = (body.mode || "buyer_problems").toString();
+    const modeGuide = MODE_GUIDANCE[mode] || MODE_GUIDANCE.buyer_problems;
 
-${category && category !== "all" ? `Focus on the "${category}" category.` : "Cover a mix of categories: AI tools, marketing, automation, freelancing, content creation, e-commerce."}
+    // Cache check
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const sb = createClient(supabaseUrl, serviceKey);
+    const cacheKey = `radar:${mode}:${keyword.toLowerCase() || "_default"}`;
 
-For each opportunity, return a JSON array with objects containing:
-- "title": catchy product name (e.g. "AI Local Client System")
-- "niche": the niche category
-- "description": one-sentence pitch of why this is hot right now
-- "demandScore": 1-10
-- "competitionScore": 1-10 (lower = less competition = better)
-- "monetizationScore": 1-10
-- "audienceUrgency": 1-10
-- "launchScore": overall 0-100 score
-- "suggestedPrice": suggested front-end price in dollars
-- "targetAudience": who would buy this
-- "mechanism": a unique mechanism name for this product
-- "salesPromise": the core transformation promise
-- "tags": array of 2-3 short tags
+    const { data: cached } = await sb
+      .from("opportunities")
+      .select("*")
+      .eq("keyword", keyword || "_default")
+      .eq("mode", mode)
+      .gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+      .order("created_at", { ascending: false })
+      .limit(8);
 
-Return ONLY the JSON array. No markdown, no explanation.`;
+    if (cached && cached.length >= 6) {
+      return new Response(JSON.stringify({ opportunities: cached, cached: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    const { content, model } = await callTieredAI(
+    const systemPrompt = `You are a buyer-pain intelligence engine for digital product creators. You blend signals from Google autocomplete, Reddit complaints, Quora questions, TikTok comments, Etsy demand, and Pinterest trends to surface real, monetizable buyer problems.
+
+${modeGuide}
+
+Generate 8 opportunities. For EACH opportunity return JSON with:
+- "title": punchy product name (e.g. "Menopause Belly Fat Reset")
+- "niche": niche category (short, lowercase)
+- "demand": 1-10 (search/trend volume)
+- "pain": 1-10 (urgency to solve)
+- "competition": 1-10 (LOWER = easier; this is "competition ease" — invert mental model: 10 = wide open, 1 = saturated)
+- "emotion": 1-10 (emotional trigger strength)
+- "ad_potential": 1-10 (paid ad scroll-stop potential)
+- "upsell": 1-10 (upsell/backend potential)
+- "score": weighted /100 = round(demand*2.5 + pain*2 + competition*1.5 + emotion*1.5 + ad_potential*1.5 + upsell*1)
+- "hooks": array of 5 short ad hook lines
+- "suggested_price": one of 17, 27, 37, 47
+- "platform": one of "Shopify", "Gumroad", "Etsy", "WarriorPlus"
+- "target_audience": specific buyer (1 sentence)
+- "pain_analysis": 2-sentence emotional frustration summary
+- "upsell_ideas": array of 3 short upsell concepts
+- "trend_velocity": "Rising" | "Stable" | "Seasonal"
+
+Return ONLY a JSON array of 8 objects. No markdown, no explanation.`;
+
+    const { content } = await callTieredAI(
       [
         { role: "system", content: systemPrompt },
-        { role: "user", content: `Generate trending digital product opportunities for ${new Date().toLocaleDateString()}. Category: ${category || "all"}` },
+        { role: "user", content: `Keyword/topic: "${keyword || "any high-intent buyer pain"}". Mode: ${mode}.` },
       ],
       userTier,
       "standard"
     );
 
-    // Parse the JSON from the response
-    let opportunities;
+    let parsed: any[];
     try {
       const cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-      opportunities = JSON.parse(cleaned);
+      parsed = JSON.parse(cleaned);
     } catch {
-      console.error("Failed to parse AI response:", content);
+      console.error("Parse fail:", content);
       throw new Error("Failed to parse opportunity data");
     }
 
-    return new Response(JSON.stringify({ opportunities, model }), {
+    // Persist to opportunities table
+    const rows = parsed.map((o) => ({
+      keyword: keyword || "_default",
+      mode,
+      title: o.title,
+      niche: o.niche,
+      score: Math.max(0, Math.min(100, Math.round(o.score || 0))),
+      demand: o.demand,
+      pain: o.pain,
+      competition: o.competition,
+      emotion: o.emotion,
+      ad_potential: o.ad_potential,
+      upsell: o.upsell,
+      hooks: o.hooks || [],
+      suggested_price: o.suggested_price,
+      platform: o.platform,
+      payload: {
+        target_audience: o.target_audience,
+        pain_analysis: o.pain_analysis,
+        upsell_ideas: o.upsell_ideas,
+        trend_velocity: o.trend_velocity,
+      },
+    }));
+
+    const { data: inserted } = await sb.from("opportunities").insert(rows).select();
+
+    return new Response(JSON.stringify({ opportunities: inserted || rows, cached: false }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
