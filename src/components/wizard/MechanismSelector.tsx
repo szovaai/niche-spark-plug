@@ -31,8 +31,35 @@ interface Props {
 export default function MechanismSelector({ mechanisms, selectedMechanism, onSelect, niche, targetAudience, productType, topic }: Props) {
   const [regenerating, setRegenerating] = useState(false);
   const [mechs, setMechs] = useState<Mechanism[]>(mechanisms);
+  const [aiPicked, setAiPicked] = useState(false);
+  const [aiPickedName, setAiPickedName] = useState<string>("");
 
   if (!mechs?.length) return null;
+
+  const HIGH_CONVERTING = ["Number", "Timeframe", "Acronym"];
+
+  const scoreMechanism = (m: Mechanism) => {
+    let score = 0;
+    if (m.formula && HIGH_CONVERTING.includes(m.formula)) score += 50;
+    if (m.formula === "Transformation" || m.formula === "Contrarian") score += 25;
+    if (m.whyItWorks) score += 15;
+    score += Math.min((m.description?.length || 0) / 20, 15);
+    score += Math.min((m.tagline?.length || 0) / 10, 10);
+    return score;
+  };
+
+  const handleAIDecide = () => {
+    const ranked = [...mechs].sort((a, b) => scoreMechanism(b) - scoreMechanism(a));
+    const top = ranked[0];
+    if (!top) return;
+    const reason = top.formula && HIGH_CONVERTING.includes(top.formula)
+      ? `highest-converting ${top.formula} formula for your niche`
+      : `strongest framework match for your audience`;
+    setAiPicked(true);
+    setAiPickedName(top.name);
+    onSelect(top);
+    toast.success(`AI selected "${top.name}" — ${reason}`);
+  };
 
   const regenerate = async () => {
     if (!niche) return;
