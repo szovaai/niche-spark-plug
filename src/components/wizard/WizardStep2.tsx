@@ -24,7 +24,7 @@ import ContentPreviewModal from "./ContentPreviewModal";
 import ReadabilityMeter from "./ReadabilityMeter";
 import ContentRewriter from "./ContentRewriter";
 import ContentGrader from "./ContentGrader";
-import { auditFullContent } from "@/lib/contentAudit";
+import { auditFullContent, auditFullContentWithBest, type DimensionScore } from "@/lib/contentAudit";
 import type { ProductAssets } from "@/types/productAssets";
 
 import type { LaunchMode } from "@/pages/LaunchWizard";
