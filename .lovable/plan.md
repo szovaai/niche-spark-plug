@@ -1,62 +1,71 @@
 
 
-## Add "Boost My Score" AI Optimizer to Launch Score Card
+## Universal Autosave + Unified "All Projects" View
 
-Add a one-click AI booster that targets the lowest-scoring dimensions on the Launch Score and rewrites the inputs (niche framing, audience, topic, mechanism, angle) to push the overall score above 80.
+Two parts: (1) extend the 2-second debounced autosave already used by Launch Wizard to **Empire Mode**, **Micro Factory**, and **Toolkit Builder** so nothing is ever lost; (2) upgrade the `Saved Projects` page into a unified hub that lists **every build type** in one place.
 
-### What the user sees
+---
 
-In `src/components/wizard/LaunchScoreCard.tsx`, when `score.overall < 80`:
+### Part 1 — Reusable autosave hook
 
-1. A new **"Boost Score to 80+"** button appears at the top-right of the card next to the score, styled with a gradient + Sparkles icon.
-2. Each dimension bar shows a small **"Weak — Fix"** chip when its value is `<= 6`, clickable to boost just that one dimension.
-3. Clicking either button opens an inline **Boost Panel** below the score that streams AI recommendations as cards:
-   - **Sharpened niche** (more specific, higher-intent variant)
-   - **Tighter audience** (a clearer "who" with pain trigger)
-   - **Stronger topic angle** (a more emotional/urgent reframe)
-   - **Mechanism upgrade** (swap to a Number/Timeframe/Acronym formula)
-   - **Pricing tweak** (if monetization is weak, suggest a price within ceiling)
-   Each card has an **"Apply"** button that updates the relevant wizard field and a **"Apply All"** button at the bottom.
-4. After Apply All, the score auto-regenerates and an animated delta shows `+12 pts` if the new score is higher.
+**Add** `src/hooks/useAutosave.ts` — generic 2s-debounced upsert hook modeled on the existing `LaunchWizard` autosave:
 
-### Data + AI flow
+```ts
+useAutosave({
+  table: "empire_projects" | "micro_products" | "toolkits" | "launch_projects",
+  recordId: string | null,
+  setRecordId: (id: string) => void,
+  userId: string | undefined,
+  data: Record<string, any>,
+  enabled: boolean,           // skip on empty drafts
+  onError?: (e) => void,
+});
+```
 
-1. New edge function: **`supabase/functions/boost-launch-score/index.ts`**
-   - Input: current `niche`, `targetAudience`, `productType`, `topic`, `productConcept`, `uniqueMechanism`, `selectedAngle`, `price`, and the full `launchScore` object (so the model knows which dimensions are weak).
-   - Prompt instructs the model to identify the 2–3 lowest-scoring dimensions and produce **targeted upgrades only for those**, returning a structured JSON via tool calling:
-     ```json
-     {
-       "weakestDimensions": ["audienceClarity", "offerStrength"],
-       "upgrades": {
-         "niche":   { "current": "...", "improved": "...", "why": "..." },
-         "audience":{ "current": "...", "improved": "...", "why": "..." },
-         "topic":   { "current": "...", "improved": "...", "why": "..." },
-         "mechanism":{"current": "...", "improved": "...", "why": "..." },
-         "price":   { "current": 17,    "improved": 27,     "why": "..." }
-       },
-       "projectedScore": 84,
-       "summary": "Tightened the audience to a 5-year window and reframed the mechanism as a 7-Day system..."
-     }
-     ```
-   - Uses `callTieredAI` with `"standard"` tier (same pattern as `generate-launch-score`).
-   - Returns only upgrades for dimensions that were actually weak (skips strong ones).
+- Debounces 2s on any `data` change.
+- First save = `insert + select id`, subsequent = `update where id`.
+- Silent success; toasts a soft warning only on failure (matches existing pattern).
+- Skips while a save is in-flight (ref guard).
 
-2. Wire-up in `WizardStep1.tsx`:
-   - Pass `niche/setNiche`, `targetAudience/setTargetAudience`, `topic/setTopic`, `price/setPrice`, plus `result/setResult` into `LaunchScoreCard` (new optional props).
-   - When user clicks **Apply** on a card, the matching setter runs (e.g., `setTargetAudience(upgrade.improved)`), and for mechanism/angle the `result.uniqueMechanism` field updates.
-   - When user clicks **Apply All**, all setters fire, then `generateScore(updatedProduct)` is called automatically to refresh the score.
+### Part 2 — Wire autosave into the three builders
 
-3. Track delta: stash the previous `overall` in component state so the new score can render a `+N pts` animated chip for 3 seconds.
+1. **`src/pages/EmpireMode.tsx`** — call `useAutosave({ table: "empire_projects", … })` with the current step state (`step1_*` through `step6_*`, `current_step`, `name`). Remove ad-hoc save buttons or leave them as "Save now" wrappers around the hook's `flush()`.
+2. **`src/pages/MicroFactory.tsx`** — autosave to `micro_products` (`niche_topic`, `product_type`, `target_audience`, `problem_statement`, `config`, `generated_content`, `product_title`, `status`).
+3. **`src/pages/CreateToolkit.tsx`** — replace the existing manual `toolkits.update`/`insert` block (lines ~450) with the hook so every keystroke autosaves. Keep the existing `localStorage` draft as a safety net.
 
-### Files to add / change
+No schema changes — every target table already has `updated_at` defaults and matching RLS.
 
-- **Add** `supabase/functions/boost-launch-score/index.ts` — new edge function (auto-deploys).
-- **Edit** `src/components/wizard/LaunchScoreCard.tsx` — add Boost button, weak-dimension chips, inline Boost Panel, Apply / Apply All handlers, delta animation, optional setter props.
-- **Edit** `src/components/wizard/WizardStep1.tsx` — pass setters + `generateScore` into `LaunchScoreCard`; expose a re-score callback.
+### Part 3 — Unified "All Projects" hub
+
+**Edit** `src/pages/SavedProjects.tsx` (route `/saved-projects`) to fetch and display **all four build types** in parallel:
+
+- `launch_projects` → "Launch" pill, opens `/wizard/:id`
+- `empire_projects` → "Empire" pill, opens `/empire?id=:id`
+- `micro_products` → "Micro" pill, opens `/micro-factory?id=:id`
+- `toolkits` → "Toolkit" pill, opens `/toolkit/builder/:id`
+
+Each row shows: type pill, name/title, niche, lifecycle status, progress %, "Updated X ago", **Open** + **Delete** buttons. Add a top filter bar with chips: **All / Launches / Empire / Micro / Toolkits** and a search input that filters by name/niche client-side.
+
+Sort all results by `updated_at desc` after merging. Skeleton loaders while any source is pending.
+
+### Part 4 — Sidebar relabel
+
+In `src/components/DashboardSidebar.tsx`, rename the "Saved Projects" link to **"All Projects"** to match the broader scope. No route change.
+
+---
+
+### Files touched
+
+- **Add** `src/hooks/useAutosave.ts`
+- **Edit** `src/pages/EmpireMode.tsx` (wire hook)
+- **Edit** `src/pages/MicroFactory.tsx` (wire hook)
+- **Edit** `src/pages/CreateToolkit.tsx` (replace manual save with hook)
+- **Edit** `src/pages/SavedProjects.tsx` (multi-source aggregation + filters)
+- **Edit** `src/components/DashboardSidebar.tsx` (label only)
 
 ### Out of scope
 
-- No changes to `generate-launch-score` itself (boost is additive).
-- No changes to other wizard steps.
-- No DB schema changes — boost runs purely in the wizard session and updates already-tracked state that autosaves via the existing autosave hook.
+- No DB schema changes.
+- No changes to the existing Launch Wizard autosave (already works).
+- No cross-type project merging — each build type stays in its own table and opens in its native editor.
 
