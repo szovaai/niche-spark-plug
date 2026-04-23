@@ -4,8 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Progress } from "@/components/ui/progress";
-import { ChevronDown, AlertTriangle, CheckCircle, ShieldAlert, Sparkles, Loader2, Zap, Lock, MessageSquareWarning, TrendingUp } from "lucide-react";
-import { ContentAuditResult, auditFullContent, DimensionScore, tallyFactoryAssets } from "@/lib/contentAudit";
+import { ChevronDown, AlertTriangle, CheckCircle, ShieldAlert, Sparkles, Loader2, Zap, Lock, MessageSquareWarning, TrendingUp, TrendingDown } from "lucide-react";
+import { ContentAuditResult, auditFullContentWithBest, DimensionScore, tallyFactoryAssets } from "@/lib/contentAudit";
 import { Step2Content } from "@/types/launchWizard";
 import type { ProductAssets } from "@/types/productAssets";
 
@@ -37,7 +37,8 @@ const ASSET_CHIPS: { key: keyof ProductAssets; label: string; emoji: string }[] 
 
 export default function ContentQualityReport({ content, assets, onExpandChapter, expandingIndex, onHumanize, humanizing }: Props) {
   const [open, setOpen] = useState(true);
-  const audit = auditFullContent(content, assets);
+  const prevDimsRef = useRef<DimensionScore[] | undefined>(undefined);
+  const audit = auditFullContentWithBest(content, assets, prevDimsRef.current);
   const assetDepthDim = audit.dimensions.find(d => d.label === "Asset Depth");
 
   // Animated +N pts delta when Asset Depth jumps after generation
@@ -55,6 +56,25 @@ export default function ContentQualityReport({ content, assets, onExpandChapter,
     }
     prevAssetDepth.current = current;
   }, [assetDepthDim?.score]);
+
+  // Track overall delta (up + down)
+  const prevOverall = useRef<number | null>(null);
+  const [overallDelta, setOverallDelta] = useState<number | null>(null);
+  useEffect(() => {
+    const current = audit.overall;
+    if (prevOverall.current !== null && current !== prevOverall.current) {
+      setOverallDelta(current - prevOverall.current);
+      const t = setTimeout(() => setOverallDelta(null), 3000);
+      prevOverall.current = current;
+      return () => clearTimeout(t);
+    }
+    prevOverall.current = current;
+  }, [audit.overall]);
+
+  // Update best-ever dimensions ref AFTER render so next pass uses new floor
+  useEffect(() => {
+    prevDimsRef.current = audit.dimensions;
+  });
 
   if (audit.dimensions.length === 0) return null;
 
@@ -91,6 +111,12 @@ export default function ContentQualityReport({ content, assets, onExpandChapter,
                 </div>
               </div>
               <div className="flex items-center gap-3">
+                {overallDelta !== null && overallDelta !== 0 && (
+                  <Badge className={`text-[10px] gap-1 animate-pulse ${overallDelta > 0 ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" : "bg-amber-500/20 text-amber-300 border-amber-500/30"}`}>
+                    {overallDelta > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                    {overallDelta > 0 ? "+" : ""}{overallDelta} pts
+                  </Badge>
+                )}
                 <div className="flex flex-col items-end gap-0.5">
                   <span className={`text-2xl font-black tabular-nums ${overallColor}`}>{audit.overall}</span>
                   <span className="text-[10px] text-muted-foreground uppercase tracking-wider">/ 100</span>

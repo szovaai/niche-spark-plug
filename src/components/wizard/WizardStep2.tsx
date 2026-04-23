@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +24,7 @@ import ContentPreviewModal from "./ContentPreviewModal";
 import ReadabilityMeter from "./ReadabilityMeter";
 import ContentRewriter from "./ContentRewriter";
 import ContentGrader from "./ContentGrader";
-import { auditFullContent } from "@/lib/contentAudit";
+import { auditFullContent, auditFullContentWithBest, type DimensionScore } from "@/lib/contentAudit";
 import type { ProductAssets } from "@/types/productAssets";
 
 import type { LaunchMode } from "@/pages/LaunchWizard";
@@ -407,7 +407,9 @@ export default function WizardStep2({ productBrief, productType, result, setResu
     toast.success("All chapters humanized!");
   };
 
-  const audit = result ? auditFullContent(result, assets) : null;
+  const prevAuditDimsRef = useRef<DimensionScore[] | undefined>(undefined);
+  const audit = result ? auditFullContentWithBest(result, assets, prevAuditDimsRef.current) : null;
+  if (audit) prevAuditDimsRef.current = audit.dimensions;
   const estimatedPages = result?.chapters ? estimatePages(result.chapters, contentDepth) : 0;
 
   if (!productBrief) {
