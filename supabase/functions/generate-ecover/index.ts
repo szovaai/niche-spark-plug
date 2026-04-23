@@ -119,11 +119,19 @@ serve(async (req) => {
     } else {
       // Build enhanced prompt with design style engine
       const nicheCategory = detectNiche(niche, title);
-      const componentDescs = validComponents.map(c => `${COMPONENT_VISUALS[c].name}: ${COMPONENT_VISUALS[c].promptFragment}`);
+      const componentDescs = validComponents.map(c => `${COMPONENT_VISUALS[c].name}: ${COMPONENT_VISUALS[c].promptFragment(includeSideLabels)}`);
+
+      const labelRule = includeSideLabels
+        ? `Side prop labels may ONLY display these EXACT words, spelled correctly: WORKBOOK, CHECKLIST, TEMPLATE, SWIPE FILE, BONUS. Do NOT invent, abbreviate, or truncate any other words.`
+        : `Side props (workbook, checklist, templates, etc.) MUST be rendered with NO TEXT, NO HEADERS, NO LABELS, NO WORDS — completely blank covers. Do not invent any words on side items.`;
+
+      const titleRule = includeSubtitle && subtitle
+        ? `RENDER ONLY the title "${title}" with subtitle "${subtitle}" on the main book cover — no body paragraph, no extra tagline.`
+        : `RENDER ONLY the title text "${title}" on the main book cover. Do NOT render a subtitle, tagline, body paragraph, or any descriptive sentence. The cover must contain ONLY the title and a small author/brand mark.`;
 
       const enhancedParams = [
         `Product Title: "${title}"`,
-        subtitle ? `Subtitle: "${subtitle}"` : '',
+        includeSubtitle && subtitle ? `Subtitle: "${subtitle}"` : '',
         `Niche: ${niche}`,
         productConcept ? `Product Description: ${productConcept}` : '',
         uniqueMechanism ? `Unique Selling Point: ${uniqueMechanism}` : '',
@@ -131,13 +139,14 @@ serve(async (req) => {
         body.designTypography ? `Typography: ${body.designTypography}` : '',
         body.designMood ? `Visual Mood: ${body.designMood}` : '',
         body.sceneLayout ? `Scene Layout: ${body.sceneLayout}` : '',
-        body.headlineFormula ? `Cover Text Formula: ${body.headlineFormula}` : '',
         body.priceTier ? `Price Tier Aesthetic: ${body.priceTier} product (match perceived value)` : '',
         `Target Audience: ${body.targetAudience || 'general audience'}`,
         `Components (${validComponents.length} items — ONLY THESE): ${componentDescs.join('; ')}`,
         `Depth: ${depthMode === 'stacked' ? 'layered 3D with depth variation, 25° perspective angles, individual drop shadows' : 'flat minimal arrangement'}`,
         `REQUIRED EFFECTS: 3D perspective at 25° angle, soft drop shadows beneath each item, light reflection on glossy surfaces, background gradient, professional product photography lighting from top-left`,
-        `CRITICAL: The cover text MUST say "${title}"${subtitle ? ` with subtitle "${subtitle}"` : ''}. The imagery must reflect the ${niche} niche and the product concept.`,
+        `TYPOGRAPHY RULE: All rendered text must be sharply legible, correctly spelled English. NO partial words, NO truncated text, NO placeholder lorem ipsum, NO fake brand names, NO invented words.`,
+        titleRule,
+        labelRule,
       ].filter(Boolean).join('\n');
 
       // STAGE 1: AI writes custom prompt
