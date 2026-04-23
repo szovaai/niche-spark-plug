@@ -122,6 +122,12 @@ export default function ContentQualityReport({ content, assets, onExpandChapter,
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-muted-foreground tabular-nums">{dim.score}/100</span>
+                        {dim.label === "Asset Depth" && delta && delta > 0 && (
+                          <Badge className="text-[10px] bg-emerald-500/20 text-emerald-300 border-emerald-500/30 animate-pulse gap-1">
+                            <TrendingUp className="w-3 h-3" />
+                            +{delta} pts
+                          </Badge>
+                        )}
                         <Badge variant="outline" className={`text-[10px] ${cfg.color}`}>
                           <StatusIcon className="w-3 h-3 mr-1" />
                           {cfg.label}
@@ -130,6 +136,25 @@ export default function ContentQualityReport({ content, assets, onExpandChapter,
                     </div>
                     <Progress value={dim.score} className="h-1.5" />
                     <p className="text-xs text-muted-foreground">{dim.details}</p>
+                    {/* Asset Factory chips on Asset Depth row */}
+                    {dim.label === "Asset Depth" && (
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {ASSET_CHIPS.map(chip => {
+                          const present = !!assets?.[chip.key];
+                          return (
+                            <Badge
+                              key={chip.key}
+                              variant="outline"
+                              className={`text-[10px] gap-1 ${present ? "bg-accent/15 text-accent border-accent/30" : "text-muted-foreground/50 border-border/40"}`}
+                            >
+                              <span>{chip.emoji}</span>
+                              {chip.label}
+                              {present && <CheckCircle className="w-2.5 h-2.5" />}
+                            </Badge>
+                          );
+                        })}
+                      </div>
+                    )}
                     {/* Coaching message */}
                     {dim.status !== "pass" && (
                       <p className="text-xs font-medium text-amber-300/90 flex items-start gap-1.5">
