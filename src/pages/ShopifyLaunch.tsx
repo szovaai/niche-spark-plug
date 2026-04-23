@@ -57,7 +57,7 @@ export default function ShopifyLaunch() {
       ["Subheadline", assets.subheadline],
       ["Description", assets.product_description],
       ["Price", form.price],
-      ["Vendor", "LaunchStack"],
+      ["Vendor", "PDF Empire AI"],
       ["Type", "Digital Product"],
       ["Tags", form.niche],
     ];

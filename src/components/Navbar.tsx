@@ -37,14 +37,10 @@ const Navbar = () => {
       className="fixed top-0 left-0 right-0 z-50 px-4 py-4"
     >
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between px-4 md:px-6 py-3 rounded-2xl glass-card">
+        <div className="flex items-center justify-between px-4 md:px-6 py-3 rounded-2xl bg-black border border-border/40 shadow-lg">
           {/* Logo */}
           <button onClick={() => handleNavigate("/")} className="flex items-center gap-2">
             <img src="/logo.png" alt="PDF Empire AI" className="h-10 w-10 object-contain drop-shadow-[0_0_12px_hsl(var(--primary)/0.5)]" />
-            <span className="text-xl font-bold hidden sm:inline">
-              PDF <span className="gradient-text">Empire</span>
-              <span className="text-xs text-muted-foreground ml-1">AI</span>
-            </span>
           </button>
           
           {/* Auth Section + Mobile Menu */}
@@ -92,7 +88,7 @@ const Navbar = () => {
                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
                       <Zap className="w-4 h-4 text-primary-foreground" />
                     </div>
-                    <span className="text-lg font-bold">LaunchStack AI</span>
+                    <span className="text-lg font-bold">PDF Empire AI</span>
                   </SheetTitle>
                 </SheetHeader>
 

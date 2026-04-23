@@ -617,7 +617,7 @@ export default function CommandCenter() {
           <div>
             <h2 className="text-2xl font-bold">Launch Command Center</h2>
             <p className="text-sm text-muted-foreground mt-2 max-w-sm mx-auto">
-              Start by choosing a niche or importing an offer idea. LaunchStack will build your mission control dashboard automatically.
+              Start by choosing a niche or importing an offer idea. PDF Empire AI will build your mission control dashboard automatically.
             </p>
           </div>
           <div className="flex gap-3">

@@ -139,7 +139,7 @@ export default function AffiliatePredictor() {
     if (!result) return;
     const report = `
 ═══════════════════════════════════════
-  LaunchStack AI — Affiliate Profit Report
+  PDF Empire AI — Affiliate Profit Report
 ═══════════════════════════════════════
 
 Product: ${productName || "Unnamed"}
@@ -166,7 +166,7 @@ Earnings/Sale: $${result.projections.affiliateEarningsPerSale}
 🥈 Top 25: $${result.projections.top25AffiliateEarnings}
 🥉 Top 50: $${result.projections.top50AffiliateEarnings}
 
-Powered by LaunchStack AI
+Powered by PDF Empire AI
     `.trim();
     navigator.clipboard.writeText(report);
     toast.success("Report copied to clipboard!");

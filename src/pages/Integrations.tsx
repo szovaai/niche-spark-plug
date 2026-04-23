@@ -20,7 +20,7 @@ export default function Integrations() {
       <div className="max-w-5xl mx-auto p-6 space-y-8">
         <div className="space-y-2">
           <h1 className="text-2xl font-bold">Integrations</h1>
-          <p className="text-sm text-muted-foreground">Connect LaunchStack AI to your favorite platforms.</p>
+          <p className="text-sm text-muted-foreground">Connect PDF Empire AI to your favorite platforms.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
