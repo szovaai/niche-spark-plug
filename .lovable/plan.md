@@ -1,31 +1,62 @@
 
 
-## Add "Let AI Decide" option to Mechanism Selector
+## Add "Boost My Score" AI Optimizer to Launch Score Card
 
-Add a special card at the top of the mechanism grid in `src/components/wizard/MechanismSelector.tsx` that lets the user delegate the choice to the AI instead of picking one of the 8 mechanism cards manually.
+Add a one-click AI booster that targets the lowest-scoring dimensions on the Launch Score and rewrites the inputs (niche framing, audience, topic, mechanism, angle) to push the overall score above 80.
 
-### Changes to `src/components/wizard/MechanismSelector.tsx`
+### What the user sees
 
-1. **Add a new "Let AI Decide" card** rendered before the mapped `mechs.map(...)` cards.
-   - Distinct visual style: gradient border (accent → primary), Sparkles icon, "Recommended" badge.
-   - Title: "Let AI Decide"
-   - Tagline: "Pick the highest-converting mechanism for me"
-   - Description: short copy explaining the AI will analyze the niche, audience, and angle scores to lock in the strongest framework automatically.
-   - Selectable like the other cards (shows the same Check indicator when active).
+In `src/components/wizard/LaunchScoreCard.tsx`, when `score.overall < 80`:
 
-2. **Selection logic** — when clicked:
-   - Score each mechanism using available signals (formula diversity, presence of `whyItWorks`, length/specificity of tagline+description). If `launchScore.angleScores` are not available here, fall back to a deterministic ranking: prioritize mechanisms whose `formula` is `Number`, `Timeframe`, or `Acronym` (highest-converting in direct response), then by description length.
-   - Pick the top-scored mechanism and call the existing `onSelect(mech)` with it.
-   - Mark internal state `aiPicked = true` so the AI Decide card shows the Check, and add a small "AI picked: {name}" hint line under the card grid.
-   - Show a toast: `AI selected "{name}" — {reason}` (e.g. "highest-converting Timeframe formula for your niche").
+1. A new **"Boost Score to 80+"** button appears at the top-right of the card next to the score, styled with a gradient + Sparkles icon.
+2. Each dimension bar shows a small **"Weak — Fix"** chip when its value is `<= 6`, clickable to boost just that one dimension.
+3. Clicking either button opens an inline **Boost Panel** below the score that streams AI recommendations as cards:
+   - **Sharpened niche** (more specific, higher-intent variant)
+   - **Tighter audience** (a clearer "who" with pain trigger)
+   - **Stronger topic angle** (a more emotional/urgent reframe)
+   - **Mechanism upgrade** (swap to a Number/Timeframe/Acronym formula)
+   - **Pricing tweak** (if monetization is weak, suggest a price within ceiling)
+   Each card has an **"Apply"** button that updates the relevant wizard field and a **"Apply All"** button at the bottom.
+4. After Apply All, the score auto-regenerates and an animated delta shows `+12 pts` if the new score is higher.
 
-3. **Visual treatment**
-   - The AI card spans the same grid cell size as the other mechanism cards (no layout shift).
-   - When AI-picked, also visually highlight the chosen underlying mechanism card with a small "AI Pick" mini-badge so the user can see which one was selected and still override it manually by clicking another card.
+### Data + AI flow
 
-4. **No prop changes required** — the parent (`WizardStep1.tsx`) already passes `onSelect` and the mechanism list. No edge function changes needed; this is a client-side smart selection layered on top of the existing mechanisms array.
+1. New edge function: **`supabase/functions/boost-launch-score/index.ts`**
+   - Input: current `niche`, `targetAudience`, `productType`, `topic`, `productConcept`, `uniqueMechanism`, `selectedAngle`, `price`, and the full `launchScore` object (so the model knows which dimensions are weak).
+   - Prompt instructs the model to identify the 2–3 lowest-scoring dimensions and produce **targeted upgrades only for those**, returning a structured JSON via tool calling:
+     ```json
+     {
+       "weakestDimensions": ["audienceClarity", "offerStrength"],
+       "upgrades": {
+         "niche":   { "current": "...", "improved": "...", "why": "..." },
+         "audience":{ "current": "...", "improved": "...", "why": "..." },
+         "topic":   { "current": "...", "improved": "...", "why": "..." },
+         "mechanism":{"current": "...", "improved": "...", "why": "..." },
+         "price":   { "current": 17,    "improved": 27,     "why": "..." }
+       },
+       "projectedScore": 84,
+       "summary": "Tightened the audience to a 5-year window and reframed the mechanism as a 7-Day system..."
+     }
+     ```
+   - Uses `callTieredAI` with `"standard"` tier (same pattern as `generate-launch-score`).
+   - Returns only upgrades for dimensions that were actually weak (skips strong ones).
+
+2. Wire-up in `WizardStep1.tsx`:
+   - Pass `niche/setNiche`, `targetAudience/setTargetAudience`, `topic/setTopic`, `price/setPrice`, plus `result/setResult` into `LaunchScoreCard` (new optional props).
+   - When user clicks **Apply** on a card, the matching setter runs (e.g., `setTargetAudience(upgrade.improved)`), and for mechanism/angle the `result.uniqueMechanism` field updates.
+   - When user clicks **Apply All**, all setters fire, then `generateScore(updatedProduct)` is called automatically to refresh the score.
+
+3. Track delta: stash the previous `overall` in component state so the new score can render a `+N pts` animated chip for 3 seconds.
+
+### Files to add / change
+
+- **Add** `supabase/functions/boost-launch-score/index.ts` — new edge function (auto-deploys).
+- **Edit** `src/components/wizard/LaunchScoreCard.tsx` — add Boost button, weak-dimension chips, inline Boost Panel, Apply / Apply All handlers, delta animation, optional setter props.
+- **Edit** `src/components/wizard/WizardStep1.tsx` — pass setters + `generateScore` into `LaunchScoreCard`; expose a re-score callback.
 
 ### Out of scope
-- No new edge function call (avoids extra AI cost; uses existing generated mechanisms).
-- No changes to `WizardStep1.tsx`, types, or other wizard steps.
+
+- No changes to `generate-launch-score` itself (boost is additive).
+- No changes to other wizard steps.
+- No DB schema changes — boost runs purely in the wizard session and updates already-tracked state that autosaves via the existing autosave hook.
 
