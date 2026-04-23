@@ -98,8 +98,46 @@ export default function MechanismSelector({ mechanisms, selectedMechanism, onSel
         Your unique mechanism is the proprietary framework that makes your product different. It will be woven into all your copy.
       </p>
       <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+        <Card
+          className={`cursor-pointer transition-all relative overflow-hidden border-2 ${
+            aiPicked
+              ? "border-accent bg-gradient-to-br from-accent/10 to-primary/10 ring-1 ring-accent/40"
+              : "border-transparent bg-gradient-to-br from-accent/5 to-primary/5 hover:from-accent/10 hover:to-primary/10"
+          }`}
+          style={{
+            backgroundImage: aiPicked
+              ? undefined
+              : "linear-gradient(hsl(var(--card)), hsl(var(--card))), linear-gradient(135deg, hsl(var(--accent)), hsl(var(--primary)))",
+            backgroundOrigin: "border-box",
+            backgroundClip: "padding-box, border-box",
+          }}
+          onClick={handleAIDecide}
+        >
+          <CardContent className="p-4 space-y-2">
+            <div className="flex items-center justify-between">
+              <Badge variant="outline" className="text-[10px] bg-gradient-to-r from-accent/20 to-primary/20 border-accent/40 text-accent">
+                ✨ Recommended
+              </Badge>
+              {aiPicked && <Check className="w-4 h-4 text-accent" />}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Wand2 className="w-4 h-4 text-accent" />
+              <p className="text-sm font-bold">Let AI Decide</p>
+            </div>
+            <p className="text-xs text-primary italic">Pick the highest-converting mechanism for me</p>
+            <p className="text-xs text-muted-foreground">
+              The AI analyzes your niche, audience, and angle scores to lock in the strongest framework automatically.
+            </p>
+            {aiPicked && aiPickedName && (
+              <p className="text-[11px] text-accent/80 pt-1 border-t border-border/50">
+                🎯 AI picked: <span className="font-semibold">{aiPickedName}</span>
+              </p>
+            )}
+          </CardContent>
+        </Card>
         {mechs.map((mech) => {
           const isSelected = selectedMechanism === mech.name || selectedMechanism?.startsWith(mech.name);
+          const isAIPick = aiPicked && aiPickedName === mech.name;
           const formulaStyle = mech.formula ? FORMULA_COLORS[mech.formula] || "" : "";
           return (
             <Card
@@ -107,19 +145,29 @@ export default function MechanismSelector({ mechanisms, selectedMechanism, onSel
               className={`cursor-pointer transition-all hover:border-accent/40 ${
                 isSelected ? "border-accent bg-accent/5 ring-1 ring-accent/30" : ""
               }`}
-              onClick={() => onSelect(mech)}
+              onClick={() => {
+                setAiPicked(false);
+                onSelect(mech);
+              }}
             >
               <CardContent className="p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  {mech.formula ? (
-                    <Badge variant="outline" className={`text-[10px] ${formulaStyle}`}>
-                      {mech.formula}
-                    </Badge>
-                  ) : (
-                    <Badge variant="secondary" className="text-[10px] bg-accent/20 text-accent-foreground">
-                      Framework
-                    </Badge>
-                  )}
+                <div className="flex items-center justify-between gap-1">
+                  <div className="flex items-center gap-1 flex-wrap">
+                    {mech.formula ? (
+                      <Badge variant="outline" className={`text-[10px] ${formulaStyle}`}>
+                        {mech.formula}
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary" className="text-[10px] bg-accent/20 text-accent-foreground">
+                        Framework
+                      </Badge>
+                    )}
+                    {isAIPick && (
+                      <Badge variant="outline" className="text-[9px] bg-gradient-to-r from-accent/20 to-primary/20 border-accent/40 text-accent">
+                        AI Pick
+                      </Badge>
+                    )}
+                  </div>
                   {isSelected && <Check className="w-4 h-4 text-accent" />}
                 </div>
                 <p className="text-sm font-bold">{mech.name}</p>
