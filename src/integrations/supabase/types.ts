@@ -565,6 +565,7 @@ export type Database = {
           created_at: string
           current_step: number
           id: string
+          lifecycle_status: string | null
           name: string
           niche: string | null
           product_type: string | null
@@ -585,6 +586,7 @@ export type Database = {
           created_at?: string
           current_step?: number
           id?: string
+          lifecycle_status?: string | null
           name?: string
           niche?: string | null
           product_type?: string | null
@@ -605,6 +607,7 @@ export type Database = {
           created_at?: string
           current_step?: number
           id?: string
+          lifecycle_status?: string | null
           name?: string
           niche?: string | null
           product_type?: string | null
@@ -751,6 +754,66 @@ export type Database = {
           target_audience?: string
           transformation_focus?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      opportunities: {
+        Row: {
+          ad_potential: number | null
+          competition: number | null
+          created_at: string
+          demand: number | null
+          emotion: number | null
+          hooks: Json | null
+          id: string
+          keyword: string
+          mode: string
+          niche: string | null
+          pain: number | null
+          payload: Json | null
+          platform: string | null
+          score: number
+          suggested_price: number | null
+          title: string
+          upsell: number | null
+        }
+        Insert: {
+          ad_potential?: number | null
+          competition?: number | null
+          created_at?: string
+          demand?: number | null
+          emotion?: number | null
+          hooks?: Json | null
+          id?: string
+          keyword: string
+          mode?: string
+          niche?: string | null
+          pain?: number | null
+          payload?: Json | null
+          platform?: string | null
+          score: number
+          suggested_price?: number | null
+          title: string
+          upsell?: number | null
+        }
+        Update: {
+          ad_potential?: number | null
+          competition?: number | null
+          created_at?: string
+          demand?: number | null
+          emotion?: number | null
+          hooks?: Json | null
+          id?: string
+          keyword?: string
+          mode?: string
+          niche?: string | null
+          pain?: number | null
+          payload?: Json | null
+          platform?: string | null
+          score?: number
+          suggested_price?: number | null
+          title?: string
+          upsell?: number | null
         }
         Relationships: []
       }
@@ -1211,6 +1274,48 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      saved_opportunities: {
+        Row: {
+          created_at: string
+          id: string
+          opportunity_id: string | null
+          project_id: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          opportunity_id?: string | null
+          project_id?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          opportunity_id?: string | null
+          project_id?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_opportunities_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_opportunities_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "launch_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       toolkits: {
         Row: {
