@@ -1,15 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Progress } from "@/components/ui/progress";
-import { ChevronDown, AlertTriangle, CheckCircle, ShieldAlert, Sparkles, Loader2, Zap, Lock, MessageSquareWarning } from "lucide-react";
-import { ContentAuditResult, auditFullContent, DimensionScore } from "@/lib/contentAudit";
+import { ChevronDown, AlertTriangle, CheckCircle, ShieldAlert, Sparkles, Loader2, Zap, Lock, MessageSquareWarning, TrendingUp } from "lucide-react";
+import { ContentAuditResult, auditFullContent, DimensionScore, tallyFactoryAssets } from "@/lib/contentAudit";
 import { Step2Content } from "@/types/launchWizard";
+import type { ProductAssets } from "@/types/productAssets";
 
 interface Props {
   content: Step2Content;
+  assets?: ProductAssets;
   onExpandChapter?: (chapterIndex: number) => void;
   expandingIndex?: number | null;
   onHumanize?: () => void;
@@ -23,12 +25,36 @@ const statusConfig: Record<DimensionScore["status"], { color: string; label: str
   unsafe: { color: "text-destructive border-destructive/30 bg-destructive/10", label: "Unsafe / Risky", icon: ShieldAlert },
 };
 
-const overallBarColor = (score: number) =>
-  score >= 75 ? "bg-emerald-500" : score >= 50 ? "bg-amber-500" : "bg-destructive";
+const ASSET_CHIPS: { key: keyof ProductAssets; label: string; emoji: string }[] = [
+  { key: "workbook", label: "Workbook", emoji: "📘" },
+  { key: "cheatsheet", label: "Cheatsheet", emoji: "⚡" },
+  { key: "toolkit", label: "Toolkit", emoji: "🧰" },
+  { key: "templates", label: "Templates", emoji: "📝" },
+  { key: "promptPack", label: "Prompts", emoji: "💬" },
+  { key: "bonusGuides", label: "Bonuses", emoji: "🎁" },
+  { key: "caseStudies", label: "Cases", emoji: "📈" },
+];
 
-export default function ContentQualityReport({ content, onExpandChapter, expandingIndex, onHumanize, humanizing }: Props) {
+export default function ContentQualityReport({ content, assets, onExpandChapter, expandingIndex, onHumanize, humanizing }: Props) {
   const [open, setOpen] = useState(true);
-  const audit = auditFullContent(content);
+  const audit = auditFullContent(content, assets);
+  const assetDepthDim = audit.dimensions.find(d => d.label === "Asset Depth");
+
+  // Animated +N pts delta when Asset Depth jumps after generation
+  const prevAssetDepth = useRef<number | null>(null);
+  const [delta, setDelta] = useState<number | null>(null);
+  useEffect(() => {
+    if (!assetDepthDim) return;
+    const current = assetDepthDim.score;
+    if (prevAssetDepth.current !== null && current > prevAssetDepth.current) {
+      const diff = current - prevAssetDepth.current;
+      setDelta(diff);
+      const t = setTimeout(() => setDelta(null), 3000);
+      prevAssetDepth.current = current;
+      return () => clearTimeout(t);
+    }
+    prevAssetDepth.current = current;
+  }, [assetDepthDim?.score]);
 
   if (audit.dimensions.length === 0) return null;
 
