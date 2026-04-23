@@ -37,6 +37,20 @@ const EmpireMode = () => {
     current_step: 1,
   });
 
+
+  // Universal autosave (2s debounce)
+  useAutosave({
+    table: "empire_projects",
+    recordId: project.id || null,
+    setRecordId: (newId) => {
+      setProject((p) => ({ ...p, id: newId } as any));
+      navigate(`/empire/${newId}`, { replace: true });
+    },
+    userId: user?.id,
+    data: { ...project, id: undefined },
+    enabled: !!user && !loading,
+  });
+
   useEffect(() => {
     if (id && user) {
       loadProject(id);
