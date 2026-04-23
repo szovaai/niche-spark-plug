@@ -7,13 +7,23 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const COMPONENT_VISUALS: Record<string, { name: string; promptFragment: string }> = {
-  guide: { name: "Main Guide / Ebook", promptFragment: "A premium 3D hardcover book with matte finish, product title visible on spine and front cover, realistic paper thickness, slight shadow beneath" },
-  worksheet: { name: "Workbook / Worksheet Pack", promptFragment: "Spiral-bound workbook with 3-5 stacked worksheet pages, grid lines visible, professional header, clipboard backing with realistic depth" },
-  checklist: { name: "Checklist", promptFragment: "Single clean checklist page with 5-7 visible checkmarks, bold header at top, minimal text blocks, clean design" },
-  resourceList: { name: "Cheat Sheet / Resource List", promptFragment: "Laminated-style card with icon bullets, compact professional layout, bold header, glossy finish" },
-  templates: { name: "Template Pack", promptFragment: "Layered swipe-file sheets with header bars, visible depth between sheets, branded folder behind" },
-  quiz: { name: "Prompt Library", promptFragment: "Card-style document showing numbered prompt list format, clean modern design, bold category headers" },
+const COMPONENT_VISUALS: Record<string, { name: string; promptFragment: (withLabels: boolean) => string }> = {
+  guide: { name: "Main Guide / Ebook", promptFragment: () => "A premium 3D hardcover book with matte finish, realistic paper thickness, slight shadow beneath" },
+  worksheet: { name: "Workbook / Worksheet Pack", promptFragment: (withLabels) => withLabels
+    ? "Spiral-bound workbook with 3-5 stacked worksheet pages, grid lines visible, header reading exactly 'WORKBOOK', clipboard backing with realistic depth"
+    : "Spiral-bound workbook with 3-5 stacked blank worksheet pages, subtle grid lines, NO TEXT, NO HEADERS, NO LABELS visible, clipboard backing with realistic depth" },
+  checklist: { name: "Checklist", promptFragment: (withLabels) => withLabels
+    ? "Single clean checklist page with 5-7 visible checkmarks, header reading exactly 'CHECKLIST', minimal text blocks, clean design"
+    : "Single clean page with 5-7 visible checkmark marks (no words next to them), NO HEADER TEXT, NO LABELS, minimal clean design" },
+  resourceList: { name: "Cheat Sheet / Resource List", promptFragment: (withLabels) => withLabels
+    ? "Laminated-style card with icon bullets, header reading exactly 'BONUS', compact professional layout, glossy finish"
+    : "Laminated-style card with icon bullets only, NO TEXT, NO HEADERS, NO LABELS, compact professional layout, glossy finish" },
+  templates: { name: "Template Pack", promptFragment: (withLabels) => withLabels
+    ? "Layered swipe-file sheets with header bars reading exactly 'TEMPLATE', visible depth between sheets, branded folder behind"
+    : "Layered blank swipe-file sheets, NO TEXT, NO HEADERS, NO LABELS, visible depth between sheets, plain folder behind" },
+  quiz: { name: "Prompt Library", promptFragment: (withLabels) => withLabels
+    ? "Card-style document with header reading exactly 'SWIPE FILE', clean modern design"
+    : "Card-style document showing abstract numbered rows, NO TEXT, NO HEADERS, NO LABELS, clean modern design" },
 };
 
 const NICHE_KEYWORDS: Record<string, string[]> = {
