@@ -30,6 +30,24 @@ function getExpansionPrompt(type: string, chapter: any, productBrief: any): stri
   }
 }
 
+function parseAiJson(content: string) {
+  const fencedMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+  const candidate = fencedMatch?.[1] || content;
+  const objectMatch = candidate.match(/[\{\[]([\s\S]*)[\}\]]/);
+  const jsonText = objectMatch ? objectMatch[0] : candidate;
+
+  try {
+    return JSON.parse(jsonText);
+  } catch {
+    const cleaned = jsonText
+      .replace(/[\u201C\u201D]/g, '"')
+      .replace(/[\u2018\u2019]/g, "'")
+      .replace(/,\s*([}\]])/g, '$1')
+      .trim();
+    return JSON.parse(cleaned);
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -159,9 +177,7 @@ Return ONLY valid JSON:
         { role: "user", content: expandPrompt },
       ], userTier, "standard");
 
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error("Failed to parse AI response");
-      const result = JSON.parse(jsonMatch[0]);
+      const result = parseAiJson(content);
 
       return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
@@ -297,9 +313,7 @@ RULES:
       { role: "user", content: prompt },
     ], userTier, "standard");
 
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("Failed to parse AI response");
-    const result = JSON.parse(jsonMatch[0]);
+    const result = parseAiJson(content);
 
     await setCachedResponse(cacheKey, "generate-launch-content", cacheKey, result, userTier, model);
 
