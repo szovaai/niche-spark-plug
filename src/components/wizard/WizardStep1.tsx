@@ -252,7 +252,25 @@ export default function WizardStep1({ niche, setNiche, targetAudience, setTarget
               <span className="text-sm text-muted-foreground">Analyzing launch potential...</span>
             </div>
           )}
-          {result.launchScore && <LaunchScoreCard score={result.launchScore} />}
+          {result.launchScore && (
+            <LaunchScoreCard
+              score={result.launchScore}
+              niche={niche}
+              setNiche={setNiche}
+              targetAudience={targetAudience}
+              setTargetAudience={setTargetAudience}
+              topic={topic}
+              setTopic={setTopic}
+              productType={productType}
+              productConcept={result.concept}
+              uniqueMechanism={result.uniqueMechanism}
+              selectedAngle={result.selectedAngle}
+              price={price}
+              setPrice={setPrice}
+              setUniqueMechanism={(v) => setResult({ ...result, uniqueMechanism: v })}
+              onRescore={() => generateScore(result)}
+            />
+          )}
           {result.launchScore?.pricingPsychology && (
             <PricingPsychologyCard pricing={result.launchScore.pricingPsychology} />
           )}
