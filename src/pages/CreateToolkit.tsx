@@ -17,6 +17,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ToolkitComponents, WritingStyle, GuideSection, GUIDE_SECTION_TEMPLATES } from "@/types/toolkit";
+import { useAutosave } from "@/hooks/useAutosave";
 
 import EcoverGenerator from "@/components/EcoverGenerator";
 import SalesLetterGenerator from "@/components/SalesLetterGenerator";
@@ -126,6 +127,32 @@ const CreateToolkit = () => {
 
   // Flag to prevent save during reset
   const isResettingRef = useRef(false);
+
+  // Universal autosave (2s debounce) — keystroke-level persistence
+  useAutosave({
+    table: "toolkits",
+    recordId: toolkitId,
+    setRecordId: setToolkitId,
+    userId: user?.id,
+    data: {
+      title: title || "Untitled Toolkit",
+      subtitle,
+      niche: niche || "draft",
+      target_audience: targetAudience,
+      logo_url: logoUrl,
+      ecover_url: ecoverUrl,
+      components: components as any,
+      content,
+      sales_letter: salesLetter,
+      upsell,
+      thesis,
+      guide_sections: guideSections as any,
+      writing_style: writingStyle,
+      wizard_step: currentStep,
+      status: "draft",
+    },
+    enabled: !!user && !isResettingRef.current && (!!title || !!niche),
+  });
 
   // Component metadata
   const componentMeta: Record<string, { title: string; description: string; estimatedSize: string }> = {

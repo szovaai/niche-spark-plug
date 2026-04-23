@@ -10,6 +10,7 @@ import StepSelectType from "@/components/micro-factory/StepSelectType";
 import StepDefineNiche from "@/components/micro-factory/StepDefineNiche";
 import StepCustomize from "@/components/micro-factory/StepCustomize";
 import StepResults from "@/components/micro-factory/StepResults";
+import { useAutosave } from "@/hooks/useAutosave";
 
 const STEPS = ["Product Type", "Niche & Audience", "Customize", "Results"];
 
@@ -21,6 +22,26 @@ export default function MicroFactory() {
   const [config, setConfig] = useState<Record<string, unknown>>({});
   const [result, setResult] = useState<Record<string, unknown> | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [recordId, setRecordId] = useState<string | null>(null);
+
+  useAutosave({
+    table: "micro_products",
+    recordId,
+    setRecordId,
+    userId: user?.id,
+    data: {
+      product_type: productType || "ebook",
+      niche_topic: nicheData.nicheTopic || "draft",
+      target_audience: nicheData.targetAudience || "draft",
+      problem_statement: nicheData.problemStatement || "draft",
+      config,
+      generated_content: result,
+      product_title: (result as any)?.product_title ?? null,
+      product_subtitle: (result as any)?.product_subtitle ?? null,
+      status: result ? "complete" : "draft",
+    },
+    enabled: !!user && (!!productType || !!nicheData.nicheTopic),
+  });
 
   const canNext = () => {
     if (step === 0) return !!productType;

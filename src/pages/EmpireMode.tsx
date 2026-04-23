@@ -18,6 +18,7 @@ import { Step3ProductPack } from "@/components/empire/Step3ProductPack";
 import { Step4GumroadLaunch } from "@/components/empire/Step4GumroadLaunch";
 import { Step5ContentEngine } from "@/components/empire/Step5ContentEngine";
 import { Step6Automation } from "@/components/empire/Step6Automation";
+import { useAutosave } from "@/hooks/useAutosave";
 
 const stepIcons = {
   Target, Palette, Package, Store, Video, Rocket
@@ -34,6 +35,20 @@ const EmpireMode = () => {
   const [project, setProject] = useState<Partial<EmpireProject>>({
     name: "My Empire Project",
     current_step: 1,
+  });
+
+
+  // Universal autosave (2s debounce)
+  useAutosave({
+    table: "empire_projects",
+    recordId: project.id || null,
+    setRecordId: (newId) => {
+      setProject((p) => ({ ...p, id: newId } as any));
+      navigate(`/empire/${newId}`, { replace: true });
+    },
+    userId: user?.id,
+    data: { ...project, id: undefined },
+    enabled: !!user && !loading,
   });
 
   useEffect(() => {

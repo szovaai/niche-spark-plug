@@ -41,7 +41,7 @@ import {
 const coreItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, tip: "Your home base" },
   { title: "Profit Radar AI", url: "/opportunities", icon: Radar, tip: "Discover problems people pay to solve" },
-  { title: "Saved Projects", url: "/saved-projects", icon: Bookmark, tip: "Your launch pipeline" },
+  { title: "All Projects", url: "/saved-projects", icon: Bookmark, tip: "Every build in one place" },
 ];
 
 const buildItems = [
