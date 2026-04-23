@@ -131,7 +131,9 @@ serve(async (req) => {
         ? `RENDER ONLY the title "${title}" with subtitle "${subtitle}" on the main book cover — no body paragraph, no extra tagline. Title and subtitle MUST fit fully inside the cover with ≥10% safe margin on every side. Scale the type down if needed; NEVER let any letter clip or run off the edge.`
         : `RENDER ONLY the title text "${title}" on the main book cover. Do NOT render a subtitle, tagline, body paragraph, or any descriptive sentence. The cover must contain ONLY the title and a small author/brand mark. Title MUST fit fully inside the cover with ≥10% safe margin on every side, broken across 1-3 balanced lines. Scale the type down if needed; NEVER let any letter clip, hyphenate, or run off the edge.`;
 
-      const compositionRule = `COMPOSITION: One cohesive bundle, NOT scattered objects. Hero book centered front; supporting items fanned tightly behind in a tight arc, each overlapping the hero by 8-12%. All items share one tight floor shadow. Tight crop (item edges should reach close to image bounds). No empty floating gaps between items.`;
+      const compositionRule = `COMPOSITION: One cohesive, editorial bundle, NOT scattered objects. Hero book ~55% of frame width, centered front. Supporting items fan tightly behind in a tight arc, each overlapping the hero by 15–20%. Add a SECOND depth row with 1–2 peeking items (folder edge, index card, tab) for layered depth. Include 1–2 styling accessories — a fountain pen across a corner, a brass paperclip, or a folded kraft band — for editorial feel. Bundle fills 80–85% of the frame (tight crop, item edges close to image bounds). All items share ONE unified soft contact shadow. NO empty floating gaps.`;
+
+      const heroLayoutRule = `HERO COVER LAYOUT (fill dead space with NON-TEXT design): thin decorative eyebrow band at top in the accent color, bold title block centered occupying 55–65% of cover height, ornamental divider line directly under the title, small brand monogram circle bottom-center, subtle background texture (paper grain or soft geometric pattern). Do NOT add extra words, taglines, or sentences beyond the title.`;
 
       const enhancedParams = [
         `Product Title (render this EXACT text on the cover, nothing else): "${title}"`,
@@ -148,7 +150,8 @@ serve(async (req) => {
         `Components (${validComponents.length} items — ONLY THESE, no duplicates, no extras): ${componentDescs.join('; ')}`,
         `Depth: ${depthMode === 'stacked' ? 'layered 3D with depth variation, 25° perspective angles, unified soft shadow' : 'flat minimal arrangement'}`,
         compositionRule,
-        `REQUIRED EFFECTS: 3D perspective at 25° angle, soft contact shadow under the bundle, light reflection on glossy surfaces, dark studio gradient background with subtle vignette, lighting from top-left, gentle rim light.`,
+        heroLayoutRule,
+        `REQUIRED EFFECTS: 3D perspective at 25° angle, soft contact shadow under the bundle, light reflection on glossy surfaces, navy-to-charcoal radial gradient background centered behind the hero with subtle vignette, faint reflective floor under the bundle, soft rim light from upper-left, gentle bloom on glossy edges, cinematic studio lighting.`,
         `TYPOGRAPHY RULE: All rendered text must be sharply legible, correctly spelled English. NO partial words, NO truncated text, NO clipping at edges, NO placeholder lorem ipsum, NO fake brand names, NO invented words.`,
         titleRule,
         labelRule,
