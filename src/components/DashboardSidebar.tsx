@@ -112,7 +112,7 @@ export function DashboardSidebar() {
         <div className="flex items-center justify-between">
           {!isCollapsed && (
             <NavLink to="/" className="flex items-center gap-2.5">
-              <img src="/logo.png" alt="PDF Empire AI" className="h-14 w-14 object-contain drop-shadow-[0_0_10px_hsl(var(--primary)/0.5)]" />
+              <img src="/logo.png" alt="PDF Empire AI" className="h-9 w-9 object-contain drop-shadow-[0_0_10px_hsl(var(--primary)/0.5)]" />
             </NavLink>
           )}
           <SidebarTrigger className="ml-auto">
