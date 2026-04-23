@@ -29,9 +29,9 @@ const scoreColor = (s: number) => {
 };
 
 const Metric = ({ label, value }: { label: string; value?: number }) => (
-  <div className="flex flex-col items-center">
-    <div className="text-[10px] uppercase tracking-wider text-muted-foreground/70">{label}</div>
-    <div className="text-sm font-bold text-foreground">{value ?? "—"}</div>
+  <div className="flex flex-col items-center justify-center px-1 min-w-0 flex-1">
+    <div className="text-[9px] uppercase tracking-tight text-muted-foreground/70 whitespace-nowrap truncate w-full text-center leading-tight">{label}</div>
+    <div className="text-sm font-bold text-foreground leading-tight mt-0.5">{value ?? "—"}</div>
   </div>
 );
 
