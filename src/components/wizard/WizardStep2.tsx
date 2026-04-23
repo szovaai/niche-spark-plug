@@ -245,6 +245,30 @@ export default function WizardStep2({ productBrief, productType, result, setResu
   const [humanizing, setHumanizing] = useState(false);
   const [writingVoice, setWritingVoice] = useState<WritingVoice>("mentor");
   const [previewChapter, setPreviewChapter] = useState<{ index: number; title: string; content: string } | null>(null);
+  const contentReportKey = result ? `${result.chapters.map((chapter) => [chapter.title, chapter.summary, chapter.fullContent || "", chapter.caseStudies?.length || 0, chapter.worksheets?.length || 0, chapter.templates?.length || 0, chapter.checklists?.length || 0, chapter.additionalExamples?.length || 0].join("|")).join("::")}--${Object.keys(assets || {}).sort().join(",")}` : "empty";
+
+  const getChapterAuditScore = (chapter: ChapterItem) => auditFullContent({ ...result!, chapters: [chapter] }).overall;
+  const keepBetterChapterVersion = (
+    index: number,
+    nextChapter: ChapterItem,
+    successMessage: string,
+    lowerScoreMessage: string,
+  ) => {
+    if (!result) return;
+    const currentChapter = result.chapters[index];
+    const previousScore = getChapterAuditScore(currentChapter);
+    const nextScore = getChapterAuditScore(nextChapter);
+    if (nextScore < previousScore - 5) {
+      toast.warning(lowerScoreMessage, {
+        description: `Kept the stronger version (${previousScore}/100 vs ${nextScore}/100).`,
+      });
+      return;
+    }
+    const updatedChapters = [...result.chapters];
+    updatedChapters[index] = nextChapter;
+    setResult({ ...result, chapters: updatedChapters });
+    toast.success(successMessage);
+  };
 
   const generate = async () => {
     if (!productBrief) return;
@@ -281,12 +305,11 @@ export default function WizardStep2({ productBrief, productType, result, setResu
       });
       if (error) throw error;
       if (data?.expandedChapter) {
-        const updatedChapters = [...result.chapters];
+        let nextChapter: ChapterItem;
         if (expansionType) {
-          // Merge expansion into existing chapter
-          const existing = updatedChapters[index];
+          const existing = result.chapters[index];
           const expanded = data.expandedChapter;
-          updatedChapters[index] = {
+          nextChapter = {
             ...existing,
             caseStudies: [...(existing.caseStudies || []), ...(expanded.caseStudies || [])],
             worksheets: [...(existing.worksheets || []), ...(expanded.worksheets || [])],
@@ -295,11 +318,10 @@ export default function WizardStep2({ productBrief, productType, result, setResu
             additionalExamples: [...(existing.additionalExamples || []), ...(expanded.additionalExamples || [])],
           };
         } else {
-          updatedChapters[index] = data.expandedChapter;
+          nextChapter = data.expandedChapter;
         }
-        setResult({ ...result, chapters: updatedChapters });
         const label = expansionType ? EXPANSION_OPTIONS.find(o => o.type === expansionType)?.label || "Content" : "examples and walkthroughs";
-        toast.success(`Chapter ${index + 1} expanded with ${label}!`);
+        keepBetterChapterVersion(index, nextChapter, `Chapter ${index + 1} expanded with ${label}!`, `New chapter version scored lower — kept previous version.`);
       }
     } catch (e: any) {
       toast.error(e.message || "Failed to expand chapter");
@@ -324,10 +346,8 @@ export default function WizardStep2({ productBrief, productType, result, setResu
       });
       if (error) throw error;
       if (data?.fullContent) {
-        const updatedChapters = [...result.chapters];
-        updatedChapters[index] = { ...updatedChapters[index], fullContent: data.fullContent };
-        setResult({ ...result, chapters: updatedChapters });
-        toast.success(`Chapter ${index + 1} full content written!`);
+        const nextChapter = { ...result.chapters[index], fullContent: data.fullContent };
+        keepBetterChapterVersion(index, nextChapter, `Chapter ${index + 1} full content written!`, `New full chapter scored lower — kept previous version.`);
       }
     } catch (e: any) {
       toast.error(e.message || "Failed to write chapter");
@@ -508,6 +528,7 @@ export default function WizardStep2({ productBrief, productType, result, setResu
 
           {/* Pre-Continue Optimization Report */}
           <ContentQualityReport
+            key={contentReportKey}
             content={result}
             assets={assets}
             onExpandChapter={(i) => expandChapter(i)}
