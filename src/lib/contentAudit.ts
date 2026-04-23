@@ -1,4 +1,5 @@
 import { ChapterItem, Step2Content } from "@/types/launchWizard";
+import type { ProductAssets } from "@/types/productAssets";
 
 // ─── Word & phrase lists ────────────────────────────────────────────────────
 const VAGUE_PHRASES = [
