@@ -10,20 +10,20 @@ const corsHeaders = {
 const COMPONENT_VISUALS: Record<string, { name: string; promptFragment: (withLabels: boolean) => string }> = {
   guide: { name: "Main Guide / Ebook", promptFragment: () => "A premium 3D hardcover book with matte finish, realistic paper thickness, slight shadow beneath" },
   worksheet: { name: "Workbook / Worksheet Pack", promptFragment: (withLabels) => withLabels
-    ? "Spiral-bound workbook with 3-5 stacked worksheet pages, grid lines visible, header reading exactly 'WORKBOOK', clipboard backing with realistic depth"
-    : "Spiral-bound workbook with 3-5 stacked blank worksheet pages, subtle grid lines, NO TEXT, NO HEADERS, NO LABELS visible, clipboard backing with realistic depth" },
+    ? "Spiral-bound workbook with 3-5 stacked pages, fill-in lines, small bar-chart sketch in a corner, tiny circular icon glyphs, ornamental corner flourishes, header reading exactly 'WORKBOOK', clipboard backing with realistic depth, premium matte cardstock"
+    : "Spiral-bound workbook with 3-5 stacked pages showing fill-in lines, small bar-chart sketch, tiny circular icon glyphs in corners, decorative corner ornaments, NO TEXT, NO HEADERS, NO LABELS, NO WORDS, clipboard backing with realistic depth, premium matte cardstock — richly designed and detailed" },
   checklist: { name: "Checklist", promptFragment: (withLabels) => withLabels
-    ? "Single clean checklist page with 5-7 visible checkmarks, header reading exactly 'CHECKLIST', minimal text blocks, clean design"
-    : "Single clean page with 5-7 visible checkmark marks (no words next to them), NO HEADER TEXT, NO LABELS, minimal clean design" },
+    ? "Clean checklist page with 6-8 checkmarks beside short horizontal placeholder bars, a star icon, a percent ring graphic, decorative divider line, ornamental border, header reading exactly 'CHECKLIST', glossy laminated finish"
+    : "Clean page with 6-8 checkmark icons beside short horizontal placeholder bars, a star icon, a percent ring graphic, decorative divider line, ornamental border, NO TEXT, NO HEADERS, NO LABELS, NO WORDS, glossy laminated finish — richly designed and detailed" },
   resourceList: { name: "Cheat Sheet / Resource List", promptFragment: (withLabels) => withLabels
-    ? "Laminated-style card with icon bullets, header reading exactly 'BONUS', compact professional layout, glossy finish"
-    : "Laminated-style card with icon bullets only, NO TEXT, NO HEADERS, NO LABELS, compact professional layout, glossy finish" },
+    ? "Laminated card with icon bullets (link, bookmark, gear, envelope glyphs), thin divider lines, a small QR-style square graphic, gold accent corners, header reading exactly 'BONUS', compact professional layout, glossy finish"
+    : "Laminated card with icon bullets (link, bookmark, gear, envelope glyphs only), thin divider lines, a small QR-style square graphic, gold accent corners, compact professional layout, glossy finish, NO TEXT, NO HEADERS, NO LABELS, NO WORDS — richly designed and detailed" },
   templates: { name: "Template Pack", promptFragment: (withLabels) => withLabels
-    ? "Layered swipe-file sheets with header bars reading exactly 'TEMPLATE', visible depth between sheets, branded folder behind"
-    : "Layered blank swipe-file sheets, NO TEXT, NO HEADERS, NO LABELS, visible depth between sheets, plain folder behind" },
+    ? "Layered swipe-file sheets with wireframe boxes, grid placeholders, small color swatch row, dotted dividers, header bars reading exactly 'TEMPLATE', visible depth between sheets, branded kraft folder behind with band"
+    : "Layered swipe-file sheets showing wireframe boxes, grid placeholders, small color swatch row, dotted dividers, visible depth between sheets, kraft folder behind with band, NO TEXT, NO HEADERS, NO LABELS, NO WORDS — richly designed and detailed" },
   quiz: { name: "Prompt Library", promptFragment: (withLabels) => withLabels
-    ? "Card-style document with header reading exactly 'SWIPE FILE', clean modern design"
-    : "Card-style document showing abstract numbered rows, NO TEXT, NO HEADERS, NO LABELS, clean modern design" },
+    ? "Card-style document with numbered circle badges, short bar placeholders, dotted dividers, small icon glyph row, subtle accent stripe, header reading exactly 'SWIPE FILE', clean modern design"
+    : "Card-style document with numbered circle badges, short bar placeholders, dotted dividers, small icon glyph row, subtle accent stripe, clean modern design, NO TEXT, NO HEADERS, NO LABELS, NO WORDS — richly designed and detailed" },
 };
 
 const NICHE_KEYWORDS: Record<string, string[]> = {
@@ -42,17 +42,18 @@ function detectNiche(niche: string, title: string): string {
   return 'default';
 }
 
-const PROMPT_WRITER_SYSTEM = `You are a premium eCover design director with 15+ years creating high-ticket digital product mockups. Write ultra-high-quality image generation prompts for photorealistic digital product bundle mockups.
+const PROMPT_WRITER_SYSTEM = `You are a premium eCover design director with 15+ years creating high-ticket digital product mockups. Write ultra-high-quality image generation prompts for photorealistic, RICHLY DETAILED digital product bundle mockups.
 
 CRITICAL RULES:
 1. ONLY include the EXACT components specified — NO extras, NO duplicates.
-2. Composition: hero book centered front, supporting items fanned tightly behind it in a tight arc, items overlapping the hero by ~10% so the bundle reads as ONE cohesive stack (NOT floating separately).
-3. Must look like $297-$997 premium product photography (3D, 25° tilt, soft contact shadows, rim light, subtle bloom).
-4. TYPOGRAPHY ON THE HERO COVER: Render the EXACT title text given, fully contained inside the cover with generous safe margins (≥10% padding on every side). Title MUST NOT overflow, MUST NOT clip, MUST NOT continue off the edge. If the title is long, scale it down — never crop. Use 1-3 lines max, perfectly balanced.
-5. Spell every visible word correctly. NO partial words, NO truncated text, NO lorem ipsum, NO invented words on side props.
-6. Background: subtle dark studio gradient with soft vignette. Tight floor shadow under the entire bundle.
+2. Composition: hero book centered front; supporting items fanned tightly behind in a tight arc, overlapping the hero by 15–20%; a second depth row with 1–2 peeking items (folder edge, index card, tab); 1–2 styling accessories (fountain pen, brass paperclip, folded kraft band) for editorial feel; bundle fills 80–85% of the frame (tight crop); ONE unified soft contact shadow under the entire stack.
+3. Must look like $297–$997 premium product photography (3D, 25° tilt, soft contact shadows, rim light, subtle bloom). Cinematic studio background: navy-to-charcoal radial gradient centered behind the hero with subtle vignette, faint reflective floor under the bundle, soft rim light from upper-left, gentle bloom on glossy edges.
+4. TYPOGRAPHY ON THE HERO COVER: Render the EXACT title text given, fully contained inside the cover with generous safe margins (≥10% padding on every side). Title MUST NOT overflow, MUST NOT clip, MUST NOT continue off the edge. If long, scale down — never crop. 1–3 balanced lines max.
+5. HERO COVER LAYOUT (non-text design fills dead space): thin decorative eyebrow band at top in the accent color, bold title block centered occupying 55–65% of the cover height, ornamental divider line under the title, small brand monogram circle bottom-center, subtle background texture (paper grain or soft geometric pattern). NO extra words beyond the title.
+6. Spell every visible word correctly. NO partial words, NO truncated text, NO lorem ipsum, NO invented words on side props.
+7. Side props must be richly detailed but blank: fill-in lines, icon glyphs, ornamental corners, dotted dividers, color swatches, wireframe boxes, percent rings, numbered badges — never words.
 
-OUTPUT: A single 400-600 word prompt ready for image generation. No headers or explanations.`;
+OUTPUT: A single 500–750 word prompt ready for image generation. No headers or explanations.`;
 
 interface EcoverRequest {
   title?: string;
@@ -130,7 +131,9 @@ serve(async (req) => {
         ? `RENDER ONLY the title "${title}" with subtitle "${subtitle}" on the main book cover — no body paragraph, no extra tagline. Title and subtitle MUST fit fully inside the cover with ≥10% safe margin on every side. Scale the type down if needed; NEVER let any letter clip or run off the edge.`
         : `RENDER ONLY the title text "${title}" on the main book cover. Do NOT render a subtitle, tagline, body paragraph, or any descriptive sentence. The cover must contain ONLY the title and a small author/brand mark. Title MUST fit fully inside the cover with ≥10% safe margin on every side, broken across 1-3 balanced lines. Scale the type down if needed; NEVER let any letter clip, hyphenate, or run off the edge.`;
 
-      const compositionRule = `COMPOSITION: One cohesive bundle, NOT scattered objects. Hero book centered front; supporting items fanned tightly behind in a tight arc, each overlapping the hero by 8-12%. All items share one tight floor shadow. Tight crop (item edges should reach close to image bounds). No empty floating gaps between items.`;
+      const compositionRule = `COMPOSITION: One cohesive, editorial bundle, NOT scattered objects. Hero book ~55% of frame width, centered front. Supporting items fan tightly behind in a tight arc, each overlapping the hero by 15–20%. Add a SECOND depth row with 1–2 peeking items (folder edge, index card, tab) for layered depth. Include 1–2 styling accessories — a fountain pen across a corner, a brass paperclip, or a folded kraft band — for editorial feel. Bundle fills 80–85% of the frame (tight crop, item edges close to image bounds). All items share ONE unified soft contact shadow. NO empty floating gaps.`;
+
+      const heroLayoutRule = `HERO COVER LAYOUT (fill dead space with NON-TEXT design): thin decorative eyebrow band at top in the accent color, bold title block centered occupying 55–65% of cover height, ornamental divider line directly under the title, small brand monogram circle bottom-center, subtle background texture (paper grain or soft geometric pattern). Do NOT add extra words, taglines, or sentences beyond the title.`;
 
       const enhancedParams = [
         `Product Title (render this EXACT text on the cover, nothing else): "${title}"`,
@@ -147,7 +150,8 @@ serve(async (req) => {
         `Components (${validComponents.length} items — ONLY THESE, no duplicates, no extras): ${componentDescs.join('; ')}`,
         `Depth: ${depthMode === 'stacked' ? 'layered 3D with depth variation, 25° perspective angles, unified soft shadow' : 'flat minimal arrangement'}`,
         compositionRule,
-        `REQUIRED EFFECTS: 3D perspective at 25° angle, soft contact shadow under the bundle, light reflection on glossy surfaces, dark studio gradient background with subtle vignette, lighting from top-left, gentle rim light.`,
+        heroLayoutRule,
+        `REQUIRED EFFECTS: 3D perspective at 25° angle, soft contact shadow under the bundle, light reflection on glossy surfaces, navy-to-charcoal radial gradient background centered behind the hero with subtle vignette, faint reflective floor under the bundle, soft rim light from upper-left, gentle bloom on glossy edges, cinematic studio lighting.`,
         `TYPOGRAPHY RULE: All rendered text must be sharply legible, correctly spelled English. NO partial words, NO truncated text, NO clipping at edges, NO placeholder lorem ipsum, NO fake brand names, NO invented words.`,
         titleRule,
         labelRule,
