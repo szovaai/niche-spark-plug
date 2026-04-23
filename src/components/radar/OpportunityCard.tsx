@@ -29,9 +29,9 @@ const scoreColor = (s: number) => {
 };
 
 const Metric = ({ label, value }: { label: string; value?: number }) => (
-  <div className="flex flex-col items-center">
-    <div className="text-[10px] uppercase tracking-wider text-muted-foreground/70">{label}</div>
-    <div className="text-sm font-bold text-foreground">{value ?? "—"}</div>
+  <div className="flex flex-col items-center justify-center px-1 min-w-0 flex-1">
+    <div className="text-[9px] uppercase tracking-tight text-muted-foreground/70 whitespace-nowrap truncate w-full text-center leading-tight">{label}</div>
+    <div className="text-sm font-bold text-foreground leading-tight mt-0.5">{value ?? "—"}</div>
   </div>
 );
 
@@ -67,12 +67,12 @@ export function OpportunityCard({ opp, onView, onBuild, onClone }: Props) {
             </div>
           </div>
 
-          <div className="grid grid-cols-5 gap-1.5 py-2 px-2 rounded-lg bg-secondary/30 border border-border/20">
-            <Metric label="Demand" value={opp.demand} />
+          <div className="flex items-stretch py-2.5 px-1 rounded-lg bg-secondary/30 border border-border/20 divide-x divide-border/30">
+            <Metric label="Dem" value={opp.demand} />
             <Metric label="Comp" value={opp.competition} />
             <Metric label="Ads" value={opp.ad_potential} />
-            <Metric label="Emotion" value={opp.emotion} />
-            <Metric label="Upsell" value={opp.upsell} />
+            <Metric label="Emo" value={opp.emotion} />
+            <Metric label="Up" value={opp.upsell} />
           </div>
 
           <div className="flex flex-wrap gap-1.5">
