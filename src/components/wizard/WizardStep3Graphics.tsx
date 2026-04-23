@@ -110,8 +110,8 @@ export default function WizardStep3Graphics({ productBrief, niche, result, setRe
 
       const { data, error } = await supabase.functions.invoke("generate-ecover", {
         body: {
-          title: productBrief.title,
-          subtitle: productBrief.subtitle,
+          title: coverTitle || productBrief.title,
+          subtitle: coverSubtitle,
           productConcept: productBrief.concept,
           uniqueMechanism: productBrief.uniqueMechanism,
           niche,
@@ -126,6 +126,9 @@ export default function WizardStep3Graphics({ productBrief, niche, result, setRe
           sceneLayout: layoutConfig.prompt,
           headlineFormula: formula?.template,
           priceTier: tierConfig.label,
+          includeSubtitle,
+          includeSideLabels,
+          maxCoverWords: 8,
           customPromptOverride,
         },
       });
