@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
+import { pickModel, type QualityMode, type UserPreference } from "../_shared/aiRouter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,7 +18,9 @@ serve(async (req) => {
       return unauthorizedResponse(authError || 'Authentication required', corsHeaders);
     }
 
-    const { niche, targetAudience, transformation, thesis } = await req.json();
+    const { niche, targetAudience, transformation, thesis, qualityMode = "balanced", modelPreference = "auto" } = await req.json();
+    const routed = pickModel("fast", qualityMode as QualityMode, modelPreference as UserPreference);
+    console.log(`[generate-toolkit-title] Routed to ${routed.model}`);
 
     if (!niche) {
       return new Response(
@@ -84,7 +87,8 @@ Return ONLY valid JSON in this exact format:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: routed.model,
+        ...(routed.reasoning ? { reasoning: routed.reasoning } : {}),
         messages: [
           { 
             role: "system", 

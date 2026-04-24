@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { encryptApiKey, decryptApiKey } from "@/lib/cryptoUtils";
 import BrandKitTab from "@/components/settings/BrandKitTab";
+import AIRoutingTab from "@/components/settings/AIRoutingTab";
 
 type ApiProvider = "deepseek" | "openai" | "anthropic";
 
@@ -215,6 +216,7 @@ const Settings = () => {
         <Tabs defaultValue="api-keys">
           <TabsList>
             <TabsTrigger value="api-keys">API Keys</TabsTrigger>
+            <TabsTrigger value="ai-routing">AI Routing</TabsTrigger>
             <TabsTrigger value="brand-kit">Brand Kit</TabsTrigger>
           </TabsList>
 
@@ -340,6 +342,10 @@ const Settings = () => {
                 </CardContent>
               </Card>
             </motion.div>
+          </TabsContent>
+
+          <TabsContent value="ai-routing" className="mt-4">
+            {user && <AIRoutingTab userId={user.id} />}
           </TabsContent>
 
           <TabsContent value="brand-kit" className="mt-4">

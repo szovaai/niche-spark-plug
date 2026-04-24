@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { getUserApiKey, getProviderConfig, type BYOKConfig } from "../_shared/byok.ts";
 import { validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
+import { pickModel, type QualityMode, type UserPreference } from "../_shared/aiRouter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -684,6 +685,9 @@ serve(async (req) => {
       chapterId,
       chapterNumber,
       chapterTitle,
+      // AI smart routing
+      qualityMode = "balanced",
+      modelPreference = "auto",
     } = await req.json();
     
     const authHeader = req.headers.get('authorization');
@@ -711,7 +715,10 @@ serve(async (req) => {
       model = "deepseek-chat";
       console.log("Using DeepSeek API");
     } else if (LOVABLE_API_KEY) {
-      console.log("Using Lovable AI Gateway");
+      // Smart routing: longform task. Override default model with the routed pick.
+      const routed = pickModel("longform", qualityMode as QualityMode, modelPreference as UserPreference);
+      model = routed.model;
+      console.log(`[generate-toolkit-content] Routed to ${model} (mode=${qualityMode}, pref=${modelPreference})`);
     } else {
       throw new Error("No API key configured");
     }

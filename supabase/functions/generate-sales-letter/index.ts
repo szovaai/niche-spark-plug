@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
+import { pickModel, type QualityMode, type UserPreference } from "../_shared/aiRouter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -278,7 +279,11 @@ serve(async (req) => {
     const contentSummary = typeof body.contentSummary === 'object' ? body.contentSummary : undefined;
     const promptBoxData = typeof body.promptBoxData === 'object' ? body.promptBoxData : undefined;
     const rawDraft = typeof body.rawDraft === 'string' ? body.rawDraft.slice(0, 50000) : '';
-    
+    const qualityMode: QualityMode = ['economy','balanced','premium'].includes(body.qualityMode) ? body.qualityMode : 'balanced';
+    const modelPreference: UserPreference = ['auto','fastest','best-writing','best-sales','cheapest'].includes(body.modelPreference) ? body.modelPreference : 'auto';
+    const routed = pickModel('salescopy', qualityMode, modelPreference);
+    console.log(`[generate-sales-letter] Routed to ${routed.model} (mode=${qualityMode}, pref=${modelPreference})`);
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
     const activeComponents = Object.entries(components || {}).filter(([_, enabled]) => enabled).map(([name]) => name);
@@ -492,7 +497,8 @@ CRITICAL: Reference ACTUAL chapter content. Use SPECIFIC benefits, not generic m
         "Content-Type": "application/json" 
       },
       body: JSON.stringify({ 
-        model: "google/gemini-2.5-flash",
+        model: routed.model,
+        ...(routed.reasoning ? { reasoning: routed.reasoning } : {}),
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: prompt }

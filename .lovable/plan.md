@@ -185,3 +185,11 @@ After implementation, manually run with the supplied product ("The 60-Minute PDF
 ---
 
 Approve this plan and I'll implement it.
+## AI Smart Routing (added)
+- Added `_shared/aiRouter.ts` (backend) + `lib/aiRouting.ts` (frontend mirror) — Hybrid Balanced mapping (Gemini Flash Lite for fast, GPT-5 for longform/sales, GPT-5 + reasoning:medium for Premium tier).
+- `callRoutedAI()` includes auto-fallback chain per task kind.
+- DB: profiles.ai_quality_mode + ai_model_preference; toolkits.ai_quality_mode_override.
+- Settings → new "AI Routing" tab with live model preview + cost/speed badges.
+- ContentControlsBar → per-project AI Quality override.
+- Wired into: generate-toolkit-content (longform), generate-sales-letter (salescopy), boost-product-copy (salescopy), generate-toolkit-title (fast). All four redeployed.
+

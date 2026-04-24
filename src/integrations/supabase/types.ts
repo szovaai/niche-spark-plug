@@ -939,6 +939,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          ai_model_preference: string
+          ai_quality_mode: string
           api_keys: Json | null
           brand_kit: Json | null
           created_at: string | null
@@ -960,6 +962,8 @@ export type Database = {
           views_today: number | null
         }
         Insert: {
+          ai_model_preference?: string
+          ai_quality_mode?: string
           api_keys?: Json | null
           brand_kit?: Json | null
           created_at?: string | null
@@ -981,6 +985,8 @@ export type Database = {
           views_today?: number | null
         }
         Update: {
+          ai_model_preference?: string
+          ai_quality_mode?: string
           api_keys?: Json | null
           brand_kit?: Json | null
           created_at?: string | null
@@ -1319,6 +1325,7 @@ export type Database = {
       }
       toolkits: {
         Row: {
+          ai_quality_mode_override: string | null
           blend_ratio: string | null
           boost_score: Json | null
           components: Json | null
@@ -1352,6 +1359,7 @@ export type Database = {
           writing_style: string | null
         }
         Insert: {
+          ai_quality_mode_override?: string | null
           blend_ratio?: string | null
           boost_score?: Json | null
           components?: Json | null
@@ -1385,6 +1393,7 @@ export type Database = {
           writing_style?: string | null
         }
         Update: {
+          ai_quality_mode_override?: string | null
           blend_ratio?: string | null
           boost_score?: Json | null
           components?: Json | null

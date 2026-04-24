@@ -4,9 +4,17 @@ import { Label } from "@/components/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { ShieldCheck, Layers3 } from "lucide-react";
+import { ShieldCheck, Layers3, Sparkles, DollarSign, Gauge } from "lucide-react";
 import type { WritingStyle, ContentDepth, VoiceBlend } from "@/types/toolkit";
 import VoiceBlendSelector from "./VoiceBlendSelector";
+import {
+  QUALITY_MODES,
+  previewModel,
+  costLabel,
+  speedLabel,
+  type QualityMode,
+} from "@/lib/aiRouting";
+import { useAIRoutingPrefs } from "@/hooks/useAIRoutingPrefs";
 
 interface ContentControlsBarProps {
   humanize: boolean;
@@ -17,6 +25,9 @@ interface ContentControlsBarProps {
   onDepthChange?: (value: ContentDepth) => void;
   voiceBlend?: VoiceBlend;
   onVoiceBlendChange?: (v: VoiceBlend) => void;
+  /** Per-project AI quality override. `null` means inherit user's global default. */
+  qualityModeOverride?: QualityMode | null;
+  onQualityModeOverrideChange?: (v: QualityMode | null) => void;
 }
 
 const DEPTH_OPTIONS: { value: ContentDepth; label: string; desc: string }[] = [
@@ -35,10 +46,17 @@ const ContentControlsBar = ({
   onDepthChange,
   voiceBlend,
   onVoiceBlendChange,
+  qualityModeOverride = null,
+  onQualityModeOverrideChange,
 }: ContentControlsBarProps) => {
   // If new voice blend is provided, render the rich selector. Otherwise fall back
   // to the original single-voice control so existing call-sites keep working.
   const useBlend = !!voiceBlend && !!onVoiceBlendChange;
+
+  // AI routing preview (uses global default unless overridden per-project)
+  const globalPrefs = useAIRoutingPrefs();
+  const effectiveQuality: QualityMode = qualityModeOverride ?? globalPrefs.qualityMode;
+  const longformPreview = previewModel("longform", effectiveQuality, globalPrefs.modelPreference);
 
   return (
     <div className="space-y-3 p-4 bg-card/30 rounded-xl border border-border/50">
@@ -95,6 +113,48 @@ const ContentControlsBar = ({
               <SelectItem value="coaching">Friendly Mentor (Coaching)</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+      )}
+
+      {onQualityModeOverrideChange && (
+        <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-border/40">
+          <Sparkles className="w-3.5 h-3.5 text-primary" />
+          <Label className="text-sm text-muted-foreground">AI Quality:</Label>
+          <Select
+            value={qualityModeOverride ?? "__inherit"}
+            onValueChange={(v) =>
+              onQualityModeOverrideChange(v === "__inherit" ? null : (v as QualityMode))
+            }
+          >
+            <SelectTrigger className="w-[180px] h-9 bg-background/50 border-border/50">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__inherit">
+                <span className="text-xs">Use my default ({globalPrefs.qualityMode})</span>
+              </SelectItem>
+              {QUALITY_MODES.map((m) => (
+                <SelectItem key={m.value} value={m.value}>
+                  <div className="flex flex-col">
+                    <span className="font-medium">{m.label}</span>
+                    <span className="text-xs text-muted-foreground">{m.desc}</span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Badge variant="outline" className="gap-1 font-mono text-[11px]">
+            {longformPreview.label}
+          </Badge>
+          <Badge variant="outline" className="gap-1 text-[11px]">
+            <DollarSign className="w-3 h-3" />
+            {costLabel(longformPreview.costTier)}
+          </Badge>
+          <Badge variant="outline" className="gap-1 text-[11px]">
+            <Gauge className="w-3 h-3" />
+            {speedLabel(longformPreview.speedTier)}
+          </Badge>
         </div>
       )}
     </div>
