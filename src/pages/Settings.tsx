@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { encryptApiKey, decryptApiKey } from "@/lib/cryptoUtils";
 import BrandKitTab from "@/components/settings/BrandKitTab";
+import AIRoutingTab from "@/components/settings/AIRoutingTab";
 
 type ApiProvider = "deepseek" | "openai" | "anthropic";
 
