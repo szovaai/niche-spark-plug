@@ -46,10 +46,17 @@ const ContentControlsBar = ({
   onDepthChange,
   voiceBlend,
   onVoiceBlendChange,
+  qualityModeOverride = null,
+  onQualityModeOverrideChange,
 }: ContentControlsBarProps) => {
   // If new voice blend is provided, render the rich selector. Otherwise fall back
   // to the original single-voice control so existing call-sites keep working.
   const useBlend = !!voiceBlend && !!onVoiceBlendChange;
+
+  // AI routing preview (uses global default unless overridden per-project)
+  const globalPrefs = useAIRoutingPrefs();
+  const effectiveQuality: QualityMode = qualityModeOverride ?? globalPrefs.qualityMode;
+  const longformPreview = previewModel("longform", effectiveQuality, globalPrefs.modelPreference);
 
   return (
     <div className="space-y-3 p-4 bg-card/30 rounded-xl border border-border/50">
