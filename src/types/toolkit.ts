@@ -1,3 +1,35 @@
+export type ContentDepth = 'quick' | 'standard' | 'premium' | 'authority';
+
+export type BlendRatio = '70/30' | '60/40' | '50/50';
+
+export interface VoiceBlend {
+  primary: WritingStyle;
+  secondary?: WritingStyle | null;
+  ratio: BlendRatio;
+}
+
+export interface BoostScoreCategory {
+  score: number;
+  tip: string;
+}
+
+export interface BoostScoreResult {
+  overall: number;
+  band: 'weak' | 'needs-work' | 'strong' | 'launch-ready';
+  categories: {
+    titleStrength: BoostScoreCategory;
+    hookClarity: BoostScoreCategory;
+    buyerPain: BoostScoreCategory;
+    promiseSpecificity: BoostScoreCategory;
+    speedAppeal: BoostScoreCategory;
+    audienceClarity: BoostScoreCategory;
+    monetizationPotential: BoostScoreCategory;
+    differentiation: BoostScoreCategory;
+    upsellAlignment: BoostScoreCategory;
+    trafficPotential: BoostScoreCategory;
+  };
+}
+
 export type WritingStyle = 
   | 'conversational'    // Warm, friendly, coffee-chat vibe
   | 'professional'      // Authority, expertise, consultant tone
