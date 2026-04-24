@@ -215,6 +215,7 @@ const Settings = () => {
         <Tabs defaultValue="api-keys">
           <TabsList>
             <TabsTrigger value="api-keys">API Keys</TabsTrigger>
+            <TabsTrigger value="ai-routing">AI Routing</TabsTrigger>
             <TabsTrigger value="brand-kit">Brand Kit</TabsTrigger>
           </TabsList>
 
@@ -340,6 +341,10 @@ const Settings = () => {
                 </CardContent>
               </Card>
             </motion.div>
+          </TabsContent>
+
+          <TabsContent value="ai-routing" className="mt-4">
+            {user && <AIRoutingTab userId={user.id} />}
           </TabsContent>
 
           <TabsContent value="brand-kit" className="mt-4">
