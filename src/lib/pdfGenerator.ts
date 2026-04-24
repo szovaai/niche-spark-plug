@@ -602,6 +602,12 @@ export const generateGuidePDF = (
   
   if (!content) return doc;
   
+  // Pre-export validation: refuse to render a 2-page shell.
+  const validation = validateGuideContent(content);
+  if (!validation.ok) {
+    throw new EmptyContentError(validation.emptySections);
+  }
+  
   // Table of Contents
   doc.addPage();
   addHeader(doc, title, authorName);
@@ -657,8 +663,11 @@ export const generateGuidePDF = (
     addHeader(doc, title, authorName);
     y = PDF_STYLES.margins.top + 15;
     
-    // Parse and format content with special elements
-    const paragraphs = section.content.split('\n\n').filter(p => p.trim());
+    // Per-section fallback so empty sections don't render as blank pages.
+    const sectionBody = (section.content && section.content.trim().length >= 50)
+      ? section.content
+      : SECTION_PLACEHOLDER;
+    const paragraphs = sectionBody.split('\n\n').filter(p => p.trim());
     
     paragraphs.forEach((paragraph) => {
       y = checkNewPage(doc, y, 20);
