@@ -115,6 +115,48 @@ const ContentControlsBar = ({
           </Select>
         </div>
       )}
+
+      {onQualityModeOverrideChange && (
+        <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-border/40">
+          <Sparkles className="w-3.5 h-3.5 text-primary" />
+          <Label className="text-sm text-muted-foreground">AI Quality:</Label>
+          <Select
+            value={qualityModeOverride ?? "__inherit"}
+            onValueChange={(v) =>
+              onQualityModeOverrideChange(v === "__inherit" ? null : (v as QualityMode))
+            }
+          >
+            <SelectTrigger className="w-[180px] h-9 bg-background/50 border-border/50">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__inherit">
+                <span className="text-xs">Use my default ({globalPrefs.qualityMode})</span>
+              </SelectItem>
+              {QUALITY_MODES.map((m) => (
+                <SelectItem key={m.value} value={m.value}>
+                  <div className="flex flex-col">
+                    <span className="font-medium">{m.label}</span>
+                    <span className="text-xs text-muted-foreground">{m.desc}</span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Badge variant="outline" className="gap-1 font-mono text-[11px]">
+            {longformPreview.label}
+          </Badge>
+          <Badge variant="outline" className="gap-1 text-[11px]">
+            <DollarSign className="w-3 h-3" />
+            {costLabel(longformPreview.costTier)}
+          </Badge>
+          <Badge variant="outline" className="gap-1 text-[11px]">
+            <Gauge className="w-3 h-3" />
+            {speedLabel(longformPreview.speedTier)}
+          </Badge>
+        </div>
+      )}
     </div>
   );
 };
