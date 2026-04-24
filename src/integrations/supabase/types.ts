@@ -1319,8 +1319,11 @@ export type Database = {
       }
       toolkits: {
         Row: {
+          blend_ratio: string | null
+          boost_score: Json | null
           components: Json | null
           content: Json | null
+          content_depth: string | null
           created_at: string
           downloads: number
           ecover_url: string | null
@@ -1328,6 +1331,7 @@ export type Database = {
           id: string
           logo_url: string | null
           niche: string
+          primary_voice: string | null
           sales_letter: string | null
           sales_offer_details: Json | null
           salesletter_html: string | null
@@ -1335,6 +1339,7 @@ export type Database = {
           salesletter_raw: string | null
           salesletter_step: string | null
           salesletter_style: string | null
+          secondary_voice: string | null
           status: string
           subtitle: string | null
           target_audience: string | null
@@ -1347,8 +1352,11 @@ export type Database = {
           writing_style: string | null
         }
         Insert: {
+          blend_ratio?: string | null
+          boost_score?: Json | null
           components?: Json | null
           content?: Json | null
+          content_depth?: string | null
           created_at?: string
           downloads?: number
           ecover_url?: string | null
@@ -1356,6 +1364,7 @@ export type Database = {
           id?: string
           logo_url?: string | null
           niche: string
+          primary_voice?: string | null
           sales_letter?: string | null
           sales_offer_details?: Json | null
           salesletter_html?: string | null
@@ -1363,6 +1372,7 @@ export type Database = {
           salesletter_raw?: string | null
           salesletter_step?: string | null
           salesletter_style?: string | null
+          secondary_voice?: string | null
           status?: string
           subtitle?: string | null
           target_audience?: string | null
@@ -1375,8 +1385,11 @@ export type Database = {
           writing_style?: string | null
         }
         Update: {
+          blend_ratio?: string | null
+          boost_score?: Json | null
           components?: Json | null
           content?: Json | null
+          content_depth?: string | null
           created_at?: string
           downloads?: number
           ecover_url?: string | null
@@ -1384,6 +1397,7 @@ export type Database = {
           id?: string
           logo_url?: string | null
           niche?: string
+          primary_voice?: string | null
           sales_letter?: string | null
           sales_offer_details?: Json | null
           salesletter_html?: string | null
@@ -1391,6 +1405,7 @@ export type Database = {
           salesletter_raw?: string | null
           salesletter_step?: string | null
           salesletter_style?: string | null
+          secondary_voice?: string | null
           status?: string
           subtitle?: string | null
           target_audience?: string | null
