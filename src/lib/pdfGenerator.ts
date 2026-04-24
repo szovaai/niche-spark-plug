@@ -2,6 +2,32 @@ import jsPDF from "jspdf";
 import { ToolkitContent, ToolkitComponents } from "@/types/toolkit";
 import { sanitizeForPDF } from "./textSanitizer";
 
+export class EmptyContentError extends Error {
+  constructor(public readonly missing: string[]) {
+    super(`PDF export blocked — missing/empty content: ${missing.join(", ")}`);
+    this.name = "EmptyContentError";
+  }
+}
+
+const SECTION_PLACEHOLDER =
+  "(This section is being rebuilt — open the Builder and regenerate it before re-exporting.)";
+
+export const validateGuideContent = (
+  content: ToolkitContent["guide"] | undefined
+): { ok: boolean; totalChars: number; emptySections: string[] } => {
+  if (!content || !content.sections || content.sections.length === 0) {
+    return { ok: false, totalChars: 0, emptySections: ["entire guide"] };
+  }
+  const emptySections: string[] = [];
+  let totalChars = 0;
+  for (const s of content.sections) {
+    const len = (s.content || "").trim().length;
+    totalChars += len;
+    if (len < 50) emptySections.push(s.heading || "Untitled section");
+  }
+  return { ok: totalChars >= 500 && emptySections.length < content.sections.length, totalChars, emptySections };
+};
+
 // PDF Styling Constants - Modern Premium Design (Story-Driven Guide Theme)
 const PDF_STYLES = {
   // Primary ocean blue theme

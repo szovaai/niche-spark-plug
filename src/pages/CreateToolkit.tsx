@@ -513,12 +513,21 @@ const CreateToolkit = () => {
 
       if (error) throw error;
 
+      // BUG FIX: edge function returns sectionContent (legacy) or chapterContent (new framework),
+      // never `content`. Without this, every section saved as undefined and the PDF was blank.
+      const resolvedContent: string =
+        data?.sectionContent ?? data?.chapterContent ?? data?.content ?? "";
+
+      if (!resolvedContent || resolvedContent.trim().length < 50) {
+        throw new Error("Generated section came back empty. Please regenerate.");
+      }
+
       setGuideSections(prev => prev.map(s => 
         s.id === sectionId ? { 
           ...s, 
           status: "complete" as const, 
-          content: data.content,
-          wordCount: data.wordCount || data.content.split(/\s+/).length,
+          content: resolvedContent,
+          wordCount: data?.wordCount || resolvedContent.split(/\s+/).filter(Boolean).length,
         } : s
       ));
 
