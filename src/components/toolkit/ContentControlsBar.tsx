@@ -25,17 +25,6 @@ interface ContentControlsBarProps {
   onDepthChange?: (value: ContentDepth) => void;
   voiceBlend?: VoiceBlend;
   onVoiceBlendChange?: (v: VoiceBlend) => void;
-}
-
-interface ContentControlsBarProps {
-  humanize: boolean;
-  onHumanizeChange: (value: boolean) => void;
-  writingStyle: WritingStyle;
-  onStyleChange: (value: WritingStyle) => void;
-  contentDepth?: ContentDepth;
-  onDepthChange?: (value: ContentDepth) => void;
-  voiceBlend?: VoiceBlend;
-  onVoiceBlendChange?: (v: VoiceBlend) => void;
   /** Per-project AI quality override. `null` means inherit user's global default. */
   qualityModeOverride?: QualityMode | null;
   onQualityModeOverrideChange?: (v: QualityMode | null) => void;
