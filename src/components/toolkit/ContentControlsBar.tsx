@@ -1,5 +1,5 @@
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ways/../ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
