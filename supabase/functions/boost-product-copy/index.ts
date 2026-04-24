@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
+import { pickModel, type QualityMode, type UserPreference } from "../_shared/aiRouter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,7 +24,12 @@ serve(async (req) => {
       upsellBridge = "",
       niche = "",
       audience = "",
+      qualityMode = "balanced",
+      modelPreference = "auto",
     } = body || {};
+
+    const routed = pickModel("salescopy", qualityMode as QualityMode, modelPreference as UserPreference);
+    console.log(`[boost-product-copy] Routed to ${routed.model} (mode=${qualityMode}, pref=${modelPreference})`);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
@@ -50,7 +56,8 @@ Return improved versions of each field.`;
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: routed.model,
+        ...(routed.reasoning ? { reasoning: routed.reasoning } : {}),
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
