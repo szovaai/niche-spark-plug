@@ -4,9 +4,17 @@ import { Label } from "@/components/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { ShieldCheck, Layers3 } from "lucide-react";
+import { ShieldCheck, Layers3, Sparkles, DollarSign, Gauge } from "lucide-react";
 import type { WritingStyle, ContentDepth, VoiceBlend } from "@/types/toolkit";
 import VoiceBlendSelector from "./VoiceBlendSelector";
+import {
+  QUALITY_MODES,
+  previewModel,
+  costLabel,
+  speedLabel,
+  type QualityMode,
+} from "@/lib/aiRouting";
+import { useAIRoutingPrefs } from "@/hooks/useAIRoutingPrefs";
 
 interface ContentControlsBarProps {
   humanize: boolean;
@@ -17,6 +25,20 @@ interface ContentControlsBarProps {
   onDepthChange?: (value: ContentDepth) => void;
   voiceBlend?: VoiceBlend;
   onVoiceBlendChange?: (v: VoiceBlend) => void;
+}
+
+interface ContentControlsBarProps {
+  humanize: boolean;
+  onHumanizeChange: (value: boolean) => void;
+  writingStyle: WritingStyle;
+  onStyleChange: (value: WritingStyle) => void;
+  contentDepth?: ContentDepth;
+  onDepthChange?: (value: ContentDepth) => void;
+  voiceBlend?: VoiceBlend;
+  onVoiceBlendChange?: (v: VoiceBlend) => void;
+  /** Per-project AI quality override. `null` means inherit user's global default. */
+  qualityModeOverride?: QualityMode | null;
+  onQualityModeOverrideChange?: (v: QualityMode | null) => void;
 }
 
 const DEPTH_OPTIONS: { value: ContentDepth; label: string; desc: string }[] = [
