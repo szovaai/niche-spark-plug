@@ -131,6 +131,7 @@ const App = () => (
             <Route path="/dashboard" element={<NovaDashboard />} />
             <Route path="/coach" element={<CoachHome />} />
             <Route path="/project/:projectId" element={<ProjectWorkspace />} />
+            <Route path="/project/:projectId/launch-assets" element={<LaunchAssets />} />
 
             {/* Settings stays at /settings (single-source) */}
             <Route path="/settings" element={<Settings />} />
