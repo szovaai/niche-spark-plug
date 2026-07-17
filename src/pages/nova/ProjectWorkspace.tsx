@@ -147,6 +147,17 @@ export default function ProjectWorkspace() {
           </Card>
           <Card>
             <CardHeader className="py-3">
+              <CardTitle className="text-sm">Launch assets</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm text-muted-foreground">
+              <p>Nova can draft your full Email Launch Engine — Origin, Insight, Launch, Value + auto-repurpose every email into 6 social channels.</p>
+              <Button size="sm" variant="outline" className="w-full" onClick={() => navigate(`/project/${project.id}/launch-assets`)}>
+                Open Email Launch Engine
+              </Button>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="py-3">
               <CardTitle className="text-sm">Your decision</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-muted-foreground">
