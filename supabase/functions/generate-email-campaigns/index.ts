@@ -89,16 +89,11 @@ Deno.serve(async (req) => {
     if (projectId) {
       const { data: proj } = await supabase
         .from("business_projects")
-        .select("project_name, niche, audience, angle, mechanism, offer_summary")
+        .select("project_name, current_stage")
         .eq("id", projectId)
         .maybeSingle();
       if (proj) {
-        projectCtx = `Project: ${proj.project_name ?? ""}
-Niche: ${proj.niche ?? ""}
-Audience: ${proj.audience ?? ""}
-Angle: ${proj.angle ?? ""}
-Mechanism: ${proj.mechanism ?? ""}
-Offer: ${proj.offer_summary ?? ""}`;
+        projectCtx = `Project: ${proj.project_name ?? ""}\nStage: ${proj.current_stage ?? ""}`;
       }
     }
     const { data: founder } = await supabase
