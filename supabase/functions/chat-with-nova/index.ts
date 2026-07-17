@@ -114,35 +114,32 @@ Deno.serve(async (req) => {
     return result.toUIMessageStreamResponse({
       originalMessages: body.messages,
       headers: corsHeaders,
-      onFinish: async ({ messages }) => {
+      onFinish: async ({ messages, isAborted }) => {
         try {
-          // Save new messages only (last two typically: user + assistant)
-          // Compute sequence numbers based on existing count
-          const { count } = await supabase
-            .from("nova_messages")
-            .select("id", { count: "exact", head: true })
-            .eq("conversation_id", body.conversationId);
-          const baseSeq = count ?? 0;
-
-          const rows = messages.map((m, idx) => ({
-            conversation_id: body.conversationId,
-            user_id: userId,
-            message_id: m.id,
-            role: m.role,
-            content_text: (m.parts as { type: string; text?: string }[])
-              .filter((p) => p.type === "text")
-              .map((p) => p.text ?? "")
-              .join("\n"),
-            parts: m.parts,
-            metadata: (m as { metadata?: unknown }).metadata ?? {},
-            agent_type: agentType,
-            sequence_no: baseSeq - messages.length + idx + 1 >= 0
-              ? baseSeq - messages.length + idx + 1
-              : idx,
-          }));
+          const rows = messages
+            .map((m, idx) => {
+              const text = (m.parts as { type: string; text?: string }[])
+                .filter((p) => p.type === "text")
+                .map((p) => p.text ?? "")
+                .join("\n");
+              // Skip aborted empty assistant messages (Amendment 3)
+              if (isAborted && m.role === "assistant" && !text.trim()) return null;
+              return {
+                conversation_id: body.conversationId,
+                user_id: userId,
+                message_id: m.id,
+                role: m.role,
+                content_text: text,
+                parts: m.parts,
+                metadata: (m as { metadata?: unknown }).metadata ?? {},
+                agent_type: agentType,
+                sequence_no: idx,
+              };
+            })
+            .filter((r): r is NonNullable<typeof r> => r !== null);
 
           if (rows.length) {
-            // Upsert against (conversation_id, message_id) so retries don't duplicate
+            // Upsert on (conversation_id, message_id) so replays/retries don't dupe
             await supabase
               .from("nova_messages")
               .upsert(rows, { onConflict: "conversation_id,message_id" });
