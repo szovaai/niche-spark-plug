@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Wand2, Monitor, Radar, Settings } from "lucide-react";
+import { LayoutDashboard, Wand2, Radar, Settings, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
@@ -8,10 +8,10 @@ import {
 } from "@/components/ui/tooltip";
 
 const items = [
-  { label: "Home", icon: LayoutDashboard, path: "/dashboard", tip: "Dashboard & stats" },
-  { label: "Radar", icon: Radar, path: "/opportunities", tip: "Opportunity scanner" },
-  { label: "Build", icon: Wand2, path: "/wizard", tip: "AI Product Builder" },
-  { label: "Center", icon: Monitor, path: "/command-center", tip: "Command Center" },
+  { label: "Home", icon: LayoutDashboard, path: "/dashboard", tip: "Dashboard" },
+  { label: "Nova", icon: MessageCircle, path: "/coach", tip: "Talk to Nova" },
+  { label: "Build", icon: Wand2, path: "/tools/wizard", tip: "Power Tools · Product Builder" },
+  { label: "Radar", icon: Radar, path: "/tools/opportunities", tip: "Power Tools · Profit Radar" },
   { label: "Settings", icon: Settings, path: "/settings", tip: "Settings & account" },
 ];
 
