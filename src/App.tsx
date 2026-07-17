@@ -48,6 +48,8 @@ import ProfitMap from "./pages/ProfitMap";
 import NotFound from "./pages/NotFound";
 import PublicSalesPage from "./pages/PublicSalesPage";
 import TemplatesMarketplace from "./pages/TemplatesMarketplace";
+import OAuthConsent from "./pages/OAuthConsent";
+
 
 const queryClient = new QueryClient();
 
@@ -107,7 +109,9 @@ const App = () => (
             <Route path="/settings" element={<Settings />} />
             <Route path="/p/:slug" element={<PublicSalesPage />} />
             <Route path="/templates-marketplace" element={<TemplatesMarketplace />} />
+            <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
             <Route path="*" element={<NotFound />} />
+
           </Routes>
           <MobileBottomNav />
         </BrowserRouter>
