@@ -59,7 +59,7 @@ const Index = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showFloatingBar, setShowFloatingBar] = useState(false);
 
-  const handleCTA = () => navigate(user ? "/command-center" : "/auth");
+  const handleCTA = () => navigate(user ? "/dashboard" : "/auth?next=/onboarding");
 
   useEffect(() => {
     const onScroll = () => {

@@ -33,7 +33,7 @@ const Auth = () => {
     if (!raw.startsWith("/") || raw.startsWith("//")) return null;
     return raw;
   })();
-  const postAuthTarget = nextParam ?? "/discover";
+  const postAuthTarget = nextParam ?? "/dashboard";
 
   useEffect(() => {
     if (user) {
