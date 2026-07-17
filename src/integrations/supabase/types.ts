@@ -53,6 +53,53 @@ export type Database = {
         }
         Relationships: []
       }
+      business_projects: {
+        Row: {
+          created_at: string
+          current_stage: string
+          id: string
+          progress_pct: number
+          project_name: string
+          selected_concept_id: string | null
+          selected_niche_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_stage?: string
+          id?: string
+          progress_pct?: number
+          project_name: string
+          selected_concept_id?: string | null
+          selected_niche_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_stage?: string
+          id?: string
+          progress_pct?: number
+          project_name?: string
+          selected_concept_id?: string | null
+          selected_niche_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_projects_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_credit_balance"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       community_wins: {
         Row: {
           created_at: string
@@ -88,6 +135,102 @@ export type Database = {
           win_type?: string
         }
         Relationships: []
+      }
+      credit_ledger: {
+        Row: {
+          balance_after: number
+          created_at: string
+          delta: number
+          grant_key: string | null
+          id: string
+          project_id: string | null
+          reason: string
+          task_id: string | null
+          user_id: string
+        }
+        Insert: {
+          balance_after: number
+          created_at?: string
+          delta: number
+          grant_key?: string | null
+          id?: string
+          project_id?: string | null
+          reason: string
+          task_id?: string | null
+          user_id: string
+        }
+        Update: {
+          balance_after?: number
+          created_at?: string
+          delta?: number
+          grant_key?: string | null
+          id?: string
+          project_id?: string | null
+          reason?: string
+          task_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_ledger_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "business_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_ledger_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_credit_balance"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      credit_reservations: {
+        Row: {
+          amount: number
+          created_at: string
+          expires_at: string
+          id: string
+          status: string
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          expires_at?: string
+          id?: string
+          status?: string
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          expires_at?: string
+          id?: string
+          status?: string
+          task_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_reservations_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "nova_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_reservations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_credit_balance"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       daily_inspiration: {
         Row: {
@@ -220,6 +363,83 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      founder_profiles: {
+        Row: {
+          audience: string | null
+          bio: string | null
+          brand_tone: string | null
+          budget_band: string | null
+          camera_comfort: string | null
+          created_at: string
+          experience: string | null
+          full_name: string | null
+          goals: string | null
+          has_audience: string | null
+          interests: string[] | null
+          onboarding_completed_at: string | null
+          onboarding_step: number
+          preferred_name: string | null
+          public_urls: Json
+          research_consent: boolean
+          skills: string[] | null
+          updated_at: string
+          user_id: string
+          weekly_hours: string | null
+        }
+        Insert: {
+          audience?: string | null
+          bio?: string | null
+          brand_tone?: string | null
+          budget_band?: string | null
+          camera_comfort?: string | null
+          created_at?: string
+          experience?: string | null
+          full_name?: string | null
+          goals?: string | null
+          has_audience?: string | null
+          interests?: string[] | null
+          onboarding_completed_at?: string | null
+          onboarding_step?: number
+          preferred_name?: string | null
+          public_urls?: Json
+          research_consent?: boolean
+          skills?: string[] | null
+          updated_at?: string
+          user_id: string
+          weekly_hours?: string | null
+        }
+        Update: {
+          audience?: string | null
+          bio?: string | null
+          brand_tone?: string | null
+          budget_band?: string | null
+          camera_comfort?: string | null
+          created_at?: string
+          experience?: string | null
+          full_name?: string | null
+          goals?: string | null
+          has_audience?: string | null
+          interests?: string[] | null
+          onboarding_completed_at?: string | null
+          onboarding_step?: number
+          preferred_name?: string | null
+          public_urls?: Json
+          research_consent?: boolean
+          skills?: string[] | null
+          updated_at?: string
+          user_id?: string
+          weekly_hours?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "founder_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_credit_balance"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       launch_genomes: {
         Row: {
@@ -757,6 +977,231 @@ export type Database = {
         }
         Relationships: []
       }
+      nova_conversations: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          project_id: string | null
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind?: string
+          project_id?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          project_id?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nova_conversations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "business_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nova_conversations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_credit_balance"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      nova_memories: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          importance: number
+          memory_type: string
+          metadata: Json
+          project_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          importance?: number
+          memory_type: string
+          metadata?: Json
+          project_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          importance?: number
+          memory_type?: string
+          metadata?: Json
+          project_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nova_memories_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "business_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nova_memories_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_credit_balance"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      nova_messages: {
+        Row: {
+          agent_type: string
+          content_text: string | null
+          conversation_id: string
+          created_at: string
+          id: string
+          message_id: string
+          metadata: Json
+          parts: Json
+          role: string
+          sequence_no: number
+          summarized_at: string | null
+          summary_memory_id: string | null
+          user_id: string
+        }
+        Insert: {
+          agent_type?: string
+          content_text?: string | null
+          conversation_id: string
+          created_at?: string
+          id?: string
+          message_id: string
+          metadata?: Json
+          parts?: Json
+          role: string
+          sequence_no: number
+          summarized_at?: string | null
+          summary_memory_id?: string | null
+          user_id: string
+        }
+        Update: {
+          agent_type?: string
+          content_text?: string | null
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          message_id?: string
+          metadata?: Json
+          parts?: Json
+          role?: string
+          sequence_no?: number
+          summarized_at?: string | null
+          summary_memory_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nova_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "nova_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nova_messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_credit_balance"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      nova_tasks: {
+        Row: {
+          assigned_agent: string | null
+          completed_at: string | null
+          created_at: string
+          credit_cost: number
+          credits_finalized_at: string | null
+          credits_reserved_at: string | null
+          error_message: string | null
+          id: string
+          input_json: Json | null
+          output_json: Json | null
+          project_id: string | null
+          status: string
+          task_name: string
+          user_id: string
+        }
+        Insert: {
+          assigned_agent?: string | null
+          completed_at?: string | null
+          created_at?: string
+          credit_cost?: number
+          credits_finalized_at?: string | null
+          credits_reserved_at?: string | null
+          error_message?: string | null
+          id?: string
+          input_json?: Json | null
+          output_json?: Json | null
+          project_id?: string | null
+          status?: string
+          task_name: string
+          user_id: string
+        }
+        Update: {
+          assigned_agent?: string | null
+          completed_at?: string | null
+          created_at?: string
+          credit_cost?: number
+          credits_finalized_at?: string | null
+          credits_reserved_at?: string | null
+          error_message?: string | null
+          id?: string
+          input_json?: Json | null
+          output_json?: Json | null
+          project_id?: string | null
+          status?: string
+          task_name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nova_tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "business_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nova_tasks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_credit_balance"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       opportunities: {
         Row: {
           ad_potential: number | null
@@ -1007,7 +1452,15 @@ export type Database = {
           usage_reset_at?: string | null
           views_today?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "v_credit_balance"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       project_versions: {
         Row: {
@@ -1279,7 +1732,15 @@ export type Database = {
           notes?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "saved_niches_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_credit_balance"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       saved_opportunities: {
         Row: {
@@ -1755,11 +2216,36 @@ export type Database = {
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_credit_balance"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
     }
     Views: {
-      [_ in never]: never
+      v_credit_balance: {
+        Row: {
+          balance: number | null
+          reserved: number | null
+          user_id: string | null
+        }
+        Insert: {
+          balance?: never
+          reserved?: never
+          user_id?: string | null
+        }
+        Update: {
+          balance?: never
+          reserved?: never
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       check_and_reset_daily_limits: {
@@ -1776,11 +2262,19 @@ export type Database = {
         Returns: number
       }
       clean_expired_cache: { Args: never; Returns: number }
+      finalize_task_credits: {
+        Args: { _output?: Json; _task_id: string }
+        Returns: Json
+      }
       get_niche_blueprint_count: {
         Args: { p_niche_id: string }
         Returns: number
       }
       get_saved_niche_count: { Args: { _user_id: string }; Returns: number }
+      grant_seed_credits: {
+        Args: { _amount: number; _user_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1792,6 +2286,20 @@ export type Database = {
       increment_page_views: { Args: { page_slug: string }; Returns: undefined }
       increment_search_count: { Args: { p_user_id: string }; Returns: Json }
       increment_view_count: { Args: { p_user_id: string }; Returns: Json }
+      release_task_credits: {
+        Args: { _error?: string; _task_id: string }
+        Returns: Json
+      }
+      reserve_task_credits: {
+        Args: {
+          _assigned_agent: string
+          _cost: number
+          _input?: Json
+          _project_id: string
+          _task_name: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "free" | "pro"
