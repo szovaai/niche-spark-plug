@@ -25,31 +25,42 @@ const Auth = () => {
   const [displayName, setDisplayName] = useState("");
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
+  // Preserve `?next=` so OAuth consent (or any deep link) returns here after auth.
+  const nextParam = (() => {
+    const raw = new URLSearchParams(window.location.search).get("next");
+    if (!raw) return null;
+    // Same-origin relative paths only.
+    if (!raw.startsWith("/") || raw.startsWith("//")) return null;
+    return raw;
+  })();
+  const postAuthTarget = nextParam ?? "/discover";
+
   useEffect(() => {
     if (user) {
-      navigate("/discover");
+      navigate(postAuthTarget);
     }
-  }, [user, navigate]);
+  }, [user, navigate, postAuthTarget]);
 
   const validate = () => {
     const newErrors: { email?: string; password?: string } = {};
     
     const emailResult = emailSchema.safeParse(email);
     if (!emailResult.success) {
-      newErrors.email = emailResult.error.errors[0].message;
+      newErrors.email = emailResult.error.issues[0].message;
     }
     
     // Only validate password for signin/signup, not forgot
     if (mode !== 'forgot') {
       const passwordResult = passwordSchema.safeParse(password);
       if (!passwordResult.success) {
-        newErrors.password = passwordResult.error.errors[0].message;
+        newErrors.password = passwordResult.error.issues[0].message;
       }
     }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,7 +88,7 @@ const Auth = () => {
           }
         } else {
           toast.success("Account created! You can now explore DigiStream.");
-          navigate("/discover");
+          navigate(postAuthTarget);
         }
       } else {
         const { error } = await signIn(email, password);
@@ -89,9 +100,10 @@ const Auth = () => {
           }
         } else {
           toast.success("Welcome back!");
-          navigate("/discover");
+          navigate(postAuthTarget);
         }
       }
+
     } finally {
       setLoading(false);
     }
