@@ -262,6 +262,65 @@ export type Database = {
         }
         Relationships: []
       }
+      email_campaigns: {
+        Row: {
+          body_html: string | null
+          body_text: string | null
+          campaign_type: string
+          created_at: string
+          cta: string | null
+          email_number: number
+          id: string
+          preview_text: string | null
+          project_id: string | null
+          repurposed_content: Json | null
+          status: string
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body_html?: string | null
+          body_text?: string | null
+          campaign_type: string
+          created_at?: string
+          cta?: string | null
+          email_number: number
+          id?: string
+          preview_text?: string | null
+          project_id?: string | null
+          repurposed_content?: Json | null
+          status?: string
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body_html?: string | null
+          body_text?: string | null
+          campaign_type?: string
+          created_at?: string
+          cta?: string | null
+          email_number?: number
+          id?: string
+          preview_text?: string | null
+          project_id?: string | null
+          repurposed_content?: Json | null
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_campaigns_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_credit_balance"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       empire_projects: {
         Row: {
           created_at: string
