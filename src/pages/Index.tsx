@@ -764,7 +764,7 @@ const Index = () => {
               Most AI tools are general-purpose chatbots. They forget your business the second you close the tab, and they treat every request like it's the first one.
             </p>
             <p className="text-muted-foreground leading-relaxed mb-6">
-              Nova was built for <strong className="text-foreground">one thing: launching digital products end-to-end.</strong> She has persistent memory, a specialist team, a clear stage map, and taste that's tuned for the WarriorPlus / ClickBank / Gumroad / Etsy world.
+              Nova was built for <strong className="text-foreground">one thing: launching digital products end-to-end.</strong> She has persistent memory, a specialist team, a 12-mission playbook, and taste that's tuned for the WarriorPlus / ClickBank / Gumroad / Etsy world.
             </p>
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-5 text-center">
               <p className="text-foreground font-semibold">Other tools give you a blank prompt.</p>
