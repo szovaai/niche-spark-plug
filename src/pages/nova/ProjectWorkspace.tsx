@@ -145,12 +145,15 @@ export default function ProjectWorkspace() {
               <StageMap current={project.current_stage} complete={["founder_profile"]} />
             </CardContent>
           </Card>
-          <Card>
+          <Card className="border-primary/30 bg-primary/5">
             <CardHeader className="py-3">
-              <CardTitle className="text-sm">Launch assets</CardTitle>
+              <div className="text-[10px] font-medium uppercase tracking-wide text-primary">
+                Phase 5 · Mission 8
+              </div>
+              <CardTitle className="text-sm">Email Engine</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-muted-foreground">
-              <p>Nova can draft your full Email Launch Engine — Origin, Insight, Launch, Value + auto-repurpose every email into 6 social channels.</p>
+              <p>Nova drafts your full Email Launch Engine — Origin, Insight, Launch, Value — and auto-repurposes every email into 6 social channels for Mission 9.</p>
               <Button size="sm" variant="outline" className="w-full" onClick={() => navigate(`/project/${project.id}/launch-assets`)}>
                 Open Email Launch Engine
               </Button>
