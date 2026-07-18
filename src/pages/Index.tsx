@@ -573,7 +573,7 @@ const Index = () => {
               {
                 icon: Monitor, title: "Nova Dashboard",
                 agent: "Nova, coordinating everything",
-                items: ["8-stage launch map with live progress", "One decision card at a time", "Credits meter and full project memory"],
+                items: ["12 guided missions across 6 phases", "One decision card at a time", "Credits meter and full project memory"],
               },
             ].map((section, i) => (
               <motion.div key={i} {...fadeIn} transition={{ delay: i * 0.08 }}>
