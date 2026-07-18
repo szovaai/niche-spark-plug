@@ -788,7 +788,7 @@ const Index = () => {
             {[
               { asset: "Nova — your AI Launch Coach with persistent memory", emoji: "🧭" },
               { asset: "Specialist team drafting product, copy, funnel, emails", emoji: "🤖" },
-              { asset: "8-stage Launch Dashboard with live progress", emoji: "🎛️" },
+              { asset: "12-Mission Launch Dashboard with live progress", emoji: "🎛️" },
               { asset: "Digital Product draft (ebook or guide)", emoji: "📚" },
               { asset: "Sales page written in your voice", emoji: "📄" },
               { asset: "Bonus stack (3+ bonuses)", emoji: "🎁" },
