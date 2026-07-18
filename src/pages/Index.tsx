@@ -232,13 +232,13 @@ const Index = () => {
             </div>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">The Nova Dashboard</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Every project lives on an 8-stage launch map. You always know exactly where you are, what Nova is working on, and what decision is waiting for you.
+              Every project runs on 12 guided missions across 6 phases. You always know exactly which mission you're on, what Nova is working on, and what decision is waiting for you. PDFs become your reference vault — the missions are the show.
             </p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
             {[
-              { icon: Compass, title: "8-Stage Launch Map", desc: "Founder Profile → Opportunity → Offer → Product → Copy → Funnel → Launch → Published. See progress at a glance." },
+              { icon: Compass, title: "12 Guided Missions", desc: "Discover → Validate → Build → Offer & Funnel → Launch Assets → Launch & Grow. Every mission has a clear finish line." },
               { icon: MessageCircle, title: "One Decision Card", desc: "No sea of dashboards. Nova surfaces the single next question that actually moves your launch forward." },
               { icon: Brain, title: "Persistent Memory", desc: "Close the tab, come back tomorrow. Nova remembers your niche, tone, offers, and every choice you've made." },
               { icon: Zap, title: "Credits Meter", desc: "Simple, transparent credits. Start with 25 free. See exactly what each action costs before Nova spends them." },
@@ -573,7 +573,7 @@ const Index = () => {
               {
                 icon: Monitor, title: "Nova Dashboard",
                 agent: "Nova, coordinating everything",
-                items: ["8-stage launch map with live progress", "One decision card at a time", "Credits meter and full project memory"],
+                items: ["12 guided missions across 6 phases", "One decision card at a time", "Credits meter and full project memory"],
               },
             ].map((section, i) => (
               <motion.div key={i} {...fadeIn} transition={{ delay: i * 0.08 }}>
@@ -764,7 +764,7 @@ const Index = () => {
               Most AI tools are general-purpose chatbots. They forget your business the second you close the tab, and they treat every request like it's the first one.
             </p>
             <p className="text-muted-foreground leading-relaxed mb-6">
-              Nova was built for <strong className="text-foreground">one thing: launching digital products end-to-end.</strong> She has persistent memory, a specialist team, a clear stage map, and taste that's tuned for the WarriorPlus / ClickBank / Gumroad / Etsy world.
+              Nova was built for <strong className="text-foreground">one thing: launching digital products end-to-end.</strong> She has persistent memory, a specialist team, a 12-mission playbook, and taste that's tuned for the WarriorPlus / ClickBank / Gumroad / Etsy world.
             </p>
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-5 text-center">
               <p className="text-foreground font-semibold">Other tools give you a blank prompt.</p>
@@ -788,7 +788,7 @@ const Index = () => {
             {[
               { asset: "Nova — your AI Launch Coach with persistent memory", emoji: "🧭" },
               { asset: "Specialist team drafting product, copy, funnel, emails", emoji: "🤖" },
-              { asset: "8-stage Launch Dashboard with live progress", emoji: "🎛️" },
+              { asset: "12-Mission Launch Dashboard with live progress", emoji: "🎛️" },
               { asset: "Digital Product draft (ebook or guide)", emoji: "📚" },
               { asset: "Sales page written in your voice", emoji: "📄" },
               { asset: "Bonus stack (3+ bonuses)", emoji: "🎁" },
@@ -961,7 +961,7 @@ const Index = () => {
             />
             <FAQItem
               q="What's the Launch Dashboard?"
-              a="It's the home screen for every project. You see an 8-stage launch map (Founder Profile → Opportunity → Offer → Product → Copy → Funnel → Launch → Published), one clear decision card, and your credits meter. That's the whole interface — Nova handles the complexity underneath."
+              a="It's the home screen for every project. You see your 12 guided missions grouped into 6 phases (Discover → Validate → Build → Offer & Funnel → Launch Assets → Launch & Grow), one clear decision card, and your credits meter. PDFs live in your reference vault — the missions are the show."
             />
             <FAQItem
               q="What are credits, and what do they cost?"

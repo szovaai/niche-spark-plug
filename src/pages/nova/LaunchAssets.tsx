@@ -55,16 +55,17 @@ export default function LaunchAssets() {
           <Button variant="ghost" size="sm" onClick={() => navigate(`/project/${projectId}`)}>
             <ArrowLeft className="mr-1 h-4 w-4" /> Back to project
           </Button>
-          <Badge variant="outline" className="gap-1">
-            <Mail className="h-3 w-3" /> Email Launch Engine
+          <Badge variant="outline" className="gap-1 border-primary/40 text-primary">
+            <Mail className="h-3 w-3" /> Phase 5 · Mission 8 — Email Engine
           </Badge>
         </div>
 
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Email Launch Engine</h1>
           <p className="text-sm text-muted-foreground">
-            Nova writes on-brand sequences and repurposes every email into X, LinkedIn,
-            Facebook, Instagram, TikTok, and YouTube Shorts — all in one pass.
+            This is your launch's voice. Nova writes on-brand sequences and repurposes every
+            email into X, LinkedIn, Facebook, Instagram, TikTok, and YouTube Shorts —
+            feeding straight into Mission 9 (Content Machine).
           </p>
         </div>
 
