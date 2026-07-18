@@ -100,8 +100,8 @@ export default function NovaDashboard() {
             </div>
             <h1 className="text-2xl font-semibold">Good to see you, {greetingName}.</h1>
             <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-              You make the decisions. My team and I do the work — research, product, cover,
-              sales page, launch plan.
+              An AI launch coach that guides you from idea to launch through measurable
+              missions. You make the calls — Nova and her team do the work.
             </p>
           </div>
           <CreditsBadge />
