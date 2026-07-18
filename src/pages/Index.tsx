@@ -961,7 +961,7 @@ const Index = () => {
             />
             <FAQItem
               q="What's the Launch Dashboard?"
-              a="It's the home screen for every project. You see an 8-stage launch map (Founder Profile → Opportunity → Offer → Product → Copy → Funnel → Launch → Published), one clear decision card, and your credits meter. That's the whole interface — Nova handles the complexity underneath."
+              a="It's the home screen for every project. You see your 12 guided missions grouped into 6 phases (Discover → Validate → Build → Offer & Funnel → Launch Assets → Launch & Grow), one clear decision card, and your credits meter. PDFs live in your reference vault — the missions are the show."
             />
             <FAQItem
               q="What are credits, and what do they cost?"
