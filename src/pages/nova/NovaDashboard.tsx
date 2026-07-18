@@ -175,7 +175,7 @@ export default function NovaDashboard() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Your launch map</CardTitle>
+              <CardTitle className="text-base">Your missions</CardTitle>
             </CardHeader>
             <CardContent>
               <StageMap
