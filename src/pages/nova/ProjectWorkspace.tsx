@@ -139,7 +139,7 @@ export default function ProjectWorkspace() {
         <div className="space-y-4">
           <Card>
             <CardHeader className="py-3">
-              <CardTitle className="text-sm">Launch map</CardTitle>
+              <CardTitle className="text-sm">Missions</CardTitle>
             </CardHeader>
             <CardContent>
               <StageMap current={project.current_stage} complete={["founder_profile"]} />
