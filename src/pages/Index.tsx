@@ -232,13 +232,13 @@ const Index = () => {
             </div>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">The Nova Dashboard</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Every project lives on an 8-stage launch map. You always know exactly where you are, what Nova is working on, and what decision is waiting for you.
+              Every project runs on 12 guided missions across 6 phases. You always know exactly which mission you're on, what Nova is working on, and what decision is waiting for you. PDFs become your reference vault — the missions are the show.
             </p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
             {[
-              { icon: Compass, title: "8-Stage Launch Map", desc: "Founder Profile → Opportunity → Offer → Product → Copy → Funnel → Launch → Published. See progress at a glance." },
+              { icon: Compass, title: "12 Guided Missions", desc: "Discover → Validate → Build → Offer & Funnel → Launch Assets → Launch & Grow. Every mission has a clear finish line." },
               { icon: MessageCircle, title: "One Decision Card", desc: "No sea of dashboards. Nova surfaces the single next question that actually moves your launch forward." },
               { icon: Brain, title: "Persistent Memory", desc: "Close the tab, come back tomorrow. Nova remembers your niche, tone, offers, and every choice you've made." },
               { icon: Zap, title: "Credits Meter", desc: "Simple, transparent credits. Start with 25 free. See exactly what each action costs before Nova spends them." },
