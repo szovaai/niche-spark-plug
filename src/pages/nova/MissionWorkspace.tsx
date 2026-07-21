@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Loader2, ArrowLeft, CheckCircle2, Circle, Sparkles, ArrowRight } from "lucide-react";
+import { Loader2, ArrowLeft, CheckCircle2, Circle, Sparkles, ArrowRight, FileText } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { NovaChat } from "@/components/nova/NovaChat";
+import { OpportunityEngine } from "@/components/nova/OpportunityEngine";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useMissionProgress } from "@/hooks/useMissionProgress";
@@ -163,17 +164,30 @@ export default function MissionWorkspace() {
                   <Progress value={pct} className="h-1.5 flex-1" />
                   <span className="text-xs text-muted-foreground">{doneCount}/{def.tasks.length}</span>
                 </div>
-                {def.primaryAction?.href && (
+                <div className="flex flex-wrap gap-2">
                   <Button
-                    onClick={() => navigate(def.primaryAction!.href!(projectId!))}
-                    className="w-full sm:w-auto"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate(`/project/${projectId}/blueprint`)}
                   >
-                    {def.primaryAction.label}
-                    <ArrowRight className="ml-1 h-4 w-4" />
+                    <FileText className="mr-1 h-4 w-4" /> Open Blueprint
                   </Button>
-                )}
+                  {def.primaryAction?.href && (
+                    <Button
+                      size="sm"
+                      onClick={() => navigate(def.primaryAction!.href!(projectId!))}
+                    >
+                      {def.primaryAction.label}
+                      <ArrowRight className="ml-1 h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
               </CardContent>
             </Card>
+
+            {missionId === "m1" && (
+              <OpportunityEngine projectId={projectId!} />
+            )}
 
             <Card>
               <CardHeader>
