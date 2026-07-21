@@ -19,6 +19,8 @@ import OAuthConsent from "./pages/OAuthConsent";
 import OnboardingChat from "./pages/nova/OnboardingChat";
 import NovaDashboard from "./pages/nova/NovaDashboard";
 import ProjectWorkspace from "./pages/nova/ProjectWorkspace";
+import MissionsHub from "./pages/nova/MissionsHub";
+import MissionWorkspace from "./pages/nova/MissionWorkspace";
 import CoachHome from "./pages/nova/CoachHome";
 import LaunchAssets from "./pages/nova/LaunchAssets";
 
@@ -130,7 +132,9 @@ const App = () => (
             <Route path="/onboarding" element={<OnboardingChat />} />
             <Route path="/dashboard" element={<NovaDashboard />} />
             <Route path="/coach" element={<CoachHome />} />
-            <Route path="/project/:projectId" element={<ProjectWorkspace />} />
+            <Route path="/project/:projectId" element={<MissionsHub />} />
+            <Route path="/project/:projectId/coach" element={<ProjectWorkspace />} />
+            <Route path="/project/:projectId/m/:missionId" element={<MissionWorkspace />} />
             <Route path="/project/:projectId/launch-assets" element={<LaunchAssets />} />
 
             {/* Settings stays at /settings (single-source) */}

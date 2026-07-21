@@ -53,13 +53,113 @@ export type Database = {
         }
         Relationships: []
       }
+      business_blueprints: {
+        Row: {
+          bonuses: Json | null
+          brand_colors: Json | null
+          brand_voice: string | null
+          business_name: string | null
+          created_at: string
+          customer_problem: string | null
+          desired_outcome: string | null
+          downsell: string | null
+          funnel_platform: string | null
+          id: string
+          launch_date: string | null
+          niche: string | null
+          offer_summary: string | null
+          order_bump: string | null
+          payment_provider: string | null
+          price: number | null
+          product_concept: string | null
+          product_promise: string | null
+          project_id: string
+          revenue_goal: number | null
+          status: string
+          target_audience: string | null
+          traffic_source: string | null
+          updated_at: string
+          upsell: string | null
+          user_id: string
+        }
+        Insert: {
+          bonuses?: Json | null
+          brand_colors?: Json | null
+          brand_voice?: string | null
+          business_name?: string | null
+          created_at?: string
+          customer_problem?: string | null
+          desired_outcome?: string | null
+          downsell?: string | null
+          funnel_platform?: string | null
+          id?: string
+          launch_date?: string | null
+          niche?: string | null
+          offer_summary?: string | null
+          order_bump?: string | null
+          payment_provider?: string | null
+          price?: number | null
+          product_concept?: string | null
+          product_promise?: string | null
+          project_id: string
+          revenue_goal?: number | null
+          status?: string
+          target_audience?: string | null
+          traffic_source?: string | null
+          updated_at?: string
+          upsell?: string | null
+          user_id: string
+        }
+        Update: {
+          bonuses?: Json | null
+          brand_colors?: Json | null
+          brand_voice?: string | null
+          business_name?: string | null
+          created_at?: string
+          customer_problem?: string | null
+          desired_outcome?: string | null
+          downsell?: string | null
+          funnel_platform?: string | null
+          id?: string
+          launch_date?: string | null
+          niche?: string | null
+          offer_summary?: string | null
+          order_bump?: string | null
+          payment_provider?: string | null
+          price?: number | null
+          product_concept?: string | null
+          product_promise?: string | null
+          project_id?: string
+          revenue_goal?: number | null
+          status?: string
+          target_audience?: string | null
+          traffic_source?: string | null
+          updated_at?: string
+          upsell?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_blueprints_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "business_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_projects: {
         Row: {
           created_at: string
+          current_mission_id: string | null
           current_stage: string
           id: string
+          last_action_at: string | null
+          next_action: Json | null
+          overall_progress_pct: number
           progress_pct: number
           project_name: string
+          readiness_pct: number
           selected_concept_id: string | null
           selected_niche_id: string | null
           status: string
@@ -68,10 +168,15 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          current_mission_id?: string | null
           current_stage?: string
           id?: string
+          last_action_at?: string | null
+          next_action?: Json | null
+          overall_progress_pct?: number
           progress_pct?: number
           project_name: string
+          readiness_pct?: number
           selected_concept_id?: string | null
           selected_niche_id?: string | null
           status?: string
@@ -80,10 +185,15 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          current_mission_id?: string | null
           current_stage?: string
           id?: string
+          last_action_at?: string | null
+          next_action?: Json | null
+          overall_progress_pct?: number
           progress_pct?: number
           project_name?: string
+          readiness_pct?: number
           selected_concept_id?: string | null
           selected_niche_id?: string | null
           status?: string
@@ -740,6 +850,41 @@ export type Database = {
           },
         ]
       }
+      launch_milestones: {
+        Row: {
+          achieved_at: string
+          id: string
+          kind: string
+          meta: Json | null
+          project_id: string
+          user_id: string
+        }
+        Insert: {
+          achieved_at?: string
+          id?: string
+          kind: string
+          meta?: Json | null
+          project_id: string
+          user_id: string
+        }
+        Update: {
+          achieved_at?: string
+          id?: string
+          kind?: string
+          meta?: Json | null
+          project_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "launch_milestones_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "business_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       launch_packs: {
         Row: {
           category: string
@@ -990,6 +1135,106 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      mission_progress: {
+        Row: {
+          blockers: Json | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          mission_id: string
+          progress_pct: number
+          project_id: string
+          started_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          blockers?: Json | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          mission_id: string
+          progress_pct?: number
+          project_id: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          blockers?: Json | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          mission_id?: string
+          progress_pct?: number
+          project_id?: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_progress_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "business_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mission_tasks: {
+        Row: {
+          approved_at: string | null
+          created_at: string
+          id: string
+          label: string
+          mission_id: string
+          output_ref: string | null
+          project_id: string
+          status: string
+          task_key: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          created_at?: string
+          id?: string
+          label: string
+          mission_id: string
+          output_ref?: string | null
+          project_id: string
+          status?: string
+          task_key: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          created_at?: string
+          id?: string
+          label?: string
+          mission_id?: string
+          output_ref?: string | null
+          project_id?: string
+          status?: string
+          task_key?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "business_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       niche_blueprint_usage: {
         Row: {
@@ -2192,6 +2437,47 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_decisions: {
+        Row: {
+          created_at: string
+          decided_at: string
+          decision_key: string
+          id: string
+          mission_id: string | null
+          project_id: string
+          user_id: string
+          value: Json
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string
+          decision_key: string
+          id?: string
+          mission_id?: string | null
+          project_id: string
+          user_id: string
+          value: Json
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string
+          decision_key?: string
+          id?: string
+          mission_id?: string | null
+          project_id?: string
+          user_id?: string
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_decisions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "business_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_product_builds: {
         Row: {
