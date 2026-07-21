@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { NovaChat } from "@/components/nova/NovaChat";
 import { OpportunityEngine } from "@/components/nova/OpportunityEngine";
+import { ValidationEngine } from "@/components/nova/ValidationEngine";
+import { ProductConceptEngine } from "@/components/nova/ProductConceptEngine";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useMissionProgress } from "@/hooks/useMissionProgress";
