@@ -185,3 +185,9 @@ verify_jwt = true
 
 [functions.generate-launch-retro]
 verify_jwt = true
+
+[functions.generate-payments-plan]
+verify_jwt = true
+
+[functions.generate-content-plan]
+verify_jwt = true
