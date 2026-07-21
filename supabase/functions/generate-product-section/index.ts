@@ -67,7 +67,7 @@ Style: direct, specific, action-first. No throat-clearing. Use short paragraphs,
 Return the section as clean HTML (h2/h3/p/ul/ol/strong only). Do not include the section number.`;
 
       const { text } = await generateText({
-        model: gateway(NOVA_MODELS.longform),
+        model: gateway(NOVA_MODELS.sectionDraft),
         prompt,
       });
 
