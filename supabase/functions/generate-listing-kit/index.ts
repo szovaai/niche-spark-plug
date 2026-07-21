@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { validateAuth } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -21,6 +22,8 @@ serve(async (req) => {
   }
 
   try {
+    const { user, error: authError } = await validateAuth(req);
+    if (authError || !user) return new Response(JSON.stringify({ error: authError || "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     const { blueprint, personalization, platform, nicheName } = await req.json();
     const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
 

@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.increment_page_views(text) FROM PUBLIC, anon;
