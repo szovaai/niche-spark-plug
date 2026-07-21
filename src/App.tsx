@@ -24,6 +24,7 @@ import MissionWorkspace from "./pages/nova/MissionWorkspace";
 import BlueprintPage from "./pages/nova/BlueprintPage";
 import CoachHome from "./pages/nova/CoachHome";
 import LaunchAssets from "./pages/nova/LaunchAssets";
+import ReferenceLibrary from "./pages/nova/ReferenceLibrary";
 
 // Legacy "Power Tools" (all still functional; mounted under /tools/*)
 import Dashboard from "./pages/Dashboard";
@@ -138,6 +139,7 @@ const App = () => (
             <Route path="/project/:projectId/m/:missionId" element={<MissionWorkspace />} />
             <Route path="/project/:projectId/blueprint" element={<BlueprintPage />} />
             <Route path="/project/:projectId/launch-assets" element={<LaunchAssets />} />
+            <Route path="/project/:projectId/reference" element={<ReferenceLibrary />} />
 
             {/* Settings stays at /settings (single-source) */}
             <Route path="/settings" element={<Settings />} />

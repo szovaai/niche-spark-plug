@@ -11,6 +11,8 @@ import { ValidationEngine } from "@/components/nova/ValidationEngine";
 import { ProductConceptEngine } from "@/components/nova/ProductConceptEngine";
 import { ProductBuildEngine } from "@/components/nova/ProductBuildEngine";
 import { OfferArchitectEngine } from "@/components/nova/OfferArchitectEngine";
+import { LaunchEngine } from "@/components/nova/LaunchEngine";
+import { ImproveEngine } from "@/components/nova/ImproveEngine";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useMissionProgress } from "@/hooks/useMissionProgress";
@@ -194,6 +196,8 @@ export default function MissionWorkspace() {
             {missionId === "m3" && <ProductConceptEngine projectId={projectId!} />}
             {missionId === "m4" && <ProductBuildEngine projectId={projectId!} />}
             {missionId === "m5" && <OfferArchitectEngine projectId={projectId!} />}
+            {missionId === "m10" && <LaunchEngine projectId={projectId!} />}
+            {missionId === "m11" && <ImproveEngine projectId={projectId!} />}
 
             <Card>
               <CardHeader>

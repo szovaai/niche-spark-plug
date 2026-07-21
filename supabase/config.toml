@@ -179,3 +179,9 @@ verify_jwt = true
 
 [functions.launch-genome]
 verify_jwt = true
+
+[functions.generate-launch-plan]
+verify_jwt = true
+
+[functions.generate-launch-retro]
+verify_jwt = true
