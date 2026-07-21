@@ -173,3 +173,9 @@ verify_jwt = true
 
 [functions.generate-offer-architecture]
 verify_jwt = true
+
+[functions.manage-byok-key]
+verify_jwt = true
+
+[functions.launch-genome]
+verify_jwt = true

@@ -11,8 +11,14 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const user = await validateAuth(req);
+    const { user, error: authError } = await validateAuth(req);
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: authError || "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const { action, projectId, genomeId } = await req.json();
+
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -99,13 +105,20 @@ serve(async (req) => {
         .from("launch_genomes")
         .select("*")
         .eq("id", genomeId)
-        .single();
+        .or(`user_id.eq.${user.id},is_public.eq.true`)
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) {
+        return new Response(JSON.stringify({ error: "Not found" }), {
+          status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
       return new Response(JSON.stringify({ genome: data }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+
     }
 
     return new Response(JSON.stringify({ error: "Invalid action" }), {

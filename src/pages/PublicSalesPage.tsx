@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { sanitizeHTML } from "@/lib/sanitize";
+
 
 export default function PublicSalesPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -53,7 +55,8 @@ export default function PublicSalesPage() {
   return (
     <div
       className="min-h-screen"
-      dangerouslySetInnerHTML={{ __html: html || "" }}
+      dangerouslySetInnerHTML={{ __html: sanitizeHTML(html || "") }}
     />
   );
+
 }

@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { encryptApiKey, decryptApiKey } from "@/lib/cryptoUtils";
+
 import BrandKitTab from "@/components/settings/BrandKitTab";
 import AIRoutingTab from "@/components/settings/AIRoutingTab";
 
@@ -75,29 +75,17 @@ const Settings = () => {
 
   const loadApiKeys = async () => {
     if (!user) return;
-    
     try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("api_keys")
-        .eq("id", user.id)
-        .single();
-
+      const { data, error } = await supabase.functions.invoke("manage-byok-key", {
+        body: { action: "get" },
+      });
       if (error) throw error;
-
-      if (data?.api_keys && typeof data.api_keys === 'object') {
-        const keys = data.api_keys as Record<string, string>;
-        // Decrypt keys for display
-        const decrypted: Record<string, string> = {};
-        for (const provider of ['deepseek', 'openai', 'anthropic'] as ApiProvider[]) {
-          decrypted[provider] = keys[provider] ? await decryptApiKey(keys[provider], user.id) : "";
-        }
-        setApiKeys({
-          deepseek: decrypted.deepseek || "",
-          openai: decrypted.openai || "",
-          anthropic: decrypted.anthropic || "",
-        });
-      }
+      const keys = (data?.keys || {}) as Record<ApiProvider, string>;
+      setApiKeys({
+        deepseek: keys.deepseek || "",
+        openai: keys.openai || "",
+        anthropic: keys.anthropic || "",
+      });
     } catch (error) {
       console.error("Error loading API keys:", error);
     } finally {
@@ -107,31 +95,12 @@ const Settings = () => {
 
   const saveApiKey = async (provider: ApiProvider) => {
     if (!user) return;
-    
     setSaving(provider);
     try {
-      // Get current keys first
-      const { data: current } = await supabase
-        .from("profiles")
-        .select("api_keys")
-        .eq("id", user.id)
-        .single();
-
-      const currentKeys = (current?.api_keys as Record<string, string>) || {};
-      // Encrypt the key before storing
-      const encryptedKey = await encryptApiKey(apiKeys[provider], user.id);
-      const updatedKeys = {
-        ...currentKeys,
-        [provider]: encryptedKey,
-      };
-
-      const { error } = await supabase
-        .from("profiles")
-        .update({ api_keys: updatedKeys })
-        .eq("id", user.id);
-
+      const { error } = await supabase.functions.invoke("manage-byok-key", {
+        body: { action: "save", provider, value: apiKeys[provider] },
+      });
       if (error) throw error;
-
       toast.success(`${API_PROVIDERS.find(p => p.id === provider)?.name} API key saved`);
     } catch (error) {
       console.error("Error saving API key:", error);
@@ -143,25 +112,12 @@ const Settings = () => {
 
   const deleteApiKey = async (provider: ApiProvider) => {
     if (!user) return;
-    
     setSaving(provider);
     try {
-      const { data: current } = await supabase
-        .from("profiles")
-        .select("api_keys")
-        .eq("id", user.id)
-        .single();
-
-      const currentKeys = (current?.api_keys as Record<string, string>) || {};
-      delete currentKeys[provider];
-
-      const { error } = await supabase
-        .from("profiles")
-        .update({ api_keys: currentKeys })
-        .eq("id", user.id);
-
+      const { error } = await supabase.functions.invoke("manage-byok-key", {
+        body: { action: "save", provider, value: "" },
+      });
       if (error) throw error;
-
       setApiKeys(prev => ({ ...prev, [provider]: "" }));
       toast.success(`${API_PROVIDERS.find(p => p.id === provider)?.name} API key removed`);
     } catch (error) {
@@ -171,6 +127,7 @@ const Settings = () => {
       setSaving(null);
     }
   };
+
 
   const toggleShowKey = (provider: ApiProvider) => {
     setShowKeys(prev => ({ ...prev, [provider]: !prev[provider] }));
