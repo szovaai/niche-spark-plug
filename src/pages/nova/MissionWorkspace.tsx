@@ -11,6 +11,8 @@ import { ValidationEngine } from "@/components/nova/ValidationEngine";
 import { ProductConceptEngine } from "@/components/nova/ProductConceptEngine";
 import { ProductBuildEngine } from "@/components/nova/ProductBuildEngine";
 import { OfferArchitectEngine } from "@/components/nova/OfferArchitectEngine";
+import { PaymentsEngine } from "@/components/nova/PaymentsEngine";
+import { ContentMachineEngine } from "@/components/nova/ContentMachineEngine";
 import { LaunchEngine } from "@/components/nova/LaunchEngine";
 import { ImproveEngine } from "@/components/nova/ImproveEngine";
 import { supabase } from "@/integrations/supabase/client";
@@ -196,6 +198,8 @@ export default function MissionWorkspace() {
             {missionId === "m3" && <ProductConceptEngine projectId={projectId!} />}
             {missionId === "m4" && <ProductBuildEngine projectId={projectId!} />}
             {missionId === "m5" && <OfferArchitectEngine projectId={projectId!} />}
+            {missionId === "m7" && <PaymentsEngine projectId={projectId!} />}
+            {missionId === "m9" && <ContentMachineEngine projectId={projectId!} />}
             {missionId === "m10" && <LaunchEngine projectId={projectId!} />}
             {missionId === "m11" && <ImproveEngine projectId={projectId!} />}
 
