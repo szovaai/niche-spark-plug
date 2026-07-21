@@ -187,9 +187,9 @@ export default function MissionWorkspace() {
               </CardContent>
             </Card>
 
-            {missionId === "m1" && (
-              <OpportunityEngine projectId={projectId!} />
-            )}
+            {missionId === "m1" && <OpportunityEngine projectId={projectId!} />}
+            {missionId === "m2" && <ValidationEngine projectId={projectId!} />}
+            {missionId === "m3" && <ProductConceptEngine projectId={projectId!} />}
 
             <Card>
               <CardHeader>
