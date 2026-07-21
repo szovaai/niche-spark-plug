@@ -9,6 +9,8 @@ import { NovaChat } from "@/components/nova/NovaChat";
 import { OpportunityEngine } from "@/components/nova/OpportunityEngine";
 import { ValidationEngine } from "@/components/nova/ValidationEngine";
 import { ProductConceptEngine } from "@/components/nova/ProductConceptEngine";
+import { ProductBuildEngine } from "@/components/nova/ProductBuildEngine";
+import { OfferArchitectEngine } from "@/components/nova/OfferArchitectEngine";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useMissionProgress } from "@/hooks/useMissionProgress";
@@ -190,6 +192,8 @@ export default function MissionWorkspace() {
             {missionId === "m1" && <OpportunityEngine projectId={projectId!} />}
             {missionId === "m2" && <ValidationEngine projectId={projectId!} />}
             {missionId === "m3" && <ProductConceptEngine projectId={projectId!} />}
+            {missionId === "m4" && <ProductBuildEngine projectId={projectId!} />}
+            {missionId === "m5" && <OfferArchitectEngine projectId={projectId!} />}
 
             <Card>
               <CardHeader>
