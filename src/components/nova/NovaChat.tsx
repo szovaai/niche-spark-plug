@@ -16,7 +16,10 @@ type Props = {
   initialMessages?: UIMessage[];
   agentType?: string;
   placeholder?: string;
-  onAssistantFinish?: () => void;
+  onAssistantFinish?: (assistantText?: string) => void;
+  composerExtra?: React.ReactNode;
+  externalInput?: string;
+  onExternalInputConsumed?: () => void;
 };
 
 function messageText(m: UIMessage): string {
