@@ -61,9 +61,12 @@ export function NovaChat({
     id: conversationId,
     messages: initialMessages,
     transport,
-    onFinish: () => {
-      onAssistantFinish?.();
-      // Fire-and-forget summarizer; server no-ops when count < 20
+    onFinish: ({ message }) => {
+      const text = (message?.parts as { type: string; text?: string }[] | undefined)
+        ?.filter((p) => p.type === "text")
+        .map((p) => p.text ?? "")
+        .join("\n");
+      onAssistantFinish?.(text);
       supabase.functions.invoke("summarize-conversation", { body: { conversationId } }).catch(() => {});
     },
     onError: (e) => {
