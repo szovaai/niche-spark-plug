@@ -84,6 +84,16 @@ export function NovaChat({
     await sendMessage({ text });
   }, [input, isBusy, sendMessage]);
 
+  // External input injection (e.g., from voice transcription)
+  useEffect(() => {
+    if (externalInput && externalInput.trim() && !isBusy) {
+      const text = externalInput.trim();
+      onExternalInputConsumed?.();
+      void sendMessage({ text });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [externalInput]);
+
   // Keep textarea focused
   useEffect(() => {
     textareaRef.current?.focus();
