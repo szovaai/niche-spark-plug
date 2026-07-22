@@ -177,6 +177,7 @@ export function NovaChat({
               }
             }}
           />
+          {composerExtra}
           {isBusy ? (
             <Button type="button" variant="outline" onClick={stop}>
               Stop
