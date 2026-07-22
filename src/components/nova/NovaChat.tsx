@@ -16,7 +16,10 @@ type Props = {
   initialMessages?: UIMessage[];
   agentType?: string;
   placeholder?: string;
-  onAssistantFinish?: () => void;
+  onAssistantFinish?: (assistantText?: string) => void;
+  composerExtra?: React.ReactNode;
+  externalInput?: string;
+  onExternalInputConsumed?: () => void;
 };
 
 function messageText(m: UIMessage): string {
@@ -33,6 +36,9 @@ export function NovaChat({
   agentType = "nova_manager",
   placeholder = "Reply to Nova…",
   onAssistantFinish,
+  composerExtra,
+  externalInput,
+  onExternalInputConsumed,
 }: Props) {
   const { session } = useAuth();
   const [input, setInput] = useState("");
@@ -55,9 +61,12 @@ export function NovaChat({
     id: conversationId,
     messages: initialMessages,
     transport,
-    onFinish: () => {
-      onAssistantFinish?.();
-      // Fire-and-forget summarizer; server no-ops when count < 20
+    onFinish: ({ message }) => {
+      const text = (message?.parts as { type: string; text?: string }[] | undefined)
+        ?.filter((p) => p.type === "text")
+        .map((p) => p.text ?? "")
+        .join("\n");
+      onAssistantFinish?.(text);
       supabase.functions.invoke("summarize-conversation", { body: { conversationId } }).catch(() => {});
     },
     onError: (e) => {
@@ -74,6 +83,16 @@ export function NovaChat({
     setInput("");
     await sendMessage({ text });
   }, [input, isBusy, sendMessage]);
+
+  // External input injection (e.g., from voice transcription)
+  useEffect(() => {
+    if (externalInput && externalInput.trim() && !isBusy) {
+      const text = externalInput.trim();
+      onExternalInputConsumed?.();
+      void sendMessage({ text });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [externalInput]);
 
   // Keep textarea focused
   useEffect(() => {
@@ -158,6 +177,7 @@ export function NovaChat({
               }
             }}
           />
+          {composerExtra}
           {isBusy ? (
             <Button type="button" variant="outline" onClick={stop}>
               Stop
