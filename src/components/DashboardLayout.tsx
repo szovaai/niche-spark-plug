@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { useLocation } from "react-router-dom";
 import QuickActionsDialog from "@/components/QuickActionsDialog";
 import PageTransition from "@/components/PageTransition";
+import { AskNovaFloat } from "@/components/nova/AskNovaFloat";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -61,6 +62,7 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
           </main>
           <QuickActionsDialog />
         </SidebarInset>
+        <AskNovaFloat />
       </div>
     </SidebarProvider>
   );
