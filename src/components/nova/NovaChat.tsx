@@ -36,6 +36,9 @@ export function NovaChat({
   agentType = "nova_manager",
   placeholder = "Reply to Nova…",
   onAssistantFinish,
+  composerExtra,
+  externalInput,
+  onExternalInputConsumed,
 }: Props) {
   const { session } = useAuth();
   const [input, setInput] = useState("");
