@@ -14,6 +14,7 @@ interface DashboardLayoutProps {
 
 const pageTitles: Record<string, string> = {
   "/dashboard": "Dashboard",
+  "/hq": "Business HQ",
   "/command-center": "Command Center",
   "/wizard": "AI Product Builder",
   "/steal": "Winning Launch Modeler",

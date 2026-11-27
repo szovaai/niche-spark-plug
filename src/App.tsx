@@ -18,6 +18,7 @@ import OAuthConsent from "./pages/OAuthConsent";
 // Nova (MVP 2.0 primary journey)
 import OnboardingChat from "./pages/nova/OnboardingChat";
 import NovaDashboard from "./pages/nova/NovaDashboard";
+import BusinessHQ from "./pages/hq/BusinessHQ";
 import ProjectWorkspace from "./pages/nova/ProjectWorkspace";
 import MissionsHub from "./pages/nova/MissionsHub";
 import MissionWorkspace from "./pages/nova/MissionWorkspace";
@@ -133,6 +134,7 @@ const App = () => (
             {/* Nova (MVP 2.0 primary journey) */}
             <Route path="/onboarding" element={<OnboardingChat />} />
             <Route path="/dashboard" element={<NovaDashboard />} />
+            <Route path="/hq" element={<BusinessHQ />} />
             <Route path="/coach" element={<CoachHome />} />
             <Route path="/project/:projectId" element={<MissionsHub />} />
             <Route path="/project/:projectId/coach" element={<ProjectWorkspace />} />

@@ -22,6 +22,7 @@ import {
   Sparkles,
   FolderKanban,
   MessageCircle,
+  Gauge,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
@@ -47,6 +48,7 @@ import {
 
 // Nova primary journey
 const novaItems = [
+  { title: "Business HQ", url: "/hq", icon: Gauge, tip: "Your Empire command center" },
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, tip: "Nova's home for you" },
   { title: "Talk to Nova", url: "/coach", icon: MessageCircle, tip: "General coaching chat" },
   { title: "My Projects", url: "/tools/saved-projects", icon: FolderKanban, tip: "Every project you're building" },
