@@ -1,4 +1,5 @@
 import { resolveSalesContext, SALES_TRUTH_RULES, salesCacheKey } from "../_shared/salesContext.ts";
+import { downsellInstructions, enforceDownsell } from "../_shared/funnelOffers.ts";
 import { corsHeaders, validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
 import { callTieredAI, getUserTier } from "../_shared/tieredAI.ts";
 import { getCachedResponse, setCachedResponse } from "../_shared/cache.ts";
@@ -66,18 +67,7 @@ function extractAndRepairJson(content: string): unknown {
     while (brackets > 0) { repaired += "]"; brackets--; }
     while (braces > 0) { repaired += "}"; braces--; }
     try { return JSON.parse(repaired); } catch (_e2) {
-      console.error("JSON repair failed, raw content (first 1200):", content.slice(0, 1200));
-      return {
-        salesPage: cleaned,
-        optInPage: "Regenerate to get full structured version.",
-        thankYouPage: "Thanks for your order! Check your email for access details.",
-        bonusPage: "Bonus bundle details being prepared. Regenerate to populate.",
-        checkoutCopy: "Complete your order now to lock in this price.",
-        orderBump: "Add this quick-start upgrade to implement faster.",
-        upsellOffer: "Upgrade now to unlock implementation templates.",
-        offerStack: { coreProduct: { name: "Core Product", value: 97 }, bonuses: [], totalValue: 97, askingPrice: 17, stackCopy: "Core Product ($97 value) — Today only $17." },
-        objections: []
-      };
+      throw new Error("Funnel response was incomplete; no fabricated replacement was saved");
     }
   }
 }
@@ -286,10 +276,10 @@ Return ONLY valid JSON with the same structure as the original funnel:
 
       const { content } = await callTieredAI([
         { role: "system", content: SALES_PAGE_SYSTEM + "\n\n" + SALES_TRUTH_RULES },
-        { role: "user", content: optimizePrompt + salesContext.prompt },
+        { role: "user", content: optimizePrompt + salesContext.prompt + "\n" + downsellInstructions(salesContext.facts) },
       ], userTier, "standard");
 
-      const result = extractAndRepairJson(content);
+      const result = enforceDownsell(extractAndRepairJson(content) as Record<string, unknown>, salesContext.facts);
       return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
@@ -306,7 +296,7 @@ Return ONLY valid JSON with the same structure as the original funnel:
     const price = typeof salesContext.facts.front_end_price === "number" ? salesContext.facts.front_end_price : (data.price ?? 17);
     const salesStyle = data.salesStyle || "warriorplus";
 
-    const cacheKey = await salesCacheKey("generate-launch-funnel", user.id, body, salesContext);
+    const cacheKey = await salesCacheKey("generate-launch-funnel:downsell-v2", user.id, body, salesContext);
     const cached = await getCachedResponse(cacheKey);
     if (cached) return new Response(JSON.stringify(cached.response), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
@@ -324,10 +314,10 @@ Return ONLY valid JSON with the same structure as the original funnel:
 
     const { content, model } = await callTieredAI([
       { role: "system", content: SALES_PAGE_SYSTEM + "\n\n" + SALES_TRUTH_RULES },
-      { role: "user", content: prompt + salesContext.prompt },
+      { role: "user", content: prompt + salesContext.prompt + "\n" + downsellInstructions(salesContext.facts) },
     ], userTier, "complex");
 
-    const result = extractAndRepairJson(content) as any;
+    const result = enforceDownsell(extractAndRepairJson(content) as Record<string, unknown>, salesContext.facts);
     
     // Inject the selected style into the result
     result.salesStyle = salesStyle;

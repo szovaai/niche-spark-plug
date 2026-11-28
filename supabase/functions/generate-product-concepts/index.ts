@@ -1,3 +1,6 @@
+import { structuredJSONPrompt } from "../_shared/structuredPrompt.ts";
+import { creditTasksForUser } from "../_shared/creditTasks.ts";
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 // Generate 3 focused product concepts from a validated problem.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { generateText, Output } from "npm:ai";
@@ -5,10 +8,6 @@ import { z } from "npm:zod";
 import { createNovaGateway, getLovableAiGatewayRunId } from "../_shared/novaGateway.ts";
 import { NOVA_MODELS } from "../_shared/novaModels.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
 const json = (s: number, b: unknown) =>
   new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
@@ -35,13 +34,14 @@ Deno.serve(async (req) => {
     const authHeader = req.headers.get("authorization");
     if (!authHeader) return json(401, { error: "unauthenticated" });
     const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
       { global: { headers: { Authorization: authHeader } } },
     );
     const { data: userRes } = await supabase.auth.getUser();
     if (!userRes?.user) return json(401, { error: "unauthenticated" });
     const userId = userRes.user.id;
+    const creditTasks = creditTasksForUser(userId);
 
     const { project_id } = await req.json();
     if (!project_id) return json(400, { error: "missing_project_id" });
@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (!bp?.niche) return json(400, { error: "blueprint_incomplete" });
 
-    const { data: reserved, error: resErr } = await supabase.rpc("reserve_task_credits", {
+    const { data: reserved, error: resErr } = await creditTasks.rpc("reserve_task_credits", {
       _project_id: project_id,
       _task_name: "product_concepts",
       _assigned_agent: "product_concept_engine",
@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
 
     try {
       const lovableKey = Deno.env.get("LOVABLE_API_KEY");
-      if (!lovableKey) return json(500, { error: "missing_lovable_api_key" });
+      if (!lovableKey) throw new Error("missing_lovable_api_key");
       const gateway = createNovaGateway(lovableKey, getLovableAiGatewayRunId(req));
 
       const prompt = `You are Nova's product architect. Draft 3 distinct FIRST product concepts a solo founder could launch quickly.
@@ -101,10 +101,10 @@ Be specific. No generic "ultimate guide to X". Products should feel like they we
       const { output } = await generateText({
         model: gateway(NOVA_MODELS.blueprint),
         output: Output.object({ schema: Schema }),
-        prompt,
+        prompt: structuredJSONPrompt(prompt, Schema),
       });
 
-      await supabase.rpc("finalize_task_credits", { _task_id: taskId, _output: output });
+      await creditTasks.rpc("finalize_task_credits", { _task_id: taskId, _output: output });
 
       await supabase.from("mission_tasks").upsert(
         {
@@ -121,7 +121,7 @@ Be specific. No generic "ultimate guide to X". Products should feel like they we
 
       return json(200, { ok: true, ...output });
     } catch (err) {
-      await supabase.rpc("release_task_credits", { _task_id: taskId, _error: String((err as Error)?.message ?? err) });
+      await creditTasks.rpc("release_task_credits", { _task_id: taskId, _error: String((err as Error)?.message ?? err) });
       throw err;
     }
   } catch (e) {

@@ -616,7 +616,7 @@ export const generateGuidePDF = (
   doc.setFontSize(PDF_STYLES.fontSize.heading);
   doc.setTextColor(...PDF_STYLES.primaryColor);
   doc.setFont("helvetica", "bold");
-  doc.text("📖 Table of Contents", PDF_STYLES.margins.left, y);
+  doc.text("Table of Contents", PDF_STYLES.margins.left, y);
   y += 5;
   
   doc.setDrawColor(...PDF_STYLES.accentColor);

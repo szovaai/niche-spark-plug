@@ -1,3 +1,6 @@
+import { structuredJSONPrompt } from "../_shared/structuredPrompt.ts";
+import { creditTasksForUser } from "../_shared/creditTasks.ts";
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 // Generate 3-5 evidence-based niche opportunities for a project.
 // Uses founder profile as context, stores shortlist in nova_tasks.output_json.
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -6,10 +9,6 @@ import { z } from "npm:zod";
 import { createNovaGateway, getLovableAiGatewayRunId } from "../_shared/novaGateway.ts";
 import { NOVA_MODELS } from "../_shared/novaModels.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
 
 function json(status: number, body: unknown) {
   return new Response(JSON.stringify(body), {
@@ -44,13 +43,14 @@ Deno.serve(async (req) => {
     if (!authHeader) return json(401, { error: "unauthenticated" });
 
     const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
       { global: { headers: { Authorization: authHeader } } },
     );
     const { data: userRes } = await supabase.auth.getUser();
     if (!userRes?.user) return json(401, { error: "unauthenticated" });
     const userId = userRes.user.id;
+    const creditTasks = creditTasksForUser(userId);
 
     const body = await req.json();
     const projectId: string | undefined = body?.project_id;
@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
     if (!proj || proj.user_id !== userId) return json(403, { error: "forbidden" });
 
     // Reserve credits (2)
-    const { data: reserved, error: reserveErr } = await supabase.rpc("reserve_task_credits", {
+    const { data: reserved, error: reserveErr } = await creditTasks.rpc("reserve_task_credits", {
       _project_id: projectId,
       _task_name: "opportunity_shortlist",
       _assigned_agent: "opportunity_engine",
@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
         : "No founder profile yet.";
 
       const lovableKey = Deno.env.get("LOVABLE_API_KEY");
-      if (!lovableKey) return json(500, { error: "missing_lovable_api_key" });
+      if (!lovableKey) throw new Error("missing_lovable_api_key");
       const gateway = createNovaGateway(lovableKey, getLovableAiGatewayRunId(req));
 
       const prompt = `You are Nova's opportunity researcher. Return 4 niche opportunities tailored to this founder for a small digital product they can launch solo.
@@ -112,10 +112,10 @@ Prefer niches where the founder's interests and experience overlap with paying a
       const { output } = await generateText({
         model: gateway(NOVA_MODELS.blueprint),
         output: Output.object({ schema: OpportunitySchema }),
-        prompt,
+        prompt: structuredJSONPrompt(prompt, OpportunitySchema),
       });
 
-      await supabase.rpc("finalize_task_credits", { _task_id: taskId, _output: output });
+      await creditTasks.rpc("finalize_task_credits", { _task_id: taskId, _output: output });
 
       // Auto-mark M1 "run_opportunity_research" task done
       await supabase.from("mission_tasks").upsert(
@@ -133,7 +133,7 @@ Prefer niches where the founder's interests and experience overlap with paying a
 
       return json(200, { ok: true, task_id: taskId, ...output });
     } catch (err) {
-      await supabase.rpc("release_task_credits", {
+      await creditTasks.rpc("release_task_credits", {
         _task_id: taskId,
         _error: String((err as Error)?.message ?? err),
       });

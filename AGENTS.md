@@ -12,3 +12,7 @@
 - Copy functions resolve sales intelligence through _shared/salesContext.ts with caller-scoped RLS and explicit owner filters; explicit business IDs never fall back, while ID-less legacy calls use the latest-updated owned business to match useActiveProject.
 - Copy context contains whitelisted blueprint/profile facts as user-message data and shared system-level truth rules; this keeps messaging consistent without trusting embedded instructions or inventing proof.
 - Funnel and marketing cache keys hash the authenticated owner, full request and resolved profile; return cached.response so business-specific copy cannot leak across tenants or remain stale after profile changes.
+- Mission credit mutations use service-only RPCs through creditTasksForUser after caller authentication; canonical prices, user-scoped locks and idempotent finalization prevent client tampering and double charges.
+- Product Studio stores manuscripts in product_manuscripts using optimistic revisions; nova_tasks retains generated section HTML for recovery, and PDF export uses the existing sanitized guide generator.
+- Team collaboration uses business_members on existing business_projects, with expiring email-matched invitations and read-only reviewers; private chats, credits, copy generation and edits remain owner-only.
+- Funnel downsells use authorized business offer data with their own optional checkout link; absent offers are omitted instead of generating fictional Lite products or discounts.

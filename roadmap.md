@@ -4,7 +4,7 @@ Full audit: /mnt/documents/PDF_Empire_MVP3_Audit_and_Plan.md
 ## Phase 1 — Foundation (in progress)
 - [x] Business HQ page (/hq): welcome, next step, Discover→Grow progress, real-data metrics with empty states, AI team activity, business health
 - [x] Approval Center, notifications, activity log storage
-- [ ] Team workspaces (multiple members per business)
+- [x] Team workspaces — owner plus invited read-only product reviewers; two-account acceptance/removal verified
 
 ## Waiting on the user
 - Payment provider: user chose "decide later" (blocks Phase 3)
@@ -16,7 +16,7 @@ Full audit: /mnt/documents/PDF_Empire_MVP3_Audit_and_Plan.md
 
 ## Audit (Nov 28)
 - [x] Security, health, clutter audit — /mnt/documents/PDF_Empire_Full_Audit_2026-11-28.md
-- [ ] Merge duplicate tools — waiting on user OK
+- [x] Consolidate duplicate department entries; legacy tools and links preserved (no destructive tool removal)
 - [x] Deep scan findings fixed — /mnt/documents/PDF_Empire_Phase1_Security_Report.md
 
 ## Post-Audit Consolidation spec (12 phases, Nov 28)
@@ -30,7 +30,16 @@ Full audit: /mnt/documents/PDF_Empire_MVP3_Audit_and_Plan.md
 
 ## Approved Functional Validation
 - [x] A: Authorized server-side shared sales intelligence + tenant isolation + backward-compatible copy tool integration and no-inference tests
-- [ ] B: Isolated container-gardening smoke test and full product/PDF validation — blocked on approval of live AI credit estimate
-- [ ] C: Same-business funnel offers and follow-up validation — no live payments or publishing; dependent on B approval
+- [x] B smoke test: concept, avatar, outline, one section, cover, sales copy, welcome emails, funnel, draft PDF; 5 task credits charged
+- [ ] B full product validation — remaining 24 sections and non-PDF deliverables need a separate approved generation budget
+- [x] C: Same-business funnel and three welcome emails generated; downsell $9, upsell $29, bump $5 retained; no payments/publishing
 - [x] D: Inspected current task/asset/approval/credit definitions; readiness gaps documented, live transitions still await B
 - [x] E: Interim completion report — /mnt/documents/Empire_AI_Functional_Validation_Phase_A.md; B/C/PDF results await approval
+
+## All remaining next steps — approved Nov 28
+- [x] Persist mission manuscripts and add a PDF export bridge; fixed text sanitizer stripping letters
+- [x] Harden task pricing, exactly-once charging and concurrent reservations; deployed server-only RPCs, fixed prices and per-user locks (concurrency stress tests remain unrun)
+- [x] Add same-business downsell page coverage and separate offer checkout links
+- [x] Consolidate duplicate department entries, preserving saved links
+- [x] Add business team membership and safe shared access (read-only reviewers)
+- [x] Run the controlled live smoke test and report actual results — roadmap-validation-report.md

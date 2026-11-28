@@ -253,6 +253,7 @@ export interface Step3Funnel {
   checkoutCopy: string;
   orderBump?: string;
   upsellOffer?: string;
+  downsellPage?: string;
   offerStack?: OfferStack;
   objections?: Objection[];
 }

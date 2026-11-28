@@ -4,11 +4,13 @@ import { ArrowRight, ChevronDown, ChevronRight, Info } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { DEPT_BY_ID } from "@/lib/departments";
+import { Button } from "@/components/ui/button";
 
 export default function DepartmentHub({ id, children }: { id: string; children?: React.ReactNode }) {
   const d = DEPT_BY_ID[id];
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const core = d.tools.filter((t) => t.tier !== "advanced");
+  const entryPaths = new Set(d.entries?.map(e => e.url.split("?")[0]) ?? []);
+  const core = d.tools.filter((t) => t.tier !== "advanced" && !entryPaths.has(t.url.split("?")[0]));
   const adv = d.tools.filter((t) => t.tier === "advanced");
   return (
     <DashboardLayout title={d.name}>
@@ -45,9 +47,9 @@ export default function DepartmentHub({ id, children }: { id: string; children?:
           </div>
           {adv.length > 0 && (
             <>
-              <button onClick={() => setShowAdvanced((v) => !v)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+              <Button variant="ghost" onClick={() => setShowAdvanced((v) => !v)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
                 {showAdvanced ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />} Advanced tools ({adv.length})
-              </button>
+              </Button>
               {showAdvanced && <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">{adv.map((t) => <ToolCard key={t.url} {...t} />)}</div>}
             </>
           )}

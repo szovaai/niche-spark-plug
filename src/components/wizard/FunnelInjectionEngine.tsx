@@ -72,6 +72,8 @@ export default function FunnelInjectionEngine({ funnel, marketing, productTitle,
   const [template, setTemplate] = useState<FunnelTemplate>("classic-im");
   const [paymentProvider, setPaymentProvider] = useState("stripe");
   const [paymentLink, setPaymentLink] = useState("");
+  const [upsellPaymentLink, setUpsellPaymentLink] = useState("");
+  const [downsellPaymentLink, setDownsellPaymentLink] = useState("");
   const [authorName, setAuthorName] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [autoresponder, setAutoresponder] = useState("none");
@@ -87,10 +89,12 @@ export default function FunnelInjectionEngine({ funnel, marketing, productTitle,
     authorName,
     contactEmail,
     paymentLink: paymentLink || "#",
+    upsellPaymentLink,
+    downsellPaymentLink,
     price,
     niche,
     template,
-  }), [productTitle, productSubtitle, authorName, contactEmail, paymentLink, price, niche, template]);
+  }), [productTitle, productSubtitle, authorName, contactEmail, paymentLink, upsellPaymentLink, downsellPaymentLink, price, niche, template]);
 
   const selectedFunnelType = FUNNEL_TYPES.find(t => t.id === funnelType) || FUNNEL_TYPES[2];
 
@@ -286,8 +290,7 @@ export default function FunnelInjectionEngine({ funnel, marketing, productTitle,
               <div className="p-4 rounded-xl border border-border bg-card space-y-3">
                 <div className="flex items-center gap-2">
                   <Link2 className="w-4 h-4 text-primary" />
-                  <h4 className="font-semibold text-sm">Global Payment Link</h4>
-                  <Badge variant="outline" className="text-[10px]">Updates all CTA buttons</Badge>
+                  <h4 className="font-semibold text-sm">Product Checkout</h4>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
@@ -312,6 +315,9 @@ export default function FunnelInjectionEngine({ funnel, marketing, productTitle,
                   </div>
                 </div>
               </div>
+
+              {funnel.upsellOffer && <div className="space-y-2"><Label htmlFor="upsell-checkout">Upsell checkout URL</Label><Input id="upsell-checkout" type="url" value={upsellPaymentLink} onChange={e => setUpsellPaymentLink(e.target.value)} placeholder="https://your-upgrade-checkout.com" /></div>}
+              {funnel.downsellPage && <div className="space-y-2"><Label htmlFor="downsell-checkout">Downsell checkout URL</Label><Input id="downsell-checkout" type="url" value={downsellPaymentLink} onChange={e => setDownsellPaymentLink(e.target.value)} placeholder="https://your-alternative-checkout.com" /></div>}
 
               {/* Autoresponder */}
               <div className="p-4 rounded-xl border border-border bg-card space-y-3">

@@ -39,7 +39,7 @@ export const DEPARTMENTS: Department[] = [
       { title: "My Products", url: "/tools/my-toolkits", blurb: "Everything you've created.", tier: "core" },
       { title: "Templates", url: "/tools/templates-marketplace", blurb: "Start from a ready-made blueprint.", tier: "core" },
       { title: "Empire Mode", url: "/tools/empire", blurb: "Faceless brand + product pack, 6 steps.", tier: "advanced" },
-      { title: "Launch Templates", url: "/tools/launch-templates", blurb: "Lead magnets and marketplace formats.", tier: "advanced" },
+      { title: "Launch Templates (classic)", url: "/tools/launch-templates", blurb: "Legacy lead magnet and marketplace formats.", tier: "advanced" },
     ],
   },
   {
@@ -48,7 +48,7 @@ export const DEPARTMENTS: Department[] = [
     tools: [
       { title: "Funnel Builder", url: "/tools/funnels", blurb: "Build the pages of your funnel.", tier: "core" },
       { title: "Profit Map", url: "/tools/profit-map", blurb: "Traffic-to-revenue scenarios.", tier: "core" },
-      { title: "Launch Simulation", url: "/tools/funnel-simulation", blurb: "Visual funnel simulator.", tier: "core" },
+      { title: "Launch Simulation (classic)", url: "/tools/funnel-simulation", blurb: "Alternative visual funnel simulator.", tier: "advanced" },
       { title: "Affiliate Predictor", url: "/tools/affiliate-predictor", blurb: "Scenario for affiliate partners.", tier: "advanced" },
       { title: "Traffic Planner", url: "/tools/traffic-planner", blurb: "Where your visitors will come from.", tier: "advanced" },
     ],

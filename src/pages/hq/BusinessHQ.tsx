@@ -18,6 +18,7 @@ import { HQ_STAGES, nextBestAction, stageIndexFromProgress } from "@/lib/busines
 import { toast } from "sonner";
 import { DEPARTMENTS } from "@/lib/departments";
 import { CreditsBadge } from "@/components/nova/CreditsBadge";
+import { BusinessTeam } from "@/components/nova/BusinessTeam";
 
 // New tables may not be in generated types yet.
 const db = supabase as any;
@@ -38,7 +39,8 @@ export default function BusinessHQ() {
     queryKey: ["hq", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const uid = user!.id;
+      if (!user) throw new Error("Sign in first.");
+      const uid = user.id;
       const [proj, tasks, approvals, toolkits, emails] = await Promise.all([
         db.from("business_projects").select("id, project_name, current_mission_id, overall_progress_pct").eq("user_id", uid).order("updated_at", { ascending: false }).limit(1),
         db.from("nova_tasks").select("id, task_name, status, assigned_agent, created_at, completed_at").eq("user_id", uid).order("created_at", { ascending: false }).limit(50),
@@ -83,7 +85,8 @@ export default function BusinessHQ() {
     );
   }
 
-  const { project, tasks, approvals, productCount, emailCount } = hq.data!;
+  if (!hq.data) return null;
+  const { project, tasks, approvals, productCount, emailCount } = hq.data;
   const progress = project?.overall_progress_pct ?? 0;
   const stageIdx = stageIndexFromProgress(progress);
   const running = tasks.filter((t) => ["running", "in_progress", "processing"].includes(t.status));
@@ -220,6 +223,8 @@ export default function BusinessHQ() {
             </CardContent>
           </Card>
         </div>
+
+        <BusinessTeam projectId={project?.id} />
 
         {/* Health */}
         <Card>

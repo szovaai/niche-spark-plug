@@ -1,4 +1,5 @@
 import type { Step3Funnel, SalesPageSections, Step4Marketing, AffiliateKit } from "@/types/launchWizard";
+import { offerCheckoutLink } from "./offerLinks";
 
 export type FunnelType = "simple" | "leadmagnet-tripwire" | "warriorplus-launch" | "list-building";
 
@@ -50,6 +51,8 @@ interface FunnelSiteConfig {
   authorName?: string;
   contactEmail?: string;
   paymentLink?: string;
+  upsellPaymentLink?: string;
+  downsellPaymentLink?: string;
   price?: number;
   niche?: string;
   template?: FunnelTemplate;
@@ -424,18 +427,18 @@ ${funnel.orderBump ? `<div style="background:${template === "toolkit-launch" ? "
 
 export function generateUpsellPageHTML(funnel: Step3Funnel, config: FunnelSiteConfig): string {
   const template = config.template || "classic-im";
-  const upsellCopy = funnel.upsellOffer || "Upgrade your order with this exclusive add-on.";
+  const upsellCopy = funnel.upsellOffer || "";
+  const checkout = offerCheckoutLink(config.upsellPaymentLink);
   const body = `<div class="hero">
-<h1>⚡ Wait — Special One-Time Offer</h1>
-<p class="subtitle">This offer is only available right now and won't be shown again.</p>
+<h1>Upgrade Your Order</h1>
 </div>
 <div class="container">
 <div class="card" style="border-color:${template === "toolkit-launch" ? "var(--accent)" : "var(--gold, var(--accent))"}">
 <h2>Upgrade Your Order</h2>
 <p>${nl2br(upsellCopy)}</p>
 <div style="text-align:center;margin-top:24px">
-<a href="${escapeHtml(config.paymentLink || "#")}" class="cta-btn">Yes — Add This To My Order</a>
-<p style="margin-top:16px"><a href="thankyou.html" style="font-size:.9rem;color:${template === "toolkit-launch" ? "var(--muted)" : "#888"}">No thanks, take me to my purchase →</a></p>
+${checkout ? `<a href="${escapeHtml(checkout)}" class="cta-btn">Yes — Add This To My Order</a>` : `<p>Upgrade checkout is not connected.</p>`}
+<p style="margin-top:16px"><a href="${funnel.downsellPage ? "downsell.html" : "thankyou.html"}">No thanks, continue →</a></p>
 </div>
 </div>
 </div>
@@ -445,25 +448,15 @@ export function generateUpsellPageHTML(funnel: Step3Funnel, config: FunnelSiteCo
 
 export function generateDownsellPageHTML(funnel: Step3Funnel, config: FunnelSiteConfig): string {
   const template = config.template || "classic-im";
-  const price = config.price || 17;
-  const litePrice = Math.round(price * 0.6);
+  const checkout = offerCheckoutLink(config.downsellPaymentLink);
   const body = `<div class="hero">
-<h1>Before You Go…</h1>
-<p class="subtitle">We'd hate for you to miss out. Here's a lighter version at a special price.</p>
+<h1>Another Option</h1>
 </div>
 <div class="container">
 <div class="card">
-<h2>${escapeHtml(config.productTitle)} — Lite Edition</h2>
-<p>Get the core system without the advanced bonuses. Perfect if you want to start small and upgrade later.</p>
-<ul class="bullet-list">
-<li>Core training included</li>
-<li>Quick-start guide</li>
-<li>Email support</li>
-</ul>
-<div class="price-box" style="margin-top:20px">
-<p class="was">Regular: $${price}</p>
-<p class="now">Just $${litePrice}</p>
-<br><a href="${escapeHtml(config.paymentLink || "#")}" class="cta-btn">Get The Lite Version — $${litePrice}</a>
+<p>${nl2br(funnel.downsellPage || "")}</p>
+<div style="margin-top:20px">
+${checkout ? `<a href="${escapeHtml(checkout)}" class="cta-btn">Yes — Choose This Offer</a>` : `<p>This offer's checkout is not connected.</p>`}
 <p style="margin-top:16px"><a href="thankyou.html" style="font-size:.9rem;color:${template === "toolkit-launch" ? "var(--muted)" : "#888"}">No thanks, I'll pass →</a></p>
 </div>
 </div>
@@ -625,8 +618,8 @@ export function generateFunnelSite(
   if (pages.includes("thankyou.html")) files["thankyou.html"] = generateThankYouPageHTML(funnel, config);
   if (pages.includes("checkout.html")) files["checkout.html"] = generateCheckoutPageHTML(funnel, config);
   if (pages.includes("bonus.html")) files["bonus.html"] = generateBonusPageHTML(funnel, config);
-  if (pages.includes("upsell.html")) files["upsell.html"] = generateUpsellPageHTML(funnel, config);
-  if (pages.includes("downsell.html")) files["downsell.html"] = generateDownsellPageHTML(funnel, config);
+  if (pages.includes("upsell.html") && funnel.upsellOffer) files["upsell.html"] = generateUpsellPageHTML(funnel, config);
+  if (pages.includes("downsell.html") && funnel.downsellPage) files["downsell.html"] = generateDownsellPageHTML(funnel, config);
   if (pages.includes("bonus-delivery.html")) files["bonus-delivery.html"] = generateBonusDeliveryPageHTML(funnel, config);
   if (pages.includes("affiliate.html")) files["affiliate.html"] = generateAffiliatePageHTML(funnel, config, affiliateKit);
 

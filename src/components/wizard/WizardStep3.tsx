@@ -41,6 +41,7 @@ const FUNNEL_TABS = [
   { key: "checkoutCopy", label: "Checkout" },
   { key: "orderBump", label: "Order Bump", icon: ShoppingCart },
   { key: "upsellOffer", label: "Upsell", icon: ArrowUpCircle },
+  { key: "downsellPage", label: "Downsell", icon: ShoppingCart },
 ] as const;
 
 export default function WizardStep3({ productBrief, productContent, result, setResult, onNext, userId, price, launchMode }: Props) {

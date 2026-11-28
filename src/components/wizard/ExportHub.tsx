@@ -67,6 +67,9 @@ function buildMarkdown(product: Step1Product | null, content: Step2Content | nul
     lines.push(`### Thank You Page\n${funnel.thankYouPage}\n`);
     lines.push(`### Bonus Page\n${funnel.bonusPage}\n`);
     lines.push(`### Checkout Copy\n${funnel.checkoutCopy}\n`);
+    if (funnel.orderBump) lines.push(`### Order Bump\n${funnel.orderBump}\n`);
+    if (funnel.upsellOffer) lines.push(`### Upsell\n${funnel.upsellOffer}\n`);
+    if (funnel.downsellPage) lines.push(`### Downsell\n${funnel.downsellPage}\n`);
   }
 
   if (marketing) {

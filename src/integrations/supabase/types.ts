@@ -251,6 +251,80 @@ export type Database = {
           },
         ]
       }
+      business_invitations: {
+        Row: {
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          project_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          project_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          project_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_invitations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "business_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_members: {
+        Row: {
+          created_at: string
+          id: string
+          project_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          project_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          project_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_members_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "business_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_projects: {
         Row: {
           created_at: string
@@ -1767,6 +1841,35 @@ export type Database = {
         }
         Relationships: []
       }
+      product_manuscripts: {
+        Row: {
+          outline: Json
+          project_id: string
+          revision: string
+          updated_at: string
+        }
+        Insert: {
+          outline?: Json
+          project_id: string
+          revision?: string
+          updated_at?: string
+        }
+        Update: {
+          outline?: Json
+          project_id?: string
+          revision?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_manuscripts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "business_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           ai_model_preference: string
@@ -2640,6 +2743,11 @@ export type Database = {
       }
     }
     Functions: {
+      accept_business_invitation: {
+        Args: { _invitation_id: string }
+        Returns: string
+      }
+      can_view_business: { Args: { _project_id: string }; Returns: boolean }
       check_and_reset_daily_limits: {
         Args: { p_user_id: string }
         Returns: Json
@@ -2656,6 +2764,10 @@ export type Database = {
       clean_expired_cache: { Args: never; Returns: number }
       finalize_task_credits: {
         Args: { _output?: Json; _task_id: string }
+        Returns: Json
+      }
+      finalize_task_credits_for_user: {
+        Args: { _output?: Json; _task_id: string; _user_id: string }
         Returns: Json
       }
       get_niche_blueprint_count: {
@@ -2682,6 +2794,10 @@ export type Database = {
         Args: { _error?: string; _task_id: string }
         Returns: Json
       }
+      release_task_credits_for_user: {
+        Args: { _error?: string; _task_id: string; _user_id: string }
+        Returns: Json
+      }
       reserve_task_credits: {
         Args: {
           _assigned_agent: string
@@ -2691,6 +2807,25 @@ export type Database = {
           _task_name: string
         }
         Returns: Json
+      }
+      reserve_task_credits_for_user: {
+        Args: {
+          _assigned_agent: string
+          _cost: number
+          _input?: Json
+          _project_id: string
+          _task_name: string
+          _user_id: string
+        }
+        Returns: Json
+      }
+      save_manuscript: {
+        Args: {
+          _expected_revision: string
+          _outline: Json
+          _project_id: string
+        }
+        Returns: string
       }
     }
     Enums: {

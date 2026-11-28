@@ -1,3 +1,6 @@
+import { structuredJSONPrompt } from "../_shared/structuredPrompt.ts";
+import { creditTasksForUser } from "../_shared/creditTasks.ts";
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 // M9 — Nova drafts a 30-day multi-channel content plan repurposed from the offer + emails.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { generateText, Output } from "npm:ai";
@@ -5,10 +8,6 @@ import { z } from "npm:zod";
 import { createNovaGateway, getLovableAiGatewayRunId } from "../_shared/novaGateway.ts";
 import { NOVA_MODELS } from "../_shared/novaModels.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
 const json = (s: number, b: unknown) =>
   new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
@@ -44,13 +43,14 @@ Deno.serve(async (req) => {
     const authHeader = req.headers.get("authorization");
     if (!authHeader) return json(401, { error: "unauthenticated" });
     const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
       { global: { headers: { Authorization: authHeader } } },
     );
     const { data: userRes } = await supabase.auth.getUser();
     if (!userRes?.user) return json(401, { error: "unauthenticated" });
     const userId = userRes.user.id;
+    const creditTasks = creditTasksForUser(userId);
 
     const { project_id, primary_channel } = await req.json();
     if (!project_id) return json(400, { error: "missing_project_id" });
@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
       .slice(0, 8)
       .join("\n");
 
-    const { data: reserved, error: resErr } = await supabase.rpc("reserve_task_credits", {
+    const { data: reserved, error: resErr } = await creditTasks.rpc("reserve_task_credits", {
       _project_id: project_id,
       _task_name: "content_plan",
       _assigned_agent: "content_machine",
@@ -96,7 +96,7 @@ Deno.serve(async (req) => {
 
     try {
       const key = Deno.env.get("LOVABLE_API_KEY");
-      if (!key) return json(500, { error: "missing_lovable_api_key" });
+      if (!key) throw new Error("missing_lovable_api_key");
       const gateway = createNovaGateway(key, getLovableAiGatewayRunId(req));
 
       const prompt = `You are Nova's content strategist. Build a realistic 30-day content plan for a solo founder.
@@ -127,14 +127,14 @@ Rules: no hype, no "leverage/optimize/unlock" language, no fake stats, no number
       const { output } = await generateText({
         model: gateway(NOVA_MODELS.blueprint),
         output: Output.object({ schema: Schema }),
-        prompt,
+        prompt: structuredJSONPrompt(prompt, Schema),
       });
 
-      await supabase.rpc("finalize_task_credits", { _task_id: taskId, _output: output });
+      await creditTasks.rpc("finalize_task_credits", { _task_id: taskId, _output: output });
 
       return json(200, { ok: true, ...output });
     } catch (err) {
-      await supabase.rpc("release_task_credits", { _task_id: taskId, _error: String((err as Error)?.message ?? err) });
+      await creditTasks.rpc("release_task_credits", { _task_id: taskId, _error: String((err as Error)?.message ?? err) });
       throw err;
     }
   } catch (e) {

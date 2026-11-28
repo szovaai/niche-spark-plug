@@ -112,6 +112,7 @@ export const createLaunchBoxZip = async (
     funnelFolder?.file("CheckoutCopy.txt", wrapText("CHECKOUT COPY", data.funnel.checkoutCopy || ""));
     if (data.funnel.orderBump) funnelFolder?.file("OrderBumpCopy.txt", wrapText("ORDER BUMP", data.funnel.orderBump));
     if (data.funnel.upsellOffer) funnelFolder?.file("UpsellPageCopy.txt", wrapText("UPSELL OFFER", data.funnel.upsellOffer));
+    if (data.funnel.downsellPage) funnelFolder?.file("DownsellPageCopy.txt", wrapText("DOWNSELL OFFER", data.funnel.downsellPage));
 
     // Offer stack summary
     if (data.funnel.offerStack) {
