@@ -51,7 +51,7 @@ const API_PROVIDERS: ApiKeyConfig[] = [
 
 const Settings = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [apiKeys, setApiKeys] = useState<Record<ApiProvider, string>>({
     deepseek: "",
     openai: "",
@@ -66,12 +66,13 @@ const Settings = () => {
   const [saving, setSaving] = useState<ApiProvider | null>(null);
 
   useEffect(() => {
+    if (authLoading) return;
     if (!user) {
-      navigate("/auth");
+      navigate("/auth?next=/settings");
       return;
     }
     loadApiKeys();
-  }, [user, navigate]);
+  }, [user, authLoading, navigate]);
 
   const loadApiKeys = async () => {
     if (!user) return;

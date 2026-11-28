@@ -41,7 +41,8 @@ export async function getUserTier(userId: string): Promise<UserTier> {
     return 'free';
   }
 
-  return data.role as UserTier;
+  // user_roles holds app roles (admin/moderator/user/pro); only pro/admin get premium models.
+  return data.role === 'pro' || data.role === 'admin' ? 'pro' : 'free';
 }
 
 /**
@@ -74,7 +75,11 @@ export function getModelConfig(
   userTier: UserTier,
   complexity: TaskComplexity = 'standard'
 ): TieredModelConfig {
-  const config = MODEL_CONFIGS[complexity][userTier];
+  // Callers sometimes pass aliases like "fast"; fall back safely instead of crashing.
+  const alias: Record<string, TaskComplexity> = { fast: 'simple', quick: 'simple', heavy: 'complex', deep: 'complex' };
+  const level: TaskComplexity = (MODEL_CONFIGS as any)[complexity] ? complexity : (alias[complexity as string] ?? 'standard');
+  const tier: UserTier = userTier === 'pro' ? 'pro' : 'free';
+  const config = MODEL_CONFIGS[level][tier];
   console.log(`TieredAI: Selected model ${config.model} for ${userTier} user (${complexity} task)`);
   return config;
 }

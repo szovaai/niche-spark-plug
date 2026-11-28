@@ -300,15 +300,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "business_projects_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_credit_balance"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       community_wins: {
         Row: {
@@ -388,13 +380,6 @@ export type Database = {
             referencedRelation: "business_projects"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "credit_ledger_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_credit_balance"
-            referencedColumns: ["user_id"]
-          },
         ]
       }
       credit_reservations: {
@@ -432,13 +417,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "nova_tasks"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "credit_reservations_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_credit_balance"
-            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -521,15 +499,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "email_campaigns_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_credit_balance"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       empire_projects: {
         Row: {
@@ -700,15 +670,7 @@ export type Database = {
           user_id?: string
           weekly_hours?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "founder_profiles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "v_credit_balance"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       launch_genomes: {
         Row: {
@@ -1461,13 +1423,6 @@ export type Database = {
             referencedRelation: "business_projects"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "nova_conversations_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_credit_balance"
-            referencedColumns: ["user_id"]
-          },
         ]
       }
       nova_memories: {
@@ -1511,13 +1466,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "business_projects"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "nova_memories_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_credit_balance"
-            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -1574,13 +1522,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "nova_conversations"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "nova_messages_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_credit_balance"
-            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -1640,13 +1581,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "business_projects"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "nova_tasks_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_credit_balance"
-            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -1900,15 +1834,7 @@ export type Database = {
           usage_reset_at?: string | null
           views_today?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "v_credit_balance"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       project_versions: {
         Row: {
@@ -2180,15 +2106,7 @@ export type Database = {
           notes?: string | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "saved_niches_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_credit_balance"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       saved_opportunities: {
         Row: {
@@ -2705,15 +2623,7 @@ export type Database = {
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_roles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_credit_balance"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
@@ -2722,16 +2632,6 @@ export type Database = {
           balance: number | null
           reserved: number | null
           user_id: string | null
-        }
-        Insert: {
-          balance?: never
-          reserved?: never
-          user_id?: string | null
-        }
-        Update: {
-          balance?: never
-          reserved?: never
-          user_id?: string | null
         }
         Relationships: []
       }
