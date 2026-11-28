@@ -2,7 +2,7 @@
 
 ## Delivered
 - Online mission manuscripts with optimistic revision checks, approval persistence, legacy browser-draft import and draft/final PDF downloads.
-- Fixed an actual PDF defect: double-escaped sanitizer patterns deleted normal letters. Draft fixture: 4 pages / 3,413 extracted characters; approved fixture: 4 pages / 3,433 characters. AI-written partial product: 5 pages / 3,671 characters. Removed unsupported emoji from the table of contents.
+- Fixed an actual PDF defect: double-escaped sanitizer patterns deleted normal letters. Draft fixture: 4 pages / 3,413 extracted characters; approved fixture: 4 pages / 3,433 characters. Final AI-written partial product: 5 pages / 3,648 readable characters. Removed unsupported emoji from the table of contents.
 - Service-only task-credit mutations, canonical prices, per-user advisory locks, idempotent finalization, reservation expiry checks and protection against browser task mutation. All ten mission functions deployed.
 - Explicit JSON schemas included in structured model prompts after live testing found missing JSON instructions and a top-level `products` versus `concepts` mismatch. All nine structured mission functions redeployed.
 - Business team invitations with seven-day expiry and email matching. Reviewers can read/export shared manuscripts but cannot edit, generate, or read private tasks/chats/credits. Invitations are in-app; no invitation email is sent.

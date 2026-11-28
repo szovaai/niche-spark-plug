@@ -1,7 +1,7 @@
 # Roadmap — PDF Empire AI MVP 3.0
 Full audit: /mnt/documents/PDF_Empire_MVP3_Audit_and_Plan.md
 
-## Phase 1 — Foundation (in progress)
+## Phase 1 — Foundation (complete with read-only team review)
 - [x] Business HQ page (/hq): welcome, next step, Discover→Grow progress, real-data metrics with empty states, AI team activity, business health
 - [x] Approval Center, notifications, activity log storage
 - [x] Team workspaces — owner plus invited read-only product reviewers; two-account acceptance/removal verified
@@ -33,8 +33,8 @@ Full audit: /mnt/documents/PDF_Empire_MVP3_Audit_and_Plan.md
 - [x] B smoke test: concept, avatar, outline, one section, cover, sales copy, welcome emails, funnel, draft PDF; 5 task credits charged
 - [ ] B full product validation — remaining 24 sections and non-PDF deliverables need a separate approved generation budget
 - [x] C: Same-business funnel and three welcome emails generated; downsell $9, upsell $29, bump $5 retained; no payments/publishing
-- [x] D: Inspected current task/asset/approval/credit definitions; readiness gaps documented, live transitions still await B
-- [x] E: Interim completion report — /mnt/documents/Empire_AI_Functional_Validation_Phase_A.md; B/C/PDF results await approval
+- [x] D: Task transitions and released failed reservations verified during the controlled smoke test
+- [x] E: Updated results — roadmap-validation-report.md; full-product and commercial tests remain separate
 
 ## All remaining next steps — approved Nov 28
 - [x] Persist mission manuscripts and add a PDF export bridge; fixed text sanitizer stripping letters
