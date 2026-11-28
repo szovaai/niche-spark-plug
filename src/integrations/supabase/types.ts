@@ -53,6 +53,106 @@ export type Database = {
         }
         Relationships: []
       }
+      approval_requests: {
+        Row: {
+          category: string
+          created_at: string
+          decided_at: string | null
+          decision_note: string | null
+          id: string
+          link_path: string | null
+          payload: Json
+          project_id: string | null
+          requested_by: string
+          status: string
+          summary: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          decided_at?: string | null
+          decision_note?: string | null
+          id?: string
+          link_path?: string | null
+          payload?: Json
+          project_id?: string | null
+          requested_by?: string
+          status?: string
+          summary?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          decided_at?: string | null
+          decision_note?: string | null
+          id?: string
+          link_path?: string | null
+          payload?: Json
+          project_id?: string | null
+          requested_by?: string
+          status?: string
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_requests_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "business_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          project_id: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          project_id?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          project_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "business_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_blueprints: {
         Row: {
           bonuses: Json | null
@@ -1280,6 +1380,50 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          kind: string
+          link_path: string | null
+          project_id: string | null
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          link_path?: string | null
+          project_id?: string | null
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          link_path?: string | null
+          project_id?: string | null
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "business_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       nova_conversations: {
         Row: {
