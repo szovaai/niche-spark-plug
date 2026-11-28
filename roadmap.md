@@ -7,7 +7,7 @@ Full audit: /mnt/documents/PDF_Empire_MVP3_Audit_and_Plan.md
 - [x] Team workspaces — owner plus invited read-only product reviewers; two-account acceptance/removal verified
 
 ## Waiting on the user
-- Payment provider: user chose "decide later" (blocks Phase 3)
+- Payment provider: Paddle selected; integrate at the end of the application build (paid checkout remains deferred)
 - API access for ClickAdMedia, GitPage.site, TRAFFIQ AI, Xavro CRM
 - Current plan prices (Founder $17 deal ended Jan 4 2026)
 
@@ -18,6 +18,11 @@ Full audit: /mnt/documents/PDF_Empire_MVP3_Audit_and_Plan.md
 - [x] Add business-scoped checklists, swipe files, trackers and workbooks with editing and online saving
 - [x] Reuse existing micro-product generation; add printable PDF, tracker CSV and product ZIP exports
 - [x] Verify saving, export and reviewer restrictions without paid generation; 37 tests pass, paid multi-format generation remains unverified pending its separate budget
+
+## Phase 3 — Digital Delivery & Customer Access (approved Nov 28)
+- [x] Private product uploads and business-owned customer order records
+- [x] Complimentary customer access, expiry and revocation; verified customer library with 60-second download links
+- [x] Verified two-account isolation, real CSV download and revocation, desktop/mobile screens; 43 tests passed without AI usage or Paddle (phase3-validation-report.md)
 
 ## Audit (Nov 28)
 - [x] Security, health, clutter audit — /mnt/documents/PDF_Empire_Full_Audit_2026-11-28.md

@@ -18,3 +18,4 @@
 - Export product assets only from saved content; trackers neutralize spreadsheet formulas and bundles contain editable source plus printable assets so customer downloads cannot execute generated text.
 - Team collaboration uses business_members on existing business_projects, with expiring email-matched invitations and read-only reviewers; private chats, credits, copy generation and edits remain owner-only.
 - Funnel downsells use authorized business offer data with their own optional checkout link; absent offers are omitted instead of generating fictional Lite products or discounts.
+- Digital fulfillment uses immutable private package files and service-only order mutations; verified customer email and live entitlement are checked before each short-lived signed download, while manual grants are complimentary, never paid orders.

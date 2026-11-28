@@ -527,6 +527,97 @@ export type Database = {
         }
         Relationships: []
       }
+      delivery_orders: {
+        Row: {
+          access_expires_at: string | null
+          amount: number
+          created_at: string
+          currency: string
+          customer_email: string
+          id: string
+          owner_id: string
+          package_id: string
+          provider: string | null
+          provider_order_id: string | null
+          status: string
+        }
+        Insert: {
+          access_expires_at?: string | null
+          amount?: number
+          created_at?: string
+          currency?: string
+          customer_email: string
+          id?: string
+          owner_id: string
+          package_id: string
+          provider?: string | null
+          provider_order_id?: string | null
+          status?: string
+        }
+        Update: {
+          access_expires_at?: string | null
+          amount?: number
+          created_at?: string
+          currency?: string
+          customer_email?: string
+          id?: string
+          owner_id?: string
+          package_id?: string
+          provider?: string | null
+          provider_order_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_orders_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      delivery_packages: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_path: string
+          file_size: number
+          id: string
+          owner_id: string
+          project_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_size: number
+          id?: string
+          owner_id: string
+          project_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          id?: string
+          owner_id?: string
+          project_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_packages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "business_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_campaigns: {
         Row: {
           body_html: string | null

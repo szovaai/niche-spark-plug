@@ -23,6 +23,8 @@ import {
   FolderKanban,
   MessageCircle,
   Gauge,
+  Package,
+  Download,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
@@ -84,6 +86,7 @@ const createItems = [
   { title: "Sales Copy Intelligence", url: "/copy-studio", icon: Megaphone, tip: "Copy for your whole funnel" },
 ];
 const launchItems = [
+  { title: "Product Delivery", url: "/delivery", icon: Package, tip: "Private files and customer access" },
   { title: "Funnel & Profit Studio", url: "/profit-studio", icon: Target, tip: "Plan funnels and profit scenarios" },
   { title: "Website & Commerce", url: "/tools/shopify-launch", icon: Store, tip: "Store and website assets" },
 ];
@@ -92,6 +95,7 @@ const growItems = [
   { title: "Analytics", url: "/tools/analytics", icon: Map, tip: "Real performance data" },
 ];
 const manageItems = [
+  { title: "My Downloads", url: "/library", icon: Download, tip: "Your customer library" },
   { title: "Integrations", url: "/integrations-status", icon: Layout, tip: "Connected apps" },
   { title: "Settings", url: "/settings", icon: Settings, tip: "Account, credits + AI settings" },
 ];
