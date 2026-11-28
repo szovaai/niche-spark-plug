@@ -17,4 +17,9 @@ Full audit: /mnt/documents/PDF_Empire_MVP3_Audit_and_Plan.md
 ## Audit (Nov 28)
 - [x] Security, health, clutter audit — /mnt/documents/PDF_Empire_Full_Audit_2026-11-28.md
 - [ ] Merge duplicate tools — waiting on user OK
-- [ ] Review deep security scan results when it finishes
+- [x] Deep scan findings fixed — /mnt/documents/PDF_Empire_Phase1_Security_Report.md
+
+## Post-Audit Consolidation spec (12 phases, Nov 28)
+- [x] Phase 1 security remediation
+- [ ] Phase 2 inventory + consolidation plan (no deletions, keep old links) — next
+- [ ] Phases 3–12 one at a time, report after each

@@ -108,7 +108,9 @@ Deno.serve(async (req) => {
     const result = streamText({
       model,
       system,
-      messages: convertToModelMessages(body.messages),
+      messages: convertToModelMessages(
+        body.messages.filter((m) => m && (m.role === "user" || m.role === "assistant")),
+      ),
     });
 
     return result.toUIMessageStreamResponse({

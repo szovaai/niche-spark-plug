@@ -36,6 +36,9 @@ export default function ContentPreviewModal({ open, onClose, title, content, cha
     toast.success("Downloaded!");
   };
 
+  const esc = (v: string) =>
+    v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+
   const handlePrint = () => {
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
@@ -43,7 +46,7 @@ export default function ContentPreviewModal({ open, onClose, title, content, cha
       <!DOCTYPE html>
       <html>
       <head>
-        <title>${title}</title>
+        <title>${esc(title)}</title>
         <style>
           body { font-family: Georgia, 'Times New Roman', serif; max-width: 700px; margin: 40px auto; padding: 0 20px; color: #1a1a1a; line-height: 1.8; font-size: 14px; }
           h1 { font-size: 24px; margin-bottom: 8px; border-bottom: 2px solid #333; padding-bottom: 8px; }
@@ -60,14 +63,14 @@ export default function ContentPreviewModal({ open, onClose, title, content, cha
         </style>
       </head>
       <body>
-        ${chapterNumber ? `<div class="chapter-num">Chapter ${chapterNumber}</div>` : ""}
-        <h1>${title}</h1>
-        ${content.split("\n").map(line => {
+        ${chapterNumber ? `<div class="chapter-num">Chapter ${esc(String(chapterNumber))}</div>` : ""}
+        <h1>${esc(title)}</h1>
+        ${esc(content).split("\n").map(line => {
           if (line.startsWith("### ")) return `<h3>${line.slice(4)}</h3>`;
           if (line.startsWith("## ")) return `<h2>${line.slice(3)}</h2>`;
           if (line.startsWith("# ")) return `<h1>${line.slice(2)}</h1>`;
           if (line.startsWith("- ")) return `<li>${line.slice(2)}</li>`;
-          if (line.startsWith("> ")) return `<blockquote>${line.slice(2)}</blockquote>`;
+          if (line.startsWith("&gt; ")) return `<blockquote>${line.slice(5)}</blockquote>`;
           if (line.startsWith("---")) return "<hr />";
           if (line.trim() === "") return "";
           return `<p>${line.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\*(.*?)\*/g, "<em>$1</em>").replace(/`(.*?)`/g, "<code>$1</code>")}</p>`;

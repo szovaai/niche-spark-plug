@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { requirePro } from "../_shared/entitlement.ts";
 import { validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
 
 const corsHeaders = {
@@ -15,6 +16,8 @@ serve(async (req) => {
     if (authError || !user) {
       return unauthorizedResponse(authError || 'Authentication required', corsHeaders);
     }
+    const proBlock = await requirePro(user!.id, corsHeaders);
+    if (proBlock) return proBlock;
     console.log(`Authenticated user: ${user.id}`);
 
     const { blueprint, personalization } = await req.json();

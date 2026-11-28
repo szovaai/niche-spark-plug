@@ -102,15 +102,18 @@ serve(async (req) => {
     // Build context-aware system prompt
     let systemPrompt = RESEARCH_SYSTEM_PROMPT;
     if (researchMode) {
-      systemPrompt += `\n\nThe user has selected research mode: ${researchMode.toUpperCase()}. Focus your questions and analysis on this mode.`;
+      systemPrompt += `\n\nThe user has selected research mode: ${String(researchMode).slice(0, 40).toUpperCase()}. Focus your questions and analysis on this mode.`;
     }
     if (researchStyle) {
-      systemPrompt += `\n\nResearch style preference: "${researchStyle}". Tailor all recommendations to this style.`;
+      systemPrompt += `\n\nResearch style preference: "${String(researchStyle).slice(0, 200)}". Tailor all recommendations to this style.`;
     }
 
     const aiMessages = [
       { role: "system", content: systemPrompt },
-      ...messages.slice(-20), // Keep last 20 messages for context
+      ...messages
+        .filter((m: any) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
+        .map((m: any) => ({ role: m.role, content: m.content.slice(0, 8000) }))
+        .slice(-20), // Only user/assistant turns; callers cannot inject system prompts
     ];
 
     const { content, model } = await callTieredAI(aiMessages, userTier, "standard");
