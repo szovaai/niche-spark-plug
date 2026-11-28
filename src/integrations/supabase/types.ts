@@ -175,6 +175,7 @@ export type Database = {
           product_promise: string | null
           project_id: string
           revenue_goal: number | null
+          sales_profile: Json
           status: string
           target_audience: string | null
           traffic_source: string | null
@@ -203,6 +204,7 @@ export type Database = {
           product_promise?: string | null
           project_id: string
           revenue_goal?: number | null
+          sales_profile?: Json
           status?: string
           target_audience?: string | null
           traffic_source?: string | null
@@ -231,6 +233,7 @@ export type Database = {
           product_promise?: string | null
           project_id?: string
           revenue_goal?: number | null
+          sales_profile?: Json
           status?: string
           target_audience?: string | null
           traffic_source?: string | null

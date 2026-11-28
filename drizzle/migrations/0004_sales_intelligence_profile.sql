@@ -1,0 +1,1 @@
+ALTER TABLE public.business_blueprints ADD COLUMN IF NOT EXISTS sales_profile jsonb NOT NULL DEFAULT '{}'::jsonb;

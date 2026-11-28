@@ -21,5 +21,8 @@ Full audit: /mnt/documents/PDF_Empire_MVP3_Audit_and_Plan.md
 
 ## Post-Audit Consolidation spec (12 phases, Nov 28)
 - [x] Phase 1 security remediation
-- [ ] Phase 2 inventory + consolidation plan (no deletions, keep old links) — next
-- [ ] Phases 3–12 one at a time, report after each
+- [x] Phase 2 inventory — /mnt/documents/PDF_Empire_Phase2-7_Consolidation_Report.md
+- [x] Phase 3 HQ is home after sign-in; departments + credits on HQ
+- [x] Phases 4–7 department hubs (/discover-intel, /studio, /profit-studio, /copy-studio) + Sales Intelligence Profile
+- [ ] Feed Sales Intelligence Profile into copy tool prompts
+- [ ] Phases 8–12

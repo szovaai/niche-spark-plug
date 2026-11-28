@@ -23,7 +23,16 @@ export type Blueprint = {
   brand_voice: string | null;
   launch_date: string | null;
   revenue_goal: number | null;
+  sales_profile?: SalesProfile;
   status: string;
+};
+
+export type SalesProfile = {
+  pain_points?: string;
+  verified_benefits?: string;
+  objections?: string;
+  positioning?: string;
+  approved_claims?: string;
 };
 
 const EMPTY = (projectId: string): Blueprint => ({

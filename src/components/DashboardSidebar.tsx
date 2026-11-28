@@ -49,8 +49,8 @@ import {
 // Nova primary journey
 const novaItems = [
   { title: "Business HQ", url: "/hq", icon: Gauge, tip: "Your Empire command center" },
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, tip: "Nova's home for you" },
-  { title: "Talk to Nova", url: "/coach", icon: MessageCircle, tip: "General coaching chat" },
+  { title: "AI Business Mentor", url: "/coach", icon: MessageCircle, tip: "Talk to Nova" },
+  { title: "Missions", url: "/dashboard", icon: LayoutDashboard, tip: "Nova's mission dashboard" },
   { title: "My Projects", url: "/tools/saved-projects", icon: FolderKanban, tip: "Every project you're building" },
 ];
 
@@ -73,6 +73,13 @@ const toolsIntel = [
 const toolsSystem = [
   { title: "Templates", url: "/tools/templates-marketplace", icon: Layout, tip: "Pre-built blueprints" },
   { title: "Bookmarks", url: "/tools/saved-projects", icon: Bookmark, tip: "Saved work" },
+];
+
+const departments = [
+  { title: "Opportunity Intelligence", url: "/discover-intel", icon: Radar, tip: "Find a market worth building for" },
+  { title: "Product Studio", url: "/studio", icon: Wand2, tip: "Create any digital product" },
+  { title: "Sales Copy Intelligence", url: "/copy-studio", icon: Megaphone, tip: "Copy for your whole funnel" },
+  { title: "Funnel & Profit Studio", url: "/profit-studio", icon: Target, tip: "Plan funnels and profit scenarios" },
 ];
 
 type NavItem = { title: string; url: string; icon: React.ComponentType<{ className?: string }>; tip: string };
@@ -138,7 +145,7 @@ export function DashboardSidebar() {
       <SidebarContent className="px-1">
         <div className={`px-2 mb-1 ${isCollapsed ? "px-1" : ""}`}>
           <Button
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate("/coach")}
             variant="hero"
             size={isCollapsed ? "icon" : "sm"}
             className={`w-full gap-2 text-xs ${isCollapsed ? "justify-center" : ""}`}
@@ -156,7 +163,11 @@ export function DashboardSidebar() {
 
         <SidebarSeparator className="my-1.5 opacity-30" />
 
-        {renderGroup("Nova", novaItems)}
+        {renderGroup("Business HQ", novaItems)}
+
+        <SidebarSeparator className="my-1 opacity-20" />
+
+        {renderGroup("Departments", departments)}
 
         <SidebarSeparator className="my-1 opacity-20" />
 

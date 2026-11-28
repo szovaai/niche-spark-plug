@@ -16,6 +16,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { MISSION_BY_ID } from "@/lib/missions";
 import { HQ_STAGES, nextBestAction, stageIndexFromProgress } from "@/lib/businessHQ";
 import { toast } from "sonner";
+import { DEPARTMENTS } from "@/lib/departments";
+import { CreditsBadge } from "@/components/nova/CreditsBadge";
 
 // New tables may not be in generated types yet.
 const db = supabase as any;
@@ -107,6 +109,17 @@ export default function BusinessHQ() {
               ? `Hi ${firstName} — ${project.project_name} is in the ${HQ_STAGES[stageIdx]} stage. Here's what matters today.`
               : `Hi ${firstName} — let's find the right business for you. I'll guide every step.`}
           </p>
+          <div className="max-w-xs pt-1"><CreditsBadge /></div>
+        </section>
+
+        {/* Departments */}
+        <section className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {DEPARTMENTS.map((d) => (
+            <Link key={d.id} to={d.path} className="rounded-xl border border-border/60 p-4 hover:border-primary/60 transition-colors">
+              <p className="font-semibold text-sm">{d.name}</p>
+              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{d.tagline}</p>
+            </Link>
+          ))}
         </section>
 
         {/* Next best action */}
