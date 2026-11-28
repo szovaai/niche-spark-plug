@@ -1,3 +1,4 @@
+import { resolveSalesContext, SALES_TRUTH_RULES, salesCacheKey } from "../_shared/salesContext.ts";
 import { corsHeaders, validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
 import { callTieredAI, getUserTier } from "../_shared/tieredAI.ts";
 import { getCachedResponse, setCachedResponse } from "../_shared/cache.ts";
@@ -254,6 +255,8 @@ Deno.serve(async (req) => {
     if (authError || !user) return unauthorizedResponse(authError || 'Authentication required', corsHeaders);
 
     const body = await req.json();
+    const salesContext = await resolveSalesContext(req, user.id, body, corsHeaders);
+    if (salesContext instanceof Response) return salesContext;
 
     // Handle optimization mode (backward compat)
     if (body.optimizationMode && body.existingSalesPage) {
@@ -282,8 +285,8 @@ Return ONLY valid JSON with the same structure as the original funnel:
 }`;
 
       const { content } = await callTieredAI([
-        { role: "system", content: SALES_PAGE_SYSTEM },
-        { role: "user", content: optimizePrompt },
+        { role: "system", content: SALES_PAGE_SYSTEM + "\n\n" + SALES_TRUTH_RULES },
+        { role: "user", content: optimizePrompt + salesContext.prompt },
       ], userTier, "standard");
 
       const result = extractAndRepairJson(content);
@@ -297,15 +300,15 @@ Return ONLY valid JSON with the same structure as the original funnel:
       { field: 'buyerAvatar', type: 'object', maxLength: 10000 },
       { field: 'salesStyle', type: 'string', maxLength: 50 },
     ]);
-    if (!valid) return validationErrorResponse(valError!, corsHeaders);
+    if (!valid) return validationErrorResponse(valError ?? "Invalid input", corsHeaders);
 
     const { productBrief, productContent, buyerAvatar } = data;
-    const price = data.price || 17;
+    const price = typeof salesContext.facts.front_end_price === "number" ? salesContext.facts.front_end_price : (data.price ?? 17);
     const salesStyle = data.salesStyle || "warriorplus";
 
-    const cacheKey = `launch-funnel-${(productBrief as any).title?.slice(0, 50)}-${price}-${salesStyle}`;
+    const cacheKey = await salesCacheKey("generate-launch-funnel", user.id, body, salesContext);
     const cached = await getCachedResponse(cacheKey);
-    if (cached) return new Response(JSON.stringify(cached), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (cached) return new Response(JSON.stringify(cached.response), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
     const userTier = await getUserTier(user.id);
 
@@ -320,8 +323,8 @@ Return ONLY valid JSON with the same structure as the original funnel:
     const prompt = getStylePrompt(salesStyle, productBrief, chapterTitles, price, angleInstruction, mechanismInstruction, avatarContext, productContent);
 
     const { content, model } = await callTieredAI([
-      { role: "system", content: SALES_PAGE_SYSTEM },
-      { role: "user", content: prompt },
+      { role: "system", content: SALES_PAGE_SYSTEM + "\n\n" + SALES_TRUTH_RULES },
+      { role: "user", content: prompt + salesContext.prompt },
     ], userTier, "complex");
 
     const result = extractAndRepairJson(content) as any;

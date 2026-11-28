@@ -1,3 +1,4 @@
+import { resolveSalesContext, SALES_TRUTH_RULES } from "../_shared/salesContext.ts";
 // Generate a full email campaign for a project + optionally repurpose each email
 // into short-form social content. Persists to public.email_campaigns.
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -69,9 +70,12 @@ Deno.serve(async (req) => {
     const authHeader = req.headers.get("authorization");
     if (!authHeader) return json(401, { error: "unauthenticated" });
 
+    const url = Deno.env.get("SUPABASE_URL");
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    if (!url || !anonKey) return json(503, { error: "server_configuration_error" });
     const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
+      url,
+      anonKey,
       { global: { headers: { Authorization: authHeader } } },
     );
     const { data: userRes, error: userErr } = await supabase.auth.getUser();
@@ -79,8 +83,10 @@ Deno.serve(async (req) => {
     const userId = userRes.user.id;
 
     const body = await req.json().catch(() => ({}));
+    const salesContext = await resolveSalesContext(req, userId, body, corsHeaders);
+    if (salesContext instanceof Response) return salesContext;
     const campaignType = body.campaign_type as CampaignType;
-    const projectId = (body.project_id ?? null) as string | null;
+    const projectId = salesContext.projectId;
     const repurpose = body.repurpose !== false; // default true
     if (!COUNTS[campaignType]) return json(400, { error: "invalid_campaign_type" });
 
@@ -91,6 +97,7 @@ Deno.serve(async (req) => {
         .from("business_projects")
         .select("project_name, current_stage")
         .eq("id", projectId)
+        .eq("user_id", userId)
         .maybeSingle();
       if (proj) {
         projectCtx = `Project: ${proj.project_name ?? ""}\nStage: ${proj.current_stage ?? ""}`;
@@ -147,25 +154,22 @@ Return STRICT JSON only, no prose:
   ]
 }`;
 
-    const result = await generateText({ model, prompt });
+    const result = await generateText({ model, system: SALES_TRUTH_RULES, prompt: prompt + salesContext.prompt });
     const parsed = parseJson<{ emails: Array<Record<string, unknown>> }>(result.text);
     if (!parsed?.emails?.length) {
       return json(502, { error: "generation_failed", raw: result.text.slice(0, 400) });
     }
 
     // Persist via service role so RLS doesn't require re-verifying user_id.
-    const admin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!serviceKey) return json(503, { error: "server_configuration_error" });
+    const admin = createClient(url, serviceKey);
 
     // Clear prior campaign of same type for this project to keep things tidy.
-    await admin
-      .from("email_campaigns")
-      .delete()
-      .eq("user_id", userId)
-      .eq("campaign_type", campaignType)
-      .eq("project_id", projectId);
+    let prior = admin.from("email_campaigns").delete().eq("user_id", userId).eq("campaign_type", campaignType);
+    prior = projectId ? prior.eq("project_id", projectId) : prior.is("project_id", null);
+    const { error: deleteError } = await prior;
+    if (deleteError) return json(500, { error: "campaign_save_failed" });
 
     const rows = parsed.emails.map((e, idx) => {
       const bodyText = String(e.body_text ?? "");

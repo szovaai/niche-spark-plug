@@ -1,6 +1,7 @@
 import { corsHeaders, validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
 import { callTieredAI, getUserTier } from "../_shared/tieredAI.ts";
 import { EMAIL_SEQUENCE_SYSTEM } from "../_shared/copyPrompts.ts";
+import { resolveSalesContext, SALES_TRUTH_RULES } from "../_shared/salesContext.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -11,6 +12,9 @@ Deno.serve(async (req) => {
       return unauthorizedResponse(authError || 'Authentication required', corsHeaders);
     }
 
+    const body = await req.json();
+    const salesContext = await resolveSalesContext(req, user.id, body, corsHeaders);
+    if (salesContext instanceof Response) return salesContext;
     const {
       offerName, targetAudience, keyBenefits, uniqueMechanism,
       price, contentSummary,
@@ -18,10 +22,10 @@ Deno.serve(async (req) => {
       purpose = "product-launch",
       emailCount = 5,
       mineStoriesOnly = false,
-    } = await req.json();
+    } = body;
 
     const userTier = await getUserTier(user.id);
-    const actualPrice = price || 17;
+    const actualPrice = typeof salesContext.facts.front_end_price === "number" ? salesContext.facts.front_end_price : (price ?? 17);
 
     // --- Story Mining Mode ---
     if (mineStoriesOnly) {
@@ -49,8 +53,8 @@ Rules:
 - Each angle should naturally lead to a product mention`;
 
       const { content } = await callTieredAI([
-        { role: "system", content: "You generate vivid, specific email story angles for digital product creators. No corporate tone. Sound human." },
-        { role: "user", content: storyPrompt },
+        { role: "system", content: "You generate story-angle questions for creators to answer from genuine experience, never fictional customer stories. No corporate tone.\n" + SALES_TRUTH_RULES },
+        { role: "user", content: storyPrompt + salesContext.prompt },
       ], userTier, "complex");
 
       const match = content.match(/\{[\s\S]*\}/);
@@ -172,8 +176,8 @@ FINAL RULES:
 - Each email must make the reader want to open the next one`;
 
     const { content } = await callTieredAI([
-      { role: "system", content: EMAIL_SEQUENCE_SYSTEM },
-      { role: "user", content: prompt },
+      { role: "system", content: EMAIL_SEQUENCE_SYSTEM + "\n\n" + SALES_TRUTH_RULES },
+      { role: "user", content: prompt + salesContext.prompt },
     ], userTier, "complex");
 
     const jsonMatch = content.match(/\{[\s\S]*\}/);

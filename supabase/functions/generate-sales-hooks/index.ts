@@ -1,3 +1,4 @@
+import { resolveSalesContext, SALES_TRUTH_RULES } from "../_shared/salesContext.ts";
 import { corsHeaders, validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
 import { callTieredAI, getUserTier } from "../_shared/tieredAI.ts";
 import { MASTER_SYSTEM_PROMPT } from "../_shared/copyPrompts.ts";
@@ -10,6 +11,8 @@ Deno.serve(async (req) => {
     if (authError || !user) return unauthorizedResponse(authError || 'Authentication required', corsHeaders);
 
     const body = await req.json();
+    const salesContext = await resolveSalesContext(req, user.id, body, corsHeaders);
+    if (salesContext instanceof Response) return salesContext;
     const { productName, mechanism, targetAudience, painPoints, price, mode, copyText } = body;
 
     if (!productName) {
@@ -48,8 +51,8 @@ Return JSON:
 }`;
 
       const { content } = await callTieredAI([
-        { role: "system", content: "You are a compliance-aware copy editor. Flag unrealistic claims but keep copy persuasive." },
-        { role: "user", content: checkPrompt },
+        { role: "system", content: "You are a compliance-aware copy editor. Flag unrealistic claims but keep copy persuasive.\n" + SALES_TRUTH_RULES },
+        { role: "user", content: checkPrompt + salesContext.prompt },
       ], userTier, "standard");
 
       const match = content.match(/\{[\s\S]*\}/);
@@ -144,8 +147,8 @@ RULES:
 - Sound human. No corporate speak.`;
 
     const { content } = await callTieredAI([
-      { role: "system", content: MASTER_SYSTEM_PROMPT },
-      { role: "user", content: prompt },
+      { role: "system", content: MASTER_SYSTEM_PROMPT + "\n\n" + SALES_TRUTH_RULES },
+      { role: "user", content: prompt + salesContext.prompt },
     ], userTier, "complex");
 
     const match = content.match(/\{[\s\S]*\}/);

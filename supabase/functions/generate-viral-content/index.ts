@@ -1,3 +1,4 @@
+import { resolveSalesContext, SALES_TRUTH_RULES } from "../_shared/salesContext.ts";
 import { corsHeaders, validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
 import { callTieredAI, getUserTier } from "../_shared/tieredAI.ts";
 import { validateInput, validationErrorResponse } from "../_shared/validate.ts";
@@ -11,6 +12,8 @@ Deno.serve(async (req) => {
     if (authError || !user) return unauthorizedResponse(authError || 'Authentication required', corsHeaders);
 
     const body = await req.json();
+    const salesContext = await resolveSalesContext(req, user.id, body, corsHeaders);
+    if (salesContext instanceof Response) return salesContext;
     const { valid, error: valError, data } = validateInput(body, [
       { field: 'mode', type: 'string', required: true, maxLength: 30 },
       { field: 'productBrief', type: 'object', required: true, maxLength: 10000 },
@@ -19,7 +22,7 @@ Deno.serve(async (req) => {
       { field: 'platforms', type: 'object', maxLength: 500 },
       { field: 'viralText', type: 'string', maxLength: 5000 },
     ]);
-    if (!valid) return validationErrorResponse(valError!, corsHeaders);
+    if (!valid) return validationErrorResponse(valError ?? "Invalid input", corsHeaders);
 
     const { mode, productBrief, productContent, funnelCopy, platforms, viralText } = data;
     const userTier = await getUserTier(user.id);
@@ -138,8 +141,8 @@ Generate exactly 10 new posts using the extracted patterns.`;
     }
 
     const { content, model } = await callTieredAI([
-      { role: "system", content: systemPrompt + "\n\nYou are a viral content reverse-engineer. You study what makes posts go viral and replicate those patterns. Write in a raw, authentic, human voice. Short sentences. Line breaks between thoughts. Never sound like AI." },
-      { role: "user", content: prompt },
+      { role: "system", content: systemPrompt + "\n\nYou are a viral content reverse-engineer. You study what makes posts go viral and replicate those patterns. Write in a raw, authentic, human voice. Short sentences. Line breaks between thoughts. Never sound like AI.\n\n" + SALES_TRUTH_RULES },
+      { role: "user", content: prompt + salesContext.prompt },
     ], userTier, "complex");
 
     const jsonMatch = content.match(/\{[\s\S]*\}/);

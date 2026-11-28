@@ -24,6 +24,13 @@ Full audit: /mnt/documents/PDF_Empire_MVP3_Audit_and_Plan.md
 - [x] Phase 2 inventory — /mnt/documents/PDF_Empire_Phase2-7_Consolidation_Report.md
 - [x] Phase 3 HQ is home after sign-in; departments + credits on HQ
 - [x] Phases 4–7 department hubs (/discover-intel, /studio, /profit-studio, /copy-studio) + Sales Intelligence Profile
-- [ ] Feed Sales Intelligence Profile into copy tool prompts
+- [ ] Feed Sales Intelligence Profile into copy tool prompts (approved Phase A; zero live generation during plumbing tests)
 - [x] Phases 8–10, 12 — /mnt/documents/PDF_Empire_Phase8-12_Report.md
 - [ ] Phase 11 full paid generation test — user said "Not now" (Nov 28); run only on their go-ahead
+
+## Approved Functional Validation
+- [ ] A: Authorized server-side shared sales intelligence + tenant isolation + backward-compatible copy tool integration and no-inference tests
+- [ ] B: Isolated container-gardening smoke test and full product/PDF validation — blocked on approval of live AI credit estimate
+- [ ] C: Same-business funnel offers and follow-up validation — no live payments or publishing; dependent on B approval
+- [ ] D: Inspect real task/asset/approval/credit events for Empire Live readiness; no simulated progress
+- [ ] E: Detailed completion report with results, costs, bugs, security concerns and API dependencies

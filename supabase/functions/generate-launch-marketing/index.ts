@@ -1,3 +1,4 @@
+import { resolveSalesContext, SALES_TRUTH_RULES, salesCacheKey } from "../_shared/salesContext.ts";
 import { corsHeaders, validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
 import { callTieredAI, getUserTier } from "../_shared/tieredAI.ts";
 import { getCachedResponse, setCachedResponse } from "../_shared/cache.ts";
@@ -12,6 +13,8 @@ Deno.serve(async (req) => {
     if (authError || !user) return unauthorizedResponse(authError || 'Authentication required', corsHeaders);
 
     const body = await req.json();
+    const salesContext = await resolveSalesContext(req, user.id, body, corsHeaders);
+    if (salesContext instanceof Response) return salesContext;
     const { valid, error: valError, data } = validateInput(body, [
       { field: 'productBrief', type: 'object', required: true, maxLength: 10000 },
       { field: 'productContent', type: 'object', maxLength: 50000 },
@@ -20,14 +23,14 @@ Deno.serve(async (req) => {
       { field: 'buyerAvatar', type: 'object', maxLength: 10000 },
       { field: 'launchMode', type: 'string', maxLength: 20 },
     ]);
-    if (!valid) return validationErrorResponse(valError!, corsHeaders);
+    if (!valid) return validationErrorResponse(valError ?? "Invalid input", corsHeaders);
 
     const { productBrief, productContent, funnelCopy, buyerAvatar, launchMode } = data;
-    const price = data.price || 17;
+    const price = typeof salesContext.facts.front_end_price === "number" ? salesContext.facts.front_end_price : (data.price ?? 17);
 
-    const cacheKey = `launch-marketing-${(productBrief as any).title?.slice(0, 50)}-${price}`;
+    const cacheKey = await salesCacheKey("generate-launch-marketing", user.id, body, salesContext);
     const cached = await getCachedResponse(cacheKey);
-    if (cached) return new Response(JSON.stringify(cached), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (cached) return new Response(JSON.stringify(cached.response), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
     const userTier = await getUserTier(user.id);
 
@@ -135,8 +138,8 @@ WARRIORPLUS MODE — CRITICAL OVERRIDES:
 
 
     const { content, model } = await callTieredAI([
-      { role: "system", content: `${AD_COPY_SYSTEM}\n\n${EMAIL_SEQUENCE_SYSTEM}\n\n${AFFILIATE_KIT_SYSTEM}` },
-      { role: "user", content: prompt },
+      { role: "system", content: `${AD_COPY_SYSTEM}\n\n${EMAIL_SEQUENCE_SYSTEM}\n\n${AFFILIATE_KIT_SYSTEM}\n\n${SALES_TRUTH_RULES}` },
+      { role: "user", content: prompt + salesContext.prompt },
     ], userTier, "complex");
 
     const jsonMatch = content.match(/\{[\s\S]*\}/);

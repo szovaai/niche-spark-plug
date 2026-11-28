@@ -9,3 +9,6 @@
 - AI chat functions accept only user/assistant roles from the client; system prompts are built server-side.
 - Departments are defined once in src/lib/departments.ts and rendered by pages/departments/DepartmentHub; they link to existing /tools/* routes instead of rewriting them (spec: reuse, keep legacy routes).
 - External apps (ClickAdMedia, GitPage, TRAFFIQ, XAVRO, payments) are listed in src/lib/integrations.ts; status changes to connected only with a real API connection (spec: no fake integrations).
+- Copy functions resolve sales intelligence through _shared/salesContext.ts with caller-scoped RLS and explicit owner filters; explicit business IDs never fall back, while ID-less legacy calls use the latest-updated owned business to match useActiveProject.
+- Copy context contains whitelisted blueprint/profile facts as user-message data and shared system-level truth rules; this keeps messaging consistent without trusting embedded instructions or inventing proof.
+- Funnel and marketing cache keys hash the authenticated owner, full request and resolved profile; return cached.response so business-specific copy cannot leak across tenants or remain stale after profile changes.

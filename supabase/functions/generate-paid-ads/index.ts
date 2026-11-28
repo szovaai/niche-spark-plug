@@ -1,3 +1,4 @@
+import { resolveSalesContext, SALES_TRUTH_RULES } from "../_shared/salesContext.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { validateAuth } from "../_shared/auth.ts";
 import { callTieredAI, getUserTier } from "../_shared/tieredAI.ts";
@@ -20,7 +21,10 @@ serve(async (req) => {
     }
 
     const tier = await getUserTier(auth.user.id);
-    const { productName, niche, audience, painPoint, mechanism } = await req.json();
+    const body = await req.json();
+    const salesContext = await resolveSalesContext(req, auth.user.id, body, corsHeaders);
+    if (salesContext instanceof Response) return salesContext;
+    const { productName, niche, audience, painPoint, mechanism } = body;
 
     const systemPrompt = `You are a direct-response paid ads creative director. Write scroll-stopping, pattern-interrupt ad copy. No corporate words. Return strict JSON.`;
     const userPrompt = `Create a complete paid ads pack for:
@@ -53,8 +57,8 @@ ONLY JSON.`;
 
     const { content } = await callTieredAI(
       [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
+        { role: "system", content: systemPrompt + "\n\n" + SALES_TRUTH_RULES },
+        { role: "user", content: userPrompt + salesContext.prompt },
       ],
       tier,
       "standard"

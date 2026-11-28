@@ -1,3 +1,4 @@
+import { resolveSalesContext, SALES_TRUTH_RULES } from "../_shared/salesContext.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
 import { pickModel, type QualityMode, type UserPreference } from "../_shared/aiRouter.ts";
@@ -15,6 +16,8 @@ serve(async (req) => {
     if (authError || !user) return unauthorizedResponse(authError || 'Authentication required', corsHeaders);
 
     const body = await req.json();
+    const salesContext = await resolveSalesContext(req, user.id, body, corsHeaders);
+    if (salesContext instanceof Response) return salesContext;
     const {
       title = "",
       subtitle = "",
@@ -59,8 +62,8 @@ Return improved versions of each field.`;
         model: routed.model,
         ...(routed.reasoning ? { reasoning: routed.reasoning } : {}),
         messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
+          { role: "system", content: systemPrompt + "\n\n" + SALES_TRUTH_RULES },
+          { role: "user", content: userPrompt + salesContext.prompt },
         ],
         tools: [{
           type: "function",

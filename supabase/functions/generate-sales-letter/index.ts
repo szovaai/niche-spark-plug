@@ -1,3 +1,4 @@
+import { resolveSalesContext, SALES_TRUTH_RULES } from "../_shared/salesContext.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
 import { pickModel, type QualityMode, type UserPreference } from "../_shared/aiRouter.ts";
@@ -248,7 +249,7 @@ CRITICAL RULES FOR HTML OUTPUT:
 - Keep paragraphs short (2-3 sentences max)
 - Use <strong> for emphasis, <em> for italics, <u> for underlines with red color
 - The output should read like a REAL direct-response sales letter, NOT a modern landing page
-- Include at least one pull-quote, one testimonial block, one fascination list, one checklist, and the order box
+- Include at least one pull-quote, one fascination list, one checklist, and the order box; include a testimonial block only for supplied authentic testimonials
 - DO NOT include <!DOCTYPE>, <html>, <head>, or <body> tags — just the content starting from urgency-bar
 `;
 
@@ -264,6 +265,8 @@ serve(async (req) => {
     console.log(`Authenticated user: ${user.id}`);
 
     const body = await req.json();
+    const salesContext = await resolveSalesContext(req, user.id, body, corsHeaders);
+    if (salesContext instanceof Response) return salesContext;
     
     // Validate core inputs
     const phase = typeof body.phase === 'string' && ['raw', 'polish', 'legacy'].includes(body.phase) ? body.phase : 'legacy';
@@ -361,7 +364,7 @@ PRICE: $${price || 17}
      Module 2: The AI Prompt System — Copy-paste prompts that generate leads instantly — Value: $147
      Total Value: $XXX
 
-10. BONUS STACK (3-5 bonuses — each must feel like a standalone product)
+10. BONUS STACK (only supplied included bonuses — do not invent extras)
    - Each bonus: catchy product-style name, one-line benefit, perceived value
    - Format: "Bonus #1: [Product-Style Name] — [Specific benefit] — Value: $XX"
    - Example: "Bonus #1: AI Client Outreach Script Pack — 15 copy-paste scripts for landing clients — Value: $67"
@@ -417,7 +420,7 @@ ${KENNEDY_HTML_STRUCTURE}
 
 === CRITICAL RULES ===
 1. Keep the SAME offer, price, and components from the raw draft — DO NOT change them
-2. DO NOT invent fake testimonials — generate placeholder testimonials clearly marked as [EXAMPLE]
+2. Only include supplied authentic testimonials; omit testimonials entirely when none are supplied
 3. Use SHORT paragraphs — 2 sentences max per paragraph
 4. Write in FIRST PERSON — "I", "me", "my" — like a personal letter
 5. PATTERN INTERRUPT headline — not generic. Make the reader stop scrolling.
@@ -487,6 +490,9 @@ CRITICAL: Reference ACTUAL chapter content. Use SPECIFIC benefits, not generic m
         prompt = `Write a complete sales letter for "${title}" in ${niche} targeting ${targetAudience || "entrepreneurs"}. Price: $${price || 17}. Components: ${activeComponents.join(", ")}. ${keyBenefits?.length ? `Benefits: ${keyBenefits.join(", ")}` : ""} ${uniqueMechanism ? `Unique mechanism: ${uniqueMechanism}` : ""} Use the DigiStream Conversion Pattern. Format as clean HTML.`;
       }
     }
+
+    systemPrompt += "\n\n" + SALES_TRUTH_RULES;
+    prompt += salesContext.prompt;
 
     console.log(`Generating ${phase} sales letter for:`, title);
 
