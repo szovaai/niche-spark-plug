@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { assetReady, productAssetSchema } from "./productAssets";
 
 export const manuscriptSchema = z.object({
   product_name: z.string().min(1),
@@ -8,8 +9,9 @@ export const manuscriptSchema = z.object({
   modules: z.array(z.object({
     title: z.string().min(1), purpose: z.string().default(""),
     sections: z.array(z.object({ title: z.string().min(1), summary: z.string().default(""), html: z.string().optional(), approved: z.boolean().optional() })).min(1),
-  })).min(1),
-});
+  })),
+  assets: z.array(productAssetSchema).max(100).optional(),
+}).refine(value => value.modules.length > 0 || (value.assets?.length ?? 0) > 0, "Add an outline or product asset.");
 export type Outline = z.infer<typeof manuscriptSchema>;
 export function parseManuscript(value: unknown): Outline | null {
   const parsed = manuscriptSchema.safeParse(value);
@@ -19,7 +21,11 @@ export function manuscriptStats(outline: Outline) {
   const sections = outline.modules.flatMap(m => m.sections);
   const drafted = sections.filter(s => (s.html ?? "").replace(/<[^>]*>/g, "").trim().length >= 50);
   const approved = drafted.filter(s => s.approved);
-  return { total: sections.length, drafted: drafted.length, approved: approved.length, complete: sections.length > 0 && approved.length === sections.length };
+  const assets = outline.assets ?? [];
+  const readyAssets = assets.filter(assetReady);
+  const total = sections.length + assets.length;
+  const approvedCount = approved.length + readyAssets.filter(a => a.approved).length;
+  return { total, drafted: drafted.length + readyAssets.length, approved: approvedCount, complete: total > 0 && approvedCount === total };
 }
 
 // Legacy browser-only drafts may be imported only into the same owned outline.

@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { parseManuscript, manuscriptStats, mergeLegacyDrafts, type Outline } from "@/lib/manuscript";
 import { exportManuscriptPDF } from "@/lib/manuscriptPDF";
 import { toast } from "sonner";
+import { ProductAssetsPanel } from "./ProductAssetsPanel";
 
 export function ProductBuildEngine({ projectId, readOnly = false }: { projectId: string; readOnly?: boolean }) {
   const { user } = useAuth();
@@ -64,7 +65,7 @@ export function ProductBuildEngine({ projectId, readOnly = false }: { projectId:
       if (generationError) throw generationError;
       const next = parseManuscript(data);
       if (!next) throw new Error("Nova returned an incomplete outline.");
-      await persist(next); setExpanded(0); toast.success("Outline saved online.");
+      await persist({ ...next, assets: outline?.assets }); setExpanded(0); toast.success("Outline saved online.");
     } catch (e) { toast.error(e instanceof Error ? e.message : "Couldn't generate the outline."); }
     finally { setBusy(false); }
   };
@@ -109,17 +110,19 @@ export function ProductBuildEngine({ projectId, readOnly = false }: { projectId:
   };
   if (loading) return <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>;
   if (error) return <div role="alert" className="space-y-3 py-6"><p className="text-sm text-destructive">{error}</p><Button variant="outline" onClick={() => void load()}><RefreshCw className="mr-2 h-4 w-4" />Reload manuscript</Button></div>;
-  if (!outline) return <section className="space-y-3 py-8 text-center"><BookOpen className="mx-auto h-6 w-6 text-primary" /><p className="text-sm text-muted-foreground">{readOnly ? "No manuscript shared yet." : !blueprint?.product_concept ? "Choose a product concept in Mission 3 first." : "No outline yet"}</p>{!readOnly && blueprint?.product_concept && <Button onClick={generate} disabled={busy}>{busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}Draft outline · 2 credits</Button>}</section>;
+  const assetPanel = <ProductAssetsPanel outline={outline} blueprint={blueprint} readOnly={readOnly} disabled={busy} onBusy={setBusy} persist={persist} />;
+  if (!outline) return <div><section className="space-y-3 py-8 text-center"><BookOpen className="mx-auto h-6 w-6 text-primary" /><p className="text-sm text-muted-foreground">{readOnly ? "No manuscript shared yet." : !blueprint?.product_concept ? "Choose a product concept in Mission 3 first." : "No outline yet"}</p>{!readOnly && blueprint?.product_concept && <Button onClick={generate} disabled={busy}>{busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}Draft outline · 2 credits</Button>}</section>{assetPanel}</div>;
   const stats = manuscriptStats(outline);
   return <div className="space-y-4">
     <section className="space-y-3 border-b border-border pb-4">
       <div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0"><h2 className="break-words text-lg font-semibold">{outline.product_name}</h2><p className="text-sm text-muted-foreground">{outline.subtitle}</p><div className="mt-2 flex flex-wrap gap-2"><Badge variant="outline">{outline.format}</Badge><Badge variant="outline">{outline.modules.length} modules</Badge><Badge variant="secondary">Saved online</Badge>{readOnly && <Badge variant="outline">Read-only</Badge>}</div></div>{!readOnly && <Button variant="ghost" size="sm" onClick={generate} disabled={busy}>Re-draft · 2</Button>}</div>
       <p className="text-xs text-muted-foreground">{outline.outcome}</p><div className="flex justify-between text-xs text-muted-foreground"><span>{stats.drafted}/{stats.total} drafted</span><span>{stats.approved} approved</span></div><Progress value={stats.drafted / stats.total * 100} className="h-1.5" />
-      <div className="flex flex-wrap gap-2">{!readOnly && <><Button size="sm" variant="outline" disabled={busy} onClick={approveOutline}>Approve outline</Button><Button size="sm" disabled={busy || !stats.complete} onClick={markComplete}>Mark product build complete</Button></>}<Button size="sm" variant="outline" disabled={busy || !stats.drafted} onClick={() => { try { exportManuscriptPDF(outline); } catch (e) { toast.error(e instanceof Error ? e.message : "PDF export failed."); } }}><Download className="mr-2 h-4 w-4" />{stats.complete ? "Export PDF" : "Export draft PDF"}</Button></div>
+      <div className="flex flex-wrap gap-2">{!readOnly && <>{outline.modules.length > 0 && <Button size="sm" variant="outline" disabled={busy} onClick={approveOutline}>Approve outline</Button>}<Button size="sm" disabled={busy || !stats.complete} onClick={markComplete}>Mark product build complete</Button></>}{outline.modules.some(m => m.sections.some(s => s.html)) && <Button size="sm" variant="outline" disabled={busy || !stats.drafted} onClick={() => { try { exportManuscriptPDF(outline); } catch (e) { toast.error(e instanceof Error ? e.message : "PDF export failed."); } }}><Download className="mr-2 h-4 w-4" />{stats.complete ? "Export PDF" : "Export draft PDF"}</Button>}</div>
     </section>
     {outline.modules.map((m, mi) => <section key={mi} className="border-b border-border pb-3">
       <Button variant="ghost" onClick={() => setExpanded(expanded === mi ? null : mi)} className="h-auto w-full justify-between gap-3 whitespace-normal px-0 py-3 text-left"><span className="min-w-0 break-words"><span className="block">Module {mi + 1}. {m.title}</span><span className="block text-xs font-normal text-muted-foreground">{m.purpose}</span></span>{expanded === mi ? <ChevronDown className="h-4 w-4 shrink-0" /> : <ChevronRight className="h-4 w-4 shrink-0" />}</Button>
       {expanded === mi && <div className="space-y-4">{m.sections.map((s, si) => <div key={si} className="border-l-2 border-primary/30 pl-3"><div className="flex flex-wrap items-start justify-between gap-2"><div className="min-w-0 flex-1"><h3 className="break-words text-sm font-medium">{s.title}</h3><p className="text-xs text-muted-foreground">{s.summary}</p></div>{!readOnly && <div className="flex flex-wrap gap-1">{s.html && <Button size="sm" variant={s.approved ? "default" : "outline"} disabled={busy} onClick={() => approveSection(mi, si)}><CheckCircle2 className="mr-1 h-3 w-3" />{s.approved ? "Approved" : "Approve"}</Button>}<Button size="sm" variant="ghost" disabled={busy} onClick={() => draftSection(mi, si)}>{drafting === `${mi}:${si}` ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Wand2 className="mr-1 h-3 w-3" />{s.html ? "Redraft · 1" : "Draft · 1"}</>}</Button></div>}</div>{s.html && <div className="prose prose-sm dark:prose-invert mt-3 max-w-none break-words" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(s.html) }} />}</div>)}</div>}
     </section>)}
+    {assetPanel}
   </div>;
 }

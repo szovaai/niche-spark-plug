@@ -14,5 +14,7 @@
 - Funnel and marketing cache keys hash the authenticated owner, full request and resolved profile; return cached.response so business-specific copy cannot leak across tenants or remain stale after profile changes.
 - Mission credit mutations use service-only RPCs through creditTasksForUser after caller authentication; canonical prices, user-scoped locks and idempotent finalization prevent client tampering and double charges.
 - Product Studio stores manuscripts in product_manuscripts using optimistic revisions; nova_tasks retains generated section HTML for recovery, and PDF export uses the existing sanitized guide generator.
+- Multi-format product assets live in the same manuscript JSON with validated per-format imports from the existing micro-product generator; this reuses owner/reviewer access and revision checks without duplicating storage or AI endpoints.
+- Export product assets only from saved content; trackers neutralize spreadsheet formulas and bundles contain editable source plus printable assets so customer downloads cannot execute generated text.
 - Team collaboration uses business_members on existing business_projects, with expiring email-matched invitations and read-only reviewers; private chats, credits, copy generation and edits remain owner-only.
 - Funnel downsells use authorized business offer data with their own optional checkout link; absent offers are omitted instead of generating fictional Lite products or discounts.

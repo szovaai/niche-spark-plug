@@ -14,6 +14,11 @@ Full audit: /mnt/documents/PDF_Empire_MVP3_Audit_and_Plan.md
 ## Later phases
 2 Create · 3 Sell · 4 Launch online · 5 Market & CRM · 6 Autopilot · 7 Admin & hardening
 
+## Phase 2 — Multi-format Product Studio (approved Nov 28)
+- [x] Add business-scoped checklists, swipe files, trackers and workbooks with editing and online saving
+- [x] Reuse existing micro-product generation; add printable PDF, tracker CSV and product ZIP exports
+- [x] Verify saving, export and reviewer restrictions without paid generation; 37 tests pass, paid multi-format generation remains unverified pending its separate budget
+
 ## Audit (Nov 28)
 - [x] Security, health, clutter audit — /mnt/documents/PDF_Empire_Full_Audit_2026-11-28.md
 - [x] Consolidate duplicate department entries; legacy tools and links preserved (no destructive tool removal)

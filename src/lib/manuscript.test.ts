@@ -14,6 +14,18 @@ describe("Manuscript persistence and completion", () => {
     expect(parseManuscript({ modules: [] })).toBe(null);
     expect(parseManuscript(outline)?.product_name).toBe("Balcony Garden");
   });
+  it("supports asset-only products while requiring approval of each asset", () => {
+    const asset = { id: "test", format: "checklist", title: "Setup", instructions: "", approved: false, entries: [{ heading: "Choose pots", body: "Check drainage" }] };
+    const parsed = parseManuscript({ ...outline, modules: [], assets: [asset] });
+    expect(parsed).not.toBeNull();
+    if (!parsed) throw new Error("Asset-only product was rejected");
+    expect(manuscriptStats(parsed)).toEqual({ total: 1, drafted: 1, approved: 0, complete: false });
+    expect(manuscriptStats({ ...parsed, assets: [{ ...parsed.assets?.[0], ...asset, format: "checklist", approved: true }] }).complete).toBe(true);
+  });
+  it("preserves assets during a manuscript parse", () => {
+    const asset = { id: "test", format: "worksheet", title: "Goals", instructions: "Reflect", approved: true, entries: [{ heading: "Goal", body: "Choose one goal" }] };
+    expect(parseManuscript({ ...outline, assets: [asset] })?.assets).toEqual([asset]);
+  });
   it("never imports browser drafts from a different outline with the same name", () => {
     const other = { ...outline, modules: [{ title: "Other", purpose: "", sections: [{ title: "Other", summary: "", html: "wrong business draft" }] }] };
     expect(mergeLegacyDrafts(outline, other)).toEqual(outline);
