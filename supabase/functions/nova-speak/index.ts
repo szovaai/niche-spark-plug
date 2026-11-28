@@ -1,3 +1,4 @@
+import { validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
 // Text-to-speech proxy. POST { text, voice? } -> audio/mpeg bytes.
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,6 +8,8 @@ const corsHeaders = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
+    const auth = await validateAuth(req);
+    if (auth.error || !auth.user) return unauthorizedResponse(auth.error || "Unauthorized", corsHeaders);
     const key = Deno.env.get("LOVABLE_API_KEY");
     if (!key) return new Response(JSON.stringify({ error: "missing_lovable_api_key" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
