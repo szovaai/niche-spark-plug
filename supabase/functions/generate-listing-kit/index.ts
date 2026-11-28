@@ -1,3 +1,4 @@
+import { resolveSalesContext, SALES_TRUTH_RULES } from "../_shared/salesContext.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { requirePro } from "../_shared/entitlement.ts";
 import { validateAuth } from "../_shared/auth.ts";
@@ -25,9 +26,12 @@ serve(async (req) => {
   try {
     const { user, error: authError } = await validateAuth(req);
     if (authError || !user) return new Response(JSON.stringify({ error: authError || "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    const proBlock = await requirePro(user!.id, corsHeaders);
+    const proBlock = await requirePro(user.id, corsHeaders);
     if (proBlock) return proBlock;
-    const { blueprint, personalization, platform, nicheName } = await req.json();
+    const body = await req.json();
+    const salesContext = await resolveSalesContext(req, user.id, body, corsHeaders);
+    if (salesContext instanceof Response) return salesContext;
+    const { blueprint, personalization, platform, nicheName } = body;
     const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
 
     if (!DEEPSEEK_API_KEY) {
@@ -115,8 +119,8 @@ Write descriptions that:
       body: JSON.stringify({
         model: "deepseek-chat",
         messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
+          { role: "system", content: systemPrompt + "\n\n" + SALES_TRUTH_RULES },
+          { role: "user", content: userPrompt + salesContext.prompt },
         ],
       }),
     });

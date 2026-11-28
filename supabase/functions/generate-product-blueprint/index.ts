@@ -1,7 +1,8 @@
+import { resolveSalesContext, SALES_TRUTH_RULES, salesCacheKey } from "../_shared/salesContext.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { requirePro } from "../_shared/entitlement.ts";
 import { validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
-import { generateCacheKey, getCachedResponse, setCachedResponse } from "../_shared/cache.ts";
+import { getCachedResponse, setCachedResponse } from "../_shared/cache.ts";
 import { getUserTier, callTieredAI } from "../_shared/tieredAI.ts";
 
 const corsHeaders = {
@@ -66,11 +67,14 @@ serve(async (req) => {
     if (authError || !user) {
       return unauthorizedResponse(authError || 'Authentication required', corsHeaders);
     }
-    const proBlock = await requirePro(user!.id, corsHeaders);
+    const proBlock = await requirePro(user.id, corsHeaders);
     if (proBlock) return proBlock;
     console.log(`Authenticated user: ${user.id}`);
 
-    const { nicheName, nicheCategory, demandTier, competitionTier, productType, personalization, plrContent } = await req.json();
+    const body = await req.json();
+    const salesContext = await resolveSalesContext(req, user.id, body, corsHeaders);
+    if (salesContext instanceof Response) return salesContext;
+    const { nicheName, nicheCategory, demandTier, competitionTier, productType, personalization, plrContent } = body;
 
     // Get user tier for model selection
     const userTier = await getUserTier(user.id);
@@ -78,7 +82,7 @@ serve(async (req) => {
 
     // Generate cache key based on input
     const cacheInput = { nicheName, nicheCategory, productType, personalization, plrContent: plrContent?.kitTitle };
-    const cacheKey = generateCacheKey('generate-product-blueprint', cacheInput);
+    const cacheKey = await salesCacheKey("generate-product-blueprint", user.id, body, salesContext);
 
     // Check cache first (only for non-PLR content since PLR transformations should be unique)
     if (!plrContent) {
@@ -261,8 +265,8 @@ Requirements:
     // Use tiered AI - complex task for blueprints
     const { content, model } = await callTieredAI(
       [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
+        { role: "system", content: systemPrompt + "\n\n" + SALES_TRUTH_RULES },
+        { role: "user", content: userPrompt + salesContext.prompt },
       ],
       userTier,
       'complex' // Blueprints are complex tasks

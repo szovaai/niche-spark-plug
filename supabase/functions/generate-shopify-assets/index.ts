@@ -1,3 +1,4 @@
+import { resolveSalesContext, SALES_TRUTH_RULES } from "../_shared/salesContext.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { validateAuth } from "../_shared/auth.ts";
 import { callTieredAI, getUserTier } from "../_shared/tieredAI.ts";
@@ -20,7 +21,10 @@ serve(async (req) => {
     }
 
     const tier = await getUserTier(auth.user.id);
-    const { productName, niche, audience, price, painPoint } = await req.json();
+    const body = await req.json();
+    const salesContext = await resolveSalesContext(req, auth.user.id, body, corsHeaders);
+    if (salesContext instanceof Response) return salesContext;
+    const { productName, niche, audience, price, painPoint } = body;
 
     const systemPrompt = `You write conversion-ready Shopify store copy in a direct-response, buyer-driven voice. Avoid corporate jargon ("leverage", "elevate", "game changer"). Return strict JSON.`;
     const userPrompt = `Generate a complete Shopify product launch pack for:
@@ -37,7 +41,7 @@ Return JSON with EXACTLY these keys:
   "product_description": "string (3 short paragraphs)",
   "benefit_bullets": ["string", ... 6 items],
   "faq": [{"q":"...","a":"..."}, ... 6 items],
-  "reviews": [{"name":"...","stars":5,"text":"..."}, ... 5 items, realistic but mock],
+  "reviews": [], // Never invent reviews or testimonials
   "upsell_offer": "string (2-3 sentences)",
   "order_bump": "string (1-2 sentences)",
   "urgency_copy": "string (1 punchy line)",
@@ -47,8 +51,8 @@ ONLY JSON.`;
 
     const { content } = await callTieredAI(
       [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
+        { role: "system", content: systemPrompt + "\n\n" + SALES_TRUTH_RULES },
+        { role: "user", content: userPrompt + salesContext.prompt },
       ],
       tier,
       "standard"
@@ -61,6 +65,9 @@ ONLY JSON.`;
       throw new Error("Failed to parse Shopify assets");
     }
 
+    assets.reviews = [];
+    if (!salesContext.facts.upsell) assets.upsell_offer = "";
+    if (!salesContext.facts.order_bump) assets.order_bump = "";
     return new Response(JSON.stringify({ assets }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

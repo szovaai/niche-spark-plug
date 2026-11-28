@@ -37,6 +37,18 @@ describe("authorized sales intelligence", () => {
     await expect(loadSalesContext(repo, "owner", { project_id: "bad-id" })).rejects.toMatchObject({ status: 400 });
     expect(repo.project).not.toHaveBeenCalled();
   });
+  it("supports each explicit business identifier without crossing tenants", async () => {
+    for (const key of ["business_project_id", "project_id", "projectId"]) {
+      expect((await loadSalesContext(repository(), "owner", { [key]: id })).projectId).toBe(id);
+      await expect(loadSalesContext(repository(), "owner", { [key]: foreignId })).rejects.toMatchObject({ status: 404 });
+    }
+  });
+  it("does not publish invalid or negative offer prices as approved facts", () => {
+    for (const price of [-1, Infinity, NaN, "49"]) {
+      expect(salesFacts("Demo", { price }).front_end_price).toBeUndefined();
+    }
+    expect(salesFacts("Demo", { price: 49 }).front_end_price).toBe(49);
+  });
   it("automatically loads the latest owned business for legacy callers", async () => {
     const repo = repository();
     expect((await loadSalesContext(repo, "owner", {})).projectId).toBe(id);

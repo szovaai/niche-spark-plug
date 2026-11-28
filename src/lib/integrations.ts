@@ -12,8 +12,8 @@ export const INTEGRATIONS: Integration[] = [
     needs: ["API documentation", "Campaign creation endpoint", "Reporting endpoint for real traffic numbers"] },
   { id: "xavro", name: "XAVRO CRM", purpose: "Customer and lead management", status: "awaiting_api",
     needs: ["API documentation", "Contact create/update endpoint", "Webhook for new leads/sales"] },
-  { id: "payments", name: "Payment provider", purpose: "Subscriptions and product checkout", status: "not_connected",
-    needs: ["Your choice of provider (deferred)", "No live payments until approved"] },
+  { id: "payments", name: "Stripe (proposed)", purpose: "Separate platform subscriptions and merchant product checkout", status: "not_connected",
+    needs: ["Evaluate Stripe Connect for merchant onboarding and payouts", "Test separate subscription and merchant payment flows", "No live payments until explicitly approved"] },
 ];
 
 export const STATUS_LABEL: Record<IntegrationStatus, string> = {

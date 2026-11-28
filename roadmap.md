@@ -1,13 +1,20 @@
 # Roadmap — PDF Empire AI MVP 3.0
 Full audit: /mnt/documents/PDF_Empire_MVP3_Audit_and_Plan.md
 
+## Master roadmap reconciliation — immediate directive (Nov 28)
+- [ ] Compare the current code with Phase 2 inventory and Phases 8–12 report; classify all master requirements and identify real gaps
+- [ ] Audit Sales Intelligence connectivity; complete only genuinely missing connections, preserving existing engines
+- [ ] Prepare one controlled product/PDF test and report estimated runtime costs; execution requires separate approval
+- [ ] Publish a reconciled remaining roadmap using the revised 12-phase sequence
+- Do not start other phases during this reconciliation. The newer master directive supersedes the older payment and phase sequence.
+
 ## Phase 1 — Foundation (complete with read-only team review)
 - [x] Business HQ page (/hq): welcome, next step, Discover→Grow progress, real-data metrics with empty states, AI team activity, business health
 - [x] Approval Center, notifications, activity log storage
 - [x] Team workspaces — owner plus invited read-only product reviewers; two-account acceptance/removal verified
 
 ## Waiting on the user
-- Payment provider: Paddle selected; integrate at the end of the application build (paid checkout remains deferred)
+- Payment provider: Stripe is now preferred/proposed; platform subscriptions and merchant product revenue must be separate. Test commerce is revised Phase 6; no live activation without explicit approval.
 - API access for ClickAdMedia, GitPage.site, TRAFFIQ AI, Xavro CRM
 - Current plan prices (Founder $17 deal ended Jan 4 2026)
 

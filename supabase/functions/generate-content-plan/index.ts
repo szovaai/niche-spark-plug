@@ -1,3 +1,4 @@
+import { resolveSalesContext, SALES_TRUTH_RULES } from "../_shared/salesContext.ts";
 import { structuredJSONPrompt } from "../_shared/structuredPrompt.ts";
 import { creditTasksForUser } from "../_shared/creditTasks.ts";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
@@ -52,7 +53,10 @@ Deno.serve(async (req) => {
     const userId = userRes.user.id;
     const creditTasks = creditTasksForUser(userId);
 
-    const { project_id, primary_channel } = await req.json();
+    const body = await req.json();
+    const salesContext = await resolveSalesContext(req, userId, body, corsHeaders);
+    if (salesContext instanceof Response) return salesContext;
+    const { project_id, primary_channel } = body;
     if (!project_id) return json(400, { error: "missing_project_id" });
     if (!primary_channel) return json(400, { error: "missing_primary_channel" });
 
@@ -72,17 +76,16 @@ Deno.serve(async (req) => {
 
     const { data: campaigns } = await supabase
       .from("email_campaigns")
-      .select("campaign_type, emails")
+      .select("campaign_type, subject, body_text, cta")
       .eq("project_id", project_id)
-      .limit(4);
+      .eq("user_id", userId)
+      .order("email_number", { ascending: true })
+      .limit(8);
 
-    const emailSnippets = (campaigns ?? [])
-      .flatMap((c: { campaign_type: string; emails: unknown }) => {
-        const arr = Array.isArray(c.emails) ? (c.emails as { subject?: string; hook?: string }[]) : [];
-        return arr.slice(0, 2).map((e) => `[${c.campaign_type}] ${e.subject ?? e.hook ?? ""}`);
-      })
-      .slice(0, 8)
-      .join("\n");
+    if (campaigns === null) return json(503, { error: "email_context_unavailable" });
+    const emailSnippets = campaigns.map(c =>
+      `[${c.campaign_type}] ${c.subject}: ${(c.body_text ?? "").slice(0, 600)} CTA: ${c.cta ?? ""}`
+    ).join("\n");
 
     const { data: reserved, error: resErr } = await creditTasks.rpc("reserve_task_credits", {
       _project_id: project_id,
@@ -127,7 +130,8 @@ Rules: no hype, no "leverage/optimize/unlock" language, no fake stats, no number
       const { output } = await generateText({
         model: gateway(NOVA_MODELS.blueprint),
         output: Output.object({ schema: Schema }),
-        prompt: structuredJSONPrompt(prompt, Schema),
+        system: SALES_TRUTH_RULES,
+        prompt: structuredJSONPrompt(prompt + salesContext.prompt, Schema),
       });
 
       await creditTasks.rpc("finalize_task_credits", { _task_id: taskId, _output: output });

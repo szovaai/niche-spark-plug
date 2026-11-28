@@ -1,3 +1,4 @@
+import { resolveSalesContext, SALES_TRUTH_RULES } from "../_shared/salesContext.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { validateAuth } from "../_shared/auth.ts";
 
@@ -24,7 +25,10 @@ serve(async (req) => {
   try {
     const { user, error: authError } = await validateAuth(req);
     if (authError || !user) return new Response(JSON.stringify({ error: authError || "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    const { productName, nicheName, targetAudience, productType, pricePoint, keyBenefits } = await req.json();
+    const body = await req.json();
+    const salesContext = await resolveSalesContext(req, user.id, body, corsHeaders);
+    if (salesContext instanceof Response) return salesContext;
+    const { productName, nicheName, targetAudience, productType, pricePoint, keyBenefits } = body;
     const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
 
     if (!DEEPSEEK_API_KEY) {
@@ -63,7 +67,7 @@ Generate TikTok scripts, Instagram content, Pinterest pins, launch emails, promo
     const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${DEEPSEEK_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "deepseek-chat", messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }] }),
+      body: JSON.stringify({ model: "deepseek-chat", messages: [{ role: "system", content: systemPrompt + "\n\n" + SALES_TRUTH_RULES }, { role: "user", content: userPrompt + salesContext.prompt }] }),
     });
 
     if (!response.ok) {

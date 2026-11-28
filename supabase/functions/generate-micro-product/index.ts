@@ -1,7 +1,8 @@
+import { resolveSalesContext, SALES_TRUTH_RULES, salesCacheKey } from "../_shared/salesContext.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { callTieredAI, getUserTier } from "../_shared/tieredAI.ts";
-import { generateCacheKey, getCachedResponse, setCachedResponse } from "../_shared/cache.ts";
+import { getCachedResponse, setCachedResponse } from "../_shared/cache.ts";
 import { validateInput, validationErrorResponse } from "../_shared/validate.ts";
 
 const corsHeaders = {
@@ -112,6 +113,8 @@ serve(async (req) => {
     }
 
     const body = await req.json();
+    const salesContext = await resolveSalesContext(req, user.id, body, corsHeaders);
+    if (salesContext instanceof Response) return salesContext;
     const { valid, error: valError, data } = validateInput(body, [
       { field: 'productType', type: 'string', required: true, maxLength: 100 },
       { field: 'nicheTopic', type: 'string', required: true, maxLength: 500 },
@@ -124,7 +127,7 @@ serve(async (req) => {
 
     // Check cache
     const cacheInput = { productType, nicheTopic, targetAudience, problemStatement, config };
-    const cacheKey = generateCacheKey("generate-micro-product", cacheInput);
+    const cacheKey = await salesCacheKey("generate-micro-product", user.id, body, salesContext);
     const cached = await getCachedResponse(cacheKey);
     if (cached) {
       return new Response(JSON.stringify(cached.response), {
@@ -136,7 +139,7 @@ serve(async (req) => {
     const prompt = buildPrompt(productType, nicheTopic, targetAudience, problemStatement, config || {});
 
     const { content, model } = await callTieredAI(
-      [{ role: "user", content: prompt }],
+      [{ role: "system", content: SALES_TRUTH_RULES }, { role: "user", content: prompt + salesContext.prompt }],
       userTier,
       "standard"
     );

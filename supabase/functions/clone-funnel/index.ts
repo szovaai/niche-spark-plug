@@ -1,3 +1,4 @@
+import { resolveSalesContext, SALES_TRUTH_RULES } from "../_shared/salesContext.ts";
 import { corsHeaders } from "../_shared/auth.ts";
 import { callTieredAI, getUserTier } from "../_shared/tieredAI.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -26,7 +27,10 @@ Deno.serve(async (req) => {
     }
     const userId = claimsData.claims.sub as string;
 
-    const { sourceFunnel, newProductName, newAudience, newNiche, tone, improve, sourceProduct } = await req.json();
+    const body = await req.json();
+    const salesContext = await resolveSalesContext(req, userId, body, corsHeaders);
+    if (salesContext instanceof Response) return salesContext;
+    const { sourceFunnel, newProductName, newAudience, newNiche, tone, improve, sourceProduct } = body;
 
     if (!sourceFunnel) {
       return new Response(JSON.stringify({ error: "sourceFunnel is required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -70,14 +74,14 @@ TONE: ${toneDirective[tone] || toneDirective.warriorplus}
 INSTRUCTIONS:
 - Rewrite ALL copy for the new product/audience
 - IMPROVE headlines with stronger hooks and pattern interrupts
-- Add better urgency and scarcity elements
+- Use only approved urgency or scarcity; omit it if none is supplied
 - Strengthen the value proposition
 - Keep the same structure and format (markdown)
 - Make it MORE persuasive than the original
 - Output ONLY the rewritten copy, no explanations`;
 
       const { content } = await callTieredAI(
-        [{ role: "user", content: prompt }],
+        [{ role: "system", content: SALES_TRUTH_RULES }, { role: "user", content: prompt + salesContext.prompt }],
         userTier,
         "standard"
       );
@@ -107,7 +111,7 @@ INSTRUCTIONS:
 - Output ONLY valid JSON, no explanations`;
 
       const { content: sectionsContent } = await callTieredAI(
-        [{ role: "user", content: sectionsPrompt }],
+        [{ role: "system", content: SALES_TRUTH_RULES }, { role: "user", content: sectionsPrompt + salesContext.prompt }],
         userTier,
         "complex"
       );

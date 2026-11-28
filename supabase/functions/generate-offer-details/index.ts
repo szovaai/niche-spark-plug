@@ -1,3 +1,4 @@
+import { resolveSalesContext, SALES_TRUTH_RULES } from "../_shared/salesContext.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { validateAuth, unauthorizedResponse } from "../_shared/auth.ts";
 
@@ -38,6 +39,9 @@ serve(async (req) => {
     }
     console.log(`Authenticated user: ${user.id}`);
 
+    const body = await req.json();
+    const salesContext = await resolveSalesContext(req, user.id, body, corsHeaders);
+    if (salesContext instanceof Response) return salesContext;
     const {
       title,
       niche,
@@ -46,7 +50,7 @@ serve(async (req) => {
       components,
       guideSections,
       content,
-    }: OfferDetailsRequest = await req.json();
+    }: OfferDetailsRequest = body;
 
     console.log("Generating offer details for:", title, niche);
 
@@ -112,8 +116,8 @@ Return ONLY valid JSON, no markdown or explanation.`;
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
+          { role: "system", content: systemPrompt + "\n\n" + SALES_TRUTH_RULES },
+          { role: "user", content: userPrompt + salesContext.prompt }
         ],
       }),
     });
@@ -154,16 +158,7 @@ Return ONLY valid JSON, no markdown or explanation.`;
       offerDetails = JSON.parse(cleanedContent);
     } catch (parseError) {
       console.error("JSON parse error:", parseError, "Content:", aiContent);
-      // Fallback: generate basic offer details
-      offerDetails = {
-        whatProductIs: `A comprehensive ${niche} toolkit called "${title}" that gives you everything you need to succeed.`,
-        whoItsFor: targetAudience || `Anyone looking to master ${niche} and get real results.`,
-        mainProblem: `Most ${niche} information is scattered, outdated, or too complicated to implement.`,
-        desiredOutcome: `A clear, actionable path to ${niche} success with templates and checklists you can use immediately.`,
-        bonusesIncluded: enabledComponents.length > 0 
-          ? `Includes: ${enabledComponents.map(c => c.charAt(0).toUpperCase() + c.slice(1)).join(", ")}`
-          : "Complete guide with actionable steps",
-      };
+      throw new Error("Generated offer details could not be parsed; no fictional fallback was returned");
     }
 
     // Validate required fields
