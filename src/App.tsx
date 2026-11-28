@@ -2,6 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import IntegrationReadiness from "./pages/departments/IntegrationReadiness";
 import { OpportunityIntelligence, ProductStudio, FunnelProfitStudio, SalesCopyIntelligence } from "./pages/departments";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MobileBottomNav from "@/components/MobileBottomNav";
@@ -139,6 +140,7 @@ const App = () => (
             <Route path="/discover-intel" element={<OpportunityIntelligence />} />
             <Route path="/studio" element={<ProductStudio />} />
             <Route path="/profit-studio" element={<FunnelProfitStudio />} />
+            <Route path="/integrations-status" element={<IntegrationReadiness />} />
             <Route path="/copy-studio" element={<SalesCopyIntelligence />} />
             <Route path="/coach" element={<CoachHome />} />
             <Route path="/project/:projectId" element={<MissionsHub />} />

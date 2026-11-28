@@ -75,11 +75,25 @@ const toolsSystem = [
   { title: "Bookmarks", url: "/tools/saved-projects", icon: Bookmark, tip: "Saved work" },
 ];
 
-const departments = [
+const discoverItems = [
   { title: "Opportunity Intelligence", url: "/discover-intel", icon: Radar, tip: "Find a market worth building for" },
+  { title: "Opportunity Vault", url: "/tools/discover", icon: Bookmark, tip: "Pre-made niches" },
+];
+const createItems = [
   { title: "Product Studio", url: "/studio", icon: Wand2, tip: "Create any digital product" },
   { title: "Sales Copy Intelligence", url: "/copy-studio", icon: Megaphone, tip: "Copy for your whole funnel" },
+];
+const launchItems = [
   { title: "Funnel & Profit Studio", url: "/profit-studio", icon: Target, tip: "Plan funnels and profit scenarios" },
+  { title: "Website & Commerce", url: "/tools/shopify-launch", icon: Store, tip: "Store and website assets" },
+];
+const growItems = [
+  { title: "AI Marketing Team", url: "/tools/agent-hub", icon: Activity, tip: "Your AI marketing agents" },
+  { title: "Analytics", url: "/tools/analytics", icon: Map, tip: "Real performance data" },
+];
+const manageItems = [
+  { title: "Integrations", url: "/integrations-status", icon: Layout, tip: "Connected apps" },
+  { title: "Settings", url: "/settings", icon: Settings, tip: "Account, credits + AI settings" },
 ];
 
 type NavItem = { title: string; url: string; icon: React.ComponentType<{ className?: string }>; tip: string };
@@ -167,7 +181,11 @@ export function DashboardSidebar() {
 
         <SidebarSeparator className="my-1 opacity-20" />
 
-        {renderGroup("Departments", departments)}
+        {renderGroup("Discover", discoverItems)}
+        {renderGroup("Create", createItems)}
+        {renderGroup("Launch", launchItems)}
+        {renderGroup("Grow", growItems)}
+        {renderGroup("Manage", manageItems)}
 
         <SidebarSeparator className="my-1 opacity-20" />
 
@@ -179,7 +197,7 @@ export function DashboardSidebar() {
               className="flex w-full items-center gap-1 px-3 mb-0.5 text-[9px] uppercase tracking-[0.15em] text-muted-foreground/50 font-semibold hover:text-muted-foreground"
             >
               {toolsOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-              Power Tools
+              All tools (advanced)
             </button>
           )}
           {(toolsOpen || isCollapsed) && (
@@ -189,15 +207,6 @@ export function DashboardSidebar() {
           )}
         </SidebarGroup>
 
-        <SidebarSeparator className="my-1 opacity-20" />
-
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {renderItems([{ title: "Settings", url: "/settings", icon: Settings, tip: "Account + integrations" }])}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter className="p-3">

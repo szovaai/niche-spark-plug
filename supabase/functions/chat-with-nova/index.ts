@@ -95,7 +95,35 @@ Deno.serve(async (req) => {
 
     const summaryBlock = summary ? `# Earlier conversation summary\n${summary}` : "";
 
-    const system = [NOVA_SYSTEM_PROMPT, profileBlock, summaryBlock, memoryBlock]
+    // Business workspace context (Phase 8: mentor knows the active business)
+    let projectId = conv.project_id as string | null;
+    if (!projectId) {
+      const { data: latest } = await supabase.from("business_projects").select("id")
+        .eq("user_id", userId).order("updated_at", { ascending: false }).limit(1);
+      projectId = latest?.[0]?.id ?? null;
+    }
+    let businessBlock = "# Active business\n(none yet — help the user pick an opportunity first)";
+    if (projectId) {
+      const [projRes, bpRes, apprRes, taskRes] = await Promise.all([
+        supabase.from("business_projects").select("project_name, current_mission_id, overall_progress_pct").eq("id", projectId).maybeSingle(),
+        supabase.from("business_blueprints").select("business_name, niche, target_audience, customer_problem, desired_outcome, product_concept, offer_summary, price, order_bump, upsell, downsell, brand_voice, launch_date, sales_profile").eq("project_id", projectId).maybeSingle(),
+        supabase.from("approval_requests").select("title").eq("user_id", userId).eq("status", "pending").limit(5),
+        supabase.from("nova_tasks").select("task_name, status").eq("user_id", userId).order("created_at", { ascending: false }).limit(6),
+      ]);
+      const p = projRes.data; const bp = bpRes.data ?? {};
+      const filled = Object.entries(bp).filter(([, v]) => v !== null && v !== "" && !(typeof v === "object" && Object.keys(v as object).length === 0))
+        .map(([k, v]) => `- ${k}: ${typeof v === "object" ? JSON.stringify(v) : v}`).join("\n");
+      businessBlock = [
+        `# Active business: ${p?.project_name ?? "unnamed"}`,
+        `Current mission: ${p?.current_mission_id ?? "not started"} · Progress: ${p?.overall_progress_pct ?? 0}%`,
+        filled ? `## Blueprint (locked decisions)\n${filled}` : "## Blueprint\n(empty)",
+        apprRes.data?.length ? `## Waiting for user approval\n${apprRes.data.map((a) => `- ${a.title}`).join("\n")}` : "",
+        taskRes.data?.length ? `## Recent AI tasks (backend-verified status)\n${taskRes.data.map((t) => `- ${t.task_name}: ${t.status}`).join("\n")}` : "",
+        "Rules: always end with one clear next step. Only say a task is done if its status above is 'completed'.",
+      ].filter(Boolean).join("\n");
+    }
+
+    const system = [NOVA_SYSTEM_PROMPT, profileBlock, businessBlock, summaryBlock, memoryBlock]
       .filter(Boolean)
       .join("\n\n");
 

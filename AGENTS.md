@@ -8,3 +8,4 @@
 - Pro-only edge functions call requirePro() from _shared/entitlement.ts right after validateAuth; client-side isPro checks are UI only.
 - AI chat functions accept only user/assistant roles from the client; system prompts are built server-side.
 - Departments are defined once in src/lib/departments.ts and rendered by pages/departments/DepartmentHub; they link to existing /tools/* routes instead of rewriting them (spec: reuse, keep legacy routes).
+- External apps (ClickAdMedia, GitPage, TRAFFIQ, XAVRO, payments) are listed in src/lib/integrations.ts; status changes to connected only with a real API connection (spec: no fake integrations).

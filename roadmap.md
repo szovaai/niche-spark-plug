@@ -25,4 +25,5 @@ Full audit: /mnt/documents/PDF_Empire_MVP3_Audit_and_Plan.md
 - [x] Phase 3 HQ is home after sign-in; departments + credits on HQ
 - [x] Phases 4–7 department hubs (/discover-intel, /studio, /profit-studio, /copy-studio) + Sales Intelligence Profile
 - [ ] Feed Sales Intelligence Profile into copy tool prompts
-- [ ] Phases 8–12
+- [x] Phases 8–10, 12 — /mnt/documents/PDF_Empire_Phase8-12_Report.md
+- [ ] Phase 11 full paid generation test — waiting on user approval of AI cost
